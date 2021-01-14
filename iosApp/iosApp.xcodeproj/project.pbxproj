@@ -1,0 +1,731 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 51;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		34E99FEC5196063C867F86D0 /* Pods_iosApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5A015B92C054E3C64BAD2D3 /* Pods_iosApp.framework */; };
+		FA75CD9825AFA9AE008F1097 /* shared.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA75CD9725AFA9AE008F1097 /* shared.framework */; };
+		FA75CD9925AFA9AE008F1097 /* shared.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FA75CD9725AFA9AE008F1097 /* shared.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		FA75CDA125AFAB2A008F1097 /* BroadcastUploadInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = FA75CD9B25AFAB2A008F1097 /* BroadcastUploadInfo.plist */; };
+		FA75CDA225AFAB2A008F1097 /* BroadcastSetupUIInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = FA75CD9C25AFAB2A008F1097 /* BroadcastSetupUIInfo.plist */; };
+		FA75CDA325AFAB2A008F1097 /* ARDBroadcastSampleHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = FA75CD9F25AFAB2A008F1097 /* ARDBroadcastSampleHandler.m */; };
+		FA75CDA425AFAB2A008F1097 /* ARDBroadcastSetupViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FA75CDA025AFAB2A008F1097 /* ARDBroadcastSetupViewController.m */; };
+		FAB20A2925AF98DF0090AEBA /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FAB20A2725AF98DF0090AEBA /* Main.storyboard */; };
+		FAB20A2B25AF98E10090AEBA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FAB20A2A25AF98E10090AEBA /* Assets.xcassets */; };
+		FAB20A2E25AF98E10090AEBA /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FAB20A2C25AF98E10090AEBA /* LaunchScreen.storyboard */; };
+		FAB20A9225AF9A260090AEBA /* ARDCaptureController.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB20A3C25AF9A240090AEBA /* ARDCaptureController.m */; };
+		FAB20A9325AF9A260090AEBA /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = FAB20A3D25AF9A240090AEBA /* LICENSE */; };
+		FAB20A9425AF9A260090AEBA /* ARDSettingsStore.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB20A3E25AF9A240090AEBA /* ARDSettingsStore.m */; };
+		FAB20A9525AF9A260090AEBA /* ARDStatsView.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB20A4025AF9A240090AEBA /* ARDStatsView.m */; };
+		FAB20A9625AF9A260090AEBA /* RTCSessionDescription+JSON.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB20A4125AF9A240090AEBA /* RTCSessionDescription+JSON.m */; };
+		FAB20A9725AF9A260090AEBA /* ARDMainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB20A4425AF9A240090AEBA /* ARDMainViewController.m */; };
+		FAB20A9825AF9A260090AEBA /* ARDWebSocketChannel.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB20A4525AF9A240090AEBA /* ARDWebSocketChannel.m */; };
+		FAB20A9925AF9A260090AEBA /* RTCIceServer+JSON.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB20A4625AF9A240090AEBA /* RTCIceServer+JSON.m */; };
+		FAB20A9A25AF9A260090AEBA /* ARDSignalingMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB20A4725AF9A240090AEBA /* ARDSignalingMessage.m */; };
+		FAB20A9B25AF9A260090AEBA /* RTCVideoCodecInfo+HumanReadable.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB20A4825AF9A240090AEBA /* RTCVideoCodecInfo+HumanReadable.m */; };
+		FAB20A9C25AF9A260090AEBA /* ARDMessageResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB20A4A25AF9A240090AEBA /* ARDMessageResponse.m */; };
+		FAB20A9D25AF9A260090AEBA /* UIImage+ARDUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB20A4B25AF9A240090AEBA /* UIImage+ARDUtilities.m */; };
+		FAB20A9E25AF9A260090AEBA /* ARDStatsBuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB20A4C25AF9A240090AEBA /* ARDStatsBuilder.m */; };
+		FAB20A9F25AF9A260090AEBA /* SRWebSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB20A4E25AF9A240090AEBA /* SRWebSocket.m */; };
+		FAB20AA025AF9A260090AEBA /* ARDAppEngineClient.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB20A5425AF9A240090AEBA /* ARDAppEngineClient.m */; };
+		FAB20AA125AF9A260090AEBA /* ARDBitrateTracker.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB20A5A25AF9A240090AEBA /* ARDBitrateTracker.m */; };
+		FAB20AA225AF9A260090AEBA /* ic_call_end_black_24dp@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FAB20A5D25AF9A250090AEBA /* ic_call_end_black_24dp@2x.png */; };
+		FAB20AA325AF9A260090AEBA /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = FAB20A5E25AF9A250090AEBA /* Icon.png */; };
+		FAB20AA425AF9A260090AEBA /* ic_settings_black_24dp@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FAB20A5F25AF9A250090AEBA /* ic_settings_black_24dp@2x.png */; };
+		FAB20AA525AF9A260090AEBA /* Icon-120.png in Resources */ = {isa = PBXBuildFile; fileRef = FAB20A6025AF9A250090AEBA /* Icon-120.png */; };
+		FAB20AA625AF9A260090AEBA /* ic_surround_sound_black_24dp@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FAB20A6125AF9A250090AEBA /* ic_surround_sound_black_24dp@2x.png */; };
+		FAB20AA725AF9A260090AEBA /* ic_clear_black_24dp@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FAB20A6225AF9A250090AEBA /* ic_clear_black_24dp@2x.png */; };
+		FAB20AA825AF9A260090AEBA /* Roboto-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FAB20A6325AF9A250090AEBA /* Roboto-Regular.ttf */; };
+		FAB20AA925AF9A260090AEBA /* iPhone5@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FAB20A6425AF9A250090AEBA /* iPhone5@2x.png */; };
+		FAB20AAA25AF9A260090AEBA /* ic_switch_video_black_24dp@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FAB20A6525AF9A250090AEBA /* ic_switch_video_black_24dp@2x.png */; };
+		FAB20AAB25AF9A260090AEBA /* ic_call_end_black_24dp.png in Resources */ = {isa = PBXBuildFile; fileRef = FAB20A6625AF9A250090AEBA /* ic_call_end_black_24dp.png */; };
+		FAB20AAC25AF9A260090AEBA /* Icon-180.png in Resources */ = {isa = PBXBuildFile; fileRef = FAB20A6725AF9A250090AEBA /* Icon-180.png */; };
+		FAB20AAD25AF9A260090AEBA /* foreman.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = FAB20A6825AF9A250090AEBA /* foreman.mp4 */; };
+		FAB20AAE25AF9A260090AEBA /* ic_clear_black_24dp.png in Resources */ = {isa = PBXBuildFile; fileRef = FAB20A6925AF9A250090AEBA /* ic_clear_black_24dp.png */; };
+		FAB20AAF25AF9A260090AEBA /* iPhone6p@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = FAB20A6A25AF9A250090AEBA /* iPhone6p@3x.png */; };
+		FAB20AB025AF9A260090AEBA /* ic_surround_sound_black_24dp.png in Resources */ = {isa = PBXBuildFile; fileRef = FAB20A6B25AF9A250090AEBA /* ic_surround_sound_black_24dp.png */; };
+		FAB20AB125AF9A260090AEBA /* ic_switch_video_black_24dp.png in Resources */ = {isa = PBXBuildFile; fileRef = FAB20A6C25AF9A250090AEBA /* ic_switch_video_black_24dp.png */; };
+		FAB20AB225AF9A260090AEBA /* ic_settings_black_24dp.png in Resources */ = {isa = PBXBuildFile; fileRef = FAB20A6D25AF9A250090AEBA /* ic_settings_black_24dp.png */; };
+		FAB20AB325AF9A260090AEBA /* mozart.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = FAB20A6E25AF9A250090AEBA /* mozart.mp3 */; };
+		FAB20AB425AF9A260090AEBA /* iPhone6@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FAB20A6F25AF9A250090AEBA /* iPhone6@2x.png */; };
+		FAB20AB525AF9A260090AEBA /* ARDJoinResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB20A7225AF9A250090AEBA /* ARDJoinResponse.m */; };
+		FAB20AB725AF9A260090AEBA /* ARDAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB20A7825AF9A250090AEBA /* ARDAppDelegate.m */; };
+		FAB20AB825AF9A260090AEBA /* RTCIceCandidate+JSON.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB20A7925AF9A250090AEBA /* RTCIceCandidate+JSON.m */; };
+		FAB20AB925AF9A260090AEBA /* ARDMainView.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB20A7B25AF9A250090AEBA /* ARDMainView.m */; };
+		FAB20ABA25AF9A260090AEBA /* ARDSettingsModel.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB20A7D25AF9A250090AEBA /* ARDSettingsModel.m */; };
+		FAB20ABB25AF9A260090AEBA /* ARDAppClient.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB20A8025AF9A250090AEBA /* ARDAppClient.m */; };
+		FAB20ABC25AF9A260090AEBA /* ARDFileCaptureController.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB20A8125AF9A250090AEBA /* ARDFileCaptureController.m */; };
+		FAB20ABD25AF9A260090AEBA /* ARDVideoCallViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB20A8425AF9A250090AEBA /* ARDVideoCallViewController.m */; };
+		FAB20ABE25AF9A260090AEBA /* ARDUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB20A8625AF9A250090AEBA /* ARDUtilities.m */; };
+		FAB20ABF25AF9A260090AEBA /* ARDExternalSampleCapturer.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB20A8725AF9A250090AEBA /* ARDExternalSampleCapturer.m */; };
+		FAB20AC025AF9A260090AEBA /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB20A8A25AF9A250090AEBA /* main.m */; };
+		FAB20AC125AF9A260090AEBA /* ARDVideoCallView.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB20A8D25AF9A250090AEBA /* ARDVideoCallView.m */; };
+		FAB20AC225AF9A260090AEBA /* ARDTURNClient.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB20A8F25AF9A250090AEBA /* ARDTURNClient.m */; };
+		FAB20AC325AF9A260090AEBA /* ARDSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB20A9125AF9A260090AEBA /* ARDSettingsViewController.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		FA75CD8725AFA6FB008F1097 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				FA75CD9925AFA9AE008F1097 /* shared.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		70B7B7E51A1DACF9121E8112 /* Pods-iosApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iosApp.debug.xcconfig"; path = "Target Support Files/Pods-iosApp/Pods-iosApp.debug.xcconfig"; sourceTree = "<group>"; };
+		A43D903744DC18CD6B8000E6 /* Pods-iosApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iosApp.release.xcconfig"; path = "Target Support Files/Pods-iosApp/Pods-iosApp.release.xcconfig"; sourceTree = "<group>"; };
+		F5A015B92C054E3C64BAD2D3 /* Pods_iosApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_iosApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		FA75CD9725AFA9AE008F1097 /* shared.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = shared.framework; path = "../shared/build/xcode-frameworks/shared.framework"; sourceTree = "<group>"; };
+		FA75CD9B25AFAB2A008F1097 /* BroadcastUploadInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = BroadcastUploadInfo.plist; sourceTree = "<group>"; };
+		FA75CD9C25AFAB2A008F1097 /* BroadcastSetupUIInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = BroadcastSetupUIInfo.plist; sourceTree = "<group>"; };
+		FA75CD9D25AFAB2A008F1097 /* ARDBroadcastSampleHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ARDBroadcastSampleHandler.h; sourceTree = "<group>"; };
+		FA75CD9E25AFAB2A008F1097 /* ARDBroadcastSetupViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ARDBroadcastSetupViewController.h; sourceTree = "<group>"; };
+		FA75CD9F25AFAB2A008F1097 /* ARDBroadcastSampleHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ARDBroadcastSampleHandler.m; sourceTree = "<group>"; };
+		FA75CDA025AFAB2A008F1097 /* ARDBroadcastSetupViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ARDBroadcastSetupViewController.m; sourceTree = "<group>"; };
+		FAB20A1B25AF98DF0090AEBA /* iosApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iosApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FAB20A2825AF98DF0090AEBA /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		FAB20A2A25AF98E10090AEBA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		FAB20A2D25AF98E10090AEBA /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		FAB20A3C25AF9A240090AEBA /* ARDCaptureController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ARDCaptureController.m; sourceTree = "<group>"; };
+		FAB20A3D25AF9A240090AEBA /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		FAB20A3E25AF9A240090AEBA /* ARDSettingsStore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ARDSettingsStore.m; sourceTree = "<group>"; };
+		FAB20A3F25AF9A240090AEBA /* ARDExternalSampleCapturer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ARDExternalSampleCapturer.h; sourceTree = "<group>"; };
+		FAB20A4025AF9A240090AEBA /* ARDStatsView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ARDStatsView.m; sourceTree = "<group>"; };
+		FAB20A4125AF9A240090AEBA /* RTCSessionDescription+JSON.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "RTCSessionDescription+JSON.m"; sourceTree = "<group>"; };
+		FAB20A4225AF9A240090AEBA /* ARDWebSocketChannel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ARDWebSocketChannel.h; sourceTree = "<group>"; };
+		FAB20A4325AF9A240090AEBA /* ARDRoomServerClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ARDRoomServerClient.h; sourceTree = "<group>"; };
+		FAB20A4425AF9A240090AEBA /* ARDMainViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ARDMainViewController.m; sourceTree = "<group>"; };
+		FAB20A4525AF9A240090AEBA /* ARDWebSocketChannel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ARDWebSocketChannel.m; sourceTree = "<group>"; };
+		FAB20A4625AF9A240090AEBA /* RTCIceServer+JSON.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "RTCIceServer+JSON.m"; sourceTree = "<group>"; };
+		FAB20A4725AF9A240090AEBA /* ARDSignalingMessage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ARDSignalingMessage.m; sourceTree = "<group>"; };
+		FAB20A4825AF9A240090AEBA /* RTCVideoCodecInfo+HumanReadable.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "RTCVideoCodecInfo+HumanReadable.m"; sourceTree = "<group>"; };
+		FAB20A4925AF9A240090AEBA /* ARDSettingsStore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ARDSettingsStore.h; sourceTree = "<group>"; };
+		FAB20A4A25AF9A240090AEBA /* ARDMessageResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ARDMessageResponse.m; sourceTree = "<group>"; };
+		FAB20A4B25AF9A240090AEBA /* UIImage+ARDUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+ARDUtilities.m"; sourceTree = "<group>"; };
+		FAB20A4C25AF9A240090AEBA /* ARDStatsBuilder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ARDStatsBuilder.m; sourceTree = "<group>"; };
+		FAB20A4D25AF9A240090AEBA /* ARDSignalingChannel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ARDSignalingChannel.h; sourceTree = "<group>"; };
+		FAB20A4E25AF9A240090AEBA /* SRWebSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SRWebSocket.m; sourceTree = "<group>"; };
+		FAB20A4F25AF9A240090AEBA /* ARDTURNClient+Internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ARDTURNClient+Internal.h"; sourceTree = "<group>"; };
+		FAB20A5025AF9A240090AEBA /* ARDUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ARDUtilities.h; sourceTree = "<group>"; };
+		FAB20A5125AF9A240090AEBA /* ARDSettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ARDSettingsViewController.h; sourceTree = "<group>"; };
+		FAB20A5225AF9A240090AEBA /* ARDCaptureController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ARDCaptureController.h; sourceTree = "<group>"; };
+		FAB20A5325AF9A240090AEBA /* ARDStatsBuilder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ARDStatsBuilder.h; sourceTree = "<group>"; };
+		FAB20A5425AF9A240090AEBA /* ARDAppEngineClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ARDAppEngineClient.m; sourceTree = "<group>"; };
+		FAB20A5525AF9A240090AEBA /* ARDBitrateTracker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ARDBitrateTracker.h; sourceTree = "<group>"; };
+		FAB20A5625AF9A240090AEBA /* ARDAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ARDAppDelegate.h; sourceTree = "<group>"; };
+		FAB20A5725AF9A240090AEBA /* ARDAppClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ARDAppClient.h; sourceTree = "<group>"; };
+		FAB20A5825AF9A240090AEBA /* ARDMainViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ARDMainViewController.h; sourceTree = "<group>"; };
+		FAB20A5925AF9A240090AEBA /* UIImage+ARDUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+ARDUtilities.h"; sourceTree = "<group>"; };
+		FAB20A5A25AF9A240090AEBA /* ARDBitrateTracker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ARDBitrateTracker.m; sourceTree = "<group>"; };
+		FAB20A5B25AF9A250090AEBA /* RTCVideoCodecInfo+HumanReadable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "RTCVideoCodecInfo+HumanReadable.h"; sourceTree = "<group>"; };
+		FAB20A5D25AF9A250090AEBA /* ic_call_end_black_24dp@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ic_call_end_black_24dp@2x.png"; sourceTree = "<group>"; };
+		FAB20A5E25AF9A250090AEBA /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
+		FAB20A5F25AF9A250090AEBA /* ic_settings_black_24dp@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ic_settings_black_24dp@2x.png"; sourceTree = "<group>"; };
+		FAB20A6025AF9A250090AEBA /* Icon-120.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-120.png"; sourceTree = "<group>"; };
+		FAB20A6125AF9A250090AEBA /* ic_surround_sound_black_24dp@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ic_surround_sound_black_24dp@2x.png"; sourceTree = "<group>"; };
+		FAB20A6225AF9A250090AEBA /* ic_clear_black_24dp@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ic_clear_black_24dp@2x.png"; sourceTree = "<group>"; };
+		FAB20A6325AF9A250090AEBA /* Roboto-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Roboto-Regular.ttf"; sourceTree = "<group>"; };
+		FAB20A6425AF9A250090AEBA /* iPhone5@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "iPhone5@2x.png"; sourceTree = "<group>"; };
+		FAB20A6525AF9A250090AEBA /* ic_switch_video_black_24dp@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ic_switch_video_black_24dp@2x.png"; sourceTree = "<group>"; };
+		FAB20A6625AF9A250090AEBA /* ic_call_end_black_24dp.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ic_call_end_black_24dp.png; sourceTree = "<group>"; };
+		FAB20A6725AF9A250090AEBA /* Icon-180.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon-180.png"; sourceTree = "<group>"; };
+		FAB20A6825AF9A250090AEBA /* foreman.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = foreman.mp4; sourceTree = "<group>"; };
+		FAB20A6925AF9A250090AEBA /* ic_clear_black_24dp.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ic_clear_black_24dp.png; sourceTree = "<group>"; };
+		FAB20A6A25AF9A250090AEBA /* iPhone6p@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "iPhone6p@3x.png"; sourceTree = "<group>"; };
+		FAB20A6B25AF9A250090AEBA /* ic_surround_sound_black_24dp.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ic_surround_sound_black_24dp.png; sourceTree = "<group>"; };
+		FAB20A6C25AF9A250090AEBA /* ic_switch_video_black_24dp.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ic_switch_video_black_24dp.png; sourceTree = "<group>"; };
+		FAB20A6D25AF9A250090AEBA /* ic_settings_black_24dp.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ic_settings_black_24dp.png; sourceTree = "<group>"; };
+		FAB20A6E25AF9A250090AEBA /* mozart.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = mozart.mp3; sourceTree = "<group>"; };
+		FAB20A6F25AF9A250090AEBA /* iPhone6@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "iPhone6@2x.png"; sourceTree = "<group>"; };
+		FAB20A7025AF9A250090AEBA /* ARDTURNClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ARDTURNClient.h; sourceTree = "<group>"; };
+		FAB20A7125AF9A250090AEBA /* ARDVideoCallView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ARDVideoCallView.h; sourceTree = "<group>"; };
+		FAB20A7225AF9A250090AEBA /* ARDJoinResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ARDJoinResponse.m; sourceTree = "<group>"; };
+		FAB20A7425AF9A250090AEBA /* ARDAppClient+Internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ARDAppClient+Internal.h"; sourceTree = "<group>"; };
+		FAB20A7525AF9A250090AEBA /* RTCIceServer+JSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "RTCIceServer+JSON.h"; sourceTree = "<group>"; };
+		FAB20A7625AF9A250090AEBA /* ARDJoinResponse+Internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ARDJoinResponse+Internal.h"; sourceTree = "<group>"; };
+		FAB20A7725AF9A250090AEBA /* ARDSettingsModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ARDSettingsModel.h; sourceTree = "<group>"; };
+		FAB20A7825AF9A250090AEBA /* ARDAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ARDAppDelegate.m; sourceTree = "<group>"; };
+		FAB20A7925AF9A250090AEBA /* RTCIceCandidate+JSON.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "RTCIceCandidate+JSON.m"; sourceTree = "<group>"; };
+		FAB20A7A25AF9A250090AEBA /* ARDJoinResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ARDJoinResponse.h; sourceTree = "<group>"; };
+		FAB20A7B25AF9A250090AEBA /* ARDMainView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ARDMainView.m; sourceTree = "<group>"; };
+		FAB20A7C25AF9A250090AEBA /* ARDFileCaptureController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ARDFileCaptureController.h; sourceTree = "<group>"; };
+		FAB20A7D25AF9A250090AEBA /* ARDSettingsModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ARDSettingsModel.m; sourceTree = "<group>"; };
+		FAB20A7E25AF9A250090AEBA /* ARDMainView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ARDMainView.h; sourceTree = "<group>"; };
+		FAB20A7F25AF9A250090AEBA /* ARDAppEngineClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ARDAppEngineClient.h; sourceTree = "<group>"; };
+		FAB20A8025AF9A250090AEBA /* ARDAppClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ARDAppClient.m; sourceTree = "<group>"; };
+		FAB20A8125AF9A250090AEBA /* ARDFileCaptureController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ARDFileCaptureController.m; sourceTree = "<group>"; };
+		FAB20A8225AF9A250090AEBA /* ARDSettingsModel+Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ARDSettingsModel+Private.h"; sourceTree = "<group>"; };
+		FAB20A8325AF9A250090AEBA /* ARDSignalingMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ARDSignalingMessage.h; sourceTree = "<group>"; };
+		FAB20A8425AF9A250090AEBA /* ARDVideoCallViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ARDVideoCallViewController.m; sourceTree = "<group>"; };
+		FAB20A8525AF9A250090AEBA /* RTCSessionDescription+JSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "RTCSessionDescription+JSON.h"; sourceTree = "<group>"; };
+		FAB20A8625AF9A250090AEBA /* ARDUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ARDUtilities.m; sourceTree = "<group>"; };
+		FAB20A8725AF9A250090AEBA /* ARDExternalSampleCapturer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ARDExternalSampleCapturer.m; sourceTree = "<group>"; };
+		FAB20A8825AF9A250090AEBA /* ARDMessageResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ARDMessageResponse.h; sourceTree = "<group>"; };
+		FAB20A8925AF9A250090AEBA /* RTCIceCandidate+JSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "RTCIceCandidate+JSON.h"; sourceTree = "<group>"; };
+		FAB20A8A25AF9A250090AEBA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		FAB20A8B25AF9A250090AEBA /* ARDMessageResponse+Internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ARDMessageResponse+Internal.h"; sourceTree = "<group>"; };
+		FAB20A8C25AF9A250090AEBA /* SRWebSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SRWebSocket.h; sourceTree = "<group>"; };
+		FAB20A8D25AF9A250090AEBA /* ARDVideoCallView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ARDVideoCallView.m; sourceTree = "<group>"; };
+		FAB20A8E25AF9A250090AEBA /* ARDStatsView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ARDStatsView.h; sourceTree = "<group>"; };
+		FAB20A8F25AF9A250090AEBA /* ARDTURNClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ARDTURNClient.m; sourceTree = "<group>"; };
+		FAB20A9025AF9A250090AEBA /* ARDVideoCallViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ARDVideoCallViewController.h; sourceTree = "<group>"; };
+		FAB20A9125AF9A260090AEBA /* ARDSettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ARDSettingsViewController.m; sourceTree = "<group>"; };
+		FAB20ACD25AF9C520090AEBA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		FAB20A1825AF98DF0090AEBA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				34E99FEC5196063C867F86D0 /* Pods_iosApp.framework in Frameworks */,
+				FA75CD9825AFA9AE008F1097 /* shared.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		560B49751BE1BD46886FED03 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				FA75CD9725AFA9AE008F1097 /* shared.framework */,
+				F5A015B92C054E3C64BAD2D3 /* Pods_iosApp.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		9D1909348F926CCDFBB7EFF5 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				70B7B7E51A1DACF9121E8112 /* Pods-iosApp.debug.xcconfig */,
+				A43D903744DC18CD6B8000E6 /* Pods-iosApp.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		FA75CD9A25AFAB2A008F1097 /* broadcast_extension */ = {
+			isa = PBXGroup;
+			children = (
+				FA75CD9B25AFAB2A008F1097 /* BroadcastUploadInfo.plist */,
+				FA75CD9C25AFAB2A008F1097 /* BroadcastSetupUIInfo.plist */,
+				FA75CD9D25AFAB2A008F1097 /* ARDBroadcastSampleHandler.h */,
+				FA75CD9E25AFAB2A008F1097 /* ARDBroadcastSetupViewController.h */,
+				FA75CD9F25AFAB2A008F1097 /* ARDBroadcastSampleHandler.m */,
+				FA75CDA025AFAB2A008F1097 /* ARDBroadcastSetupViewController.m */,
+			);
+			path = broadcast_extension;
+			sourceTree = "<group>";
+		};
+		FAB20A1225AF98DF0090AEBA = {
+			isa = PBXGroup;
+			children = (
+				FAB20A1D25AF98DF0090AEBA /* iosApp */,
+				FAB20A1C25AF98DF0090AEBA /* Products */,
+				9D1909348F926CCDFBB7EFF5 /* Pods */,
+				560B49751BE1BD46886FED03 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		FAB20A1C25AF98DF0090AEBA /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				FAB20A1B25AF98DF0090AEBA /* iosApp.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		FAB20A1D25AF98DF0090AEBA /* iosApp */ = {
+			isa = PBXGroup;
+			children = (
+				FA75CD9A25AFAB2A008F1097 /* broadcast_extension */,
+				FAB20A5725AF9A240090AEBA /* ARDAppClient.h */,
+				FAB20A8025AF9A250090AEBA /* ARDAppClient.m */,
+				FAB20A7425AF9A250090AEBA /* ARDAppClient+Internal.h */,
+				FAB20A5625AF9A240090AEBA /* ARDAppDelegate.h */,
+				FAB20A7825AF9A250090AEBA /* ARDAppDelegate.m */,
+				FAB20A7F25AF9A250090AEBA /* ARDAppEngineClient.h */,
+				FAB20A5425AF9A240090AEBA /* ARDAppEngineClient.m */,
+				FAB20A5525AF9A240090AEBA /* ARDBitrateTracker.h */,
+				FAB20A5A25AF9A240090AEBA /* ARDBitrateTracker.m */,
+				FAB20A5225AF9A240090AEBA /* ARDCaptureController.h */,
+				FAB20A3C25AF9A240090AEBA /* ARDCaptureController.m */,
+				FAB20A3F25AF9A240090AEBA /* ARDExternalSampleCapturer.h */,
+				FAB20A8725AF9A250090AEBA /* ARDExternalSampleCapturer.m */,
+				FAB20A7C25AF9A250090AEBA /* ARDFileCaptureController.h */,
+				FAB20A8125AF9A250090AEBA /* ARDFileCaptureController.m */,
+				FAB20A7A25AF9A250090AEBA /* ARDJoinResponse.h */,
+				FAB20A7225AF9A250090AEBA /* ARDJoinResponse.m */,
+				FAB20A7625AF9A250090AEBA /* ARDJoinResponse+Internal.h */,
+				FAB20A7E25AF9A250090AEBA /* ARDMainView.h */,
+				FAB20A7B25AF9A250090AEBA /* ARDMainView.m */,
+				FAB20A5825AF9A240090AEBA /* ARDMainViewController.h */,
+				FAB20A4425AF9A240090AEBA /* ARDMainViewController.m */,
+				FAB20A8825AF9A250090AEBA /* ARDMessageResponse.h */,
+				FAB20A4A25AF9A240090AEBA /* ARDMessageResponse.m */,
+				FAB20ACD25AF9C520090AEBA /* Info.plist */,
+				FAB20A8B25AF9A250090AEBA /* ARDMessageResponse+Internal.h */,
+				FAB20A4325AF9A240090AEBA /* ARDRoomServerClient.h */,
+				FAB20A7725AF9A250090AEBA /* ARDSettingsModel.h */,
+				FAB20A7D25AF9A250090AEBA /* ARDSettingsModel.m */,
+				FAB20A8225AF9A250090AEBA /* ARDSettingsModel+Private.h */,
+				FAB20A4925AF9A240090AEBA /* ARDSettingsStore.h */,
+				FAB20A3E25AF9A240090AEBA /* ARDSettingsStore.m */,
+				FAB20A5125AF9A240090AEBA /* ARDSettingsViewController.h */,
+				FAB20A9125AF9A260090AEBA /* ARDSettingsViewController.m */,
+				FAB20A4D25AF9A240090AEBA /* ARDSignalingChannel.h */,
+				FAB20A8325AF9A250090AEBA /* ARDSignalingMessage.h */,
+				FAB20A4725AF9A240090AEBA /* ARDSignalingMessage.m */,
+				FAB20A5325AF9A240090AEBA /* ARDStatsBuilder.h */,
+				FAB20A4C25AF9A240090AEBA /* ARDStatsBuilder.m */,
+				FAB20A8E25AF9A250090AEBA /* ARDStatsView.h */,
+				FAB20A4025AF9A240090AEBA /* ARDStatsView.m */,
+				FAB20A7025AF9A250090AEBA /* ARDTURNClient.h */,
+				FAB20A8F25AF9A250090AEBA /* ARDTURNClient.m */,
+				FAB20A4F25AF9A240090AEBA /* ARDTURNClient+Internal.h */,
+				FAB20A5025AF9A240090AEBA /* ARDUtilities.h */,
+				FAB20A8625AF9A250090AEBA /* ARDUtilities.m */,
+				FAB20A7125AF9A250090AEBA /* ARDVideoCallView.h */,
+				FAB20A8D25AF9A250090AEBA /* ARDVideoCallView.m */,
+				FAB20A9025AF9A250090AEBA /* ARDVideoCallViewController.h */,
+				FAB20A8425AF9A250090AEBA /* ARDVideoCallViewController.m */,
+				FAB20A4225AF9A240090AEBA /* ARDWebSocketChannel.h */,
+				FAB20A4525AF9A240090AEBA /* ARDWebSocketChannel.m */,
+				FAB20A3D25AF9A240090AEBA /* LICENSE */,
+				FAB20A8A25AF9A250090AEBA /* main.m */,
+				FAB20A5C25AF9A250090AEBA /* resources */,
+				FAB20A8925AF9A250090AEBA /* RTCIceCandidate+JSON.h */,
+				FAB20A7925AF9A250090AEBA /* RTCIceCandidate+JSON.m */,
+				FAB20A7525AF9A250090AEBA /* RTCIceServer+JSON.h */,
+				FAB20A4625AF9A240090AEBA /* RTCIceServer+JSON.m */,
+				FAB20A8525AF9A250090AEBA /* RTCSessionDescription+JSON.h */,
+				FAB20A4125AF9A240090AEBA /* RTCSessionDescription+JSON.m */,
+				FAB20A5B25AF9A250090AEBA /* RTCVideoCodecInfo+HumanReadable.h */,
+				FAB20A4825AF9A240090AEBA /* RTCVideoCodecInfo+HumanReadable.m */,
+				FAB20A8C25AF9A250090AEBA /* SRWebSocket.h */,
+				FAB20A4E25AF9A240090AEBA /* SRWebSocket.m */,
+				FAB20A5925AF9A240090AEBA /* UIImage+ARDUtilities.h */,
+				FAB20A4B25AF9A240090AEBA /* UIImage+ARDUtilities.m */,
+				FAB20A2725AF98DF0090AEBA /* Main.storyboard */,
+				FAB20A2A25AF98E10090AEBA /* Assets.xcassets */,
+				FAB20A2C25AF98E10090AEBA /* LaunchScreen.storyboard */,
+			);
+			path = iosApp;
+			sourceTree = "<group>";
+		};
+		FAB20A5C25AF9A250090AEBA /* resources */ = {
+			isa = PBXGroup;
+			children = (
+				FAB20A5D25AF9A250090AEBA /* ic_call_end_black_24dp@2x.png */,
+				FAB20A5E25AF9A250090AEBA /* Icon.png */,
+				FAB20A5F25AF9A250090AEBA /* ic_settings_black_24dp@2x.png */,
+				FAB20A6025AF9A250090AEBA /* Icon-120.png */,
+				FAB20A6125AF9A250090AEBA /* ic_surround_sound_black_24dp@2x.png */,
+				FAB20A6225AF9A250090AEBA /* ic_clear_black_24dp@2x.png */,
+				FAB20A6325AF9A250090AEBA /* Roboto-Regular.ttf */,
+				FAB20A6425AF9A250090AEBA /* iPhone5@2x.png */,
+				FAB20A6525AF9A250090AEBA /* ic_switch_video_black_24dp@2x.png */,
+				FAB20A6625AF9A250090AEBA /* ic_call_end_black_24dp.png */,
+				FAB20A6725AF9A250090AEBA /* Icon-180.png */,
+				FAB20A6825AF9A250090AEBA /* foreman.mp4 */,
+				FAB20A6925AF9A250090AEBA /* ic_clear_black_24dp.png */,
+				FAB20A6A25AF9A250090AEBA /* iPhone6p@3x.png */,
+				FAB20A6B25AF9A250090AEBA /* ic_surround_sound_black_24dp.png */,
+				FAB20A6C25AF9A250090AEBA /* ic_switch_video_black_24dp.png */,
+				FAB20A6D25AF9A250090AEBA /* ic_settings_black_24dp.png */,
+				FAB20A6E25AF9A250090AEBA /* mozart.mp3 */,
+				FAB20A6F25AF9A250090AEBA /* iPhone6@2x.png */,
+			);
+			path = resources;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		FAB20A1A25AF98DF0090AEBA /* iosApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FAB20A3425AF98E10090AEBA /* Build configuration list for PBXNativeTarget "iosApp" */;
+			buildPhases = (
+				FD0355E5D9F8C0EDA6E2A4A3 /* [CP] Check Pods Manifest.lock */,
+				FAB20A1725AF98DF0090AEBA /* Sources */,
+				FAB20A1825AF98DF0090AEBA /* Frameworks */,
+				FAB20A1925AF98DF0090AEBA /* Resources */,
+				381E171045160A4EF9A43A8F /* [CP] Embed Pods Frameworks */,
+				FA75CD8725AFA6FB008F1097 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = iosApp;
+			productName = iosApp;
+			productReference = FAB20A1B25AF98DF0090AEBA /* iosApp.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		FAB20A1325AF98DF0090AEBA /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 1230;
+				TargetAttributes = {
+					FAB20A1A25AF98DF0090AEBA = {
+						CreatedOnToolsVersion = 12.3;
+					};
+				};
+			};
+			buildConfigurationList = FAB20A1625AF98DF0090AEBA /* Build configuration list for PBXProject "iosApp" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = FAB20A1225AF98DF0090AEBA;
+			productRefGroup = FAB20A1C25AF98DF0090AEBA /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				FAB20A1A25AF98DF0090AEBA /* iosApp */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		FAB20A1925AF98DF0090AEBA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FAB20AB425AF9A260090AEBA /* iPhone6@2x.png in Resources */,
+				FAB20AA525AF9A260090AEBA /* Icon-120.png in Resources */,
+				FAB20AB125AF9A260090AEBA /* ic_switch_video_black_24dp.png in Resources */,
+				FAB20AAB25AF9A260090AEBA /* ic_call_end_black_24dp.png in Resources */,
+				FAB20AAF25AF9A260090AEBA /* iPhone6p@3x.png in Resources */,
+				FAB20AB225AF9A260090AEBA /* ic_settings_black_24dp.png in Resources */,
+				FAB20AAD25AF9A260090AEBA /* foreman.mp4 in Resources */,
+				FA75CDA125AFAB2A008F1097 /* BroadcastUploadInfo.plist in Resources */,
+				FAB20AAA25AF9A260090AEBA /* ic_switch_video_black_24dp@2x.png in Resources */,
+				FAB20AA825AF9A260090AEBA /* Roboto-Regular.ttf in Resources */,
+				FAB20AA325AF9A260090AEBA /* Icon.png in Resources */,
+				FAB20AA925AF9A260090AEBA /* iPhone5@2x.png in Resources */,
+				FAB20AAE25AF9A260090AEBA /* ic_clear_black_24dp.png in Resources */,
+				FAB20AB325AF9A260090AEBA /* mozart.mp3 in Resources */,
+				FAB20AB025AF9A260090AEBA /* ic_surround_sound_black_24dp.png in Resources */,
+				FAB20AA225AF9A260090AEBA /* ic_call_end_black_24dp@2x.png in Resources */,
+				FAB20A2E25AF98E10090AEBA /* LaunchScreen.storyboard in Resources */,
+				FAB20A2B25AF98E10090AEBA /* Assets.xcassets in Resources */,
+				FAB20AA625AF9A260090AEBA /* ic_surround_sound_black_24dp@2x.png in Resources */,
+				FA75CDA225AFAB2A008F1097 /* BroadcastSetupUIInfo.plist in Resources */,
+				FAB20AA725AF9A260090AEBA /* ic_clear_black_24dp@2x.png in Resources */,
+				FAB20A9325AF9A260090AEBA /* LICENSE in Resources */,
+				FAB20AA425AF9A260090AEBA /* ic_settings_black_24dp@2x.png in Resources */,
+				FAB20AAC25AF9A260090AEBA /* Icon-180.png in Resources */,
+				FAB20A2925AF98DF0090AEBA /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		381E171045160A4EF9A43A8F /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-iosApp/Pods-iosApp-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-iosApp/Pods-iosApp-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-iosApp/Pods-iosApp-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		FD0355E5D9F8C0EDA6E2A4A3 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-iosApp-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		FAB20A1725AF98DF0090AEBA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FAB20AC025AF9A260090AEBA /* main.m in Sources */,
+				FAB20A9A25AF9A260090AEBA /* ARDSignalingMessage.m in Sources */,
+				FAB20A9525AF9A260090AEBA /* ARDStatsView.m in Sources */,
+				FAB20ABC25AF9A260090AEBA /* ARDFileCaptureController.m in Sources */,
+				FAB20AB725AF9A260090AEBA /* ARDAppDelegate.m in Sources */,
+				FAB20AC225AF9A260090AEBA /* ARDTURNClient.m in Sources */,
+				FA75CDA425AFAB2A008F1097 /* ARDBroadcastSetupViewController.m in Sources */,
+				FAB20ABE25AF9A260090AEBA /* ARDUtilities.m in Sources */,
+				FAB20AB525AF9A260090AEBA /* ARDJoinResponse.m in Sources */,
+				FAB20AB925AF9A260090AEBA /* ARDMainView.m in Sources */,
+				FAB20A9B25AF9A260090AEBA /* RTCVideoCodecInfo+HumanReadable.m in Sources */,
+				FAB20A9825AF9A260090AEBA /* ARDWebSocketChannel.m in Sources */,
+				FAB20AC325AF9A260090AEBA /* ARDSettingsViewController.m in Sources */,
+				FAB20A9C25AF9A260090AEBA /* ARDMessageResponse.m in Sources */,
+				FAB20AB825AF9A260090AEBA /* RTCIceCandidate+JSON.m in Sources */,
+				FA75CDA325AFAB2A008F1097 /* ARDBroadcastSampleHandler.m in Sources */,
+				FAB20ABB25AF9A260090AEBA /* ARDAppClient.m in Sources */,
+				FAB20A9E25AF9A260090AEBA /* ARDStatsBuilder.m in Sources */,
+				FAB20A9925AF9A260090AEBA /* RTCIceServer+JSON.m in Sources */,
+				FAB20A9D25AF9A260090AEBA /* UIImage+ARDUtilities.m in Sources */,
+				FAB20A9625AF9A260090AEBA /* RTCSessionDescription+JSON.m in Sources */,
+				FAB20A9425AF9A260090AEBA /* ARDSettingsStore.m in Sources */,
+				FAB20AA025AF9A260090AEBA /* ARDAppEngineClient.m in Sources */,
+				FAB20A9225AF9A260090AEBA /* ARDCaptureController.m in Sources */,
+				FAB20A9F25AF9A260090AEBA /* SRWebSocket.m in Sources */,
+				FAB20A9725AF9A260090AEBA /* ARDMainViewController.m in Sources */,
+				FAB20ABD25AF9A260090AEBA /* ARDVideoCallViewController.m in Sources */,
+				FAB20ABA25AF9A260090AEBA /* ARDSettingsModel.m in Sources */,
+				FAB20ABF25AF9A260090AEBA /* ARDExternalSampleCapturer.m in Sources */,
+				FAB20AA125AF9A260090AEBA /* ARDBitrateTracker.m in Sources */,
+				FAB20AC125AF9A260090AEBA /* ARDVideoCallView.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		FAB20A2725AF98DF0090AEBA /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				FAB20A2825AF98DF0090AEBA /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		FAB20A2C25AF98E10090AEBA /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				FAB20A2D25AF98E10090AEBA /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		FAB20A3225AF98E10090AEBA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.3;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		FAB20A3325AF98E10090AEBA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.3;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		FAB20A3525AF98E10090AEBA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 70B7B7E51A1DACF9121E8112 /* Pods-iosApp.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = Q86C89UZUH;
+				ENABLE_BITCODE = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/../shared/build/xcode-frameworks",
+				);
+				INFOPLIST_FILE = iosApp/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.shepeliev.apprtckmm.iosApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		FAB20A3625AF98E10090AEBA /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A43D903744DC18CD6B8000E6 /* Pods-iosApp.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = Q86C89UZUH;
+				ENABLE_BITCODE = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/../shared/build/xcode-frameworks",
+				);
+				INFOPLIST_FILE = iosApp/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.shepeliev.apprtckmm.iosApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		FAB20A1625AF98DF0090AEBA /* Build configuration list for PBXProject "iosApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FAB20A3225AF98E10090AEBA /* Debug */,
+				FAB20A3325AF98E10090AEBA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		FAB20A3425AF98E10090AEBA /* Build configuration list for PBXNativeTarget "iosApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FAB20A3525AF98E10090AEBA /* Debug */,
+				FAB20A3625AF98E10090AEBA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = FAB20A1325AF98DF0090AEBA /* Project object */;
+}
