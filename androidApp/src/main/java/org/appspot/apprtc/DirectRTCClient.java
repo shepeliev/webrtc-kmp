@@ -14,7 +14,11 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import com.shepeliev.webrtckmm.AdapterType;
+import com.shepeliev.webrtckmm.IceCandidate;
+
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
@@ -22,7 +26,6 @@ import java.util.regex.Pattern;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.webrtc.IceCandidate;
 import org.webrtc.SessionDescription;
 
 /**
@@ -185,9 +188,9 @@ public class DirectRTCClient implements AppRTCClient, TCPChannelClient.TCPChanne
       public void run() {
         JSONObject json = new JSONObject();
         jsonPut(json, "type", "candidate");
-        jsonPut(json, "label", candidate.sdpMLineIndex);
-        jsonPut(json, "id", candidate.sdpMid);
-        jsonPut(json, "candidate", candidate.sdp);
+        jsonPut(json, "label", candidate.getSdpMLineIndex());
+        jsonPut(json, "id", candidate.getSdpMid());
+        jsonPut(json, "candidate", candidate.getSdp());
 
         if (roomState != ConnectionState.CONNECTED) {
           reportError("Sending ICE candidate in non connected state.");
@@ -200,7 +203,7 @@ public class DirectRTCClient implements AppRTCClient, TCPChannelClient.TCPChanne
 
   /** Send removed Ice candidates to the other participant. */
   @Override
-  public void sendLocalIceCandidateRemovals(final IceCandidate[] candidates) {
+  public void sendLocalIceCandidateRemovals(final List<IceCandidate> candidates) {
     executor.execute(new Runnable() {
       @Override
       public void run() {
@@ -255,9 +258,9 @@ public class DirectRTCClient implements AppRTCClient, TCPChannelClient.TCPChanne
         events.onRemoteIceCandidate(toJavaCandidate(json));
       } else if (type.equals("remove-candidates")) {
         JSONArray candidateArray = json.getJSONArray("candidates");
-        IceCandidate[] candidates = new IceCandidate[candidateArray.length()];
+        ArrayList<IceCandidate> candidates = new ArrayList<>();
         for (int i = 0; i < candidateArray.length(); ++i) {
-          candidates[i] = toJavaCandidate(candidateArray.getJSONObject(i));
+          candidates.add(toJavaCandidate(candidateArray.getJSONObject(i)));
         }
         events.onRemoteIceCandidatesRemoved(candidates);
       } else if (type.equals("answer")) {
@@ -334,15 +337,20 @@ public class DirectRTCClient implements AppRTCClient, TCPChannelClient.TCPChanne
   // Converts a Java candidate to a JSONObject.
   private static JSONObject toJsonCandidate(final IceCandidate candidate) {
     JSONObject json = new JSONObject();
-    jsonPut(json, "label", candidate.sdpMLineIndex);
-    jsonPut(json, "id", candidate.sdpMid);
-    jsonPut(json, "candidate", candidate.sdp);
+    jsonPut(json, "label", candidate.getSdpMLineIndex());
+    jsonPut(json, "id", candidate.getSdpMid());
+    jsonPut(json, "candidate", candidate.getSdp());
     return json;
   }
 
   // Converts a JSON candidate to a Java object.
   private static IceCandidate toJavaCandidate(JSONObject json) throws JSONException {
     return new IceCandidate(
-        json.getString("id"), json.getInt("label"), json.getString("candidate"));
+        json.getString("id"),
+            json.getInt("label"),
+            json.getString("candidate"),
+            "",
+            AdapterType.Unknown
+    );
   }
 }

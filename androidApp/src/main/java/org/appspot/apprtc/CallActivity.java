@@ -34,6 +34,9 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
+import com.shepeliev.webrtckmm.IceCandidate;
+import com.shepeliev.webrtckmm.Options;
+
 import java.io.IOException;
 import java.lang.RuntimeException;
 import java.util.ArrayList;
@@ -50,7 +53,6 @@ import org.webrtc.Camera2Enumerator;
 import org.webrtc.CameraEnumerator;
 import org.webrtc.EglBase;
 import org.webrtc.FileVideoCapturer;
-import org.webrtc.IceCandidate;
 import org.webrtc.Logging;
 import org.webrtc.PeerConnectionFactory;
 import org.webrtc.RendererCommon.ScalingType;
@@ -374,10 +376,7 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
     // Create peer connection client.
     peerConnectionClient = new PeerConnectionClient(
         getApplicationContext(), eglBase, peerConnectionParameters, CallActivity.this);
-    PeerConnectionFactory.Options options = new PeerConnectionFactory.Options();
-    if (loopback) {
-      options.networkIgnoreMask = 0;
-    }
+    final Options options = new Options();
     peerConnectionClient.createPeerConnectionFactory(options);
 
     if (screencaptureEnabled) {
@@ -771,7 +770,7 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
       }
       if (params.iceCandidates != null) {
         // Add remote ICE candidates from room.
-        for (IceCandidate iceCandidate : params.iceCandidates) {
+        for (com.shepeliev.webrtckmm.IceCandidate iceCandidate : params.iceCandidates) {
           peerConnectionClient.addRemoteIceCandidate(iceCandidate);
         }
       }
@@ -825,7 +824,7 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
   }
 
   @Override
-  public void onRemoteIceCandidatesRemoved(final IceCandidate[] candidates) {
+  public void onRemoteIceCandidatesRemoved(final List<com.shepeliev.webrtckmm.IceCandidate> candidates) {
     runOnUiThread(new Runnable() {
       @Override
       public void run() {
@@ -881,7 +880,7 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
   }
 
   @Override
-  public void onIceCandidate(final IceCandidate candidate) {
+  public void onIceCandidate(final com.shepeliev.webrtckmm.IceCandidate candidate) {
     runOnUiThread(new Runnable() {
       @Override
       public void run() {
@@ -893,7 +892,7 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
   }
 
   @Override
-  public void onIceCandidatesRemoved(final IceCandidate[] candidates) {
+  public void onIceCandidatesRemoved(final List<com.shepeliev.webrtckmm.IceCandidate> candidates) {
     runOnUiThread(new Runnable() {
       @Override
       public void run() {

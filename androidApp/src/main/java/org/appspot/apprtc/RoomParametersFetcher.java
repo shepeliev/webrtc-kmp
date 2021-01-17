@@ -11,6 +11,10 @@
 package org.appspot.apprtc;
 
 import android.util.Log;
+
+import com.shepeliev.webrtckmm.AdapterType;
+import com.shepeliev.webrtckmm.IceCandidate;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -24,7 +28,6 @@ import org.appspot.apprtc.util.AsyncHttpURLConnection.AsyncHttpEvents;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.webrtc.IceCandidate;
 import org.webrtc.PeerConnection;
 import org.webrtc.SessionDescription;
 
@@ -83,7 +86,7 @@ public class RoomParametersFetcher {
   private void roomHttpResponseParse(String response) {
     Log.d(TAG, "Room response: " + response);
     try {
-      List<IceCandidate> iceCandidates = null;
+      List<com.shepeliev.webrtckmm.IceCandidate> iceCandidates = null;
       SessionDescription offerSdp = null;
       JSONObject roomJson = new JSONObject(response);
 
@@ -112,7 +115,7 @@ public class RoomParametersFetcher {
             offerSdp = new SessionDescription(
                 SessionDescription.Type.fromCanonicalForm(messageType), message.getString("sdp"));
           } else if (messageType.equals("candidate")) {
-            IceCandidate candidate = new IceCandidate(
+            com.shepeliev.webrtckmm.IceCandidate candidate = new IceCandidate(
                 message.getString("id"), message.getInt("label"), message.getString("candidate"));
             iceCandidates.add(candidate);
           } else {

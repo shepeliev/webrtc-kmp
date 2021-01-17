@@ -10,7 +10,8 @@
 
 package org.appspot.apprtc;
 
-import org.webrtc.IceCandidate;
+import com.shepeliev.webrtckmm.IceCandidate;
+
 import org.webrtc.PeerConnection;
 import org.webrtc.SessionDescription;
 
@@ -60,12 +61,12 @@ public interface AppRTCClient {
   /**
    * Send Ice candidate to the other participant.
    */
-  void sendLocalIceCandidate(final IceCandidate candidate);
+  void sendLocalIceCandidate(final com.shepeliev.webrtckmm.IceCandidate candidate);
 
   /**
    * Send removed ICE candidates to the other participant.
    */
-  void sendLocalIceCandidateRemovals(final IceCandidate[] candidates);
+  void sendLocalIceCandidateRemovals(final List<com.shepeliev.webrtckmm.IceCandidate> candidates);
 
   /**
    * Disconnect from room.
@@ -82,7 +83,7 @@ public interface AppRTCClient {
     public final String wssUrl;
     public final String wssPostUrl;
     public final SessionDescription offerSdp;
-    public final List<IceCandidate> iceCandidates;
+    public final List<com.shepeliev.webrtckmm.IceCandidate> iceCandidates;
 
     public SignalingParameters(List<PeerConnection.IceServer> iceServers, boolean initiator,
         String clientId, String wssUrl, String wssPostUrl, SessionDescription offerSdp,
@@ -117,12 +118,12 @@ public interface AppRTCClient {
     /**
      * Callback fired once remote Ice candidate is received.
      */
-    void onRemoteIceCandidate(final IceCandidate candidate);
+    void onRemoteIceCandidate(final com.shepeliev.webrtckmm.IceCandidate candidate);
 
     /**
      * Callback fired once remote Ice candidate removals are received.
      */
-    void onRemoteIceCandidatesRemoved(final IceCandidate[] candidates);
+    void onRemoteIceCandidatesRemoved(final List<com.shepeliev.webrtckmm.IceCandidate> candidates);
 
     /**
      * Callback fired once channel is closed.
