@@ -3,6 +3,16 @@ package com.shepeliev.webrtckmm
 import kotlin.jvm.JvmOverloads
 
 expect class PeerConnection {
+    fun createDataChannel(
+        label: String,
+        id: Int = -1,
+        ordered: Boolean = true,
+        maxRetransmitTimeMs: Int = -1,
+        maxRetransmits: Int = -1,
+        protocol: String = "",
+        negotiated: Boolean = false,
+    ): DataChannel?
+
     fun addIceCandidate(candidate: IceCandidate)
     fun removeIceCandidates(candidates: List<IceCandidate>)
 }

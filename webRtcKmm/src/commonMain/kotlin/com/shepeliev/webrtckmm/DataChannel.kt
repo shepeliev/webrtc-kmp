@@ -1,6 +1,5 @@
 package com.shepeliev.webrtckmm
 
-// TODO implement initialization
 expect class DataChannel {
     val label: String
     val id: Int

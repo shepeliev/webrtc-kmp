@@ -414,18 +414,16 @@ class PeerConnectionClient(
         )
         peerConnection = factory!!.createPeerConnection(rtcConfiguration, pcObserver)
         if (dataChannelEnabled) {
-            val init = WebRtcDataChannel.Init().apply {
-                ordered = peerConnectionParameters.dataChannelParameters!!.ordered
-                negotiated = peerConnectionParameters.dataChannelParameters.negotiated
-                maxRetransmits = peerConnectionParameters.dataChannelParameters.maxRetransmits
-                maxRetransmitTimeMs =
-                    peerConnectionParameters.dataChannelParameters.maxRetransmitTimeMs
-                id = peerConnectionParameters.dataChannelParameters.id
-                protocol = peerConnectionParameters.dataChannelParameters.protocol
-            }
-            dataChannel = peerConnection!!.native.createDataChannel("ApprtcDemo data", init)?.let {
-                DataChannel(it)
-            }
+            val dcParams = peerConnectionParameters.dataChannelParameters!!
+            dataChannel = peerConnection!!.createDataChannel(
+                "ApprtcDemo data",
+                id = dcParams.id,
+                ordered = dcParams.ordered,
+                maxRetransmitTimeMs = dcParams.maxRetransmitTimeMs,
+                maxRetransmits = dcParams.maxRetransmits,
+                protocol = dcParams.protocol,
+                negotiated = dcParams.negotiated
+            )
         }
         isInitiator = false
 
@@ -1149,7 +1147,8 @@ class PeerConnectionClient(
                 return null
             }
             val header: List<String> = origLineParts.subList(0, 3)
-            val unpreferredPayloadTypes = mutableListOf(*origLineParts.subList(3, origLineParts.size).toTypedArray())
+            val unpreferredPayloadTypes =
+                mutableListOf(*origLineParts.subList(3, origLineParts.size).toTypedArray())
             unpreferredPayloadTypes.removeAll(preferredPayloadTypes)
             // Reconstruct the line with |preferredPayloadTypes| moved to the beginning of the payload
             // types.
