@@ -1,5 +1,6 @@
 package com.shepeliev.webrtckmm
 
+// TODO implement initialization
 expect class DataChannel {
     val label: String
     val id: Int
@@ -23,5 +24,5 @@ expect class DataChannelBuffer(data: ByteArray, binary: Boolean) {
 interface DataChannelObserver {
     fun onBufferedAmountChange(previousAmount: Long)
     fun onStateChange()
-    fun onMessage(var1: DataChannelBuffer)
+    fun onMessage(buffer: DataChannelBuffer)
 }

@@ -46,15 +46,12 @@ import org.appspot.apprtc.AppRTCAudioManager.AudioDevice;
 import org.appspot.apprtc.AppRTCAudioManager.AudioManagerEvents;
 import org.appspot.apprtc.AppRTCClient.RoomConnectionParameters;
 import org.appspot.apprtc.AppRTCClient.SignalingParameters;
-import org.appspot.apprtc.PeerConnectionClient.DataChannelParameters;
-import org.appspot.apprtc.PeerConnectionClient.PeerConnectionParameters;
 import org.webrtc.Camera1Enumerator;
 import org.webrtc.Camera2Enumerator;
 import org.webrtc.CameraEnumerator;
 import org.webrtc.EglBase;
 import org.webrtc.FileVideoCapturer;
 import org.webrtc.Logging;
-import org.webrtc.PeerConnectionFactory;
 import org.webrtc.RendererCommon.ScalingType;
 import org.webrtc.ScreenCapturerAndroid;
 import org.webrtc.SessionDescription;
@@ -173,7 +170,7 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
   private boolean activityRunning;
   private RoomConnectionParameters roomConnectionParameters;
   @Nullable
-  private PeerConnectionParameters peerConnectionParameters;
+  private PeerConnectionClient.PeerConnectionParameters peerConnectionParameters;
   private boolean connected;
   private boolean isError;
   private boolean callControlFragmentVisible = true;
@@ -307,20 +304,31 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
       videoWidth = displayMetrics.widthPixels;
       videoHeight = displayMetrics.heightPixels;
     }
-    DataChannelParameters dataChannelParameters = null;
+    PeerConnectionClient.DataChannelParameters dataChannelParameters = null;
     if (intent.getBooleanExtra(EXTRA_DATA_CHANNEL_ENABLED, false)) {
-      dataChannelParameters = new DataChannelParameters(intent.getBooleanExtra(EXTRA_ORDERED, true),
+      dataChannelParameters = new PeerConnectionClient.DataChannelParameters(
+          intent.getBooleanExtra(EXTRA_ORDERED, true),
           intent.getIntExtra(EXTRA_MAX_RETRANSMITS_MS, -1),
-          intent.getIntExtra(EXTRA_MAX_RETRANSMITS, -1), intent.getStringExtra(EXTRA_PROTOCOL),
-          intent.getBooleanExtra(EXTRA_NEGOTIATED, false), intent.getIntExtra(EXTRA_ID, -1));
+          intent.getIntExtra(EXTRA_MAX_RETRANSMITS, -1),
+          intent.getStringExtra(EXTRA_PROTOCOL),
+          intent.getBooleanExtra(EXTRA_NEGOTIATED, false),
+          intent.getIntExtra(EXTRA_ID, -1)
+      );
     }
     peerConnectionParameters =
-        new PeerConnectionParameters(intent.getBooleanExtra(EXTRA_VIDEO_CALL, true), loopback,
-            tracing, videoWidth, videoHeight, intent.getIntExtra(EXTRA_VIDEO_FPS, 0),
-            intent.getIntExtra(EXTRA_VIDEO_BITRATE, 0), intent.getStringExtra(EXTRA_VIDEOCODEC),
+        new PeerConnectionClient.PeerConnectionParameters(
+            intent.getBooleanExtra(EXTRA_VIDEO_CALL, true),
+            loopback,
+            tracing,
+            videoWidth,
+            videoHeight,
+            intent.getIntExtra(EXTRA_VIDEO_FPS, 0),
+            intent.getIntExtra(EXTRA_VIDEO_BITRATE, 0),
+            intent.getStringExtra(EXTRA_VIDEOCODEC),
             intent.getBooleanExtra(EXTRA_HWCODEC_ENABLED, true),
             intent.getBooleanExtra(EXTRA_FLEXFEC_ENABLED, false),
-            intent.getIntExtra(EXTRA_AUDIO_BITRATE, 0), intent.getStringExtra(EXTRA_AUDIOCODEC),
+            intent.getIntExtra(EXTRA_AUDIO_BITRATE, 0),
+            intent.getStringExtra(EXTRA_AUDIOCODEC),
             intent.getBooleanExtra(EXTRA_NOAUDIOPROCESSING_ENABLED, false),
             intent.getBooleanExtra(EXTRA_AECDUMP_ENABLED, false),
             intent.getBooleanExtra(EXTRA_SAVE_INPUT_AUDIO_TO_FILE_ENABLED, false),
@@ -329,7 +337,9 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
             intent.getBooleanExtra(EXTRA_DISABLE_BUILT_IN_AGC, false),
             intent.getBooleanExtra(EXTRA_DISABLE_BUILT_IN_NS, false),
             intent.getBooleanExtra(EXTRA_DISABLE_WEBRTC_AGC_AND_HPF, false),
-            intent.getBooleanExtra(EXTRA_ENABLE_RTCEVENTLOG, false), dataChannelParameters);
+            intent.getBooleanExtra(EXTRA_ENABLE_RTCEVENTLOG, false),
+            dataChannelParameters
+        );
     commandLineRun = intent.getBooleanExtra(EXTRA_CMDLINE, false);
     int runTimeMs = intent.getIntExtra(EXTRA_RUNTIME, 0);
 
@@ -753,7 +763,7 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
       videoCapturer = createVideoCapturer();
     }
     peerConnectionClient.createPeerConnection(
-        localProxyVideoSink, remoteSinks, videoCapturer, signalingParameters);
+            localProxyVideoSink, remoteSinks, videoCapturer, signalingParameters);
 
     if (signalingParameters.initiator) {
       logAndToast("Creating OFFER...");
