@@ -1,6 +1,5 @@
 package com.shepeliev.webrtckmm
 
-import com.shepeliev.webrtckmm.utils.toNative
 import org.webrtc.RtcCertificatePem as NativeRtcCertificatePem
 
 actual class RtcCertificatePem(val native: NativeRtcCertificatePem) {
@@ -21,3 +20,5 @@ actual class RtcCertificatePem(val native: NativeRtcCertificatePem) {
         }
     }
 }
+
+internal fun NativeRtcCertificatePem.toCommon() = RtcCertificatePem(this)

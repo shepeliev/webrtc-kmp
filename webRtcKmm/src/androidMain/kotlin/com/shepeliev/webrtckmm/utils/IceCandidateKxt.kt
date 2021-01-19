@@ -1,6 +1,7 @@
 package com.shepeliev.webrtckmm.utils
 
 import com.shepeliev.webrtckmm.IceCandidate
+import com.shepeliev.webrtckmm.toCommon
 import org.webrtc.IceCandidate as NativeIceCandidate
 
 fun NativeIceCandidate.toCommon(): IceCandidate {

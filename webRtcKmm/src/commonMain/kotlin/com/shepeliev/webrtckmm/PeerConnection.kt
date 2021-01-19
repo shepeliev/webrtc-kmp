@@ -2,10 +2,9 @@ package com.shepeliev.webrtckmm
 
 import kotlin.jvm.JvmOverloads
 
-
 expect class PeerConnection {
-    var localDescription: SessionDescription?
-    var remoteDescription: SessionDescription?
+    val localDescription: SessionDescription?
+    val remoteDescription: SessionDescription?
     val certificate: RtcCertificatePem?
     val signalingState: SignalingState
     val iceConnectionState: IceConnectionState
@@ -24,6 +23,8 @@ expect class PeerConnection {
 
     suspend fun createOffer(constraints: MediaConstraints): SessionDescription
     suspend fun createAnswer(constraints: MediaConstraints): SessionDescription
+    suspend fun setLocalDescription(description: SessionDescription)
+    suspend fun setRemoteDescription(description: SessionDescription)
 
     /**
      * Enables/disables playout of received audio streams. Enabled by default.
@@ -43,9 +44,9 @@ expect class PeerConnection {
      */
     fun setAudioRecording(recording: Boolean)
 
-    fun setConfiguration(configuration: RtcConfiguration)
-    fun addIceCandidate(candidate: IceCandidate)
-    fun removeIceCandidates(candidates: List<IceCandidate>)
+    fun setConfiguration(configuration: RtcConfiguration): Boolean
+    fun addIceCandidate(candidate: IceCandidate): Boolean
+    fun removeIceCandidates(candidates: List<IceCandidate>): Boolean
 
     /**
      * Adds a new MediaStream to be sent on this peer connection.

@@ -31,7 +31,9 @@ actual class RtpTransceiver(val native: NativeRtpTransceiver) {
     actual fun dispose() = native.dispose()
 }
 
-private fun NativeRtpTransceiver.RtpTransceiverDirection.toCommon(): RtpTransceiverDirection {
+internal fun NativeRtpTransceiver.toCommon() = RtpTransceiver(this)
+
+internal fun NativeRtpTransceiver.RtpTransceiverDirection.toCommon(): RtpTransceiverDirection {
     return when (this) {
         NativeRtpTransceiver.RtpTransceiverDirection.SEND_RECV -> {
             RtpTransceiverDirection.SendRecv
@@ -51,7 +53,7 @@ private fun NativeRtpTransceiver.RtpTransceiverDirection.toCommon(): RtpTranscei
     }
 }
 
-private fun RtpTransceiverDirection.toNative(): NativeRtpTransceiver.RtpTransceiverDirection {
+internal fun RtpTransceiverDirection.toNative(): NativeRtpTransceiver.RtpTransceiverDirection {
     return when (this) {
         RtpTransceiverDirection.SendRecv -> NativeRtpTransceiver.RtpTransceiverDirection.SEND_RECV
         RtpTransceiverDirection.SendOnly -> NativeRtpTransceiver.RtpTransceiverDirection.SEND_ONLY

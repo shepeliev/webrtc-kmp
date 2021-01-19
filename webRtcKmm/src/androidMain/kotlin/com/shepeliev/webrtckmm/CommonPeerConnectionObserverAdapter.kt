@@ -1,6 +1,5 @@
 package com.shepeliev.webrtckmm
 
-import com.shepeliev.webrtckmm.utils.toCommon
 import org.webrtc.PeerConnection
 import org.webrtc.CandidatePairChangeEvent as NativeCandidatePairChangeEvent
 import org.webrtc.DataChannel as NativeDataChannel

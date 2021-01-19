@@ -20,3 +20,5 @@ actual class RtpReceiver(val native: NativeRtpReceiver) {
         native.dispose()
     }
 }
+
+internal fun NativeRtpReceiver.toCommon() = RtpReceiver(this)

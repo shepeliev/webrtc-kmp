@@ -1,26 +1,8 @@
-package com.shepeliev.webrtckmm.utils
+package com.shepeliev.webrtckmm
 
-import com.shepeliev.webrtckmm.AdapterType
-import com.shepeliev.webrtckmm.BundlePolicy
-import com.shepeliev.webrtckmm.CandidateNetworkPolicy
-import com.shepeliev.webrtckmm.ContinualGatheringPolicy
-import com.shepeliev.webrtckmm.CryptoOptions
-import com.shepeliev.webrtckmm.IceConnectionState
-import com.shepeliev.webrtckmm.IceGatheringState
-import com.shepeliev.webrtckmm.IceServer
-import com.shepeliev.webrtckmm.IceTransportsType
-import com.shepeliev.webrtckmm.KeyType
-import com.shepeliev.webrtckmm.PeerConnectionState
-import com.shepeliev.webrtckmm.PortPrunePolicy
-import com.shepeliev.webrtckmm.RtcConfiguration
-import com.shepeliev.webrtckmm.RtcpMuxPolicy
-import com.shepeliev.webrtckmm.SdpSemantics
-import com.shepeliev.webrtckmm.SignalingState
-import com.shepeliev.webrtckmm.TcpCandidatePolicy
-import com.shepeliev.webrtckmm.TlsCertPolicy
 import org.webrtc.PeerConnection
 
-fun RtcConfiguration.toNative(): PeerConnection.RTCConfiguration {
+internal fun RtcConfiguration.toNative(): PeerConnection.RTCConfiguration {
     return PeerConnection.RTCConfiguration(iceServers.map { it.toNative() }).also {
         it.iceTransportsType = iceTransportsType.toNative()
         it.bundlePolicy = bundlePolicy.toNative()
@@ -161,7 +143,7 @@ private fun IceTransportsType.toNative(): PeerConnection.IceTransportsType {
     }
 }
 
-fun TlsCertPolicy.toNative(): PeerConnection.TlsCertPolicy {
+internal fun TlsCertPolicy.toNative(): PeerConnection.TlsCertPolicy {
     return when (this) {
         TlsCertPolicy.TlsCertPolicySecure -> PeerConnection.TlsCertPolicy.TLS_CERT_POLICY_SECURE
 
@@ -171,7 +153,7 @@ fun TlsCertPolicy.toNative(): PeerConnection.TlsCertPolicy {
     }
 }
 
-fun IceServer.toNative(): PeerConnection.IceServer {
+internal fun IceServer.toNative(): PeerConnection.IceServer {
     return PeerConnection.IceServer.builder(urls)
         .setUsername(username)
         .setPassword(password)
@@ -182,7 +164,7 @@ fun IceServer.toNative(): PeerConnection.IceServer {
         .createIceServer()
 }
 
-fun PeerConnection.SignalingState.toCommon(): SignalingState {
+internal fun PeerConnection.SignalingState.toCommon(): SignalingState {
     return when(this) {
         PeerConnection.SignalingState.STABLE -> SignalingState.Stable
         PeerConnection.SignalingState.HAVE_LOCAL_OFFER -> SignalingState.HaveLocalOffer
@@ -193,7 +175,7 @@ fun PeerConnection.SignalingState.toCommon(): SignalingState {
     }
 }
 
-fun PeerConnection.IceConnectionState.toCommon(): IceConnectionState {
+internal fun PeerConnection.IceConnectionState.toCommon(): IceConnectionState {
     return when(this) {
         PeerConnection.IceConnectionState.NEW -> IceConnectionState.New
         PeerConnection.IceConnectionState.CHECKING -> IceConnectionState.Checking
@@ -205,7 +187,7 @@ fun PeerConnection.IceConnectionState.toCommon(): IceConnectionState {
     }
 }
 
-fun PeerConnection.PeerConnectionState.toCommon(): PeerConnectionState {
+internal fun PeerConnection.PeerConnectionState.toCommon(): PeerConnectionState {
     return when(this) {
         PeerConnection.PeerConnectionState.NEW -> PeerConnectionState.New
         PeerConnection.PeerConnectionState.CONNECTING -> PeerConnectionState.Connecting
@@ -216,7 +198,7 @@ fun PeerConnection.PeerConnectionState.toCommon(): PeerConnectionState {
     }
 }
 
-fun PeerConnection.IceGatheringState.toCommon(): IceGatheringState {
+internal fun PeerConnection.IceGatheringState.toCommon(): IceGatheringState {
     return when(this) {
         PeerConnection.IceGatheringState.NEW -> IceGatheringState.New
         PeerConnection.IceGatheringState.GATHERING -> IceGatheringState.Gathering
@@ -224,7 +206,7 @@ fun PeerConnection.IceGatheringState.toCommon(): IceGatheringState {
     }
 }
 
-fun PeerConnection.AdapterType.toCommon(): AdapterType {
+internal fun PeerConnection.AdapterType.toCommon(): AdapterType {
     return when(this) {
         PeerConnection.AdapterType.UNKNOWN -> AdapterType.Unknown
         PeerConnection.AdapterType.ETHERNET -> AdapterType.Ethernet

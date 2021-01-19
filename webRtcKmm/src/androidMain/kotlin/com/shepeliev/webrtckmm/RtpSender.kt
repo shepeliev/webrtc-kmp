@@ -30,3 +30,5 @@ actual class RtpSender(val native: NativeRtpSender) {
 
     actual fun dispose() = native.dispose()
 }
+
+internal fun NativeRtpSender.toCommon() = RtpSender(this)
