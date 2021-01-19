@@ -13,7 +13,10 @@ actual class VideoSource internal constructor(override val native: NativeVideoSo
         get() = super.state
 
     actual val capturerObserver: CapturerObserver
-        get() = CapturerObserverImpl(native.capturerObserver)
+        get() = NativeCapturerObserverAdapter(native.capturerObserver)
+
+    val nativeCapturerObserver: NativeCapturerObserver
+        get() = native.capturerObserver
 
     actual fun setIsScreencast(isScreencast: Boolean) {
         native.setIsScreencast(isScreencast)
@@ -57,7 +60,7 @@ actual class VideoSource internal constructor(override val native: NativeVideoSo
     }
 }
 
-private class CapturerObserverImpl(val native: NativeCapturerObserver) : CapturerObserver {
+private inline class NativeCapturerObserverAdapter(val native: NativeCapturerObserver) : CapturerObserver {
     override fun onCapturerStarted(success: Boolean) {
         native.onCapturerStarted(success)
     }

@@ -11,9 +11,9 @@
 package org.appspot.apprtc;
 
 import com.shepeliev.webrtckmm.IceCandidate;
+import com.shepeliev.webrtckmm.SessionDescription;
 
 import org.webrtc.PeerConnection;
-import org.webrtc.SessionDescription;
 
 import java.util.List;
 

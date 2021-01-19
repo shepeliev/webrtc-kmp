@@ -12,8 +12,9 @@ package org.appspot.apprtc;
 
 import android.util.Log;
 
-import com.shepeliev.webrtckmm.AdapterType;
 import com.shepeliev.webrtckmm.IceCandidate;
+import com.shepeliev.webrtckmm.SessionDescription;
+import com.shepeliev.webrtckmm.SessionDescriptionType;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,7 +30,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.webrtc.PeerConnection;
-import org.webrtc.SessionDescription;
 
 /**
  * AsyncTask that converts an AppRTC room URL into the set of signaling
@@ -112,8 +112,7 @@ public class RoomParametersFetcher {
           String messageType = message.getString("type");
           Log.d(TAG, "GAE->C #" + i + " : " + messageString);
           if (messageType.equals("offer")) {
-            offerSdp = new SessionDescription(
-                SessionDescription.Type.fromCanonicalForm(messageType), message.getString("sdp"));
+            offerSdp = new SessionDescription(SessionDescriptionType.Offer, message.getString("sdp"));
           } else if (messageType.equals("candidate")) {
             com.shepeliev.webrtckmm.IceCandidate candidate = new IceCandidate(
                 message.getString("id"), message.getInt("label"), message.getString("candidate"));

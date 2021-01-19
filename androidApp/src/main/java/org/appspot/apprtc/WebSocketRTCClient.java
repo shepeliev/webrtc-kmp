@@ -16,8 +16,9 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
-import com.shepeliev.webrtckmm.AdapterType;
 import com.shepeliev.webrtckmm.IceCandidate;
+import com.shepeliev.webrtckmm.SessionDescription;
+import com.shepeliev.webrtckmm.SessionDescriptionType;
 
 import org.appspot.apprtc.RoomParametersFetcher.RoomParametersFetcherEvents;
 import org.appspot.apprtc.WebSocketChannelClient.WebSocketChannelEvents;
@@ -27,7 +28,6 @@ import org.appspot.apprtc.util.AsyncHttpURLConnection.AsyncHttpEvents;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.webrtc.SessionDescription;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -200,13 +200,14 @@ public class WebSocketRTCClient implements AppRTCClient, WebSocketChannelEvents 
           return;
         }
         JSONObject json = new JSONObject();
-        jsonPut(json, "sdp", sdp.description);
+        jsonPut(json, "sdp", sdp.getDescription());
         jsonPut(json, "type", "offer");
         sendPostMessage(MessageType.MESSAGE, messageUrl, json.toString());
         if (connectionParameters.loopback) {
           // In loopback mode rename this offer to answer and route it back.
           SessionDescription sdpAnswer = new SessionDescription(
-              SessionDescription.Type.fromCanonicalForm("answer"), sdp.description);
+                  SessionDescriptionType.Answer, sdp.getDescription()
+          );
           events.onRemoteDescription(sdpAnswer);
         }
       }
@@ -224,7 +225,7 @@ public class WebSocketRTCClient implements AppRTCClient, WebSocketChannelEvents 
           return;
         }
         JSONObject json = new JSONObject();
-        jsonPut(json, "sdp", sdp.description);
+        jsonPut(json, "sdp", sdp.getDescription());
         jsonPut(json, "type", "answer");
         wsClient.send(json.toString());
       }
@@ -320,7 +321,8 @@ public class WebSocketRTCClient implements AppRTCClient, WebSocketChannelEvents 
         } else if (type.equals("answer")) {
           if (initiator) {
             SessionDescription sdp = new SessionDescription(
-                SessionDescription.Type.fromCanonicalForm(type), json.getString("sdp"));
+                SessionDescriptionType.Answer, json.getString("sdp")
+            );
             events.onRemoteDescription(sdp);
           } else {
             reportError("Received answer for call initiator: " + msg);
@@ -328,7 +330,7 @@ public class WebSocketRTCClient implements AppRTCClient, WebSocketChannelEvents 
         } else if (type.equals("offer")) {
           if (!initiator) {
             SessionDescription sdp = new SessionDescription(
-                SessionDescription.Type.fromCanonicalForm(type), json.getString("sdp"));
+                SessionDescriptionType.Offer, json.getString("sdp"));
             events.onRemoteDescription(sdp);
           } else {
             reportError("Received offer for call receiver: " + msg);

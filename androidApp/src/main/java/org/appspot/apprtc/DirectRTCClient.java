@@ -16,6 +16,8 @@ import androidx.annotation.Nullable;
 
 import com.shepeliev.webrtckmm.AdapterType;
 import com.shepeliev.webrtckmm.IceCandidate;
+import com.shepeliev.webrtckmm.SessionDescription;
+import com.shepeliev.webrtckmm.SessionDescriptionKt;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +28,6 @@ import java.util.regex.Pattern;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.webrtc.SessionDescription;
 
 /**
  * Implementation of AppRTCClient that uses direct TCP connection as the signaling channel.
@@ -161,7 +162,7 @@ public class DirectRTCClient implements AppRTCClient, TCPChannelClient.TCPChanne
           return;
         }
         JSONObject json = new JSONObject();
-        jsonPut(json, "sdp", sdp.description);
+        jsonPut(json, "sdp", sdp.getDescription());
         jsonPut(json, "type", "offer");
         sendMessage(json.toString());
       }
@@ -174,7 +175,7 @@ public class DirectRTCClient implements AppRTCClient, TCPChannelClient.TCPChanne
       @Override
       public void run() {
         JSONObject json = new JSONObject();
-        jsonPut(json, "sdp", sdp.description);
+        jsonPut(json, "sdp", sdp.getDescription());
         jsonPut(json, "type", "answer");
         sendMessage(json.toString());
       }
@@ -265,11 +266,15 @@ public class DirectRTCClient implements AppRTCClient, TCPChannelClient.TCPChanne
         events.onRemoteIceCandidatesRemoved(candidates);
       } else if (type.equals("answer")) {
         SessionDescription sdp = new SessionDescription(
-            SessionDescription.Type.fromCanonicalForm(type), json.getString("sdp"));
+            SessionDescriptionKt.sessionDescriptionTypeFromCanonicalForm(type),
+            json.getString("sdp")
+        );
         events.onRemoteDescription(sdp);
       } else if (type.equals("offer")) {
         SessionDescription sdp = new SessionDescription(
-            SessionDescription.Type.fromCanonicalForm(type), json.getString("sdp"));
+                SessionDescriptionKt.sessionDescriptionTypeFromCanonicalForm(type),
+                json.getString("sdp")
+        );
 
         SignalingParameters parameters = new SignalingParameters(
             // Ice servers are not needed for direct connections.

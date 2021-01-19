@@ -16,6 +16,8 @@ import android.content.Context
 import android.os.Environment
 import android.os.ParcelFileDescriptor
 import android.util.Log
+import com.shepeliev.webrtckmm.AudioSource
+import com.shepeliev.webrtckmm.AudioTrack
 import com.shepeliev.webrtckmm.CandidatePairChangeEvent
 import com.shepeliev.webrtckmm.ContinualGatheringPolicy
 import com.shepeliev.webrtckmm.DataChannel
@@ -26,6 +28,7 @@ import com.shepeliev.webrtckmm.IceConnectionState
 import com.shepeliev.webrtckmm.IceGatheringState
 import com.shepeliev.webrtckmm.IceServer
 import com.shepeliev.webrtckmm.KeyType
+import com.shepeliev.webrtckmm.MediaConstraints
 import com.shepeliev.webrtckmm.MediaStream
 import com.shepeliev.webrtckmm.Options
 import com.shepeliev.webrtckmm.PeerConnection
@@ -37,24 +40,24 @@ import com.shepeliev.webrtckmm.RtcpMuxPolicy
 import com.shepeliev.webrtckmm.RtpReceiver
 import com.shepeliev.webrtckmm.RtpTransceiver
 import com.shepeliev.webrtckmm.SdpSemantics
+import com.shepeliev.webrtckmm.SessionDescription
 import com.shepeliev.webrtckmm.SignalingState
 import com.shepeliev.webrtckmm.TcpCandidatePolicy
+import com.shepeliev.webrtckmm.VideoSink
+import com.shepeliev.webrtckmm.VideoSource
+import com.shepeliev.webrtckmm.VideoTrack
+import com.shepeliev.webrtckmm.mediaConstraints
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import org.appspot.apprtc.AppRTCClient.SignalingParameters
-import org.webrtc.AudioSource
-import org.webrtc.AudioTrack
 import org.webrtc.CameraVideoCapturer
 import org.webrtc.EglBase
 import org.webrtc.Logging
-import org.webrtc.MediaConstraints
 import org.webrtc.RtpSender
-import org.webrtc.SdpObserver
-import org.webrtc.SessionDescription
 import org.webrtc.StatsReport
 import org.webrtc.SurfaceTextureHelper
 import org.webrtc.VideoCapturer
-import org.webrtc.VideoSink
-import org.webrtc.VideoSource
-import org.webrtc.VideoTrack
 import org.webrtc.audio.AudioDeviceModule
 import org.webrtc.audio.JavaAudioDeviceModule
 import org.webrtc.audio.JavaAudioDeviceModule.AudioRecordErrorCallback
@@ -69,7 +72,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.Executors
 import java.util.regex.Pattern
-import org.webrtc.DataChannel as WebRtcDataChannel
 import org.webrtc.PeerConnectionFactory as WebRtcPeerConnectionFactory
 
 /**
@@ -85,9 +87,9 @@ class PeerConnectionClient(
     private val rootEglBase: EglBase,
     private val peerConnectionParameters: PeerConnectionParameters,
     private val events: PeerConnectionEvents
-) {
+) : CoroutineScope by MainScope() {
+
     private val pcObserver: PCObserver = PCObserver()
-    private val sdpObserver: SDPObserver = SDPObserver()
     private val statsTimer = Timer()
     private var factory: PeerConnectionFactory? = null
     private var peerConnection: PeerConnection? = null
@@ -161,10 +163,8 @@ class PeerConnectionClient(
     init {
         Log.d(TAG, "Preferred video codec: " + getSdpVideoCodecName(peerConnectionParameters))
         val fieldTrials = getFieldTrials(peerConnectionParameters)
-        executor.execute {
-            Log.d(TAG, "Initialize WebRTC. Field trials: $fieldTrials")
-            PeerConnectionFactory.initialize(appContext, fieldTrials, true)
-        }
+        Log.d(TAG, "Initialize WebRTC. Field trials: $fieldTrials")
+        PeerConnectionFactory.initialize(appContext, fieldTrials, true)
     }
 
 
@@ -173,7 +173,7 @@ class PeerConnectionClient(
      */
     fun createPeerConnectionFactory(options: Options?) {
         check(factory == null) { "PeerConnectionFactory has already been constructed" }
-        executor.execute { createPeerConnectionFactoryInternal(options) }
+        createPeerConnectionFactoryInternal(options)
     }
 
     fun createPeerConnection(
@@ -199,20 +199,18 @@ class PeerConnectionClient(
         this.remoteSinks = remoteSinks
         this.videoCapturer = videoCapturer
         this.signalingParameters = signalingParameters
-        executor.execute {
-            try {
-                createMediaConstraintsInternal()
-                createPeerConnectionInternal()
-                maybeCreateAndStartRtcEventLog()
-            } catch (e: Exception) {
-                reportError("Failed to create peer connection: " + e.message)
-                throw e
-            }
+        try {
+            createMediaConstraintsInternal()
+            createPeerConnectionInternal()
+            maybeCreateAndStartRtcEventLog()
+        } catch (e: Exception) {
+            reportError("Failed to create peer connection: " + e.message)
+            throw e
         }
     }
 
     fun close() {
-        executor.execute { closeInternal() }
+        closeInternal()
     }
 
     private fun createPeerConnectionFactoryInternal(options: Options?) {
@@ -364,33 +362,21 @@ class PeerConnectionClient(
         }
 
         // Create audio constraints.
-        audioConstraints = MediaConstraints()
-        // added for audio performance measurements
-        if (peerConnectionParameters.noAudioProcessing) {
-            Log.d(TAG, "Disabling audio processing")
-            audioConstraints!!.mandatory.add(
-                MediaConstraints.KeyValuePair(AUDIO_ECHO_CANCELLATION_CONSTRAINT, "false")
-            )
-            audioConstraints!!.mandatory.add(
-                MediaConstraints.KeyValuePair(AUDIO_AUTO_GAIN_CONTROL_CONSTRAINT, "false")
-            )
-            audioConstraints!!.mandatory.add(
-                MediaConstraints.KeyValuePair(AUDIO_HIGH_PASS_FILTER_CONSTRAINT, "false")
-            )
-            audioConstraints!!.mandatory.add(
-                MediaConstraints.KeyValuePair(AUDIO_NOISE_SUPPRESSION_CONSTRAINT, "false")
-            )
+        audioConstraints = mediaConstraints {
+            // added for audio performance measurements
+            if (peerConnectionParameters.noAudioProcessing) {
+                Log.d(TAG, "Disabling audio processing")
+                mandatory { AUDIO_ECHO_CANCELLATION_CONSTRAINT to "false" }
+                mandatory { AUDIO_AUTO_GAIN_CONTROL_CONSTRAINT to "false" }
+                mandatory { AUDIO_HIGH_PASS_FILTER_CONSTRAINT to "false" }
+                mandatory { AUDIO_NOISE_SUPPRESSION_CONSTRAINT to "false" }
+            }
         }
         // Create SDP constraints.
-        sdpMediaConstraints = MediaConstraints()
-        sdpMediaConstraints!!.mandatory.add(
-            MediaConstraints.KeyValuePair("OfferToReceiveAudio", "true")
-        )
-        sdpMediaConstraints!!.mandatory.add(
-            MediaConstraints.KeyValuePair(
-                "OfferToReceiveVideo", java.lang.Boolean.toString(isVideoCallEnabled)
-            )
-        )
+        sdpMediaConstraints = mediaConstraints {
+            mandatory { "OfferToReceiveAudio" to "true" }
+            mandatory { "OfferToReceiveVideo" to "$isVideoCallEnabled" }
+        }
     }
 
     private fun createPeerConnectionInternal() {
@@ -432,16 +418,16 @@ class PeerConnectionClient(
         Logging.enableLogToDebugOutput(Logging.Severity.LS_INFO)
         val mediaStreamLabels = listOf("ARDAMS")
         if (isVideoCallEnabled) {
-            peerConnection!!.native.addTrack(createVideoTrack(videoCapturer), mediaStreamLabels)
+            peerConnection!!.addTrack(createVideoTrack(videoCapturer), mediaStreamLabels)
             // We can add the renderers right away because we don't need to wait for an
             // answer to get the remote track.
             remoteVideoTrack = getRemoteVideoTrack()
-            remoteVideoTrack!!.setEnabled(renderVideo)
+            remoteVideoTrack!!.enabled = renderVideo
             for (remoteSink in remoteSinks!!) {
                 remoteVideoTrack!!.addSink(remoteSink)
             }
         }
-        peerConnection!!.native.addTrack(createAudioTrack(), mediaStreamLabels)
+        peerConnection!!.addTrack(createAudioTrack(), mediaStreamLabels)
         if (isVideoCallEnabled) {
             findVideoSender()
         }
@@ -502,7 +488,7 @@ class PeerConnectionClient(
             rtcEventLog = null
         }
         if (peerConnection != null) {
-            peerConnection!!.native.dispose()
+            peerConnection!!.dispose()
             peerConnection = null
         }
         Log.d(TAG, "Closing audio source.")
@@ -554,7 +540,7 @@ class PeerConnectionClient(
             try {
                 statsTimer.schedule(object : TimerTask() {
                     override fun run() {
-                        executor.execute { stats }
+                        stats
                     }
                 }, 0, periodMs.toLong())
             } catch (e: Exception) {
@@ -566,170 +552,227 @@ class PeerConnectionClient(
     }
 
     fun setAudioEnabled(enable: Boolean) {
-        executor.execute {
-            enableAudio = enable
-            if (localAudioTrack != null) {
-                localAudioTrack!!.setEnabled(enableAudio)
-            }
+        enableAudio = enable
+        if (localAudioTrack != null) {
+            localAudioTrack!!.enabled = enableAudio
         }
     }
 
     fun setVideoEnabled(enable: Boolean) {
-        executor.execute {
-            renderVideo = enable
-            if (localVideoTrack != null) {
-                localVideoTrack!!.setEnabled(renderVideo)
-            }
-            if (remoteVideoTrack != null) {
-                remoteVideoTrack!!.setEnabled(renderVideo)
-            }
+        renderVideo = enable
+        if (localVideoTrack != null) {
+            localVideoTrack!!.enabled = renderVideo
+        }
+        if (remoteVideoTrack != null) {
+            remoteVideoTrack!!.enabled = renderVideo
         }
     }
 
     fun createOffer() {
-        executor.execute {
-            if (peerConnection != null && !isError) {
-                Log.d(TAG, "PC Create OFFER")
-                isInitiator = true
-                peerConnection!!.native.createOffer(sdpObserver, sdpMediaConstraints)
+        if (peerConnection != null && !isError) {
+            Log.d(TAG, "PC Create OFFER")
+            isInitiator = true
+            launch {
+                lateinit var sdp: SessionDescription
+                try {
+                    sdp = peerConnection!!.createOffer(sdpMediaConstraints!!)
+                } catch (e: Throwable) {
+                    reportError("Create SDP failed ${e.message}")
+                    return@launch
+                }
+                Log.d(TAG, "PC created OFFER")
+                setSdp(sdp)
             }
         }
     }
 
     fun createAnswer() {
-        executor.execute {
-            if (peerConnection != null && !isError) {
-                Log.d(TAG, "PC create ANSWER")
-                isInitiator = false
-                peerConnection!!.native.createAnswer(sdpObserver, sdpMediaConstraints)
+        if (peerConnection != null && !isError) {
+            Log.d(TAG, "PC create ANSWER")
+            isInitiator = false
+            launch {
+                lateinit var sdp: SessionDescription
+                try {
+                    sdp = peerConnection!!.createAnswer(sdpMediaConstraints!!)
+                } catch (e: Throwable) {
+                    reportError("Create SDP failed ${e.message}")
+                    return@launch
+                }
+                Log.d(TAG, "PC created ANSWER")
+                setSdp(sdp)
+            }
+        }
+    }
+
+    private suspend fun setSdp(description: SessionDescription) {
+        if (localDescription != null) {
+            reportError("Multiple SDP create.")
+            return
+        }
+        var sdp = description.description
+        if (preferIsac) {
+            sdp = preferCodec(sdp, AUDIO_CODEC_ISAC, true)
+        }
+        if (isVideoCallEnabled) {
+            sdp = preferCodec(sdp, getSdpVideoCodecName(peerConnectionParameters), false)
+        }
+        val newDesc = SessionDescription(description.type, sdp)
+        localDescription = newDesc
+        if (peerConnection != null && !isError) {
+            Log.d(TAG, "Set local SDP from " + description.type)
+
+            try {
+                peerConnection!!.setLocalDescription(newDesc)
+            } catch (e: Throwable) {
+                reportError("Set SDP failed: ${e.message}")
+                return
+            }
+
+            if (peerConnection == null || isError) {
+                return
+            }
+
+            if (isInitiator) {
+                // For offering peer connection we first create offer and set
+                // local SDP, then after receiving answer set remote SDP.
+                if (peerConnection!!.native.remoteDescription == null) {
+                    // We've just set our local SDP so time to send it.
+                    Log.d(TAG, "Local SDP set succesfully")
+                    events.onLocalDescription(localDescription!!)
+                } else {
+                    // We've just set remote description, so drain remote
+                    // and send local ICE candidates.
+                    Log.d(TAG, "Remote SDP set succesfully")
+                    drainCandidates()
+                }
+            } else {
+                // For answering peer connection we set remote SDP and then
+                // create answer and set local SDP.
+                if (peerConnection!!.native.localDescription != null) {
+                    // We've just set our local SDP so time to send it, drain
+                    // remote and send local ICE candidates.
+                    Log.d(TAG, "Local SDP set succesfully")
+                    events.onLocalDescription(localDescription!!)
+                    drainCandidates()
+                } else {
+                    // We've just set remote SDP - do nothing for now -
+                    // answer will be created soon.
+                    Log.d(TAG, "Remote SDP set succesfully")
+                }
             }
         }
     }
 
     fun addRemoteIceCandidate(candidate: IceCandidate) {
-        executor.execute {
-            if (peerConnection != null && !isError) {
-                if (queuedRemoteCandidates != null) {
-                    queuedRemoteCandidates!!.add(candidate)
-                } else {
-                    peerConnection!!.addIceCandidate(candidate)
-                }
+        if (peerConnection != null && !isError) {
+            if (queuedRemoteCandidates != null) {
+                queuedRemoteCandidates!!.add(candidate)
+            } else {
+                peerConnection!!.addIceCandidate(candidate)
             }
         }
     }
 
     fun removeRemoteIceCandidates(candidates: List<IceCandidate>) {
-        executor.execute {
-            if (peerConnection == null || isError) {
-                return@execute
-            }
-            // Drain the queued remote candidates if there is any so that
-            // they are processed in the proper order.
-            drainCandidates()
-            peerConnection!!.removeIceCandidates(candidates)
+        if (peerConnection == null || isError) {
+            return
         }
+        // Drain the queued remote candidates if there is any so that
+        // they are processed in the proper order.
+        drainCandidates()
+        peerConnection!!.removeIceCandidates(candidates)
     }
 
     fun setRemoteDescription(desc: SessionDescription) {
-        executor.execute {
-            if (peerConnection == null || isError) {
-                return@execute
-            }
-            var sdp = desc.description
-            if (preferIsac) {
-                sdp = preferCodec(sdp, AUDIO_CODEC_ISAC, true)
-            }
-            if (isVideoCallEnabled) {
-                sdp = preferCodec(sdp, getSdpVideoCodecName(peerConnectionParameters), false)
-            }
-            if (peerConnectionParameters.audioStartBitrate > 0) {
-                sdp = setStartBitrate(
-                    AUDIO_CODEC_OPUS, false, sdp, peerConnectionParameters.audioStartBitrate
-                )
-            }
-            Log.d(TAG, "Set remote SDP.")
-            val sdpRemote = SessionDescription(desc.type, sdp)
-            peerConnection!!.native.setRemoteDescription(sdpObserver, sdpRemote)
+        if (peerConnection == null || isError) {
+            return
         }
+        var sdp = desc.description
+        if (preferIsac) {
+            sdp = preferCodec(sdp, AUDIO_CODEC_ISAC, true)
+        }
+        if (isVideoCallEnabled) {
+            sdp = preferCodec(sdp, getSdpVideoCodecName(peerConnectionParameters), false)
+        }
+        if (peerConnectionParameters.audioStartBitrate > 0) {
+            sdp = setStartBitrate(
+                AUDIO_CODEC_OPUS, false, sdp, peerConnectionParameters.audioStartBitrate
+            )
+        }
+        Log.d(TAG, "Set remote SDP.")
+        val sdpRemote = SessionDescription(desc.type, sdp)
+        launch { peerConnection!!.setRemoteDescription(sdpRemote) }
     }
 
     fun stopVideoSource() {
-        executor.execute {
-            if (videoCapturer != null && !videoCapturerStopped) {
-                Log.d(TAG, "Stop video source.")
-                try {
-                    videoCapturer!!.stopCapture()
-                } catch (e: InterruptedException) {
-                }
-                videoCapturerStopped = true
+        if (videoCapturer != null && !videoCapturerStopped) {
+            Log.d(TAG, "Stop video source.")
+            try {
+                videoCapturer!!.stopCapture()
+            } catch (e: InterruptedException) {
             }
+            videoCapturerStopped = true
         }
     }
 
     fun startVideoSource() {
-        executor.execute {
-            if (videoCapturer != null && videoCapturerStopped) {
-                Log.d(TAG, "Restart video source.")
-                videoCapturer!!.startCapture(videoWidth, videoHeight, videoFps)
-                videoCapturerStopped = false
-            }
+        if (videoCapturer != null && videoCapturerStopped) {
+            Log.d(TAG, "Restart video source.")
+            videoCapturer!!.startCapture(videoWidth, videoHeight, videoFps)
+            videoCapturerStopped = false
         }
     }
 
     fun setVideoMaxBitrate(maxBitrateKbps: Int?) {
-        executor.execute {
-            if (peerConnection == null || localVideoSender == null || isError) {
-                return@execute
-            }
-            Log.d(TAG, "Requested max video bitrate: $maxBitrateKbps")
-            if (localVideoSender == null) {
-                Log.w(TAG, "Sender is not ready.")
-                return@execute
-            }
-            val parameters = localVideoSender!!.parameters
-            if (parameters.encodings.size == 0) {
-                Log.w(TAG, "RtpParameters are not ready.")
-                return@execute
-            }
-            for (encoding in parameters.encodings) {
-                // Null value means no limit.
-                encoding.maxBitrateBps =
-                    if (maxBitrateKbps == null) null else maxBitrateKbps * BPS_IN_KBPS
-            }
-            if (!localVideoSender!!.setParameters(parameters)) {
-                Log.e(TAG, "RtpSender.setParameters failed.")
-            }
-            Log.d(TAG, "Configured max video bitrate to: $maxBitrateKbps")
+        if (peerConnection == null || localVideoSender == null || isError) {
+            return
         }
+        Log.d(TAG, "Requested max video bitrate: $maxBitrateKbps")
+        if (localVideoSender == null) {
+            Log.w(TAG, "Sender is not ready.")
+            return
+        }
+        val parameters = localVideoSender!!.parameters
+        if (parameters.encodings.size == 0) {
+            Log.w(TAG, "RtpParameters are not ready.")
+            return
+        }
+        for (encoding in parameters.encodings) {
+            // Null value means no limit.
+            encoding.maxBitrateBps =
+                if (maxBitrateKbps == null) null else maxBitrateKbps * BPS_IN_KBPS
+        }
+        if (!localVideoSender!!.setParameters(parameters)) {
+            Log.e(TAG, "RtpSender.setParameters failed.")
+        }
+        Log.d(TAG, "Configured max video bitrate to: $maxBitrateKbps")
     }
 
     private fun reportError(errorMessage: String) {
         Log.e(TAG, "Peerconnection error: $errorMessage")
-        executor.execute {
-            if (!isError) {
-                events.onPeerConnectionError(errorMessage)
-                isError = true
-            }
+        if (!isError) {
+            events.onPeerConnectionError(errorMessage)
+            isError = true
         }
     }
 
-    private fun createAudioTrack(): AudioTrack? {
-        audioSource = factory!!.native.createAudioSource(audioConstraints)
-        localAudioTrack = factory!!.native.createAudioTrack(AUDIO_TRACK_ID, audioSource)
-        localAudioTrack!!.setEnabled(enableAudio)
-        return localAudioTrack
+    private fun createAudioTrack(): AudioTrack {
+        audioSource = factory!!.createAudioSource(audioConstraints!!)
+        localAudioTrack = factory!!.createAudioTrack(AUDIO_TRACK_ID, audioSource!!)
+        localAudioTrack!!.enabled = enableAudio
+        return localAudioTrack!!
     }
 
-    private fun createVideoTrack(capturer: VideoCapturer?): VideoTrack? {
+    private fun createVideoTrack(capturer: VideoCapturer?): VideoTrack {
         surfaceTextureHelper =
             SurfaceTextureHelper.create("CaptureThread", rootEglBase.eglBaseContext)
-        videoSource = factory!!.native.createVideoSource(capturer!!.isScreencast)
-        capturer.initialize(surfaceTextureHelper, appContext, videoSource!!.capturerObserver)
+        videoSource = factory!!.createVideoSource(capturer!!.isScreencast)
+        capturer.initialize(surfaceTextureHelper, appContext, videoSource!!.nativeCapturerObserver)
         capturer.startCapture(videoWidth, videoHeight, videoFps)
-        localVideoTrack = factory!!.native.createVideoTrack(VIDEO_TRACK_ID, videoSource)
-        localVideoTrack!!.setEnabled(renderVideo)
-        localVideoTrack!!.addSink(localRender)
-        return localVideoTrack
+        localVideoTrack = factory!!.createVideoTrack(VIDEO_TRACK_ID, videoSource!!)
+        localVideoTrack!!.enabled = renderVideo
+        localVideoTrack!!.addSink(localRender!!)
+        return localVideoTrack!!
     }
 
     private fun findVideoSender() {
@@ -746,8 +789,8 @@ class PeerConnectionClient(
 
     // Returns the remote VideoTrack, assuming there is only one.
     private fun getRemoteVideoTrack(): VideoTrack? {
-        for (transceiver in peerConnection!!.native.transceivers) {
-            val track = transceiver.receiver.track()
+        for (transceiver in peerConnection!!.getTransceivers()) {
+            val track = transceiver.receiver.track
             if (track is VideoTrack) {
                 return track
             }
@@ -783,11 +826,11 @@ class PeerConnectionClient(
     }
 
     fun switchCamera() {
-        executor.execute { switchCameraInternal() }
+        switchCameraInternal()
     }
 
     fun changeCaptureFormat(width: Int, height: Int, framerate: Int) {
-        executor.execute { changeCaptureFormatInternal(width, height, framerate) }
+        changeCaptureFormatInternal(width, height, framerate)
     }
 
     private fun changeCaptureFormatInternal(width: Int, height: Int, framerate: Int) {
@@ -819,28 +862,24 @@ class PeerConnectionClient(
         }
 
         override fun onIceConnectionChange(newState: IceConnectionState) {
-            executor.execute {
-                Log.d(TAG, "IceConnectionState: $newState")
-                if (newState === IceConnectionState.Connected) {
-                    events.onIceConnected()
-                } else if (newState === IceConnectionState.Disconnected) {
-                    events.onIceDisconnected()
-                } else if (newState === IceConnectionState.Failed) {
-                    reportError("ICE connection failed.")
-                }
+            Log.d(TAG, "IceConnectionState: $newState")
+            if (newState === IceConnectionState.Connected) {
+                events.onIceConnected()
+            } else if (newState === IceConnectionState.Disconnected) {
+                events.onIceDisconnected()
+            } else if (newState === IceConnectionState.Failed) {
+                reportError("ICE connection failed.")
             }
         }
 
         override fun onConnectionChange(newState: PeerConnectionState) {
-            executor.execute {
-                Log.d(TAG, "PeerConnectionState: $newState")
-                if (newState === PeerConnectionState.Connected) {
-                    events.onConnected()
-                } else if (newState === PeerConnectionState.Disconnected) {
-                    events.onDisconnected()
-                } else if (newState === PeerConnectionState.Failed) {
-                    reportError("DTLS connection failed.")
-                }
+            Log.d(TAG, "PeerConnectionState: $newState")
+            if (newState === PeerConnectionState.Connected) {
+                events.onConnected()
+            } else if (newState === PeerConnectionState.Disconnected) {
+                events.onDisconnected()
+            } else if (newState === PeerConnectionState.Failed) {
+                reportError("DTLS connection failed.")
             }
         }
 
@@ -853,11 +892,11 @@ class PeerConnectionClient(
         }
 
         override fun onIceCandidate(candidate: IceCandidate) {
-            executor.execute { events.onIceCandidate(candidate) }
+            events.onIceCandidate(candidate)
         }
 
         override fun onIceCandidatesRemoved(candidates: List<IceCandidate>) {
-            executor.execute { events.onIceCandidatesRemoved(candidates) }
+            events.onIceCandidatesRemoved(candidates)
         }
 
         override fun onAddStream(stream: MediaStream) {}
@@ -895,76 +934,6 @@ class PeerConnectionClient(
 
         override fun onAddTrack(receiver: RtpReceiver, streams: List<MediaStream>) {}
         override fun onTrack(transceiver: RtpTransceiver) {}
-    }
-
-    // Implementation detail: handle offer creation/signaling and answer setting,
-    // as well as adding remote ICE candidates once the answer SDP is set.
-    private inner class SDPObserver : SdpObserver {
-        override fun onCreateSuccess(desc: SessionDescription) {
-            if (localDescription != null) {
-                reportError("Multiple SDP create.")
-                return
-            }
-            var sdp = desc.description
-            if (preferIsac) {
-                sdp = preferCodec(sdp, AUDIO_CODEC_ISAC, true)
-            }
-            if (isVideoCallEnabled) {
-                sdp = preferCodec(sdp, getSdpVideoCodecName(peerConnectionParameters), false)
-            }
-            val newDesc = SessionDescription(desc.type, sdp)
-            localDescription = newDesc
-            executor.execute {
-                if (peerConnection != null && !isError) {
-                    Log.d(TAG, "Set local SDP from " + desc.type)
-                    peerConnection!!.native.setLocalDescription(sdpObserver, newDesc)
-                }
-            }
-        }
-
-        override fun onSetSuccess() {
-            executor.execute {
-                if (peerConnection == null || isError) {
-                    return@execute
-                }
-                if (isInitiator) {
-                    // For offering peer connection we first create offer and set
-                    // local SDP, then after receiving answer set remote SDP.
-                    if (peerConnection!!.native.remoteDescription == null) {
-                        // We've just set our local SDP so time to send it.
-                        Log.d(TAG, "Local SDP set succesfully")
-                        events.onLocalDescription(localDescription!!)
-                    } else {
-                        // We've just set remote description, so drain remote
-                        // and send local ICE candidates.
-                        Log.d(TAG, "Remote SDP set succesfully")
-                        drainCandidates()
-                    }
-                } else {
-                    // For answering peer connection we set remote SDP and then
-                    // create answer and set local SDP.
-                    if (peerConnection!!.native.localDescription != null) {
-                        // We've just set our local SDP so time to send it, drain
-                        // remote and send local ICE candidates.
-                        Log.d(TAG, "Local SDP set succesfully")
-                        events.onLocalDescription(localDescription!!)
-                        drainCandidates()
-                    } else {
-                        // We've just set remote SDP - do nothing for now -
-                        // answer will be created soon.
-                        Log.d(TAG, "Remote SDP set succesfully")
-                    }
-                }
-            }
-        }
-
-        override fun onCreateFailure(error: String) {
-            reportError("createSDP error: $error")
-        }
-
-        override fun onSetFailure(error: String) {
-            reportError("setSDP error: $error")
-        }
     }
 
     /**
@@ -1040,6 +1009,7 @@ class PeerConnectionClient(
         // peer connection API calls to ensure new peer connection factory is
         // created on the same thread as previously destroyed factory.
         private val executor = Executors.newSingleThreadExecutor()
+
         private fun getSdpVideoCodecName(parameters: PeerConnectionParameters): String {
             return when (parameters.videoCodec) {
                 VIDEO_CODEC_VP8 -> VIDEO_CODEC_VP8

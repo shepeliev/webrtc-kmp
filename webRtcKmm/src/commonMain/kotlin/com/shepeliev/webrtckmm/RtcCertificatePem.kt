@@ -1,6 +1,5 @@
 package com.shepeliev.webrtckmm
 
-private const val DEFAULT_EXPIRE = 2592000L
 
 expect class RtcCertificatePem {
     val privateKey: String
@@ -9,7 +8,7 @@ expect class RtcCertificatePem {
     companion object {
         fun generateCertificate(
             keyType: KeyType = KeyType.ECDSA,
-            expires: Long = DEFAULT_EXPIRE
+            expires: Long = 2592000L
         ): RtcCertificatePem
     }
 }

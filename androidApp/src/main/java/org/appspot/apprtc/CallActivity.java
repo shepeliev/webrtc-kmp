@@ -35,7 +35,9 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 
 import com.shepeliev.webrtckmm.IceCandidate;
+import com.shepeliev.webrtckmm.NativeVideoSinkAdapter;
 import com.shepeliev.webrtckmm.Options;
+import com.shepeliev.webrtckmm.SessionDescription;
 
 import java.io.IOException;
 import java.lang.RuntimeException;
@@ -46,6 +48,7 @@ import org.appspot.apprtc.AppRTCAudioManager.AudioDevice;
 import org.appspot.apprtc.AppRTCAudioManager.AudioManagerEvents;
 import org.appspot.apprtc.AppRTCClient.RoomConnectionParameters;
 import org.appspot.apprtc.AppRTCClient.SignalingParameters;
+import org.jetbrains.annotations.NotNull;
 import org.webrtc.Camera1Enumerator;
 import org.webrtc.Camera2Enumerator;
 import org.webrtc.CameraEnumerator;
@@ -54,7 +57,6 @@ import org.webrtc.FileVideoCapturer;
 import org.webrtc.Logging;
 import org.webrtc.RendererCommon.ScalingType;
 import org.webrtc.ScreenCapturerAndroid;
-import org.webrtc.SessionDescription;
 import org.webrtc.StatsReport;
 import org.webrtc.SurfaceViewRenderer;
 import org.webrtc.VideoCapturer;
@@ -131,21 +133,21 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
   // Peer connection statistics callback period in ms.
   private static final int STAT_CALLBACK_PERIOD = 1000;
 
-  private static class ProxyVideoSink implements VideoSink {
+  private static class ProxyVideoSink implements com.shepeliev.webrtckmm.VideoSink {
     private VideoSink target;
 
+    synchronized public void setTarget(VideoSink target) {
+      this.target = target;
+    }
+
     @Override
-    synchronized public void onFrame(VideoFrame frame) {
+    public void onFrame(@NotNull com.shepeliev.webrtckmm.VideoFrame frame) {
       if (target == null) {
         Logging.d(TAG, "Dropping frame in proxy because target is null.");
         return;
       }
 
-      target.onFrame(frame);
-    }
-
-    synchronized public void setTarget(VideoSink target) {
-      this.target = target;
+      target.onFrame(frame.getNative());
     }
   }
 
@@ -164,7 +166,7 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
   private SurfaceViewRenderer fullscreenRenderer;
   @Nullable
   private VideoFileRenderer videoFileRenderer;
-  private final List<VideoSink> remoteSinks = new ArrayList<>();
+  private final List<com.shepeliev.webrtckmm.VideoSink> remoteSinks = new ArrayList<>();
   private Toast logToast;
   private boolean commandLineRun;
   private boolean activityRunning;
@@ -246,7 +248,7 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
       try {
         videoFileRenderer = new VideoFileRenderer(
             saveRemoteVideoToFile, videoOutWidth, videoOutHeight, eglBase.getEglBaseContext());
-        remoteSinks.add(videoFileRenderer);
+        remoteSinks.add(new NativeVideoSinkAdapter(videoFileRenderer));
       } catch (IOException e) {
         throw new RuntimeException(
             "Failed to open video file for output: " + saveRemoteVideoToFile, e);
@@ -807,7 +809,7 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
           Log.e(TAG, "Received remote SDP for non-initilized peer connection.");
           return;
         }
-        logAndToast("Received remote " + desc.type + ", delay=" + delta + "ms");
+        logAndToast("Received remote " + desc.getType() + ", delay=" + delta + "ms");
         peerConnectionClient.setRemoteDescription(desc);
         if (!signalingParameters.initiator) {
           logAndToast("Creating ANSWER...");
@@ -874,7 +876,7 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
       @Override
       public void run() {
         if (appRtcClient != null) {
-          logAndToast("Sending " + desc.type + ", delay=" + delta + "ms");
+          logAndToast("Sending " + desc.getType() + ", delay=" + delta + "ms");
           if (signalingParameters.initiator) {
             appRtcClient.sendOfferSdp(desc);
           } else {

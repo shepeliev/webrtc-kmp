@@ -1,6 +1,7 @@
 package com.shepeliev.webrtckmm
 
 import android.content.Context
+import com.shepeliev.webrtckmm.utils.toNative
 import org.webrtc.DefaultVideoDecoderFactory
 import org.webrtc.DefaultVideoEncoderFactory
 import org.webrtc.EglBase
