@@ -1,6 +1,5 @@
 package com.shepeliev.webrtckmm
 
-
 expect class RtcCertificatePem {
     val privateKey: String
     val certificate: String

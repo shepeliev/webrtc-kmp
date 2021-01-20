@@ -352,10 +352,8 @@ public class DirectRTCClient implements AppRTCClient, TCPChannelClient.TCPChanne
   private static IceCandidate toJavaCandidate(JSONObject json) throws JSONException {
     return new IceCandidate(
         json.getString("id"),
-            json.getInt("label"),
-            json.getString("candidate"),
-            "",
-            AdapterType.Unknown
+        json.getInt("label"),
+        json.getString("candidate")
     );
   }
 }

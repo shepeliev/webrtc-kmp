@@ -1,6 +1,5 @@
 package com.shepeliev.webrtckmm
 
-import com.shepeliev.webrtckmm.utils.toCommon
 import org.webrtc.PeerConnection
 import org.webrtc.CandidatePairChangeEvent as NativeCandidatePairChangeEvent
 import org.webrtc.DataChannel as NativeDataChannel
@@ -33,23 +32,15 @@ class CommonPeerConnectionObserverAdapter(private val observer: PeerConnectionOb
     }
 
     override fun onIceCandidate(candidate: NativeIceCandidate) {
-        observer.onIceCandidate(candidate.toCommon())
+        observer.onIceCandidate(candidate.asCommon())
     }
 
     override fun onIceCandidatesRemoved(candidates: Array<out NativeIceCandidate>) {
-        observer.onIceCandidatesRemoved(candidates.map { it.toCommon() })
+        observer.onIceCandidatesRemoved(candidates.map { it.asCommon() })
     }
 
     override fun onSelectedCandidatePairChanged(event: NativeCandidatePairChangeEvent) {
-        observer.onSelectedCandidatePairChanged(
-            CandidatePairChangeEvent(
-                local = event.local.toCommon(),
-                remote = event.remote.toCommon(),
-                lastDataReceivedMs = event.lastDataReceivedMs,
-                reason = event.reason,
-                estimatedDisconnectedTimeMs = event.estimatedDisconnectedTimeMs
-            )
-        )
+        observer.onSelectedCandidatePairChanged(event.asCommon())
     }
 
     override fun onAddStream(stream: NativeMediaStream) {

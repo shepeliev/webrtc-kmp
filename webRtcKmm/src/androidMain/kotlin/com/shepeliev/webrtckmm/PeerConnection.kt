@@ -1,6 +1,5 @@
 package com.shepeliev.webrtckmm
 
-import com.shepeliev.webrtckmm.utils.toNative
 import org.webrtc.SdpObserver
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
@@ -55,13 +54,13 @@ actual class PeerConnection internal constructor(val native: NativePeerConnectio
 
     actual suspend fun createOffer(constraints: MediaConstraints): SessionDescription {
         return suspendCoroutine { cont ->
-            native.createOffer(createSdpObserver(cont), constraints.toNative())
+            native.createOffer(createSdpObserver(cont), constraints.native)
         }
     }
 
     actual suspend fun createAnswer(constraints: MediaConstraints): SessionDescription {
         return suspendCoroutine { cont ->
-            native.createAnswer(createSdpObserver(cont), constraints.toNative())
+            native.createAnswer(createSdpObserver(cont), constraints.native)
         }
     }
 
@@ -119,16 +118,17 @@ actual class PeerConnection internal constructor(val native: NativePeerConnectio
 
     actual fun setAudioPlayout(playout: Boolean) = native.setAudioPlayout(playout)
     actual fun setAudioRecording(recording: Boolean) = native.setAudioRecording(recording)
+
     actual fun setConfiguration(configuration: RtcConfiguration): Boolean {
-        return native.setConfiguration(configuration.toNative())
+        return native.setConfiguration(configuration.native)
     }
 
     actual fun addIceCandidate(candidate: IceCandidate): Boolean {
-        return native.addIceCandidate(candidate.toNative())
+        return native.addIceCandidate(candidate.native)
     }
 
     actual fun removeIceCandidates(candidates: List<IceCandidate>): Boolean {
-        return native.removeIceCandidates(candidates.map { it.toNative() }.toTypedArray())
+        return native.removeIceCandidates(candidates.map { it.native }.toTypedArray())
     }
 
     actual fun addStream(stream: MediaStream): Boolean = native.addStream(stream.native)

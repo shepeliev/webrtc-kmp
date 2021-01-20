@@ -1,7 +1,6 @@
 package com.shepeliev.webrtckmm
 
 import android.content.Context
-import com.shepeliev.webrtckmm.utils.toNative
 import org.webrtc.DefaultVideoDecoderFactory
 import org.webrtc.DefaultVideoEncoderFactory
 import org.webrtc.EglBase
@@ -67,9 +66,8 @@ actual class PeerConnectionFactory private constructor(val native: AndroidPeerCo
         rtcConfig: RtcConfiguration,
         observer: PeerConnectionObserver
     ): PeerConnection? {
-        val nativeRtcConfig = rtcConfig.toNative()
         return native.createPeerConnection(
-            nativeRtcConfig,
+            rtcConfig.native,
             CommonPeerConnectionObserverAdapter(observer)
         )?.let { PeerConnection(it) }
     }
@@ -90,7 +88,7 @@ actual class PeerConnectionFactory private constructor(val native: AndroidPeerCo
     }
 
     actual fun createAudioSource(constraints: MediaConstraints): AudioSource {
-        return AudioSource(native.createAudioSource(constraints.toNative()))
+        return AudioSource(native.createAudioSource(constraints.native))
     }
 
     actual fun createAudioTrack(id: String, audioSource: AudioSource): AudioTrack {
