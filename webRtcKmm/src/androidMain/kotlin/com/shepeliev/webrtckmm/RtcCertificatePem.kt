@@ -13,7 +13,7 @@ actual class RtcCertificatePem(val native: NativeRtcCertificatePem) {
         actual fun generateCertificate(keyType: KeyType, expires: Long): RtcCertificatePem {
             return RtcCertificatePem(
                 NativeRtcCertificatePem.generateCertificate(
-                    keyType.toNative(),
+                    keyType.asNative(),
                     expires
                 )
             )
@@ -21,4 +21,4 @@ actual class RtcCertificatePem(val native: NativeRtcCertificatePem) {
     }
 }
 
-internal fun NativeRtcCertificatePem.toCommon() = RtcCertificatePem(this)
+internal fun NativeRtcCertificatePem.asCommon() = RtcCertificatePem(this)

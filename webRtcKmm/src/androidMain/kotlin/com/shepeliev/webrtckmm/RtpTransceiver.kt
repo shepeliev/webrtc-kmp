@@ -4,16 +4,16 @@ import org.webrtc.RtpTransceiver as NativeRtpTransceiver
 
 actual class RtpTransceiver(val native: NativeRtpTransceiver) {
     actual var direction: RtpTransceiverDirection
-        get() = native.direction.toCommon()
+        get() = native.direction.asCommon()
         set(value) {
-            native.direction = value.toNative()
+            native.direction = value.asNative()
         }
 
     actual val currentDirectioin: RtpTransceiverDirection?
-        get() = native.currentDirection?.toCommon()
+        get() = native.currentDirection?.asCommon()
 
     actual val mediaType: MediaStreamTrack.MediaType
-        get() = native.mediaType.toCommon()
+        get() = native.mediaType.asCommon()
 
     actual val mid: String?
         get() = native.mid
@@ -31,9 +31,9 @@ actual class RtpTransceiver(val native: NativeRtpTransceiver) {
     actual fun dispose() = native.dispose()
 }
 
-internal fun NativeRtpTransceiver.toCommon() = RtpTransceiver(this)
+internal fun NativeRtpTransceiver.asCommon() = RtpTransceiver(this)
 
-internal fun NativeRtpTransceiver.RtpTransceiverDirection.toCommon(): RtpTransceiverDirection {
+internal fun NativeRtpTransceiver.RtpTransceiverDirection.asCommon(): RtpTransceiverDirection {
     return when (this) {
         NativeRtpTransceiver.RtpTransceiverDirection.SEND_RECV -> {
             RtpTransceiverDirection.SendRecv
@@ -53,7 +53,7 @@ internal fun NativeRtpTransceiver.RtpTransceiverDirection.toCommon(): RtpTransce
     }
 }
 
-internal fun RtpTransceiverDirection.toNative(): NativeRtpTransceiver.RtpTransceiverDirection {
+internal fun RtpTransceiverDirection.asNative(): NativeRtpTransceiver.RtpTransceiverDirection {
     return when (this) {
         RtpTransceiverDirection.SendRecv -> NativeRtpTransceiver.RtpTransceiverDirection.SEND_RECV
         RtpTransceiverDirection.SendOnly -> NativeRtpTransceiver.RtpTransceiverDirection.SEND_ONLY

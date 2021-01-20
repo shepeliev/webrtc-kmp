@@ -5,18 +5,18 @@ import org.webrtc.SessionDescription as NativeSessionDescription
 actual class SessionDescription internal constructor(val native: NativeSessionDescription) {
 
     actual constructor(type: SessionDescriptionType, description: String) : this(
-        NativeSessionDescription(type.toNative(), description)
+        NativeSessionDescription(type.asNative(), description)
     )
 
-    actual val type: SessionDescriptionType = native.type.toCommon()
+    actual val type: SessionDescriptionType = native.type.asCommon()
     actual val description: String = native.description
 }
 
 actual fun sessionDescriptionTypeFromCanonicalForm(canonical: String): SessionDescriptionType {
-    return NativeSessionDescription.Type.fromCanonicalForm(canonical).toCommon()
+    return NativeSessionDescription.Type.fromCanonicalForm(canonical).asCommon()
 }
 
-fun NativeSessionDescription.Type.toCommon(): SessionDescriptionType {
+fun NativeSessionDescription.Type.asCommon(): SessionDescriptionType {
     return when (this) {
         NativeSessionDescription.Type.OFFER -> SessionDescriptionType.Offer
         NativeSessionDescription.Type.PRANSWER -> SessionDescriptionType.Pranswer
@@ -24,7 +24,7 @@ fun NativeSessionDescription.Type.toCommon(): SessionDescriptionType {
     }
 }
 
-fun SessionDescriptionType.toNative(): NativeSessionDescription.Type {
+fun SessionDescriptionType.asNative(): NativeSessionDescription.Type {
     return when (this) {
         SessionDescriptionType.Offer -> NativeSessionDescription.Type.OFFER
         SessionDescriptionType.Pranswer -> NativeSessionDescription.Type.PRANSWER
@@ -32,4 +32,4 @@ fun SessionDescriptionType.toNative(): NativeSessionDescription.Type {
     }
 }
 
-fun NativeSessionDescription.toCommon(): SessionDescription = SessionDescription(this)
+fun NativeSessionDescription.asCommon(): SessionDescription = SessionDescription(this)

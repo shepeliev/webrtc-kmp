@@ -2,7 +2,7 @@ package com.shepeliev.webrtckmm
 
 import org.webrtc.PeerConnection
 
-internal fun TlsCertPolicy.toNative(): PeerConnection.TlsCertPolicy {
+internal fun TlsCertPolicy.asNative(): PeerConnection.TlsCertPolicy {
     return when (this) {
         TlsCertPolicy.TlsCertPolicySecure -> PeerConnection.TlsCertPolicy.TLS_CERT_POLICY_SECURE
 
@@ -12,18 +12,18 @@ internal fun TlsCertPolicy.toNative(): PeerConnection.TlsCertPolicy {
     }
 }
 
-internal fun IceServer.toNative(): PeerConnection.IceServer {
+internal fun IceServer.asNative(): PeerConnection.IceServer {
     return PeerConnection.IceServer.builder(urls)
         .setUsername(username)
         .setPassword(password)
-        .setTlsCertPolicy(tlsCertPolicy.toNative())
+        .setTlsCertPolicy(tlsCertPolicy.asNative())
         .setHostname(hostname)
         .setTlsAlpnProtocols(tlsAlpnProtocols)
         .setTlsEllipticCurves(tlsEllipticCurves)
         .createIceServer()
 }
 
-internal fun PeerConnection.SignalingState.toCommon(): SignalingState {
+internal fun PeerConnection.SignalingState.asCommon(): SignalingState {
     return when(this) {
         PeerConnection.SignalingState.STABLE -> SignalingState.Stable
         PeerConnection.SignalingState.HAVE_LOCAL_OFFER -> SignalingState.HaveLocalOffer
@@ -34,7 +34,7 @@ internal fun PeerConnection.SignalingState.toCommon(): SignalingState {
     }
 }
 
-internal fun PeerConnection.IceConnectionState.toCommon(): IceConnectionState {
+internal fun PeerConnection.IceConnectionState.asCommon(): IceConnectionState {
     return when(this) {
         PeerConnection.IceConnectionState.NEW -> IceConnectionState.New
         PeerConnection.IceConnectionState.CHECKING -> IceConnectionState.Checking
@@ -46,7 +46,7 @@ internal fun PeerConnection.IceConnectionState.toCommon(): IceConnectionState {
     }
 }
 
-internal fun PeerConnection.PeerConnectionState.toCommon(): PeerConnectionState {
+internal fun PeerConnection.PeerConnectionState.asCommon(): PeerConnectionState {
     return when(this) {
         PeerConnection.PeerConnectionState.NEW -> PeerConnectionState.New
         PeerConnection.PeerConnectionState.CONNECTING -> PeerConnectionState.Connecting
@@ -57,7 +57,7 @@ internal fun PeerConnection.PeerConnectionState.toCommon(): PeerConnectionState 
     }
 }
 
-internal fun PeerConnection.IceGatheringState.toCommon(): IceGatheringState {
+internal fun PeerConnection.IceGatheringState.asCommon(): IceGatheringState {
     return when(this) {
         PeerConnection.IceGatheringState.NEW -> IceGatheringState.New
         PeerConnection.IceGatheringState.GATHERING -> IceGatheringState.Gathering
@@ -65,7 +65,7 @@ internal fun PeerConnection.IceGatheringState.toCommon(): IceGatheringState {
     }
 }
 
-internal fun PeerConnection.AdapterType.toCommon(): AdapterType {
+internal fun PeerConnection.AdapterType.asCommon(): AdapterType {
     return when(this) {
         PeerConnection.AdapterType.UNKNOWN -> AdapterType.Unknown
         PeerConnection.AdapterType.ETHERNET -> AdapterType.Ethernet

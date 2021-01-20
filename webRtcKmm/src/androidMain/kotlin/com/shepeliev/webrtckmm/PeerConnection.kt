@@ -12,25 +12,25 @@ import org.webrtc.SessionDescription as NativeSessionDescription
 
 actual class PeerConnection internal constructor(val native: NativePeerConnection) {
     actual val localDescription: SessionDescription?
-        get() = native.localDescription?.toCommon()
+        get() = native.localDescription?.asCommon()
 
     actual val remoteDescription: SessionDescription?
-        get() = native.remoteDescription?.toCommon()
+        get() = native.remoteDescription?.asCommon()
 
     actual val certificate: RtcCertificatePem?
-        get() = native.certificate?.toCommon()
+        get() = native.certificate?.asCommon()
 
     actual val signalingState: SignalingState
-        get() = native.signalingState().toCommon()
+        get() = native.signalingState().asCommon()
 
     actual val iceConnectionState: IceConnectionState
-        get() = native.iceConnectionState().toCommon()
+        get() = native.iceConnectionState().asCommon()
 
     actual val connectionState: PeerConnectionState
-        get() = native.connectionState().toCommon()
+        get() = native.connectionState().asCommon()
 
     actual val iceGatheringState: IceGatheringState
-        get() = native.iceGatheringState().toCommon()
+        get() = native.iceGatheringState().asCommon()
 
     actual fun createDataChannel(
         label: String,
@@ -67,7 +67,7 @@ actual class PeerConnection internal constructor(val native: NativePeerConnectio
     private fun createSdpObserver(continuation: Continuation<SessionDescription>): SdpObserver {
         return object : SdpObserver {
             override fun onCreateSuccess(description: NativeSessionDescription) {
-                continuation.resume(description.toCommon())
+                continuation.resume(description.asCommon())
             }
 
             override fun onSetSuccess() {
@@ -135,15 +135,15 @@ actual class PeerConnection internal constructor(val native: NativePeerConnectio
     actual fun removeStream(stream: MediaStream) = native.removeStream(stream.native)
 
     actual fun createSender(kind: String, streamId: String): RtpSender? {
-        return native.createSender(kind, streamId)?.toCommon()
+        return native.createSender(kind, streamId)?.asCommon()
     }
 
-    actual fun getSenders(): List<RtpSender> = native.senders.map { it.toCommon() }
-    actual fun getReceivers(): List<RtpReceiver> = native.receivers.map { it.toCommon() }
-    actual fun getTransceivers(): List<RtpTransceiver> = native.transceivers.map { it.toCommon() }
+    actual fun getSenders(): List<RtpSender> = native.senders.map { it.asCommon() }
+    actual fun getReceivers(): List<RtpReceiver> = native.receivers.map { it.asCommon() }
+    actual fun getTransceivers(): List<RtpTransceiver> = native.transceivers.map { it.asCommon() }
 
     actual fun addTrack(track: MediaStreamTrack, streamIds: List<String>): RtpSender {
-        return native.addTrack((track as BaseMediaStreamTrack).native, streamIds).toCommon()
+        return native.addTrack((track as BaseMediaStreamTrack).native, streamIds).asCommon()
     }
 
     actual fun removeTrack(sender: RtpSender): Boolean = native.removeTrack(sender.native)
@@ -157,11 +157,11 @@ actual class PeerConnection internal constructor(val native: NativePeerConnectio
         return native.addTransceiver(
             (track as BaseMediaStreamTrack).native,
             NativeRtpTransceiver.RtpTransceiverInit(
-                direction.toNative(),
+                direction.asNative(),
                 streamIds,
                 sendEncodings.map { it.native }
             )
-        ).toCommon()
+        ).asCommon()
     }
 
     actual fun addTransceiver(
@@ -171,18 +171,18 @@ actual class PeerConnection internal constructor(val native: NativePeerConnectio
         sendEncodings: List<RtpParameters.Encoding>
     ): RtpTransceiver {
         return native.addTransceiver(
-            mediaType.toNative(),
+            mediaType.asNative(),
             NativeRtpTransceiver.RtpTransceiverInit(
-                direction.toNative(),
+                direction.asNative(),
                 streamIds,
                 sendEncodings.map { it.native }
             )
-        ).toCommon()
+        ).asCommon()
     }
 
     actual suspend fun getStats(): RtcStatsReport {
         return suspendCoroutine { cont ->
-            native.getStats { cont.resume(it.toCommon()) }
+            native.getStats { cont.resume(it.asCommon()) }
         }
     }
 

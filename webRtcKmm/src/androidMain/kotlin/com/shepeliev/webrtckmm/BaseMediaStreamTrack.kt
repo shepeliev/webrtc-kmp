@@ -16,14 +16,14 @@ abstract class BaseMediaStreamTrack : MediaStreamTrack {
         set(value) { native.setEnabled(value) }
 
     override val state: MediaStreamTrack.State
-        get() = native.state().toCommon()
+        get() = native.state().asCommon()
 
     override fun dispose() {
         native.dispose()
     }
 }
 
-fun MediaStreamTrack.MediaType.toNative(): NativeMediaStreamTrack.MediaType {
+fun MediaStreamTrack.MediaType.asNative(): NativeMediaStreamTrack.MediaType {
     return when(this) {
         MediaStreamTrack.MediaType.MediaTypeAudio -> {
             NativeMediaStreamTrack.MediaType.MEDIA_TYPE_AUDIO
@@ -35,7 +35,7 @@ fun MediaStreamTrack.MediaType.toNative(): NativeMediaStreamTrack.MediaType {
     }
 }
 
-fun NativeMediaStreamTrack.MediaType.toCommon() : MediaStreamTrack.MediaType {
+fun NativeMediaStreamTrack.MediaType.asCommon() : MediaStreamTrack.MediaType {
     return when(this) {
         NativeMediaStreamTrack.MediaType.MEDIA_TYPE_AUDIO -> {
             MediaStreamTrack.MediaType.MediaTypeAudio
@@ -47,7 +47,7 @@ fun NativeMediaStreamTrack.MediaType.toCommon() : MediaStreamTrack.MediaType {
     }
 }
 
-fun NativeMediaStreamTrack.toCommon(): MediaStreamTrack {
+fun NativeMediaStreamTrack.asCommon(): MediaStreamTrack {
     return when (this) {
         is org.webrtc.AudioTrack -> AudioTrack(this)
         is org.webrtc.VideoTrack -> VideoTrack(this)
@@ -55,7 +55,7 @@ fun NativeMediaStreamTrack.toCommon(): MediaStreamTrack {
     }
 }
 
-private fun NativeMediaStreamTrack.State.toCommon(): MediaStreamTrack.State {
+private fun NativeMediaStreamTrack.State.asCommon(): MediaStreamTrack.State {
     return when(this) {
         org.webrtc.MediaStreamTrack.State.LIVE -> MediaStreamTrack.State.Live
         org.webrtc.MediaStreamTrack.State.ENDED -> MediaStreamTrack.State.Ended

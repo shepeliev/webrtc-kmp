@@ -7,7 +7,7 @@ actual class RtpSender(val native: NativeRtpSender) {
         get() = native.id()
 
     actual val track: MediaStreamTrack?
-        get() = native.track()?.toCommon()
+        get() = native.track()?.asCommon()
 
     actual var streams: List<String>
         get() = native.streams
@@ -31,4 +31,4 @@ actual class RtpSender(val native: NativeRtpSender) {
     actual fun dispose() = native.dispose()
 }
 
-internal fun NativeRtpSender.toCommon() = RtpSender(this)
+internal fun NativeRtpSender.asCommon() = RtpSender(this)

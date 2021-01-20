@@ -12,15 +12,15 @@ class CommonPeerConnectionObserverAdapter(private val observer: PeerConnectionOb
     PeerConnection.Observer {
 
     override fun onSignalingChange(newState: PeerConnection.SignalingState) {
-        observer.onSignalingChange(newState.toCommon())
+        observer.onSignalingChange(newState.asCommon())
     }
 
     override fun onIceConnectionChange(newState: PeerConnection.IceConnectionState) {
-        observer.onIceConnectionChange(newState.toCommon())
+        observer.onIceConnectionChange(newState.asCommon())
     }
 
     override fun onConnectionChange(newState: PeerConnection.PeerConnectionState) {
-        observer.onConnectionChange(newState.toCommon())
+        observer.onConnectionChange(newState.asCommon())
     }
 
     override fun onIceConnectionReceivingChange(receiving: Boolean) {
@@ -28,7 +28,7 @@ class CommonPeerConnectionObserverAdapter(private val observer: PeerConnectionOb
     }
 
     override fun onIceGatheringChange(newState: PeerConnection.IceGatheringState) {
-        observer.onIceGatheringChange(newState.toCommon())
+        observer.onIceGatheringChange(newState.asCommon())
     }
 
     override fun onIceCandidate(candidate: NativeIceCandidate) {

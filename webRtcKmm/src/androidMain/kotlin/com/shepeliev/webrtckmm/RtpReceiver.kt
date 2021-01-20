@@ -7,13 +7,13 @@ actual class RtpReceiver(val native: NativeRtpReceiver) {
         get() = native.id()
 
     actual val track: MediaStreamTrack?
-        get() = native.track()?.toCommon()
+        get() = native.track()?.asCommon()
 
     actual val parameters: RtpParameters
         get() = RtpParameters(native.parameters)
 
     actual fun setObserver(observer: RtpReceiverObserver) {
-        native.SetObserver { observer.onFirstPacketReceived(it.toCommon()) }
+        native.SetObserver { observer.onFirstPacketReceived(it.asCommon()) }
     }
 
     actual fun dispose() {
@@ -21,4 +21,4 @@ actual class RtpReceiver(val native: NativeRtpReceiver) {
     }
 }
 
-internal fun NativeRtpReceiver.toCommon() = RtpReceiver(this)
+internal fun NativeRtpReceiver.asCommon() = RtpReceiver(this)

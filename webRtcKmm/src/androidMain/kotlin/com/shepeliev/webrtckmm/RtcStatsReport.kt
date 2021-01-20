@@ -8,4 +8,4 @@ actual class RtcStatsReport(val native: RTCStatsReport) {
     actual override fun toString(): String = native.toString()
 }
 
-internal fun RTCStatsReport.toCommon() = RtcStatsReport(this)
+internal fun RTCStatsReport.asCommon() = RtcStatsReport(this)

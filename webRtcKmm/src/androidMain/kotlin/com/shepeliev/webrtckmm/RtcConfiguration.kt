@@ -44,21 +44,21 @@ actual class RtcConfiguration private constructor(val native: PeerConnection.RTC
         cryptoOptions: CryptoOptions?,
         turnLoggingId: String?,
     ) : this(
-        PeerConnection.RTCConfiguration(iceServers.map { it.toNative() }).also {
-            it.iceTransportsType = iceTransportsType.toNative()
-            it.bundlePolicy = bundlePolicy.toNative()
+        PeerConnection.RTCConfiguration(iceServers.map { it.asNative() }).also {
+            it.iceTransportsType = iceTransportsType.asNative()
+            it.bundlePolicy = bundlePolicy.asNative()
             it.certificate = certificate?.native
-            it.rtcpMuxPolicy = rtcpMuxPolicy.toNative()
-            it.tcpCandidatePolicy = tcpCandidatePolicy.toNative()
-            it.candidateNetworkPolicy = candidateNetworkPolicy.toNative()
+            it.rtcpMuxPolicy = rtcpMuxPolicy.asNative()
+            it.tcpCandidatePolicy = tcpCandidatePolicy.asNative()
+            it.candidateNetworkPolicy = candidateNetworkPolicy.asNative()
             it.audioJitterBufferMaxPackets = audioJitterBufferMaxPackets
             it.audioJitterBufferFastAccelerate = audioJitterBufferFastAccelerate
             it.iceConnectionReceivingTimeout = iceConnectionReceivingTimeout
             it.iceBackupCandidatePairPingInterval = iceBackupCandidatePairPingInterval
-            it.keyType = keyType.toNative()
-            it.continualGatheringPolicy = continualGatheringPolicy.toNative()
+            it.keyType = keyType.asNative()
+            it.continualGatheringPolicy = continualGatheringPolicy.asNative()
             it.iceCandidatePoolSize = iceCandidatePoolSize
-            it.turnPortPrunePolicy = turnPortPrunePolicy.toNative()
+            it.turnPortPrunePolicy = turnPortPrunePolicy.asNative()
             it.presumeWritableWhenFullyRelayed = presumeWritableWhenFullyRelayed
             it.surfaceIceCandidatesOnIceTransportTypeChanged =
                 surfaceIceCandidatesOnIceTransportTypeChanged
@@ -78,8 +78,8 @@ actual class RtcConfiguration private constructor(val native: PeerConnection.RTC
             it.screencastMinBitrate = screencastMinBitrate
             it.combinedAudioVideoBwe = combinedAudioVideoBwe
             it.enableDtlsSrtp = enableDtlsSrtp
-            it.networkPreference = networkPreference.toNative()
-            it.sdpSemantics = sdpSemantics.toNative()
+            it.networkPreference = networkPreference.asNative()
+            it.sdpSemantics = sdpSemantics.asNative()
             it.activeResetSrtpParams = activeResetSrtpParams
             it.allowCodecSwitching = allowCodecSwitching
             it.cryptoOptions = cryptoOptions?.native
@@ -88,14 +88,14 @@ actual class RtcConfiguration private constructor(val native: PeerConnection.RTC
     )
 }
 
-private fun SdpSemantics.toNative(): PeerConnection.SdpSemantics {
+private fun SdpSemantics.asNative(): PeerConnection.SdpSemantics {
     return when (this) {
         SdpSemantics.PlanB -> PeerConnection.SdpSemantics.PLAN_B
         SdpSemantics.UnifiedPlan -> PeerConnection.SdpSemantics.UNIFIED_PLAN
     }
 }
 
-private fun AdapterType.toNative(): PeerConnection.AdapterType {
+private fun AdapterType.asNative(): PeerConnection.AdapterType {
     return when (this) {
         AdapterType.Unknown -> PeerConnection.AdapterType.UNKNOWN
         AdapterType.Ethernet -> PeerConnection.AdapterType.ETHERNET
@@ -111,7 +111,7 @@ private fun AdapterType.toNative(): PeerConnection.AdapterType {
     }
 }
 
-private fun PortPrunePolicy.toNative(): PeerConnection.PortPrunePolicy {
+private fun PortPrunePolicy.asNative(): PeerConnection.PortPrunePolicy {
     return when (this) {
         PortPrunePolicy.NoPrune -> PeerConnection.PortPrunePolicy.NO_PRUNE
 
@@ -123,7 +123,7 @@ private fun PortPrunePolicy.toNative(): PeerConnection.PortPrunePolicy {
     }
 }
 
-private fun ContinualGatheringPolicy.toNative(): PeerConnection.ContinualGatheringPolicy {
+private fun ContinualGatheringPolicy.asNative(): PeerConnection.ContinualGatheringPolicy {
     return when (this) {
         ContinualGatheringPolicy.GatherOnce -> PeerConnection.ContinualGatheringPolicy.GATHER_ONCE
         ContinualGatheringPolicy.GatherContinually -> {
@@ -132,35 +132,35 @@ private fun ContinualGatheringPolicy.toNative(): PeerConnection.ContinualGatheri
     }
 }
 
-internal fun KeyType.toNative(): PeerConnection.KeyType {
+internal fun KeyType.asNative(): PeerConnection.KeyType {
     return when (this) {
         KeyType.RSA -> PeerConnection.KeyType.RSA
         KeyType.ECDSA -> PeerConnection.KeyType.ECDSA
     }
 }
 
-private fun CandidateNetworkPolicy.toNative(): PeerConnection.CandidateNetworkPolicy {
+private fun CandidateNetworkPolicy.asNative(): PeerConnection.CandidateNetworkPolicy {
     return when (this) {
         CandidateNetworkPolicy.All -> PeerConnection.CandidateNetworkPolicy.ALL
         CandidateNetworkPolicy.LowCost -> PeerConnection.CandidateNetworkPolicy.LOW_COST
     }
 }
 
-private fun TcpCandidatePolicy.toNative(): PeerConnection.TcpCandidatePolicy {
+private fun TcpCandidatePolicy.asNative(): PeerConnection.TcpCandidatePolicy {
     return when (this) {
         TcpCandidatePolicy.Enabled -> PeerConnection.TcpCandidatePolicy.ENABLED
         TcpCandidatePolicy.Disabled -> PeerConnection.TcpCandidatePolicy.DISABLED
     }
 }
 
-private fun RtcpMuxPolicy.toNative(): PeerConnection.RtcpMuxPolicy {
+private fun RtcpMuxPolicy.asNative(): PeerConnection.RtcpMuxPolicy {
     return when (this) {
         RtcpMuxPolicy.Negotiate -> PeerConnection.RtcpMuxPolicy.NEGOTIATE
         RtcpMuxPolicy.Require -> PeerConnection.RtcpMuxPolicy.REQUIRE
     }
 }
 
-private fun BundlePolicy.toNative(): PeerConnection.BundlePolicy {
+private fun BundlePolicy.asNative(): PeerConnection.BundlePolicy {
     return when (this) {
         BundlePolicy.Balanced -> PeerConnection.BundlePolicy.BALANCED
         BundlePolicy.Maxbundle -> PeerConnection.BundlePolicy.MAXBUNDLE
@@ -168,7 +168,7 @@ private fun BundlePolicy.toNative(): PeerConnection.BundlePolicy {
     }
 }
 
-private fun IceTransportsType.toNative(): PeerConnection.IceTransportsType {
+private fun IceTransportsType.asNative(): PeerConnection.IceTransportsType {
     return when (this) {
         IceTransportsType.None -> PeerConnection.IceTransportsType.NONE
         IceTransportsType.Relay -> PeerConnection.IceTransportsType.RELAY
