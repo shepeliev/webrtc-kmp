@@ -2,18 +2,38 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
 plugins {
     kotlin("multiplatform")
+    kotlin("native.cocoapods")
     id("com.android.library")
 }
 
+version = "1.0.0"
+
 kotlin {
-    android()
-    ios {
-        binaries {
-            framework {
-                baseName = "WebRtcKmm"
-            }
+    cocoapods {
+        summary = "WebRTC Kotlin multi platform SDK"
+        homepage = "https://github.com/shepeliev/webrtc-kmp"
+        ios.deploymentTarget = "9.0"
+
+        specRepos {
+            url("https://github.com/CocoaPods/Specs.git")
+        }
+
+        pod("GoogleWebRTC") {
+            version = "~> 1.1"
+            moduleName = "WebRTC"
         }
     }
+
+    android()
+
+    val iosTarget: (String, KotlinNativeTarget.() -> Unit) -> KotlinNativeTarget =
+        if (System.getenv("SDK_NAME")?.startsWith("iphoneos") == true)
+            ::iosArm64
+        else
+            ::iosX64
+
+    iosTarget("ios") { }
+
     sourceSets {
         val commonMain by getting
         val androidMain by getting {
@@ -43,7 +63,8 @@ val packForXcode by tasks.creating(Sync::class) {
     group = "build"
     val mode = System.getenv("CONFIGURATION") ?: "DEBUG"
     val sdkName = System.getenv("SDK_NAME") ?: "iphonesimulator"
-    val targetName = "ios" + if (sdkName.startsWith("iphoneos")) "Arm64" else "X64"
+//    val targetName = "ios" + if (sdkName.startsWith("iphoneos")) "Arm64" else "X64"
+    val targetName = "ios"
     val framework =
         kotlin.targets.getByName<KotlinNativeTarget>(targetName).binaries.getFramework(mode)
     inputs.property("mode", mode)

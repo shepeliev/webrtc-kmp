@@ -6,9 +6,6 @@ actual class RtpParameters(val native: NativeRtpParameters) {
     actual val codecs: List<Codec>
         get() = native.codecs.map { Codec(it) }
 
-    actual val degradationPreference: DegradationPreference?
-        get() = native.degradationPreference?.toCommon()
-
     actual val encodings: List<Encoding>
         get() = native.encodings.map { Encoding(it) }
 
@@ -93,39 +90,5 @@ actual class RtpParameters(val native: NativeRtpParameters) {
         /** Whether reduced size RTCP is configured or compound RTCP  */
         actual val reducedSize: Boolean
             get() = native.reducedSize
-    }
-
-    actual enum class DegradationPreference {
-        /** Does not degrade resolution or framerate. */
-        Disabled,
-
-        /** Degrade resolution in order to maintain framerate. */
-        MaintainFramerate,
-
-        /** Degrade framerate in order to maintain resolution. */
-        MaintainResolution,
-
-        /** Degrade a balance of framerate and resolution. */
-        Balanced;
-    }
-
-    private fun NativeRtpParameters.DegradationPreference.toCommon(): DegradationPreference {
-        return when(this) {
-            NativeRtpParameters.DegradationPreference.DISABLED -> {
-                DegradationPreference.Disabled
-            }
-
-            NativeRtpParameters.DegradationPreference.MAINTAIN_FRAMERATE -> {
-                DegradationPreference.MaintainFramerate
-            }
-
-            NativeRtpParameters.DegradationPreference.MAINTAIN_RESOLUTION -> {
-                DegradationPreference.MaintainResolution
-            }
-
-            NativeRtpParameters.DegradationPreference.BALANCED -> {
-                DegradationPreference.Balanced
-            }
-        }
     }
 }

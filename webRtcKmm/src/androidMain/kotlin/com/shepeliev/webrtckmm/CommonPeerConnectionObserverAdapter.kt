@@ -40,7 +40,15 @@ class CommonPeerConnectionObserverAdapter(private val observer: PeerConnectionOb
     }
 
     override fun onSelectedCandidatePairChanged(event: NativeCandidatePairChangeEvent) {
-        observer.onSelectedCandidatePairChanged(event.asCommon())
+        observer.onSelectedCandidatePairChanged(
+            CandidatePairChangeEvent(
+                local = event.local.asCommon(),
+                remote = event.remote.asCommon(),
+                lastDataReceivedMs = event.lastDataReceivedMs,
+                reason = event.reason,
+                estimatedDisconnectedTimeMs = event.estimatedDisconnectedTimeMs
+            )
+        )
     }
 
     override fun onAddStream(stream: NativeMediaStream) {

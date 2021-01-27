@@ -14,7 +14,7 @@ actual class DtmfSender(val native: NativeDtmfSender) {
         get() = native.interToneGap()
 
     actual fun insertDtmf(tones: String, durationMs: Int, interToneGapMs: Int): Boolean {
-        return native.insertDtmf(tones, duration, interToneGap)
+        return native.insertDtmf(tones, durationMs, interToneGapMs)
     }
 
     actual fun tones(): String = native.tones()

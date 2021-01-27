@@ -1,6 +1,8 @@
 package com.shepeliev.webrtckmm
 
+import android.os.ParcelFileDescriptor
 import org.webrtc.SdpObserver
+import java.io.File
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -180,7 +182,7 @@ actual class PeerConnection internal constructor(val native: NativePeerConnectio
         ).asCommon()
     }
 
-    actual suspend fun getStats(): RtcStatsReport {
+    actual suspend fun getStats(): RtcStatsReport? {
         return suspendCoroutine { cont ->
             native.getStats { cont.resume(it.asCommon()) }
         }
@@ -190,8 +192,14 @@ actual class PeerConnection internal constructor(val native: NativePeerConnectio
         return native.setBitrate(min, current, max)
     }
 
-    actual fun startRtcEventLog(fileDescriptor: Int, maxSizeBytes: Int): Boolean {
-        return native.startRtcEventLog(fileDescriptor, maxSizeBytes)
+    actual fun startRtcEventLog(filePath: String, maxSizeBytes: Int): Boolean {
+        val fileDescriptor = ParcelFileDescriptor.open(
+            File(filePath),
+            ParcelFileDescriptor.MODE_READ_WRITE or
+                ParcelFileDescriptor.MODE_CREATE or
+                ParcelFileDescriptor.MODE_TRUNCATE
+        )
+        return native.startRtcEventLog(fileDescriptor.detachFd(), maxSizeBytes)
     }
 
     actual fun stopRtcEventLog() = native.stopRtcEventLog()

@@ -1,11 +1,13 @@
 package com.shepeliev.webrtckmm
 
 import android.content.Context
+import android.os.ParcelFileDescriptor
 import org.webrtc.DefaultVideoDecoderFactory
 import org.webrtc.DefaultVideoEncoderFactory
 import org.webrtc.EglBase
 import org.webrtc.PeerConnectionFactory.InitializationOptions
 import org.webrtc.audio.AudioDeviceModule
+import java.io.File
 import org.webrtc.PeerConnectionFactory as AndroidPeerConnectionFactory
 
 actual class PeerConnectionFactory private constructor(val native: AndroidPeerConnectionFactory) {
@@ -39,24 +41,28 @@ actual class PeerConnectionFactory private constructor(val native: AndroidPeerCo
 
             val nativeOptions = options?.let {
                 AndroidPeerConnectionFactory.Options().apply {
-                    networkIgnoreMask = it.networkIgnoreMask
+                    var ignoreMask = 0
+                    if (it.ignoreEthernetNetworkAdapter) ignoreMask = ignoreMask or 1
+                    if (it.ignoreWiFiNetworkAdapter) ignoreMask = ignoreMask or 2
+                    if (it.ignoreCellularNetworkAdapter) ignoreMask = ignoreMask or 4
+                    if (it.ignoreVpnNetworkAdapter) ignoreMask = ignoreMask or 8
+                    if (it.ignoreLoopbackNetworkAdapter) ignoreMask = ignoreMask or 16
+                    if (ignoreMask == 31) ignoreMask = ignoreMask or 32
+                    networkIgnoreMask = ignoreMask
                     disableEncryption = it.disableEncryption
                     disableNetworkMonitor = it.disableNetworkMonitor
                 }
             }
 
-            val builder = AndroidPeerConnectionFactory.builder().apply {
-                setOptions(nativeOptions)
-                setVideoEncoderFactory(
-                    DefaultVideoEncoderFactory(
-                        eglContext.eglBaseContext,
-                        false,
-                        false
-                    )
+            val builder = AndroidPeerConnectionFactory.builder()
+                .setOptions(nativeOptions)
+                .setVideoEncoderFactory(
+                    DefaultVideoEncoderFactory(eglContext.eglBaseContext, false, false)
                 )
-                setVideoDecoderFactory(DefaultVideoDecoderFactory(eglContext.eglBaseContext))
-                audioDeviceModule?.let { setAudioDeviceModule(audioDeviceModule as AudioDeviceModule) }
-            }
+                .setVideoDecoderFactory(DefaultVideoDecoderFactory(eglContext.eglBaseContext))
+                .apply {
+                    audioDeviceModule?.let { setAudioDeviceModule(audioDeviceModule as AudioDeviceModule) }
+                }
 
             return PeerConnectionFactory(builder.createPeerConnectionFactory())
         }
@@ -95,8 +101,14 @@ actual class PeerConnectionFactory private constructor(val native: AndroidPeerCo
         return AudioTrack(native.createAudioTrack(id, audioSource.native))
     }
 
-    actual fun startAecDump(fileDescriptor: Int, fileSizeLimitBytes: Int) {
-        native.startAecDump(fileDescriptor, fileSizeLimitBytes)
+    actual fun startAecDump(filePath: String, fileSizeLimitBytes: Int) {
+        val fileDescriptor = ParcelFileDescriptor.open(
+            File(filePath),
+            ParcelFileDescriptor.MODE_READ_WRITE or
+                ParcelFileDescriptor.MODE_CREATE or
+                ParcelFileDescriptor.MODE_TRUNCATE
+        )
+        native.startAecDump(fileDescriptor.detachFd(), fileSizeLimitBytes)
     }
 
     actual fun stopAecDump() = native.stopAecDump()

@@ -12,17 +12,6 @@ internal fun TlsCertPolicy.asNative(): PeerConnection.TlsCertPolicy {
     }
 }
 
-internal fun IceServer.asNative(): PeerConnection.IceServer {
-    return PeerConnection.IceServer.builder(urls)
-        .setUsername(username)
-        .setPassword(password)
-        .setTlsCertPolicy(tlsCertPolicy.asNative())
-        .setHostname(hostname)
-        .setTlsAlpnProtocols(tlsAlpnProtocols)
-        .setTlsEllipticCurves(tlsEllipticCurves)
-        .createIceServer()
-}
-
 internal fun PeerConnection.SignalingState.asCommon(): SignalingState {
     return when(this) {
         PeerConnection.SignalingState.STABLE -> SignalingState.Stable

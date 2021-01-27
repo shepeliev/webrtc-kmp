@@ -2,19 +2,21 @@ package com.shepeliev.webrtckmm
 
 import org.webrtc.VideoTrack as NativeVideoTrack
 
-actual class VideoTrack internal constructor(override val  native: NativeVideoTrack):
+actual class VideoTrack internal constructor(override val native: NativeVideoTrack):
     BaseMediaStreamTrack(), MediaStreamTrack {
 
-    private val sinks: MutableMap<VideoSink, CommonVideoSinkAdapter> = mutableMapOf()
+    private val sinks: MutableMap<VideoRenderer, CommonVideoSinkAdapter> = mutableMapOf()
 
-    actual fun addSink(sink: VideoSink) {
-        val proxy = CommonVideoSinkAdapter(sink)
-        sinks += sink to proxy
+    actual fun addSink(renderer: VideoRenderer) {
+        val proxy = CommonVideoSinkAdapter(renderer)
+        sinks += renderer to proxy
         native.addSink(proxy)
     }
 
-    actual fun removeSink(sink: VideoSink) {
-        val proxy = sinks.remove(sink)
+    actual fun removeSink(renderer: VideoRenderer) {
+        val proxy = sinks.remove(renderer)
         proxy?.let { native.removeSink(it) }
     }
 }
+
+internal fun NativeVideoTrack.asCommon() = VideoTrack(this)

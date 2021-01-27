@@ -11,6 +11,7 @@ expect class VideoFrame {
     fun release()
 }
 
+// TODO rework
 interface I420Buffer : VideoFrameBuffer {
     val dataY: ByteArray
     val dataU: ByteArray

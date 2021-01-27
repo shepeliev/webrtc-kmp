@@ -44,7 +44,7 @@ actual class RtcConfiguration private constructor(val native: PeerConnection.RTC
         cryptoOptions: CryptoOptions?,
         turnLoggingId: String?,
     ) : this(
-        PeerConnection.RTCConfiguration(iceServers.map { it.asNative() }).also {
+        PeerConnection.RTCConfiguration(iceServers.map { it.native }).also {
             it.iceTransportsType = iceTransportsType.asNative()
             it.bundlePolicy = bundlePolicy.asNative()
             it.certificate = certificate?.native

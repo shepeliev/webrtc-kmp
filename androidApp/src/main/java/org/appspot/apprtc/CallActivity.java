@@ -38,6 +38,7 @@ import com.shepeliev.webrtckmm.IceCandidate;
 import com.shepeliev.webrtckmm.NativeVideoSinkAdapter;
 import com.shepeliev.webrtckmm.Options;
 import com.shepeliev.webrtckmm.SessionDescription;
+import com.shepeliev.webrtckmm.Size;
 
 import java.io.IOException;
 import java.lang.RuntimeException;
@@ -61,7 +62,6 @@ import org.webrtc.StatsReport;
 import org.webrtc.SurfaceViewRenderer;
 import org.webrtc.VideoCapturer;
 import org.webrtc.VideoFileRenderer;
-import org.webrtc.VideoFrame;
 import org.webrtc.VideoSink;
 
 /**
@@ -133,7 +133,7 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
   // Peer connection statistics callback period in ms.
   private static final int STAT_CALLBACK_PERIOD = 1000;
 
-  private static class ProxyVideoSink implements com.shepeliev.webrtckmm.VideoSink {
+  private static class ProxyVideoRenderer implements com.shepeliev.webrtckmm.VideoRenderer {
     private VideoSink target;
 
     synchronized public void setTarget(VideoSink target) {
@@ -149,10 +149,15 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
 
       target.onFrame(frame.getNative());
     }
+
+    @Override
+    public void setSize(@NotNull Size size) {
+      // ignore
+    }
   }
 
-  private final ProxyVideoSink remoteProxyRenderer = new ProxyVideoSink();
-  private final ProxyVideoSink localProxyVideoSink = new ProxyVideoSink();
+  private final ProxyVideoRenderer remoteProxyRenderer = new ProxyVideoRenderer();
+  private final ProxyVideoRenderer localProxyVideoSink = new ProxyVideoRenderer();
   @Nullable
   private PeerConnectionClient peerConnectionClient;
   @Nullable
@@ -166,7 +171,7 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
   private SurfaceViewRenderer fullscreenRenderer;
   @Nullable
   private VideoFileRenderer videoFileRenderer;
-  private final List<com.shepeliev.webrtckmm.VideoSink> remoteSinks = new ArrayList<>();
+  private final List<com.shepeliev.webrtckmm.VideoRenderer> remoteSinks = new ArrayList<>();
   private Toast logToast;
   private boolean commandLineRun;
   private boolean activityRunning;

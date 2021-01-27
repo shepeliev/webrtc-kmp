@@ -15,7 +15,7 @@ actual class RtpTransceiver(val native: NativeRtpTransceiver) {
     actual val mediaType: MediaStreamTrack.MediaType
         get() = native.mediaType.asCommon()
 
-    actual val mid: String?
+    actual val mid: String
         get() = native.mid
 
     actual val sender: RtpSender

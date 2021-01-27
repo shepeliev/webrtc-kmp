@@ -2,6 +2,8 @@ package com.shepeliev.webrtckmm
 
 expect class MediaStream {
     val id: String
+    val audioTracks: List<AudioTrack>
+    val videoTracks: List<VideoTrack>
 
     fun addTrack(track: AudioTrack): Boolean
     fun addTrack(track: VideoTrack): Boolean

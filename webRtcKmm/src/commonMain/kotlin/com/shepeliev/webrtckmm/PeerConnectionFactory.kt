@@ -3,9 +3,15 @@ package com.shepeliev.webrtckmm
 import kotlin.jvm.JvmOverloads
 
 data class Options @JvmOverloads constructor(
-    val networkIgnoreMask: Int = 0,
     val disableEncryption: Boolean = false,
     val disableNetworkMonitor: Boolean = false,
+    val ignoreEthernetNetworkAdapter: Boolean = false,
+    val ignoreWiFiNetworkAdapter: Boolean = false,
+    val ignoreVpnNetworkAdapter: Boolean = false,
+    val ignoreLoopbackNetworkAdapter: Boolean = false,
+
+    // Android only
+    val ignoreCellularNetworkAdapter: Boolean = false,
 ) {
     companion object {
         const val ADAPTER_TYPE_UNKNOWN = 0
@@ -45,7 +51,7 @@ expect class PeerConnectionFactory {
     fun createAudioSource(constraints: MediaConstraints): AudioSource
     fun createAudioTrack(id: String, audioSource: AudioSource): AudioTrack
 
-    fun startAecDump(fileDescriptor: Int, fileSizeLimitBytes: Int)
+    fun startAecDump(filePath: String, fileSizeLimitBytes: Int)
     fun stopAecDump()
     /* TODO
     fun printInternalStackTraces(printNativeStackTraces: Boolean)

@@ -16,6 +16,6 @@ interface MediaStreamTrack {
 
     enum class State { Live, Ended }
 
-    enum class MediaType { MediaTypeAudio, MediaTypeVideo; }
+    enum class MediaType { Audio, Video, Data; }
 }
 

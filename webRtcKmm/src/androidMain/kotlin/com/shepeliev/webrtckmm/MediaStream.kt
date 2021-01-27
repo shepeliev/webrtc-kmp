@@ -6,6 +6,15 @@ actual class MediaStream internal constructor(val native: NativeMediaStream) {
     actual val id: String
         get() = native.id
 
+    actual val audioTracks: List<AudioTrack>
+        get() = native.audioTracks.map { it.asCommon() }
+
+    actual val videoTracks: List<VideoTrack>
+        get() {
+            return native.videoTracks.map { it.asCommon() } +
+                native.preservedVideoTracks.map { it.asCommon() }
+        }
+
     actual fun addTrack(track: AudioTrack): Boolean = native.addTrack(track.native)
     actual fun addTrack(track: VideoTrack): Boolean = native.addTrack(track.native)
 

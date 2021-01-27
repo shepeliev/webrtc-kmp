@@ -14,7 +14,6 @@ package org.appspot.apprtc
 
 import android.content.Context
 import android.os.Environment
-import android.os.ParcelFileDescriptor
 import android.util.Log
 import com.shepeliev.webrtckmm.AudioSource
 import com.shepeliev.webrtckmm.AudioTrack
@@ -43,7 +42,7 @@ import com.shepeliev.webrtckmm.SdpSemantics
 import com.shepeliev.webrtckmm.SessionDescription
 import com.shepeliev.webrtckmm.SignalingState
 import com.shepeliev.webrtckmm.TcpCandidatePolicy
-import com.shepeliev.webrtckmm.VideoSink
+import com.shepeliev.webrtckmm.VideoRenderer
 import com.shepeliev.webrtckmm.VideoSource
 import com.shepeliev.webrtckmm.VideoTrack
 import com.shepeliev.webrtckmm.mediaConstraints
@@ -99,8 +98,8 @@ class PeerConnectionClient(
     private var preferIsac = false
     private var videoCapturerStopped = false
     private var isError = false
-    private var localRender: VideoSink? = null
-    private var remoteSinks: List<VideoSink>? = null
+    private var localRender: VideoRenderer? = null
+    private var remoteRenderers: List<VideoRenderer>? = null
     private var signalingParameters: SignalingParameters? = null
     private var videoWidth = 0
     private var videoHeight = 0
@@ -177,26 +176,26 @@ class PeerConnectionClient(
     }
 
     fun createPeerConnection(
-        localRender: VideoSink?,
-        remoteSink: VideoSink?,
+        localRender: VideoRenderer?,
+        remoteRenderer: VideoRenderer?,
         videoCapturer: VideoCapturer?,
         signalingParameters: SignalingParameters?
     ) {
         if (peerConnectionParameters.videoCallEnabled && videoCapturer == null) {
             Log.w(TAG, "Video call enabled but no video capturer provided.")
         }
-        val remoteSinks = remoteSink?.let { listOf(remoteSink) } ?: emptyList()
+        val remoteSinks = remoteRenderer?.let { listOf(remoteRenderer) } ?: emptyList()
         createPeerConnection(localRender, remoteSinks, videoCapturer, signalingParameters)
     }
 
     fun createPeerConnection(
-        localRender: VideoSink?,
-        remoteSinks: List<VideoSink>,
+        localRender: VideoRenderer?,
+        remoteRenderers: List<VideoRenderer>,
         videoCapturer: VideoCapturer?,
         signalingParameters: SignalingParameters?
     ) {
         this.localRender = localRender
-        this.remoteSinks = remoteSinks
+        this.remoteRenderers = remoteRenderers
         this.videoCapturer = videoCapturer
         this.signalingParameters = signalingParameters
         try {
@@ -244,7 +243,7 @@ class PeerConnectionClient(
 
         // Create peer connection factory.
         if (options != null) {
-            Log.d(TAG, "Factory networkIgnoreMask option: " + options.networkIgnoreMask)
+            Log.d(TAG, "Factory networkIgnoreMask option: $options")
         }
         //    final boolean enableH264HighProfile =
 //        VIDEO_CODEC_H264_HIGH.equals(peerConnectionParameters.videoCodec);
@@ -423,7 +422,7 @@ class PeerConnectionClient(
             // answer to get the remote track.
             remoteVideoTrack = getRemoteVideoTrack()
             remoteVideoTrack!!.enabled = renderVideo
-            for (remoteSink in remoteSinks!!) {
+            for (remoteSink in remoteRenderers!!) {
                 remoteVideoTrack!!.addSink(remoteSink)
             }
         }
@@ -433,12 +432,9 @@ class PeerConnectionClient(
         }
         if (peerConnectionParameters.aecDump) {
             try {
-                val aecDumpFileDescriptor = ParcelFileDescriptor.open(
-                    File("${Environment.getExternalStorageDirectory().path}${File.separator}Download/audio.aecdump"),
-                    ParcelFileDescriptor.MODE_READ_WRITE or ParcelFileDescriptor.MODE_CREATE
-                        or ParcelFileDescriptor.MODE_TRUNCATE
-                )
-                factory!!.startAecDump(aecDumpFileDescriptor.detachFd(), -1)
+                val pathname =
+                    "${Environment.getExternalStorageDirectory().path}${File.separator}Download/audio.aecdump"
+                factory!!.startAecDump(pathname, -1)
             } catch (e: IOException) {
                 Log.e(TAG, "Can not open aecdump file", e)
             }
@@ -522,7 +518,7 @@ class PeerConnectionClient(
             saveRecordedAudioToFile = null
         }
         localRender = null
-        remoteSinks = null
+        remoteRenderers = null
         Log.d(TAG, "Closing peer connection factory.")
         if (factory != null) {
             factory!!.dispose()

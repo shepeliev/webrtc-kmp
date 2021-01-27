@@ -2,7 +2,6 @@ package com.shepeliev.webrtckmm
 
 expect class RtpParameters {
     val codecs: List<Codec>
-    val degradationPreference: DegradationPreference?
     val encodings: List<Encoding>
     val headerExtension: List<HeaderExtension>
     val rtcp: Rtcp
@@ -92,19 +91,5 @@ expect class RtpParameters {
 
         /** Whether reduced size RTCP is configured or compound RTCP  */
         val reducedSize: Boolean
-    }
-
-    enum class DegradationPreference {
-        /** Does not degrade resolution or framerate. */
-        Disabled,
-
-        /** Degrade resolution in order to maintain framerate. */
-        MaintainFramerate,
-
-        /** Degrade framerate in order to maintain resolution. */
-        MaintainResolution,
-
-        /** Degrade a balance of framerate and resolution. */
-        Balanced;
     }
 }

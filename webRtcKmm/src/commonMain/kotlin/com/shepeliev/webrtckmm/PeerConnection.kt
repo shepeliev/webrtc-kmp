@@ -1,7 +1,5 @@
 package com.shepeliev.webrtckmm
 
-import kotlin.jvm.JvmOverloads
-
 expect class PeerConnection {
     val localDescription: SessionDescription?
     val remoteDescription: SessionDescription?
@@ -189,7 +187,7 @@ expect class PeerConnection {
     /**
      * Gets stats using the new stats collection API, see webrtc/api/stats/.
      */
-    suspend fun getStats(): RtcStatsReport
+    suspend fun getStats(): RtcStatsReport?
 
     /**
      * Limits the bandwidth allocated for all RTP streams sent by this
@@ -206,7 +204,7 @@ expect class PeerConnection {
      * function is called. The max_size_bytes argument is ignored, it is added
      * for future use.
      */
-    fun startRtcEventLog(fileDescriptor: Int, maxSizeBytes: Int): Boolean
+    fun startRtcEventLog(filePath: String, maxSizeBytes: Int): Boolean
 
     /**
      * Stops recording an RTC event log. If no RTC event log is currently being
@@ -261,16 +259,6 @@ enum class AdapterType(val bitMask: Int) {
 }
 
 
-data class IceServer @JvmOverloads constructor(
-    val urls: List<String>,
-    val username: String = "",
-    val password: String = "",
-    val tlsCertPolicy: TlsCertPolicy = TlsCertPolicy.TlsCertPolicySecure,
-    val hostname: String = "",
-    val tlsAlpnProtocols: List<String>? = null,
-    val tlsEllipticCurves: List<String>? = null
-)
-
 interface PeerConnectionObserver {
     fun onSignalingChange(newState: SignalingState)
     fun onIceConnectionChange(newState: IceConnectionState)
@@ -285,6 +273,7 @@ interface PeerConnectionObserver {
     fun onDataChannel(dataChannel: DataChannel)
     fun onRenegotiationNeeded()
     fun onAddTrack(receiver: RtpReceiver, streams: List<MediaStream>)
+    fun onRemoveTrack(receiver: RtpReceiver) {}
     fun onTrack(transceiver: RtpTransceiver)
 }
 
@@ -304,7 +293,8 @@ enum class IceConnectionState {
     Completed,
     Failed,
     Disconnected,
-    Closed;
+    Closed,
+    Count;
 }
 
 enum class PeerConnectionState { New, Connecting, Connected, Disconnected, Failed, Closed; }
