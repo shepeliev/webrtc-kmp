@@ -12,3 +12,4 @@ local.properties
 #XCode
 Pods/
 xcuserdata/
+*.podspec
