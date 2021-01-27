@@ -9,5 +9,6 @@ build/
 .cxx
 local.properties
 
-#iOS
+#XCode
 Pods/
+xcuserdata/
