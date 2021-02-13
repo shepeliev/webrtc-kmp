@@ -1,4 +1,5 @@
 buildscript {
+    val kotlinVersion by extra("1.4.21")
     repositories {
         gradlePluginPortal()
         jcenter()
@@ -6,7 +7,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.21")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
         classpath("com.android.tools.build:gradle:4.1.2")
     }
 }

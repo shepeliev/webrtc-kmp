@@ -22,4 +22,6 @@ actual class IceServer internal constructor(val native: RTCIceServer) {
             tlsEllipticCurves = tlsEllipticCurves
         )
     )
+
+    actual override fun toString(): String = native.toString()
 }

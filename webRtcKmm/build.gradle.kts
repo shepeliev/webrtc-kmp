@@ -32,7 +32,19 @@ kotlin {
         else
             ::iosX64
 
-    iosTarget("ios") { }
+    iosTarget("ios") {
+        binaries {
+            getTest("DEBUG").apply {
+                linkerOpts(
+                    "-framework",
+                    "WebRTC",
+                    "-F${rootProject.projectDir}/webRtcKmm/build/cocoapods/synthetic/IOS/webRtcKmm/Pods/GoogleWebRTC/Frameworks/frameworks",
+                    "-rpath",
+                    "${rootProject.projectDir}/webRtcKmm/build/cocoapods/synthetic/IOS/webRtcKmm/Pods/GoogleWebRTC/Frameworks/frameworks"
+                )
+            }
+        }
+    }
 
     sourceSets {
         val commonMain by getting
@@ -42,6 +54,15 @@ kotlin {
             }
         }
         val iosMain by getting
+
+        val commonTest by getting {
+            dependencies {
+                implementation(kotlin("test-common"))
+                implementation(kotlin("test-annotations-common"))
+            }
+        }
+
+        val iosTest by getting
     }
 }
 

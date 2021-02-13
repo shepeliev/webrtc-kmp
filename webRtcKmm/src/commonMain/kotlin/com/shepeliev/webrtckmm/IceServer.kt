@@ -10,4 +10,6 @@ expect class IceServer @JvmOverloads constructor(
     hostname: String = "",
     tlsAlpnProtocols: List<String>? = null,
     tlsEllipticCurves: List<String>? = null
-)
+) {
+    override fun toString(): String
+}

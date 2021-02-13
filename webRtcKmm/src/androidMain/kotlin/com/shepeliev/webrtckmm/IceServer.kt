@@ -21,4 +21,6 @@ actual class IceServer internal constructor(val native: PeerConnection.IceServer
             .setTlsEllipticCurves(tlsEllipticCurves)
             .createIceServer()
     )
+
+    actual override fun toString(): String = native.toString()
 }
