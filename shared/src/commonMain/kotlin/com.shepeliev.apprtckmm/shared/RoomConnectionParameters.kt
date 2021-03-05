@@ -1,4 +1,4 @@
-package com.shepeliev.apprtckmm
+package com.shepeliev.apprtckmm.shared
 
 /**
  * Struct holding the connection parameters of an AppRTC room.

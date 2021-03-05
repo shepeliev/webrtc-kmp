@@ -67,6 +67,9 @@ kotlin {
                 }
                 implementation("io.ktor:ktor-client-core:$ktorVersion")
                 implementation("io.ktor:ktor-client-serialization:$ktorVersion")
+//                implementation("ch.qos.logback:logback-classic:$ktorVersion")
+                implementation("io.ktor:ktor-client-logging:$ktorVersion")
+
             }
         }
         val commonTest by getting {
@@ -77,7 +80,8 @@ kotlin {
         }
         val androidMain by getting {
             dependencies {
-                implementation("io.ktor:ktor-client-android:$ktorVersion")
+                api("io.ktor:ktor-client-okhttp:$ktorVersion")
+                api("io.ktor:ktor-client-websockets:$ktorVersion")
                 implementation("com.google.android.material:material:1.2.1")
             }
         }

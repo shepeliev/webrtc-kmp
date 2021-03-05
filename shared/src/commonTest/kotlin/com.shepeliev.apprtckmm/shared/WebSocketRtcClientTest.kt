@@ -1,9 +1,7 @@
 package com.shepeliev.apprtckmm.shared
 
-import com.shepeliev.apprtckmm.AppRtcClient
-import com.shepeliev.apprtckmm.RoomConnectionParameters
-import com.shepeliev.apprtckmm.WebSocketRtcClient
-import com.shepeliev.apprtckmm.uuid
+import com.shepeliev.apprtckmm.shared.rtcclient.AppRtcClient
+import com.shepeliev.apprtckmm.shared.rtcclient.WebSocketRtcClient
 import com.shepeliev.webrtckmm.IceCandidate
 import com.shepeliev.webrtckmm.SessionDescription
 import kotlin.test.Test
@@ -21,7 +19,7 @@ class WebSocketRtcClientTest {
             roomId = roomId,
             loopback = false,
         )
-        val signalingParameters =  client.connectToRoom(params)
+        val signalingParameters = client.connectToRoom(params)
 
         assertTrue(signalingParameters.clientId.isNotEmpty())
         assertTrue(signalingParameters.iceServers.isNotEmpty())
@@ -29,18 +27,18 @@ class WebSocketRtcClientTest {
 }
 
 private class SignalingEvents : AppRtcClient.SignalingEvents {
-    override suspend fun onRemoteDescription(sdp: SessionDescription) {
+    override fun onRemoteDescription(sdp: SessionDescription) {
     }
 
-    override suspend fun onRemoteIceCandidate(candidate: IceCandidate) {
+    override fun onRemoteIceCandidate(candidate: IceCandidate) {
     }
 
-    override suspend fun onRemoteIceCandidatesRemoved(candidates: List<IceCandidate>) {
+    override fun onRemoteIceCandidatesRemoved(candidates: List<IceCandidate>) {
     }
 
-    override suspend fun onChannelClose() {
+    override fun onChannelClose() {
     }
 
-    override suspend fun onChannelError(description: String?) {
+    override fun onChannelError(description: String?) {
     }
 }

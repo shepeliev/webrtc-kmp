@@ -7,8 +7,10 @@
  *  in the file PATENTS.  All contributing project authors may
  *  be found in the AUTHORS file in the root of the source tree.
  */
-package com.shepeliev.apprtckmm
+package com.shepeliev.apprtckmm.shared.rtcclient
 
+import com.shepeliev.apprtckmm.shared.RoomConnectionParameters
+import com.shepeliev.apprtckmm.shared.SignalingParameters
 import com.shepeliev.webrtckmm.IceCandidate
 import com.shepeliev.webrtckmm.SessionDescription
 
@@ -59,26 +61,26 @@ interface AppRtcClient {
         /**
          * Callback fired once remote SDP is received.
          */
-        suspend fun onRemoteDescription(sdp: SessionDescription)
+        fun onRemoteDescription(sdp: SessionDescription)
 
         /**
          * Callback fired once remote Ice candidate is received.
          */
-        suspend fun onRemoteIceCandidate(candidate: IceCandidate)
+        fun onRemoteIceCandidate(candidate: IceCandidate)
 
         /**
          * Callback fired once remote Ice candidate removals are received.
          */
-        suspend fun onRemoteIceCandidatesRemoved(candidates: List<IceCandidate>)
+        fun onRemoteIceCandidatesRemoved(candidates: List<IceCandidate>)
 
         /**
          * Callback fired once channel is closed.
          */
-        suspend fun onChannelClose()
+        fun onChannelClose()
 
         /**
          * Callback fired once channel error happened.
          */
-        suspend fun onChannelError(description: String?)
+        fun onChannelError(description: String?)
     }
 }

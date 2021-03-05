@@ -1,4 +1,4 @@
-package com.shepeliev.apprtckmm
+package com.shepeliev.apprtckmm.shared
 
 import java.util.*
 

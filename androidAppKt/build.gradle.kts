@@ -1,7 +1,8 @@
 plugins {
     id("com.android.application")
     kotlin("android")
-    id("kotlin-android")
+    kotlin("kapt")
+    id("androidx.navigation.safeargs")
 }
 
 android {
@@ -18,6 +19,9 @@ android {
             isMinifyEnabled = false
         }
     }
+    buildFeatures {
+        dataBinding = true
+    }
 
     kotlinOptions {
         jvmTarget = "1.8"
@@ -29,18 +33,23 @@ android {
     }
 }
 
+
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:${rootProject.extra["kotlinVersion"]}")
-    implementation("androidx.legacy:legacy-support-v4:1.0.0")
-    val navVersion = "2.3.3"
+    val kotlinVersion: String by rootProject.extra
+    val navVersion: String by rootProject.extra
+    val lifecycleVersion = "2.3.0"
 
     implementation(fileTree("libs"))
-//    implementation(project(":shared"))
-    implementation("com.google.android.material:material:1.2.1")
+    implementation(project(":shared"))
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.2-native-mt")
+    implementation("androidx.legacy:legacy-support-v4:1.0.0")
     implementation("androidx.appcompat:appcompat:1.2.0")
     implementation("androidx.constraintlayout:constraintlayout:2.0.4")
-    implementation("org.webrtc:google-webrtc:1.0.32006")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.2")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
     implementation("androidx.navigation:navigation-fragment-ktx:$navVersion")
     implementation("androidx.navigation:navigation-ui-ktx:$navVersion")
+    implementation("com.google.android.material:material:1.3.0")
+    implementation("com.jakewharton.timber:timber:4.7.1")
+    implementation("org.webrtc:google-webrtc:1.0.32006")
 }
