@@ -21,7 +21,7 @@ class WebSocketChannelClient(private val events: WebSocketChannelEvents) {
     private var roomId: String? = null
     private var clientId: String? = null
     private var closeEvent: Boolean = false
-    private val wsSendQueue = mutableListOf<Any>()
+    private val wsSendQueue = mutableListOf<Message>()
 
     suspend fun connect(wsUrl: String, postUrl: String) {
         if (state != WebSocketConnectionState.New) {
@@ -34,6 +34,8 @@ class WebSocketChannelClient(private val events: WebSocketChannelEvents) {
         closeEvent = false
 
         ws = WebSocketConnection()
+
+        Log.d(tag, "Connecting to WSS: $wsUrl")
         ws.connect(wsServerUrl) {
             when (it) {
                 is WebSocketFrame.Text -> {
@@ -59,6 +61,8 @@ class WebSocketChannelClient(private val events: WebSocketChannelEvents) {
                 }
             }
         }
+
+        state = WebSocketConnectionState.Connected
     }
 
     suspend fun register(roomId: String, clientId: String) {
@@ -78,17 +82,18 @@ class WebSocketChannelClient(private val events: WebSocketChannelEvents) {
         )
         sendJson(wsMessage)
         state = WebSocketConnectionState.Registered
+        Log.d(tag, "Registered WebSocket for room $roomId. ClientID: $clientId")
         wsSendQueue.forEach { send(it) }
         wsSendQueue.clear()
     }
 
-    suspend fun send(message: Any) {
+    suspend fun send(message: Message) {
         when (state) {
             WebSocketConnectionState.New,
             WebSocketConnectionState.Connected -> {
                 // Store outgoing messages and send them after websocket client
                 // is registered.
-                Log.d(tag, "WS ACC: $message")
+                Log.d(tag, "WS -> ACC: $message")
                 wsSendQueue += message
             }
             WebSocketConnectionState.Error,
@@ -112,7 +117,7 @@ class WebSocketChannelClient(private val events: WebSocketChannelEvents) {
     suspend fun disconnect() {
         Log.d(tag, "Disconnect WebSocket. State: $state")
         if (state == WebSocketConnectionState.Registered) {
-            sendJson("""{"type":"bye"}""")
+            sendJson("""{"cmd":"send", "msg":"{\"type\":\"bye\"}"}""")
             state = WebSocketConnectionState.Connected
             sendWssMessage(HttpMethod.Delete)
         }

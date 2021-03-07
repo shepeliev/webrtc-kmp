@@ -9,4 +9,6 @@
     <string name="join_room_button">Join room</string>
     <string name="room_name_placeholder">Room name</string>
     <string name="pref_default_room_url" translatable="false">https://appr.tc</string>
+    <string name="channel_error_title">Connection error</string>
+    <string name="ok">OK</string>
 </resources>

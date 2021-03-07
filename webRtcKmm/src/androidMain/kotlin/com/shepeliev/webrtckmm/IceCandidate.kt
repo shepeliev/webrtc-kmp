@@ -13,6 +13,8 @@ actual class IceCandidate constructor(val native: NativeIceCandidate) {
     actual val sdpMid: String = native.sdpMid
     actual val sdpMLineIndex: Int = native.sdpMLineIndex
     actual val sdp: String = native.sdp
+
+    actual override fun toString(): String = native.toString()
 }
 
 internal fun NativeIceCandidate.asCommon(): IceCandidate = IceCandidate(this)

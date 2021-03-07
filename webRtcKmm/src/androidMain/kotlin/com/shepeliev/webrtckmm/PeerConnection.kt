@@ -1,18 +1,33 @@
 package com.shepeliev.webrtckmm
 
 import android.os.ParcelFileDescriptor
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.launch
 import org.webrtc.SdpObserver
 import java.io.File
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
+import org.webrtc.CandidatePairChangeEvent as NativeCandidatePairChangeEvent
 import org.webrtc.DataChannel as NativeDataChannel
+import org.webrtc.IceCandidate as NativeIceCandidate
+import org.webrtc.MediaStream as NativeMediaStream
 import org.webrtc.PeerConnection as NativePeerConnection
+import org.webrtc.RtpReceiver as NativeRtpReceiver
 import org.webrtc.RtpTransceiver as NativeRtpTransceiver
 import org.webrtc.SessionDescription as NativeSessionDescription
 
-actual class PeerConnection internal constructor(val native: NativePeerConnection) {
+actual class PeerConnection internal constructor() {
+
+    lateinit var native: NativePeerConnection
+
     actual val localDescription: SessionDescription?
         get() = native.localDescription?.asCommon()
 
@@ -33,6 +48,42 @@ actual class PeerConnection internal constructor(val native: NativePeerConnectio
 
     actual val iceGatheringState: IceGatheringState
         get() = native.iceGatheringState().asCommon()
+
+    private val _signalingStateFlow = MutableSharedFlow<SignalingState>()
+    actual val signalingStateFlow: Flow<SignalingState> = _signalingStateFlow.asSharedFlow()
+
+    private val _iceConnectionStateFlow = MutableSharedFlow<IceConnectionState>()
+    actual val iceConnectionStateFlow: Flow<IceConnectionState> =
+        _iceConnectionStateFlow.asSharedFlow()
+
+    private val _connectionStateFlow = MutableSharedFlow<PeerConnectionState>()
+    actual val connectionStateFlow: Flow<PeerConnectionState> = _connectionStateFlow.asSharedFlow()
+
+    private val _iceGatheringStateFlow = MutableSharedFlow<IceGatheringState>()
+    actual val iceGatheringStateFlow: Flow<IceGatheringState> =
+        _iceGatheringStateFlow.asSharedFlow()
+
+    private val _iceCandidateFlow = MutableSharedFlow<IceCandidate>()
+    actual val iceCandidateFlow: Flow<IceCandidate> = _iceCandidateFlow.asSharedFlow()
+
+    private val _removedIceCandidatesFlow = MutableSharedFlow<List<IceCandidate>>()
+    actual val removedIceCandidatesFlow: Flow<List<IceCandidate>> =
+        _removedIceCandidatesFlow.asSharedFlow()
+
+    private val _dataChannelFlow = MutableSharedFlow<DataChannel>()
+    actual val dataChannelFlow: Flow<DataChannel> = _dataChannelFlow.asSharedFlow()
+
+    private val _renegotiationNeeded = MutableSharedFlow<Unit>()
+    actual val renegotiationNeeded: Flow<Unit> = _renegotiationNeeded.asSharedFlow()
+
+    private val _addTrackFlow = MutableSharedFlow<Pair<RtpReceiver, List<MediaStream>>>()
+    actual val addTrackFlow: Flow<Pair<RtpReceiver, List<MediaStream>>> =
+        _addTrackFlow.asSharedFlow()
+
+    private val _removeTrackFlow = MutableSharedFlow<RtpReceiver>()
+    actual val removeTrackFlow: Flow<RtpReceiver> = _removeTrackFlow.asSharedFlow()
+
+    internal val pcObserver = PcObserver()
 
     actual fun createDataChannel(
         label: String,
@@ -133,8 +184,8 @@ actual class PeerConnection internal constructor(val native: NativePeerConnectio
         return native.removeIceCandidates(candidates.map { it.native }.toTypedArray())
     }
 
-    actual fun addStream(stream: MediaStream): Boolean = native.addStream(stream.native)
-    actual fun removeStream(stream: MediaStream) = native.removeStream(stream.native)
+//    actual fun addStream(stream: MediaStream): Boolean = native.addStream(stream.native)
+//    actual fun removeStream(stream: MediaStream) = native.removeStream(stream.native)
 
     actual fun createSender(kind: String, streamId: String): RtpSender? {
         return native.createSender(kind, streamId)?.asCommon()
@@ -196,13 +247,76 @@ actual class PeerConnection internal constructor(val native: NativePeerConnectio
         val fileDescriptor = ParcelFileDescriptor.open(
             File(filePath),
             ParcelFileDescriptor.MODE_READ_WRITE or
-                ParcelFileDescriptor.MODE_CREATE or
-                ParcelFileDescriptor.MODE_TRUNCATE
+                    ParcelFileDescriptor.MODE_CREATE or
+                    ParcelFileDescriptor.MODE_TRUNCATE
         )
         return native.startRtcEventLog(fileDescriptor.detachFd(), maxSizeBytes)
     }
 
     actual fun stopRtcEventLog() = native.stopRtcEventLog()
     actual fun close() = native.close()
-    actual fun dispose() = native.dispose()
+    actual fun dispose() {
+        GlobalScope.launch(Dispatchers.Default) { native.dispose() }
+    }
+
+    internal inner class PcObserver() : NativePeerConnection.Observer,
+        CoroutineScope by MainScope() {
+        override fun onSignalingChange(newState: NativePeerConnection.SignalingState) {
+            launch { _signalingStateFlow.emit(newState.asCommon()) }
+        }
+
+        override fun onIceConnectionChange(newState: NativePeerConnection.IceConnectionState) {
+            launch { _iceConnectionStateFlow.emit(newState.asCommon()) }
+        }
+
+        override fun onConnectionChange(newState: NativePeerConnection.PeerConnectionState) {
+            launch { _connectionStateFlow.emit(newState.asCommon()) }
+        }
+
+        override fun onIceConnectionReceivingChange(receiving: Boolean) {}
+
+        override fun onIceGatheringChange(newState: NativePeerConnection.IceGatheringState) {
+            launch { _iceGatheringStateFlow.emit(newState.asCommon()) }
+        }
+
+        override fun onIceCandidate(candidate: NativeIceCandidate) {
+            launch { _iceCandidateFlow.emit(candidate.asCommon()) }
+        }
+
+        override fun onIceCandidatesRemoved(candidates: Array<out NativeIceCandidate>) {
+            launch { _removedIceCandidatesFlow.emit(candidates.map { it.asCommon() }) }
+        }
+
+        override fun onSelectedCandidatePairChanged(event: NativeCandidatePairChangeEvent) {}
+
+        override fun onAddStream(stream: NativeMediaStream) {}
+
+        override fun onRemoveStream(stream: NativeMediaStream) {}
+
+        override fun onDataChannel(dataChannel: NativeDataChannel) {
+            launch { _dataChannelFlow.emit(DataChannel(dataChannel)) }
+        }
+
+        override fun onRenegotiationNeeded() {
+            launch { _renegotiationNeeded.emit(Unit) }
+        }
+
+        override fun onAddTrack(
+            receiver: NativeRtpReceiver,
+            streams: Array<out NativeMediaStream>
+        ) {
+            launch {
+                _addTrackFlow.emit(Pair(RtpReceiver(receiver), streams.map { MediaStream(it) }))
+            }
+        }
+
+        override fun onTrack(transceiver: NativeRtpTransceiver) {}
+    }
+}
+
+actual fun RtcPeerConnection(rtcConfiguration: RtcConfiguration): PeerConnection {
+    return PeerConnection().apply {
+        native =
+            peerConnectionFactory.native.createPeerConnection(rtcConfiguration.native, pcObserver)!!
+    }
 }

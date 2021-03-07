@@ -12,14 +12,23 @@ abstract class BaseMediaStreamTrack : MediaStreamTrack {
         get() = native.kind()
 
     override var enabled: Boolean
-        get() = native.enabled()
-        set(value) { native.setEnabled(value) }
+        get() = native.enabled() && !isStopped
+        set(value) { native.setEnabled(value && !isStopped) }
 
     override val state: MediaStreamTrack.State
         get() = native.state().asCommon()
 
-    override fun dispose() {
-        native.dispose()
+
+    private var isStopped = false
+
+    override fun stop() {
+        isStopped = true
+        enabled = false
+
+        when (this.kind) {
+            MediaStreamTrack.AUDIO_TRACK_KIND -> MediaDevices.onAudioTrackStopped(this)
+            MediaStreamTrack.VIDEO_TRACK_KIND -> MediaDevices.onVideoTrackStopped(this)
+        }
     }
 }
 

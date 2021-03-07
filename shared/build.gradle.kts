@@ -67,8 +67,6 @@ kotlin {
                 }
                 implementation("io.ktor:ktor-client-core:$ktorVersion")
                 implementation("io.ktor:ktor-client-serialization:$ktorVersion")
-//                implementation("ch.qos.logback:logback-classic:$ktorVersion")
-                implementation("io.ktor:ktor-client-logging:$ktorVersion")
 
             }
         }

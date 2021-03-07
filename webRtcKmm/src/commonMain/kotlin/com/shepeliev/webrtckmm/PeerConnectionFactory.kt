@@ -27,23 +27,8 @@ data class Options @JvmOverloads constructor(
 expect class PeerConnectionFactory {
 
     companion object {
-        fun initialize(
-            context: Any? = null,
-            fieldTrials: String = "",
-            enableInternalTracer: Boolean = false,
-        )
-
-        fun build(
-            options: Options? = null,
-            eglContext: Any? = null,
-            audioDeviceModule: Any? = null,
-        ): PeerConnectionFactory
+        fun build(options: Options? = null): PeerConnectionFactory
     }
-
-    fun createPeerConnection(
-        rtcConfig: RtcConfiguration,
-        observer: PeerConnectionObserver
-    ): PeerConnection?
 
     fun createLocalMediaStream(label: String): MediaStream
     fun createVideoSource(isScreencast: Boolean, alignTimestamps: Boolean = true): VideoSource
@@ -59,3 +44,7 @@ expect class PeerConnectionFactory {
 
     fun dispose()
 }
+
+var options: Options? = null
+
+val peerConnectionFactory by lazy { PeerConnectionFactory.build(options) }

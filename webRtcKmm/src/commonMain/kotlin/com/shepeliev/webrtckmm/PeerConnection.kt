@@ -1,5 +1,7 @@
 package com.shepeliev.webrtckmm
 
+import kotlinx.coroutines.flow.Flow
+
 expect class PeerConnection {
     val localDescription: SessionDescription?
     val remoteDescription: SessionDescription?
@@ -8,6 +10,17 @@ expect class PeerConnection {
     val iceConnectionState: IceConnectionState
     val connectionState: PeerConnectionState
     val iceGatheringState: IceGatheringState
+
+    val signalingStateFlow: Flow<SignalingState>
+    val iceConnectionStateFlow: Flow<IceConnectionState>
+    val connectionStateFlow: Flow<PeerConnectionState>
+    val iceGatheringStateFlow: Flow<IceGatheringState>
+    val iceCandidateFlow:  Flow<IceCandidate>
+    val removedIceCandidatesFlow: Flow<List<IceCandidate>>
+    val dataChannelFlow: Flow<DataChannel>
+    val renegotiationNeeded: Flow<Unit>
+    val addTrackFlow: Flow<Pair<RtpReceiver, List<MediaStream>>>
+    val removeTrackFlow: Flow<RtpReceiver>
 
     fun createDataChannel(
         label: String,
@@ -46,19 +59,19 @@ expect class PeerConnection {
     fun addIceCandidate(candidate: IceCandidate): Boolean
     fun removeIceCandidates(candidates: List<IceCandidate>): Boolean
 
-    /**
-     * Adds a new MediaStream to be sent on this peer connection.
-     * Note: This method is not supported with SdpSemantics.UNIFIED_PLAN. Please
-     * use addTrack instead.
-     */
-    fun addStream(stream: MediaStream): Boolean
-
-    /**
-     * Removes the given media stream from this peer connection.
-     * This method is not supported with SdpSemantics.UNIFIED_PLAN. Please use
-     * removeTrack instead.
-     */
-    fun removeStream(stream: MediaStream)
+//    /**
+//     * Adds a new MediaStream to be sent on this peer connection.
+//     * Note: This method is not supported with SdpSemantics.UNIFIED_PLAN. Please
+//     * use addTrack instead.
+//     */
+//    fun addStream(stream: MediaStream): Boolean
+//
+//    /**
+//     * Removes the given media stream from this peer connection.
+//     * This method is not supported with SdpSemantics.UNIFIED_PLAN. Please use
+//     * removeTrack instead.
+//     */
+//    fun removeStream(stream: MediaStream)
 
     /**
      * Creates an RtpSender without a track.
@@ -300,3 +313,5 @@ enum class IceConnectionState {
 enum class PeerConnectionState { New, Connecting, Connected, Disconnected, Failed, Closed; }
 
 enum class IceGatheringState { New, Gathering, Complete }
+
+expect fun RtcPeerConnection(rtcConfiguration: RtcConfiguration): PeerConnection

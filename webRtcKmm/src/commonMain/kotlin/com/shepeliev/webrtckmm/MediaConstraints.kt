@@ -20,7 +20,7 @@ class MediaConstraintsBuilder internal constructor() {
     internal fun build(): MediaConstraints = MediaConstraints(mandatory, optional)
 }
 
-fun mediaConstraints(build: MediaConstraintsBuilder.() -> Unit): MediaConstraints {
+fun mediaConstraints(build: MediaConstraintsBuilder.() -> Unit = {}): MediaConstraints {
     val builder = MediaConstraintsBuilder()
     build(builder)
     return builder.build()

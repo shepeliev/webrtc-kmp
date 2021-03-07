@@ -8,4 +8,6 @@ expect class IceCandidate(
     val sdpMid: String
     val sdpMLineIndex: Int
     val sdp: String
+
+    override fun toString(): String
 }

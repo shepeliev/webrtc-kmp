@@ -2,7 +2,6 @@ package com.shepeliev.apprtckmm.shared.rtcclient
 
 import com.shepeliev.apprtckmm.shared.Log
 import io.ktor.client.*
-import io.ktor.client.features.logging.*
 import io.ktor.client.features.websocket.*
 import io.ktor.client.request.*
 import io.ktor.http.*
@@ -10,6 +9,7 @@ import io.ktor.http.cio.websocket.*
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 actual class WebSocketConnection {
@@ -17,7 +17,6 @@ actual class WebSocketConnection {
     private val tag = "WSConnection"
     private val client = HttpClient {
         install(WebSockets)
-        install(Logging)
     }
 
     private var wsSession: WebSocketSession? = null
@@ -30,8 +29,7 @@ actual class WebSocketConnection {
         }
         wsSession = session
 
-        MainScope().launch {
-            while (true) {
+        session.launch {
                 session.incoming.receiveAsFlow().collect {
                     when (it) {
                         is Frame.Text -> onFrame(WebSocketFrame.Text(it.readText()))
@@ -48,7 +46,6 @@ actual class WebSocketConnection {
                     }
                 }
             }
-        }
     }
 
     actual suspend fun sendTextMessage(message: String) {

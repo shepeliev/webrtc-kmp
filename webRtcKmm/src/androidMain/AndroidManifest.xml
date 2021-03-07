@@ -1,2 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest package="com.shepeliev.webrtckmm" />
+<manifest package="com.shepeliev.webrtckmm"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <provider
+            android:authorities="com.shepeliev.webrtckmm.context.provider"
+            android:name=".android.ApplicationContextProvider"
+            android:exported="false"/>
+    </application>
+</manifest>

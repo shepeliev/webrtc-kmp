@@ -1,43 +1,24 @@
 package com.shepeliev.webrtckmm
 
-import android.content.Context
 import android.os.ParcelFileDescriptor
-import org.webrtc.DefaultVideoDecoderFactory
-import org.webrtc.DefaultVideoEncoderFactory
-import org.webrtc.EglBase
-import org.webrtc.PeerConnectionFactory.InitializationOptions
-import org.webrtc.audio.AudioDeviceModule
+import com.shepeliev.webrtckmm.android.ApplicationContextProvider
+import com.shepeliev.webrtckmm.android.AudioDeviceModuleProvider
+import com.shepeliev.webrtckmm.android.VideoDecoderFactoryProvider
+import com.shepeliev.webrtckmm.android.VideoEncoderFactoryProvider
 import java.io.File
 import org.webrtc.PeerConnectionFactory as AndroidPeerConnectionFactory
 
 actual class PeerConnectionFactory private constructor(val native: AndroidPeerConnectionFactory) {
     actual companion object {
-        actual fun initialize(
-            context: Any?,
-            fieldTrials: String,
-            enableInternalTracer: Boolean
-        ) {
-            require(context is Context) { "context' must be an instance of android.content.Context" }
-
-            val options = InitializationOptions.builder(context)
+        actual fun build(options: Options?): PeerConnectionFactory {
+            val context = ApplicationContextProvider.applicationContext
+            val fieldTrials = context.getString(R.string.webRtcKmm_fieldTrials)
+            val enableInternalTracer = context.getString(R.string.webRtcKmm_fieldTrials).toBoolean()
+            val initOptions = AndroidPeerConnectionFactory.InitializationOptions.builder(context)
                 .setFieldTrials(fieldTrials)
                 .setEnableInternalTracer(enableInternalTracer)
                 .createInitializationOptions()
-            AndroidPeerConnectionFactory.initialize(options)
-
-        }
-
-        actual fun build(
-            options: Options?,
-            eglContext: Any?,
-            audioDeviceModule: Any?
-        ): PeerConnectionFactory {
-            require(eglContext is EglBase) { "eglContext must be instance of EglBase" }
-            if (audioDeviceModule != null) {
-                require(audioDeviceModule is AudioDeviceModule) {
-                    "audioDeviceModule must be AudioDeviceModule instance"
-                }
-            }
+            AndroidPeerConnectionFactory.initialize(initOptions)
 
             val nativeOptions = options?.let {
                 AndroidPeerConnectionFactory.Options().apply {
@@ -56,27 +37,23 @@ actual class PeerConnectionFactory private constructor(val native: AndroidPeerCo
 
             val builder = AndroidPeerConnectionFactory.builder()
                 .setOptions(nativeOptions)
-                .setVideoEncoderFactory(
-                    DefaultVideoEncoderFactory(eglContext.eglBaseContext, false, false)
-                )
-                .setVideoDecoderFactory(DefaultVideoDecoderFactory(eglContext.eglBaseContext))
-                .apply {
-                    audioDeviceModule?.let { setAudioDeviceModule(audioDeviceModule as AudioDeviceModule) }
-                }
+                .setVideoEncoderFactory(VideoEncoderFactoryProvider.getVideoEncoderFactory())
+                .setVideoDecoderFactory(VideoDecoderFactoryProvider.getVideoDecoderFactory())
+                .setAudioDeviceModule(AudioDeviceModuleProvider.getAudioDeviceModule())
 
             return PeerConnectionFactory(builder.createPeerConnectionFactory())
         }
     }
 
-    actual fun createPeerConnection(
-        rtcConfig: RtcConfiguration,
-        observer: PeerConnectionObserver
-    ): PeerConnection? {
-        return native.createPeerConnection(
-            rtcConfig.native,
-            CommonPeerConnectionObserverAdapter(observer)
-        )?.let { PeerConnection(it) }
-    }
+//    actual fun createPeerConnection(
+//        rtcConfig: RtcConfiguration,
+//        observer: PeerConnectionObserver
+//    ): PeerConnection? {
+//        return native.createPeerConnection(
+//            rtcConfig.native,
+//            CommonPeerConnectionObserverAdapter(observer)
+//        )?.let { PeerConnection(it) }
+//    }
 
     actual fun createLocalMediaStream(label: String): MediaStream {
         return MediaStream(native.createLocalMediaStream(label))
@@ -105,8 +82,8 @@ actual class PeerConnectionFactory private constructor(val native: AndroidPeerCo
         val fileDescriptor = ParcelFileDescriptor.open(
             File(filePath),
             ParcelFileDescriptor.MODE_READ_WRITE or
-                ParcelFileDescriptor.MODE_CREATE or
-                ParcelFileDescriptor.MODE_TRUNCATE
+                    ParcelFileDescriptor.MODE_CREATE or
+                    ParcelFileDescriptor.MODE_TRUNCATE
         )
         native.startAecDump(fileDescriptor.detachFd(), fileSizeLimitBytes)
     }

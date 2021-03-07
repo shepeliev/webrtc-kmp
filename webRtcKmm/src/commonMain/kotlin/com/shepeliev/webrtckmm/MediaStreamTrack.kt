@@ -12,7 +12,7 @@ interface MediaStreamTrack {
     var enabled: Boolean
     val state: State
 
-    fun dispose()
+    fun stop()
 
     enum class State { Live, Ended }
 

@@ -24,7 +24,7 @@ abstract class BaseMediaStreamTrack : MediaStreamTrack {
     override val state: MediaStreamTrack.State
         get() = rtcMediaStreamTrackStateAsCommon(native.readyState)
 
-    override fun dispose() {
+    override fun stop() {
         // not applicable
     }
 

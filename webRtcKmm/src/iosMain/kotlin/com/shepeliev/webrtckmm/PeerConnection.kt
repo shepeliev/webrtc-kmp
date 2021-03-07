@@ -2,22 +2,36 @@ package com.shepeliev.webrtckmm
 
 import cocoapods.GoogleWebRTC.RTCDataChannel
 import cocoapods.GoogleWebRTC.RTCDataChannelConfiguration
+import cocoapods.GoogleWebRTC.RTCIceCandidate
+import cocoapods.GoogleWebRTC.RTCIceConnectionState
+import cocoapods.GoogleWebRTC.RTCIceGatheringState
+import cocoapods.GoogleWebRTC.RTCMediaStream
 import cocoapods.GoogleWebRTC.RTCPeerConnection
+import cocoapods.GoogleWebRTC.RTCPeerConnectionDelegateProtocol
+import cocoapods.GoogleWebRTC.RTCPeerConnectionState
 import cocoapods.GoogleWebRTC.RTCRtpReceiver
 import cocoapods.GoogleWebRTC.RTCRtpSender
 import cocoapods.GoogleWebRTC.RTCRtpTransceiver
 import cocoapods.GoogleWebRTC.RTCRtpTransceiverInit
+import cocoapods.GoogleWebRTC.RTCSignalingState
 import cocoapods.GoogleWebRTC.dataChannelForLabel
 import cocoapods.GoogleWebRTC.senderWithKind
-import cocoapods.GoogleWebRTC.statisticsWithCompletionHandler
-import cocoapods.GoogleWebRTC.statsForTrack
-import kotlinx.cinterop.usePinned
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.launch
 import platform.Foundation.NSNumber
+import platform.darwin.NSObject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-actual class PeerConnection internal constructor(val native: RTCPeerConnection) {
+actual class PeerConnection internal constructor() :  CoroutineScope by MainScope() {
+
+    lateinit var native: RTCPeerConnection
+
     actual val localDescription: SessionDescription?
         get() = native.localDescription?.let { SessionDescription(it) }
 
@@ -38,6 +52,42 @@ actual class PeerConnection internal constructor(val native: RTCPeerConnection) 
 
     actual val iceGatheringState: IceGatheringState
         get() = rtcIceGatheringStateAsCommon(native.iceGatheringState())
+
+    private val _signalingStateFlow = MutableSharedFlow<SignalingState>()
+    actual val signalingStateFlow: Flow<SignalingState> = _signalingStateFlow.asSharedFlow()
+
+    private val _iceConnectionStateFlow = MutableSharedFlow<IceConnectionState>()
+    actual val iceConnectionStateFlow: Flow<IceConnectionState> =
+        _iceConnectionStateFlow.asSharedFlow()
+
+    private val _connectionStateFlow = MutableSharedFlow<PeerConnectionState>()
+    actual val connectionStateFlow: Flow<PeerConnectionState> = _connectionStateFlow.asSharedFlow()
+
+    private val _iceGatheringStateFlow = MutableSharedFlow<IceGatheringState>()
+    actual val iceGatheringStateFlow: Flow<IceGatheringState> =
+        _iceGatheringStateFlow.asSharedFlow()
+
+    private val _iceCandidateFlow = MutableSharedFlow<IceCandidate>()
+    actual val iceCandidateFlow: Flow<IceCandidate> = _iceCandidateFlow.asSharedFlow()
+
+    private val _removedIceCandidatesFlow = MutableSharedFlow<List<IceCandidate>>()
+    actual val removedIceCandidatesFlow: Flow<List<IceCandidate>> =
+        _removedIceCandidatesFlow.asSharedFlow()
+
+    private val _dataChannelFlow = MutableSharedFlow<DataChannel>()
+    actual val dataChannelFlow: Flow<DataChannel> = _dataChannelFlow.asSharedFlow()
+
+    private val _renegotiationNeeded = MutableSharedFlow<Unit>()
+    actual val renegotiationNeeded: Flow<Unit> = _renegotiationNeeded.asSharedFlow()
+
+    private val _addTrackFlow = MutableSharedFlow<Pair<RtpReceiver, List<MediaStream>>>()
+    actual val addTrackFlow: Flow<Pair<RtpReceiver, List<MediaStream>>> =
+        _addTrackFlow.asSharedFlow()
+
+    private val _removeTrackFlow = MutableSharedFlow<RtpReceiver>()
+    actual val removeTrackFlow: Flow<RtpReceiver> = _removeTrackFlow.asSharedFlow()
+
+    internal val pcObserver = PcObserver()
 
     actual fun createDataChannel(
         label: String,
@@ -135,12 +185,12 @@ actual class PeerConnection internal constructor(val native: RTCPeerConnection) 
         return true
     }
 
-    actual fun addStream(stream: MediaStream): Boolean {
-        native.addStream(stream.native)
-        return true
-    }
-
-    actual fun removeStream(stream: MediaStream) = native.removeStream(stream.native)
+//    actual fun addStream(stream: MediaStream): Boolean {
+//        native.addStream(stream.native)
+//        return true
+//    }
+//
+//    actual fun removeStream(stream: MediaStream) = native.removeStream(stream.native)
 
     actual fun createSender(kind: String, streamId: String): RtpSender? {
         return RtpSender(native.senderWithKind(kind, streamId))
@@ -219,5 +269,126 @@ actual class PeerConnection internal constructor(val native: RTCPeerConnection) 
     actual fun close() = native.close()
     actual fun dispose() {
         // not applicable
+    }
+
+    internal inner class PcObserver : NSObject(), RTCPeerConnectionDelegateProtocol {
+        override fun peerConnection(
+            peerConnection: RTCPeerConnection,
+            didChangeSignalingState: RTCSignalingState
+        ) {
+            launch { _signalingStateFlow.emit(rtcSignalingStateAsCommon(didChangeSignalingState)) }
+        }
+
+        @Suppress("CONFLICTING_OVERLOADS")
+        override fun peerConnection(
+            peerConnection: RTCPeerConnection,
+            didAddStream: RTCMediaStream
+        ) {
+        }
+
+        override fun peerConnection(
+            peerConnection: RTCPeerConnection,
+            didChangeIceConnectionState: RTCIceConnectionState
+        ) {
+            launch {
+                _iceConnectionStateFlow.emit(
+                    rtcIceConnectionStateAsCommon(didChangeIceConnectionState)
+                )
+            }
+        }
+
+        override fun peerConnection(
+            peerConnection: RTCPeerConnection,
+            didChangeIceGatheringState: RTCIceGatheringState
+        ) {
+            launch {
+                _iceGatheringStateFlow.emit(rtcIceGatheringStateAsCommon(didChangeIceGatheringState))
+            }
+        }
+
+        override fun peerConnection(
+            peerConnection: RTCPeerConnection,
+            didGenerateIceCandidate: RTCIceCandidate
+        ) {
+            launch { _iceCandidateFlow.emit(IceCandidate(didGenerateIceCandidate)) }
+        }
+
+        override fun peerConnection(
+            peerConnection: RTCPeerConnection,
+            didRemoveIceCandidates: List<*>
+        ) {
+            val candidates = didRemoveIceCandidates.map { IceCandidate(it as RTCIceCandidate) }
+            launch { _removedIceCandidatesFlow.emit(candidates) }
+        }
+
+        override fun peerConnection(
+            peerConnection: RTCPeerConnection,
+            didOpenDataChannel: RTCDataChannel
+        ) {
+            launch { _dataChannelFlow.emit(DataChannel(didOpenDataChannel)) }
+        }
+
+        override fun peerConnectionShouldNegotiate(peerConnection: RTCPeerConnection) {
+            launch { _renegotiationNeeded.emit(Unit) }
+        }
+
+        @Suppress("CONFLICTING_OVERLOADS")
+        override fun peerConnection(
+            peerConnection: RTCPeerConnection,
+            didRemoveStream: RTCMediaStream
+        ) {
+        }
+
+        override fun peerConnection(
+            peerConnection: RTCPeerConnection,
+            didChangeConnectionState: RTCPeerConnectionState
+        ) {
+            launch {
+                _connectionStateFlow.emit(rtcPeerConnectionStateAsCommon(didChangeConnectionState))
+            }
+        }
+
+        override fun peerConnection(
+            peerConnection: RTCPeerConnection,
+            didRemoveReceiver: RTCRtpReceiver
+        ) {
+            launch { _removeTrackFlow.emit(RtpReceiver(didRemoveReceiver)) }
+        }
+
+        override fun peerConnection(
+            peerConnection: RTCPeerConnection,
+            didStartReceivingOnTransceiver: RTCRtpTransceiver
+        ) {
+        }
+
+        override fun peerConnection(
+            peerConnection: RTCPeerConnection,
+            didAddReceiver: RTCRtpReceiver,
+            streams: List<*>
+        ) {
+            launch {
+                _addTrackFlow.emit(
+                    Pair(
+                        RtpReceiver(didAddReceiver),
+                        streams.map { MediaStream(it as RTCMediaStream) }
+                    )
+                )
+            }
+        }
+    }
+}
+
+actual fun RtcPeerConnection(rtcConfiguration: RtcConfiguration): PeerConnection {
+    return PeerConnection().apply {
+        val constraints = mediaConstraints {
+            optional { "RtpDataChannels" to "${rtcConfiguration.enableRtpDataChannel}" }
+            rtcConfiguration.enableDtlsSrtp?.let { optional { "DtlsSrtpKeyAgreement" to "$it" } }
+        }
+
+        native = peerConnectionFactory.native.peerConnectionWithConfiguration(
+            rtcConfiguration.native,
+            constraints.native,
+            pcObserver
+        )
     }
 }

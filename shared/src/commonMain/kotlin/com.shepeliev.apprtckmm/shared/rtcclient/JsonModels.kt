@@ -4,18 +4,18 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-class IceServerItem(
+data class IceServerItem(
     val urls: String,
     val credential: String? = null
 )
 
 @Serializable
-class IceServersResponse(
+data class IceServersResponse(
     val iceServers: List<TurnServerItem>
 )
 
 @Serializable
-class Message(
+data class Message(
     val type: String,
     val sdp: String? = null,
     val id: String? = null,
@@ -25,7 +25,7 @@ class Message(
 ) {
 
     @Serializable
-    class Candidate(
+    data class Candidate(
         val id: String? = null,
         val label: Int? = null,
         val candidate: String? = null
@@ -33,14 +33,14 @@ class Message(
 }
 
 @Serializable
-class PcConfig(
+data class PcConfig(
     val rtcpMuxPolicy: String,
     val bundlePolicy: String,
     val iceServers: List<IceServerItem>
 )
 
 @Serializable
-class RoomParams(
+data class RoomParams(
     @SerialName("room_id") val roomId: String? = null,
     @SerialName("client_id") val clientId: String? = null,
     @SerialName("wss_url") val wssUrl: String? = null,
@@ -53,20 +53,20 @@ class RoomParams(
 )
 
 @Serializable
-class RoomResponse(
+data class RoomResponse(
     val result: String,
     val params: RoomParams
 )
 
 @Serializable
-class TurnServerItem(
+data class TurnServerItem(
     val urls: List<String>,
     val username: String? = null,
     val credential: String? = null
 )
 
 @Serializable
-class MessageResponse(val result: String)
+data class MessageResponse(val result: String)
 
 @Serializable
-class IncomingWsMessage(val msg: String, val error: String? = null)
+data class IncomingWsMessage(val msg: String, val error: String? = null)

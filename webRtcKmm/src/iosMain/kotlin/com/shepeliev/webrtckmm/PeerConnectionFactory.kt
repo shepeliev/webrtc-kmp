@@ -7,19 +7,7 @@ import cocoapods.GoogleWebRTC.RTCPeerConnectionFactoryOptions
 
 actual class PeerConnectionFactory private constructor(val native: RTCPeerConnectionFactory) {
     actual companion object {
-        actual fun initialize(
-            context: Any?,
-            fieldTrials: String,
-            enableInternalTracer: Boolean
-        ) {
-            // not applicable
-        }
-
-        actual fun build(
-            options: Options?,
-            eglContext: Any?,
-            audioDeviceModule: Any?
-        ): PeerConnectionFactory {
+        actual fun build(options: Options?): PeerConnectionFactory {
             val native = RTCPeerConnectionFactory(
                 RTCDefaultVideoEncoderFactory(),
                 RTCDefaultVideoDecoderFactory()
@@ -42,22 +30,22 @@ actual class PeerConnectionFactory private constructor(val native: RTCPeerConnec
         }
     }
 
-    actual fun createPeerConnection(
-        rtcConfig: RtcConfiguration,
-        observer: PeerConnectionObserver
-    ): PeerConnection? {
-
-        val constraints = mediaConstraints {
-            optional { "RtpDataChannels" to "${rtcConfig.enableRtpDataChannel}" }
-            rtcConfig.enableDtlsSrtp?.let {  optional { "DtlsSrtpKeyAgreement" to "$it" } }
-        }
-
-        return native.peerConnectionWithConfiguration(
-            rtcConfig.native,
-            constraints.native,
-            CommonPeerConnectionObserverAdapter(observer)
-        ).let { PeerConnection(it) }
-    }
+//    actual fun createPeerConnection(
+//        rtcConfig: RtcConfiguration,
+//        observer: PeerConnectionObserver
+//    ): RtcPeerConnection? {
+//
+//        val constraints = mediaConstraints {
+//            optional { "RtpDataChannels" to "${rtcConfig.enableRtpDataChannel}" }
+//            rtcConfig.enableDtlsSrtp?.let { optional { "DtlsSrtpKeyAgreement" to "$it" } }
+//        }
+//
+//        return native.peerConnectionWithConfiguration(
+//            rtcConfig.native,
+//            constraints.native,
+//            CommonPeerConnectionObserverAdapter(observer)
+//        ).let { RtcPeerConnection(it) }
+//    }
 
     actual fun createLocalMediaStream(label: String): MediaStream {
         return MediaStream(native.mediaStreamWithStreamId(label))

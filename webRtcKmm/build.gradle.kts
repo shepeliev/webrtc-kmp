@@ -47,7 +47,11 @@ kotlin {
     }
 
     sourceSets {
-        val commonMain by getting
+        val commonMain by getting {
+            dependencies {
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2")
+            }
+        }
         val androidMain by getting {
             dependencies {
                 implementation("org.webrtc:google-webrtc:1.0.32006")
@@ -73,6 +77,7 @@ android {
         targetSdkVersion(30)
     }
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
+    sourceSets["main"].res.srcDir("src/androidMain/res")
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8

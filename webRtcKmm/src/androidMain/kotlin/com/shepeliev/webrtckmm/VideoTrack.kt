@@ -2,7 +2,7 @@ package com.shepeliev.webrtckmm
 
 import org.webrtc.VideoTrack as NativeVideoTrack
 
-actual class VideoTrack internal constructor(override val native: NativeVideoTrack):
+actual class VideoTrack internal constructor(override val native: NativeVideoTrack) :
     BaseMediaStreamTrack(), MediaStreamTrack {
 
     private val sinks: MutableMap<VideoRenderer, CommonVideoSinkAdapter> = mutableMapOf()
@@ -18,5 +18,3 @@ actual class VideoTrack internal constructor(override val native: NativeVideoTra
         proxy?.let { native.removeSink(it) }
     }
 }
-
-internal fun NativeVideoTrack.asCommon() = VideoTrack(this)

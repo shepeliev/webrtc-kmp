@@ -11,7 +11,6 @@ import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.features.json.*
 import io.ktor.client.features.json.serializer.*
-import io.ktor.client.features.logging.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -152,7 +151,7 @@ class WebSocketRtcClient(
     }
 
     override suspend fun sendAnswerSdp(sdp: SessionDescription) {
-        val message = Message(type = "offer", sdp = sdp.description)
+        val message = Message(type = "answer", sdp = sdp.description)
         wsClient.send(message)
     }
 
@@ -205,7 +204,7 @@ class WebSocketRtcClient(
     private suspend fun sendPostMessage(
         messageType: MessageType,
         url: String,
-        message: Any? = null
+        message: Message? = null
     ) {
         val json = message?.let { Json.encodeToString(message) }
         Log.d(tag, "C->GAE: $url ${json?.let { ". Message: $it" } ?: ""}")
@@ -334,5 +333,4 @@ private fun defaultHttpClient() = HttpClient {
             ignoreUnknownKeys = true
         })
     }
-    install(Logging)
 }
