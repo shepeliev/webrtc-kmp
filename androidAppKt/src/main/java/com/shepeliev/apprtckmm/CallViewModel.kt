@@ -1,9 +1,9 @@
 package com.shepeliev.apprtckmm
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.app.Application
 import android.widget.Toast
-import androidx.annotation.MainThread
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
@@ -36,7 +36,13 @@ class CallViewModel(app: Application) : AndroidViewModel(app), AppRtcClient.Sign
 
     fun connectToRoom(roomUrl: String, roomId: String) = viewModelScope.launch {
         val params = RoomConnectionParameters(roomUrl, roomId, false)
-        signalingParams = appRtcClient.connectToRoom(params)
+
+        try {
+            signalingParams = appRtcClient.connectToRoom(params)
+        } catch (e: Throwable) {
+            logAndToast("Connecting room failed: ${e.message}")
+            navController.popBackStack()
+        }
         pcClient.createPeerConnection(
             NativeVideoSinkAdapter(localSink),
             NativeVideoSinkAdapter(remoteSink),
@@ -64,16 +70,23 @@ class CallViewModel(app: Application) : AndroidViewModel(app), AppRtcClient.Sign
     }
 
     private fun disconnectWithErrorMessage(errorMessage: String) {
-        AlertDialog.Builder(getApplication())
-            .setTitle(R.string.channel_error_title)
-            .setMessage(errorMessage)
-            .setCancelable(false)
-            .setNeutralButton(R.string.ok) { dialog, id ->
-                dialog.cancel()
-                disconnect()
-            }
-            .create()
-            .show()
+        logAndToast("Connection error: $errorMessage")
+        disconnect()
+    }
+
+    fun disconnect() {
+        if (isDisconnecting) return
+        isDisconnecting = true
+        viewModelScope.launch {
+            logAndToast("Remote end hung up; dropping PeerConnection")
+            appRtcClient.disconnectFromRoom()
+            pcClient.close()
+            navController.popBackStack()
+        }
+    }
+
+    fun switchCamera() {
+        viewModelScope.launch { pcClient.switchCamera() }
     }
 
     override fun onRemoteDescription(sdp: SessionDescription) {
@@ -96,17 +109,6 @@ class CallViewModel(app: Application) : AndroidViewModel(app), AppRtcClient.Sign
 
     override fun onChannelClose() {
         disconnect()
-    }
-
-    fun disconnect() {
-        if (isDisconnecting) return
-        isDisconnecting = true
-        viewModelScope.launch {
-            logAndToast("Remote end hung up; dropping PeerConnection")
-            appRtcClient.disconnectFromRoom()
-            pcClient.close()
-            navController.popBackStack()
-        }
     }
 
     override fun onChannelError(description: String?) {

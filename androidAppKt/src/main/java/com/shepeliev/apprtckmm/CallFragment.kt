@@ -30,6 +30,8 @@ class CallFragment : Fragment(R.layout.fragment_call) {
 
         binding.btnHangup.setOnClickListener { vm.disconnect() }
 
+        binding.btnSwitchCamera.setOnClickListener { vm.switchCamera() }
+
         vm.navController = findNavController()
 
         vm.localSink = binding.localVideoPreview.also {
