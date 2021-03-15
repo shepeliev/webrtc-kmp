@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
 plugins {
     kotlin("multiplatform")
-    kotlin("plugin.serialization") version "1.4.21"
+    kotlin("plugin.serialization") version "1.4.31"
     kotlin("native.cocoapods")
     id("com.android.library")
 }
@@ -15,7 +15,6 @@ kotlin {
         summary = "AppRTC KMM shared module"
         homepage = "https://github.com/shepeliev/webrtc-kmp"
         ios.deploymentTarget = "9.0"
-
         specRepos {
             url("https://github.com/CocoaPods/Specs.git")
         }
@@ -58,6 +57,7 @@ kotlin {
 
     sourceSets {
         val ktorVersion = "1.5.1"
+        val mviKotlinVersion = "2.0.1"
 
         val commonMain by getting {
             dependencies {
@@ -67,7 +67,9 @@ kotlin {
                 }
                 implementation("io.ktor:ktor-client-core:$ktorVersion")
                 implementation("io.ktor:ktor-client-serialization:$ktorVersion")
-
+                api("com.arkivanov.mvikotlin:mvikotlin:$mviKotlinVersion")
+                implementation("com.arkivanov.mvikotlin:mvikotlin-main:$mviKotlinVersion")
+                implementation("com.arkivanov.mvikotlin:mvikotlin-extensions-coroutines:$mviKotlinVersion")
             }
         }
         val commonTest by getting {

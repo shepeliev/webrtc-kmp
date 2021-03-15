@@ -1,5 +1,5 @@
 buildscript {
-    val kotlinVersion by extra("1.4.21")
+    val kotlinVersion by extra("1.4.31")
     val navVersion by extra("2.3.3")
 
     repositories {

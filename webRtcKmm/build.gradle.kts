@@ -54,7 +54,7 @@ kotlin {
         }
         val androidMain by getting {
             dependencies {
-                implementation("org.webrtc:google-webrtc:1.0.32006")
+                api("org.webrtc:google-webrtc:1.0.32006")
             }
         }
         val iosMain by getting

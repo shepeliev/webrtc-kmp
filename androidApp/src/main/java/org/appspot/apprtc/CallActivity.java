@@ -35,7 +35,7 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 
 import com.shepeliev.webrtckmm.IceCandidate;
-import com.shepeliev.webrtckmm.NativeVideoSinkAdapter;
+import com.shepeliev.webrtckmm.VideoSinkAdapter;
 import com.shepeliev.webrtckmm.Options;
 import com.shepeliev.webrtckmm.SessionDescription;
 import com.shepeliev.webrtckmm.Size;
@@ -253,7 +253,7 @@ public class CallActivity extends Activity implements AppRTCClient.SignalingEven
       try {
         videoFileRenderer = new VideoFileRenderer(
             saveRemoteVideoToFile, videoOutWidth, videoOutHeight, eglBase.getEglBaseContext());
-        remoteSinks.add(new NativeVideoSinkAdapter(videoFileRenderer));
+        remoteSinks.add(new VideoSinkAdapter(videoFileRenderer));
       } catch (IOException e) {
         throw new RuntimeException(
             "Failed to open video file for output: " + saveRemoteVideoToFile, e);

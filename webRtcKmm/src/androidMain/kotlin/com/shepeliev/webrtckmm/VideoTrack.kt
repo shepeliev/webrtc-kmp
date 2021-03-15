@@ -5,16 +5,13 @@ import org.webrtc.VideoTrack as NativeVideoTrack
 actual class VideoTrack internal constructor(override val native: NativeVideoTrack) :
     BaseMediaStreamTrack(), MediaStreamTrack {
 
-    private val sinks: MutableMap<VideoRenderer, CommonVideoSinkAdapter> = mutableMapOf()
-
     actual fun addSink(renderer: VideoRenderer) {
-        val proxy = CommonVideoSinkAdapter(renderer)
-        sinks += renderer to proxy
-        native.addSink(proxy)
+        require(renderer is VideoSinkAdapter) { "renderer must be instance of VideoSinkAdapter" }
+        native.addSink(renderer.native)
     }
 
     actual fun removeSink(renderer: VideoRenderer) {
-        val proxy = sinks.remove(renderer)
-        proxy?.let { native.removeSink(it) }
+        require(renderer is VideoSinkAdapter) { "renderer must be instance of VideoSinkAdapter" }
+        native.removeSink(renderer.native)
     }
 }

@@ -271,19 +271,55 @@ actual class PeerConnection internal constructor() :  CoroutineScope by MainScop
         // not applicable
     }
 
+    private fun rtcSignalingStateAsCommon(state: RTCSignalingState): SignalingState {
+        return when (state) {
+            RTCSignalingState.RTCSignalingStateStable -> SignalingState.Stable
+            RTCSignalingState.RTCSignalingStateHaveLocalOffer -> SignalingState.HaveLocalOffer
+            RTCSignalingState.RTCSignalingStateHaveLocalPrAnswer -> SignalingState.HaveLocalPranswer
+            RTCSignalingState.RTCSignalingStateHaveRemoteOffer -> SignalingState.HaveRemoteOffer
+            RTCSignalingState.RTCSignalingStateHaveRemotePrAnswer -> SignalingState.HaveRemotePranswer
+            RTCSignalingState.RTCSignalingStateClosed -> SignalingState.Closed
+        }
+    }
+
+    private fun rtcIceConnectionStateAsCommon(state: RTCIceConnectionState): IceConnectionState {
+        return when (state) {
+            RTCIceConnectionState.RTCIceConnectionStateNew -> IceConnectionState.New
+            RTCIceConnectionState.RTCIceConnectionStateChecking -> IceConnectionState.Checking
+            RTCIceConnectionState.RTCIceConnectionStateConnected -> IceConnectionState.Connected
+            RTCIceConnectionState.RTCIceConnectionStateCompleted -> IceConnectionState.Completed
+            RTCIceConnectionState.RTCIceConnectionStateFailed -> IceConnectionState.Failed
+            RTCIceConnectionState.RTCIceConnectionStateDisconnected -> IceConnectionState.Disconnected
+            RTCIceConnectionState.RTCIceConnectionStateClosed -> IceConnectionState.Closed
+            RTCIceConnectionState.RTCIceConnectionStateCount -> IceConnectionState.Count
+        }
+    }
+
+    private fun rtcPeerConnectionStateAsCommon(state: RTCPeerConnectionState): PeerConnectionState {
+        return when (state) {
+            RTCPeerConnectionState.RTCPeerConnectionStateNew -> PeerConnectionState.New
+            RTCPeerConnectionState.RTCPeerConnectionStateConnecting -> PeerConnectionState.Connecting
+            RTCPeerConnectionState.RTCPeerConnectionStateConnected -> PeerConnectionState.Connected
+            RTCPeerConnectionState.RTCPeerConnectionStateDisconnected -> PeerConnectionState.Disconnected
+            RTCPeerConnectionState.RTCPeerConnectionStateFailed -> PeerConnectionState.Failed
+            RTCPeerConnectionState.RTCPeerConnectionStateClosed -> PeerConnectionState.Closed
+        }
+    }
+
+    internal fun rtcIceGatheringStateAsCommon(state: RTCIceGatheringState): IceGatheringState {
+        return when (state) {
+            RTCIceGatheringState.RTCIceGatheringStateNew -> IceGatheringState.New
+            RTCIceGatheringState.RTCIceGatheringStateGathering -> IceGatheringState.Gathering
+            RTCIceGatheringState.RTCIceGatheringStateComplete -> IceGatheringState.Complete
+        }
+    }
+
     internal inner class PcObserver : NSObject(), RTCPeerConnectionDelegateProtocol {
         override fun peerConnection(
             peerConnection: RTCPeerConnection,
             didChangeSignalingState: RTCSignalingState
         ) {
             launch { _signalingStateFlow.emit(rtcSignalingStateAsCommon(didChangeSignalingState)) }
-        }
-
-        @Suppress("CONFLICTING_OVERLOADS")
-        override fun peerConnection(
-            peerConnection: RTCPeerConnection,
-            didAddStream: RTCMediaStream
-        ) {
         }
 
         override fun peerConnection(
@@ -330,6 +366,13 @@ actual class PeerConnection internal constructor() :  CoroutineScope by MainScop
 
         override fun peerConnectionShouldNegotiate(peerConnection: RTCPeerConnection) {
             launch { _renegotiationNeeded.emit(Unit) }
+        }
+
+        @Suppress("CONFLICTING_OVERLOADS")
+        override fun peerConnection(
+            peerConnection: RTCPeerConnection,
+            didAddStream: RTCMediaStream
+        ) {
         }
 
         @Suppress("CONFLICTING_OVERLOADS")

@@ -34,8 +34,11 @@ import com.shepeliev.webrtckmm.VideoRenderer
 import com.shepeliev.webrtckmm.VideoTrack
 import com.shepeliev.webrtckmm.mediaConstraints
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Peer connection client implementation.
@@ -47,13 +50,11 @@ import kotlinx.coroutines.launch
  */
 class PeerConnectionClient(
     private val events: PeerConnectionEvents,
-    private val coroutineScope: CoroutineScope
+    coroutineContext: CoroutineContext = Dispatchers.Main
 ) {
 
     private var peerConnection: PeerConnection? = null
     private var isError = false
-    private var localRender: VideoRenderer? = null
-    private var remoteRenderer: VideoRenderer? = null
     private var signalingParameters: SignalingParameters? = null
     private var sdpMediaConstraints: MediaConstraints? = null
 
@@ -75,13 +76,11 @@ class PeerConnectionClient(
     private var localAudioTrack: AudioTrack? = null
     private var dataChannel: DataChannel? = null
 
+    private val scope = CoroutineScope(coroutineContext)
+
     suspend fun createPeerConnection(
-        localRender: VideoRenderer,
-        remoteRenderer: VideoRenderer,
         signalingParameters: SignalingParameters
     ) {
-        this.localRender = localRender
-        this.remoteRenderer = remoteRenderer
         this.signalingParameters = signalingParameters
         try {
             createMediaConstraintsInternal()
@@ -99,9 +98,8 @@ class PeerConnectionClient(
         peerConnection?.getSenders()?.forEach { it.track?.stop() }
         peerConnection?.dispose()
         peerConnection = null
-        localRender = null
-        remoteRenderer = null
         events.onPeerConnectionClosed()
+        scope.cancel()
     }
 
     private fun createMediaConstraintsInternal() {
@@ -128,54 +126,45 @@ class PeerConnectionClient(
             sdpSemantics = SdpSemantics.UnifiedPlan
         )
         peerConnection = RtcPeerConnection(rtcConfiguration).apply {
-            coroutineScope.launch {
-                iceConnectionStateFlow.collect {
-                    Log.d(TAG, "IceConnectionState: $it")
-                    when (it) {
-                        IceConnectionState.Connected -> events.onIceConnected()
-                        IceConnectionState.Disconnected -> events.onIceDisconnected()
-                        IceConnectionState.Failed -> reportError("ICE connection failed.")
-                        else -> {
-                        }
+
+            iceConnectionStateFlow.onEach {
+                Log.d(TAG, "IceConnectionState: $it")
+                when (it) {
+                    IceConnectionState.Connected -> events.onIceConnected()
+                    IceConnectionState.Disconnected -> events.onIceDisconnected()
+                    IceConnectionState.Failed -> reportError("ICE connection failed.")
+                    else -> {
                     }
                 }
             }
+                .launchIn(scope)
 
-            coroutineScope.launch {
-                connectionStateFlow.collect {
-                    Log.d(TAG, "PeerConnectionState: $it")
-                    when (it) {
-                        PeerConnectionState.Connected -> events.onConnected()
-                        PeerConnectionState.Disconnected -> events.onDisconnected()
-                        PeerConnectionState.Failed -> reportError("DTLS connection failed.")
-                        else -> {
-                        }
-
+            connectionStateFlow.onEach {
+                Log.d(TAG, "PeerConnectionState: $it")
+                when (it) {
+                    PeerConnectionState.Connected -> events.onConnected()
+                    PeerConnectionState.Disconnected -> events.onDisconnected()
+                    PeerConnectionState.Failed -> reportError("DTLS connection failed.")
+                    else -> {
                     }
+
                 }
             }
+                .launchIn(scope)
 
-            coroutineScope.launch {
-                signalingStateFlow.collect { Log.d(TAG, "SignalingState: $it") }
-            }
+            signalingStateFlow.onEach { Log.d(TAG, "SignalingState: $it") }.launchIn(scope)
 
-            coroutineScope.launch {
-                iceCandidateFlow.collect {
-                    Log.d(TAG, "IceCandidate: $it")
-                    events.onIceCandidate(it)
-                }
-            }
+            iceCandidateFlow.onEach {
+                Log.d(TAG, "IceCandidate: $it")
+                events.onIceCandidate(it)
+            }.launchIn(scope)
 
-            coroutineScope.launch {
-                removedIceCandidatesFlow.collect {
-                    Log.d(TAG, "Removed ICE candidates: $it")
-                    events.onIceCandidatesRemoved(it)
-                }
-            }
+            removedIceCandidatesFlow.onEach {
+                Log.d(TAG, "Removed ICE candidates: $it")
+                events.onIceCandidatesRemoved(it)
+            }.launchIn(scope)
 
-            coroutineScope.launch {
-                iceGatheringStateFlow.collect { Log.d(TAG, "IceGatheringState: $it") }
-            }
+            iceGatheringStateFlow.onEach { Log.d(TAG, "IceGatheringState: $it") }.launchIn(scope)
 
 //            coroutineScope.launch {
 //                dataChannelFlow.collect {
@@ -211,7 +200,7 @@ class PeerConnectionClient(
         isInitiator = false
 
         val userMedia = MediaDevices.getUserMedia(audio = true, video = true).also {
-            it.videoTracks.first().addSink(localRender!!)
+            events.onLocalVideoTrack(it.videoTracks.first())
         }
 
         val mediaStreamLabels = listOf("ARDAMS")
@@ -220,7 +209,7 @@ class PeerConnectionClient(
         // answer to get the remote track.
         remoteVideoTrack = getRemoteVideoTrack()
         remoteVideoTrack!!.enabled = renderVideo
-        remoteVideoTrack!!.addSink(remoteRenderer!!)
+        events.onRemoteVideoTrack(remoteVideoTrack!!)
         peerConnection!!.addTrack(userMedia.audioTracks.first(), mediaStreamLabels)
         findVideoSender()
         Log.d(TAG, "Peer connection created.")
@@ -547,6 +536,10 @@ class PeerConnectionClient(
              * Callback fired once peer connection error happened.
              */
             fun onPeerConnectionError(description: String?)
+
+            fun onLocalVideoTrack(track: VideoTrack)
+
+            fun onRemoteVideoTrack(track: VideoTrack)
         }
     }
 }
