@@ -13,4 +13,4 @@ expect class RtpTransceiver {
     fun dispose()
 }
 
-enum class RtpTransceiverDirection { SendRecv, SendOnly, RecvOnly, Inactive; }
+enum class RtpTransceiverDirection { SendRecv, SendOnly, RecvOnly, Inactive, Stopped; }

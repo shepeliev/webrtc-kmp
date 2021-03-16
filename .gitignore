@@ -9,7 +9,12 @@ build/
 .cxx
 local.properties
 
-#XCode
+# XCode
 Pods/
 xcuserdata/
 *.podspec
+
+# Carthage
+Cartfile.resolved
+Build/
+Checkouts/

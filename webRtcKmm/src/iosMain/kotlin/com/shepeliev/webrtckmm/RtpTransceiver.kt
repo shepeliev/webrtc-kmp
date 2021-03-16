@@ -59,6 +59,9 @@ private fun rtcRtpTransceiverDirectionAsCommon(direction: RTCRtpTransceiverDirec
         RTCRtpTransceiverDirection.RTCRtpTransceiverDirectionInactive -> {
             RtpTransceiverDirection.Inactive
         }
+        RTCRtpTransceiverDirection.RTCRtpTransceiverDirectionStopped -> {
+            RtpTransceiverDirection.Stopped
+        }
     }
 }
 
@@ -78,6 +81,9 @@ internal fun RtpTransceiverDirection.asNative(): RTCRtpTransceiverDirection {
 
         RtpTransceiverDirection.Inactive -> {
             RTCRtpTransceiverDirection.RTCRtpTransceiverDirectionInactive
+        }
+        RtpTransceiverDirection.Stopped -> {
+            RTCRtpTransceiverDirection.RTCRtpTransceiverDirectionStopped
         }
     }
 }

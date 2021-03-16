@@ -59,5 +59,6 @@ internal fun RtpTransceiverDirection.asNative(): NativeRtpTransceiver.RtpTransce
         RtpTransceiverDirection.SendOnly -> NativeRtpTransceiver.RtpTransceiverDirection.SEND_ONLY
         RtpTransceiverDirection.RecvOnly -> NativeRtpTransceiver.RtpTransceiverDirection.RECV_ONLY
         RtpTransceiverDirection.Inactive -> NativeRtpTransceiver.RtpTransceiverDirection.INACTIVE
+        RtpTransceiverDirection.Stopped -> NativeRtpTransceiver.RtpTransceiverDirection.INACTIVE
     }
 }

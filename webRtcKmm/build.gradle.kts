@@ -1,29 +1,13 @@
+import org.apache.tools.ant.taskdefs.condition.Os
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+import org.jetbrains.kotlin.gradle.tasks.CInteropProcess
 
 plugins {
     kotlin("multiplatform")
-    kotlin("native.cocoapods")
     id("com.android.library")
 }
 
-version = "1.0.0"
-
 kotlin {
-    cocoapods {
-        summary = "WebRTC Kotlin multi platform SDK"
-        homepage = "https://github.com/shepeliev/webrtc-kmp"
-        ios.deploymentTarget = "9.0"
-
-        specRepos {
-            url("https://github.com/CocoaPods/Specs.git")
-        }
-
-        pod("GoogleWebRTC") {
-            version = "~> 1.1"
-            moduleName = "WebRTC"
-        }
-    }
-
     android()
 
     val iosTarget: (String, KotlinNativeTarget.() -> Unit) -> KotlinNativeTarget =
@@ -33,16 +17,31 @@ kotlin {
             ::iosX64
 
     iosTarget("ios") {
-        binaries {
-            getTest("DEBUG").apply {
-                linkerOpts(
+        val frameworksPath = "${projectDir}/src/nativeInterop/cinterop/Carthage/Build/iOS"
+
+        compilations.getByName("main") {
+            val WebRTC by cinterops.creating {
+                compilerOpts(
                     "-framework",
                     "WebRTC",
-                    "-F${rootProject.projectDir}/webRtcKmm/build/cocoapods/synthetic/IOS/webRtcKmm/Pods/GoogleWebRTC/Frameworks/frameworks",
-                    "-rpath",
-                    "${rootProject.projectDir}/webRtcKmm/build/cocoapods/synthetic/IOS/webRtcKmm/Pods/GoogleWebRTC/Frameworks/frameworks"
+                    "-F$frameworksPath"
                 )
             }
+        }
+
+        binaries {
+            all {
+                linkerOpts(
+                    "-framework", "WebRTC",
+                    "-F$frameworksPath"
+                )
+            }
+
+            framework {
+                baseName = "WebRtcKmm"
+            }
+
+            getTest(DEBUG).linkerOpts.plusAssign(listOf("-rpath", frameworksPath))
         }
     }
 
@@ -99,4 +98,32 @@ val packForXcode by tasks.creating(Sync::class) {
     from({ framework.outputDirectory })
     into(targetDir)
 }
-tasks.getByName("build").dependsOn(packForXcode)
+
+tasks {
+    getByName("build").dependsOn(packForXcode)
+
+    val carthageBootstrap by creating(Exec::class) {
+        group = "carthage"
+        commandLine(
+            "carthage",
+            "update",
+            "--platform", "iOS",
+            "--project-directory", "${projectDir}/src/nativeInterop/cinterop/",
+            "--cache-builds"
+        )
+    }
+
+    if (Os.isFamily(Os.FAMILY_MAC)) {
+        withType(CInteropProcess::class) {
+            dependsOn("carthageBootstrap")
+        }
+    }
+
+    create("carthageClean", Delete::class.java) {
+        group = "carthage"
+        delete(
+            projectDir.resolve("src/nativeInterop/cinterop/Carthage"),
+            projectDir.resolve("src/nativeInterop/cinterop/Cartfile.resolved")
+        )
+    }
+}
