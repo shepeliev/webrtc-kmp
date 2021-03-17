@@ -30,7 +30,7 @@ import com.shepeliev.webrtckmm.RtpSender
 import com.shepeliev.webrtckmm.SdpSemantics
 import com.shepeliev.webrtckmm.SessionDescription
 import com.shepeliev.webrtckmm.TcpCandidatePolicy
-import com.shepeliev.webrtckmm.VideoRenderer
+import com.shepeliev.webrtckmm.UserMedia
 import com.shepeliev.webrtckmm.VideoTrack
 import com.shepeliev.webrtckmm.mediaConstraints
 import kotlinx.coroutines.CoroutineScope
@@ -199,9 +199,8 @@ class PeerConnectionClient(
         dataChannel = peerConnection!!.createDataChannel("ApprtcDemo data")
         isInitiator = false
 
-        val userMedia = MediaDevices.getUserMedia(audio = true, video = true).also {
-            events.onLocalVideoTrack(it.videoTracks.first())
-        }
+        val userMedia = MediaDevices.getUserMedia(audio = true, video = true)
+        events.onLocalStream(userMedia)
 
         val mediaStreamLabels = listOf("ARDAMS")
         peerConnection!!.addTrack(userMedia.videoTracks.first(), mediaStreamLabels)
@@ -209,7 +208,7 @@ class PeerConnectionClient(
         // answer to get the remote track.
         remoteVideoTrack = getRemoteVideoTrack()
         remoteVideoTrack!!.enabled = renderVideo
-        events.onRemoteVideoTrack(remoteVideoTrack!!)
+        events.onRemoteStream(UserMedia(emptyList(), listOf(remoteVideoTrack!!)))
         peerConnection!!.addTrack(userMedia.audioTracks.first(), mediaStreamLabels)
         findVideoSender()
         Log.d(TAG, "Peer connection created.")
@@ -537,9 +536,9 @@ class PeerConnectionClient(
              */
             fun onPeerConnectionError(description: String?)
 
-            fun onLocalVideoTrack(track: VideoTrack)
+            fun onLocalStream(stream: UserMedia)
 
-            fun onRemoteVideoTrack(track: VideoTrack)
+            fun onRemoteStream(stream: UserMedia)
         }
     }
 }

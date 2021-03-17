@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 
 internal val stateToModel: suspend CallStore.State.() -> CallView.Model = {
-    CallView.Model(localVideoTrack, remoteVideoTrack)
+    CallView.Model(localStream, remoteStream)
 }
 
 internal val eventToIntent: suspend CallView.Event.() -> CallStore.Intent = {

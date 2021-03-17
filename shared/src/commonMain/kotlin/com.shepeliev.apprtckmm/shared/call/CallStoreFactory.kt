@@ -17,15 +17,15 @@ import com.shepeliev.apprtckmm.shared.call.CallStoreFactory.Action.IceCandidates
 import com.shepeliev.apprtckmm.shared.call.CallStoreFactory.Action.JoinRoom
 import com.shepeliev.apprtckmm.shared.call.CallStoreFactory.Action.LocalDescriptionReady
 import com.shepeliev.apprtckmm.shared.call.CallStoreFactory.Action.RemoteDescriptionReady
-import com.shepeliev.apprtckmm.shared.call.CallStoreFactory.Result.LocalVideoTrack
-import com.shepeliev.apprtckmm.shared.call.CallStoreFactory.Result.RemoteVideoTrack
+import com.shepeliev.apprtckmm.shared.call.CallStoreFactory.Result.LocalStream
+import com.shepeliev.apprtckmm.shared.call.CallStoreFactory.Result.RemoteStream
 import com.shepeliev.apprtckmm.shared.rtcclient.AppRtcClient
 import com.shepeliev.apprtckmm.shared.rtcclient.PeerConnectionClient
 import com.shepeliev.apprtckmm.shared.rtcclient.WebSocketRtcClient
 import com.shepeliev.webrtckmm.IceCandidate
 import com.shepeliev.webrtckmm.RtcStatsReport
 import com.shepeliev.webrtckmm.SessionDescription
-import com.shepeliev.webrtckmm.VideoTrack
+import com.shepeliev.webrtckmm.UserMedia
 
 internal class CallStoreFactory(private val storeFactory: StoreFactory) {
 
@@ -47,15 +47,15 @@ internal class CallStoreFactory(private val storeFactory: StoreFactory) {
     }
 
     private sealed class Result {
-        data class LocalVideoTrack(val track: VideoTrack) : Result()
-        data class RemoteVideoTrack(val track: VideoTrack) : Result()
+        data class LocalStream(val stream: UserMedia) : Result()
+        data class RemoteStream(val stream: UserMedia) : Result()
     }
 
     private object ReducerImpl : Reducer<State, Result> {
         override fun State.reduce(result: Result): State {
             return when (result) {
-                is LocalVideoTrack -> copy(localVideoTrack = result.track)
-                is RemoteVideoTrack -> copy(remoteVideoTrack = result.track)
+                is LocalStream -> copy(localStream = result.stream)
+                is RemoteStream -> copy(remoteStream = result.stream)
             }
         }
     }
@@ -82,7 +82,7 @@ internal class CallStoreFactory(private val storeFactory: StoreFactory) {
             when (action) {
                 is JoinRoom -> joinRoom(action)
                 is IceCandidateReady -> client.sendLocalIceCandidate(action.candidate)
-                is IceCandidatesRemoved ->  client.sendLocalIceCandidateRemovals(action.candidates)
+                is IceCandidatesRemoved -> client.sendLocalIceCandidateRemovals(action.candidates)
                 is LocalDescriptionReady -> executeLocalDescriptionReadyAction(action)
                 is RemoteDescriptionReady -> executeRemoteDescriptionReadyAction(action)
             }
@@ -211,12 +211,12 @@ internal class CallStoreFactory(private val storeFactory: StoreFactory) {
                 disconnectWithErrorMessage("$description")
             }
 
-            override fun onLocalVideoTrack(track: VideoTrack) {
-                dispatch(LocalVideoTrack(track))
+            override fun onLocalStream(stream: UserMedia) {
+                dispatch(LocalStream(stream))
             }
 
-            override fun onRemoteVideoTrack(track: VideoTrack) {
-                dispatch(RemoteVideoTrack(track))
+            override fun onRemoteStream(stream: UserMedia) {
+                dispatch(RemoteStream(stream))
             }
         }
     }

@@ -1,3 +1,5 @@
 language = Objective-C
 modules = WebRTC
 package = cocoapods.GoogleWebRTC
+compilerOpts = -framework WebRTC
+linkerOpts = -framework WebRTC

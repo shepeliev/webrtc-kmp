@@ -11,6 +11,10 @@ import UIKit
 
 class WelcomeViewController: UIViewController {
 
+    @IBOutlet weak var roomIdField: UITextField!
+    @IBAction func joinRoomPressed(_ sender: Any) {
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.

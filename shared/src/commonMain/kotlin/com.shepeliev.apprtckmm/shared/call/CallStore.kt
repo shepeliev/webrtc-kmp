@@ -4,6 +4,7 @@ import com.arkivanov.mvikotlin.core.store.Store
 import com.shepeliev.apprtckmm.shared.call.CallStore.Intent
 import com.shepeliev.apprtckmm.shared.call.CallStore.Label
 import com.shepeliev.apprtckmm.shared.call.CallStore.State
+import com.shepeliev.webrtckmm.UserMedia
 import com.shepeliev.webrtckmm.VideoTrack
 
 internal interface CallStore : Store<Intent, State, Label> {
@@ -14,8 +15,8 @@ internal interface CallStore : Store<Intent, State, Label> {
 
     data class State(
         val isDisconnecting: Boolean = false,
-        val localVideoTrack: VideoTrack? = null,
-        val remoteVideoTrack: VideoTrack? = null,
+        val localStream: UserMedia? = null,
+        val remoteStream: UserMedia? = null,
     )
 
     sealed class Label {

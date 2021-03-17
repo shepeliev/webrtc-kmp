@@ -19,30 +19,18 @@ kotlin {
     iosTarget("ios") {
         val frameworksPath = "${projectDir}/src/nativeInterop/cinterop/Carthage/Build/iOS"
 
-        compilations.getByName("main") {
-            val WebRTC by cinterops.creating {
-                compilerOpts(
-                    "-framework",
-                    "WebRTC",
-                    "-F$frameworksPath"
-                )
-            }
-        }
-
         binaries {
-            all {
-                linkerOpts(
-                    "-framework", "WebRTC",
-                    "-F$frameworksPath"
-                )
+            getTest(DEBUG).apply {
+                linkerOpts("-F$frameworksPath", "-rpath", frameworksPath)
             }
-
-            framework {
-                baseName = "WebRtcKmm"
-            }
-
-            getTest(DEBUG).linkerOpts.plusAssign(listOf("-rpath", frameworksPath))
         }
+
+        compilations.getByName("main") {
+            cinterops.create("WebRTC") {
+                compilerOpts("-F$frameworksPath")
+            }
+        }
+
     }
 
     sourceSets {
@@ -51,12 +39,6 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2")
             }
         }
-        val androidMain by getting {
-            dependencies {
-                api("org.webrtc:google-webrtc:1.0.32006")
-            }
-        }
-        val iosMain by getting
 
         val commonTest by getting {
             dependencies {
@@ -64,6 +46,14 @@ kotlin {
                 implementation(kotlin("test-annotations-common"))
             }
         }
+
+        val androidMain by getting {
+            dependencies {
+                api("org.webrtc:google-webrtc:1.0.32006")
+            }
+        }
+
+        val iosMain by getting
 
         val iosTest by getting
     }
@@ -84,23 +74,23 @@ android {
     }
 }
 
-val packForXcode by tasks.creating(Sync::class) {
-    group = "build"
-    val mode = System.getenv("CONFIGURATION") ?: "DEBUG"
-    val sdkName = System.getenv("SDK_NAME") ?: "iphonesimulator"
-//    val targetName = "ios" + if (sdkName.startsWith("iphoneos")) "Arm64" else "X64"
-    val targetName = "ios"
-    val framework =
-        kotlin.targets.getByName<KotlinNativeTarget>(targetName).binaries.getFramework(mode)
-    inputs.property("mode", mode)
-    dependsOn(framework.linkTask)
-    val targetDir = File(buildDir, "xcode-frameworks")
-    from({ framework.outputDirectory })
-    into(targetDir)
-}
+//val packForXcode by tasks.creating(Sync::class) {
+//    group = "build"
+//    val mode = System.getenv("CONFIGURATION") ?: "DEBUG"
+//    val sdkName = System.getenv("SDK_NAME") ?: "iphonesimulator"
+////    val targetName = "ios" + if (sdkName.startsWith("iphoneos")) "Arm64" else "X64"
+//    val targetName = "ios"
+//    val framework =
+//        kotlin.targets.getByName<KotlinNativeTarget>(targetName).binaries.getFramework(mode)
+//    inputs.property("mode", mode)
+//    dependsOn(framework.linkTask)
+//    val targetDir = File(buildDir, "xcode-frameworks")
+//    from({ framework.outputDirectory })
+//    into(targetDir)
+//}
 
 tasks {
-    getByName("build").dependsOn(packForXcode)
+//    getByName("build").dependsOn(packForXcode)
 
     val carthageBootstrap by creating(Exec::class) {
         group = "carthage"

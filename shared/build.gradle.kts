@@ -4,35 +4,14 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 plugins {
     kotlin("multiplatform")
     kotlin("plugin.serialization") version "1.4.31"
-    kotlin("native.cocoapods")
     id("com.android.library")
 }
 
 version = "1.0.0"
+val mviKotlinVersion = "2.0.1"
 
 kotlin {
-    cocoapods {
-        summary = "AppRTC KMM shared module"
-        homepage = "https://github.com/shepeliev/webrtc-kmp"
-        ios.deploymentTarget = "9.0"
-        specRepos {
-            url("https://github.com/CocoaPods/Specs.git")
-        }
-
-        pod("GoogleWebRTC") {
-            version = "~> 1.1"
-            moduleName = "WebRTC"
-        }
-    }
-
     android()
-//    ios {
-//        binaries {
-//            framework {
-//                baseName = "shared"
-//            }
-//        }
-//    }
 
     val iosTarget: (String, KotlinNativeTarget.() -> Unit) -> KotlinNativeTarget =
         if (System.getenv("SDK_NAME")?.startsWith("iphoneos") == true)
@@ -42,22 +21,20 @@ kotlin {
 
     iosTarget("ios") {
         binaries {
-            getTest("DEBUG").apply {
-                linkerOpts(
-                    "-framework",
-                    "WebRTC",
-                    "-F${rootProject.projectDir}/shared/build/cocoapods/synthetic/IOS/shared/Pods/GoogleWebRTC/Frameworks/frameworks",
-                    "-rpath",
-                    "${rootProject.projectDir}/shared/build/cocoapods/synthetic/IOS/shared/Pods/GoogleWebRTC/Frameworks/frameworks"
-                )
-                linkerOpts("-ObjC")
+            framework {
+                baseName = "shared"
+                freeCompilerArgs = freeCompilerArgs + "-Xobjc-generics"
+                linkerOpts("-F$projectDir/src/nativeInterop/Carthage/Build/iOS")
+
+                export(project(":webRtcKmm"))
+                export("com.arkivanov.mvikotlin:mvikotlin-iosx64:$mviKotlinVersion")
+                export("com.arkivanov.mvikotlin:mvikotlin-main-iosx64:$mviKotlinVersion")
             }
         }
     }
 
     sourceSets {
         val ktorVersion = "1.5.1"
-        val mviKotlinVersion = "2.0.1"
 
         val commonMain by getting {
             dependencies {
@@ -68,7 +45,7 @@ kotlin {
                 implementation("io.ktor:ktor-client-core:$ktorVersion")
                 implementation("io.ktor:ktor-client-serialization:$ktorVersion")
                 api("com.arkivanov.mvikotlin:mvikotlin:$mviKotlinVersion")
-                implementation("com.arkivanov.mvikotlin:mvikotlin-main:$mviKotlinVersion")
+                api("com.arkivanov.mvikotlin:mvikotlin-main:$mviKotlinVersion")
                 implementation("com.arkivanov.mvikotlin:mvikotlin-extensions-coroutines:$mviKotlinVersion")
             }
         }
@@ -133,3 +110,26 @@ val packForXcode by tasks.creating(Sync::class) {
 }
 
 tasks.getByName("build").dependsOn(packForXcode)
+
+val carthageBootstrap by tasks.creating(Exec::class) {
+    group = "carthage"
+    commandLine(
+        "carthage",
+        "update",
+        "--platform", "iOS",
+        "--project-directory", "${projectDir}/src/nativeInterop/",
+        "--cache-builds"
+    )
+}
+
+afterEvaluate {
+    tasks.named("linkDebugTestIos").configure {
+        dependsOn(tasks.named("carthageBootstrap"))
+    }
+    tasks.named("linkDebugFrameworkIos").configure {
+        dependsOn(tasks.named("carthageBootstrap"))
+    }
+    tasks.named("linkReleaseFrameworkIos").configure {
+        dependsOn(tasks.named("carthageBootstrap"))
+    }
+}

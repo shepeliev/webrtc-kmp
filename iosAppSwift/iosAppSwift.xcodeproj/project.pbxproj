@@ -14,7 +14,25 @@
 		FA4E5ABB25F7FFF70056CF72 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FA4E5ABA25F7FFF70056CF72 /* Assets.xcassets */; };
 		FA4E5ABE25F7FFF70056CF72 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FA4E5ABC25F7FFF70056CF72 /* LaunchScreen.storyboard */; };
 		FA72BD0325FE277B00259593 /* CallViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA72BD0225FE277B00259593 /* CallViewController.swift */; };
+		FADAD666260286D40088AF3C /* shared.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAEAB2FA2601EED0007DF8F4 /* shared.framework */; };
+		FADAD6682602909A0088AF3C /* WebRTC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FADAD6672602909A0088AF3C /* WebRTC.framework */; };
+		FAEAB2FB2601EED0007DF8F4 /* shared.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAEAB2FA2601EED0007DF8F4 /* shared.framework */; };
+		FAEAB2FC2601EED0007DF8F4 /* shared.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FAEAB2FA2601EED0007DF8F4 /* shared.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		FAEAB2FD2601EED0007DF8F4 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				FAEAB2FC2601EED0007DF8F4 /* shared.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		FA4E5AAE25F7FFF40056CF72 /* iosAppSwift.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iosAppSwift.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -26,6 +44,8 @@
 		FA4E5ABD25F7FFF70056CF72 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		FA4E5ABF25F7FFF70056CF72 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FA72BD0225FE277B00259593 /* CallViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallViewController.swift; sourceTree = "<group>"; };
+		FADAD6672602909A0088AF3C /* WebRTC.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebRTC.framework; path = ../shared/src/nativeInterop/Carthage/Build/iOS/WebRTC.framework; sourceTree = "<group>"; };
+		FAEAB2FA2601EED0007DF8F4 /* shared.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = shared.framework; path = "../shared/build/xcode-frameworks/shared.framework"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -33,6 +53,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FAEAB2FB2601EED0007DF8F4 /* shared.framework in Frameworks */,
+				FADAD666260286D40088AF3C /* shared.framework in Frameworks */,
+				FADAD6682602909A0088AF3C /* WebRTC.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -74,6 +97,8 @@
 		FA4E5AC625F800180056CF72 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				FADAD6672602909A0088AF3C /* WebRTC.framework */,
+				FAEAB2FA2601EED0007DF8F4 /* shared.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -88,6 +113,7 @@
 				FA4E5AAA25F7FFF40056CF72 /* Sources */,
 				FA4E5AAB25F7FFF40056CF72 /* Frameworks */,
 				FA4E5AAC25F7FFF40056CF72 /* Resources */,
+				FAEAB2FD2601EED0007DF8F4 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -300,7 +326,10 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = Q86C89UZUH;
-				FRAMEWORK_SEARCH_PATHS = "";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(PROJECT_DIR)/../shared/build/xcode-frameworks",
+					"$(PROJECT_DIR)/../shared/src/nativeInterop/Carthage/Build/iOS",
+				);
 				INFOPLIST_FILE = iosAppSwift/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -320,7 +349,10 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = Q86C89UZUH;
-				FRAMEWORK_SEARCH_PATHS = "";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(PROJECT_DIR)/../shared/build/xcode-frameworks",
+					"$(PROJECT_DIR)/../shared/src/nativeInterop/Carthage/Build/iOS",
+				);
 				INFOPLIST_FILE = iosAppSwift/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

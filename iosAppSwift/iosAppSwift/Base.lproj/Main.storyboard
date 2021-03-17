@@ -34,6 +34,9 @@
                                 <state key="normal" title="Join room">
                                     <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 </state>
+                                <connections>
+                                    <action selector="joinRoomPressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="wOT-A0-FaP"/>
+                                </connections>
                             </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
@@ -51,6 +54,7 @@
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="roomIdField" destination="YyA-DH-B5I" id="8gS-gC-l04"/>
                         <segue destination="ZKE-DF-0oE" kind="presentation" id="oqv-1O-7sn"/>
                     </connections>
                 </viewController>
@@ -65,14 +69,51 @@
                     <view key="view" contentMode="scaleToFill" id="1p0-KZ-u0G">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="842"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="k51-DR-9Ke" userLabel="Full screen renderer" customClass="RTCEAGLVideoView">
+                                <rect key="frame" x="0.0" y="0.0" width="414" height="808"/>
+                                <subviews>
+                                    <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="c4j-E3-LXf" customClass="RTCEAGLVideoView">
+                                        <rect key="frame" x="259" y="518" width="112" height="191"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                    </view>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="wsB-hS-vf2">
+                                        <rect key="frame" x="180" y="757" width="54" height="30"/>
+                                        <color key="backgroundColor" systemColor="systemRedColor"/>
+                                        <state key="normal" title="Hangup">
+                                            <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        </state>
+                                        <connections>
+                                            <action selector="hangupPressed:" destination="ZKE-DF-0oE" eventType="touchUpInside" id="kZd-hn-pVR"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="bottom" secondItem="wsB-hS-vf2" secondAttribute="bottom" constant="21" id="HwZ-v9-a6A"/>
+                                    <constraint firstItem="wsB-hS-vf2" firstAttribute="centerX" secondItem="k51-DR-9Ke" secondAttribute="centerX" id="UoN-tM-aeu"/>
+                                </constraints>
+                            </view>
+                        </subviews>
                         <viewLayoutGuide key="safeArea" id="cwc-Zr-oQJ"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="cwc-Zr-oQJ" firstAttribute="bottom" secondItem="k51-DR-9Ke" secondAttribute="bottom" id="QNP-Nv-6eE"/>
+                            <constraint firstItem="k51-DR-9Ke" firstAttribute="leading" secondItem="cwc-Zr-oQJ" secondAttribute="leading" id="SHT-BO-Fzf"/>
+                            <constraint firstItem="cwc-Zr-oQJ" firstAttribute="trailing" secondItem="k51-DR-9Ke" secondAttribute="trailing" id="V9h-xt-ZG1"/>
+                            <constraint firstItem="k51-DR-9Ke" firstAttribute="top" secondItem="cwc-Zr-oQJ" secondAttribute="top" id="jwX-9z-uXf"/>
+                        </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="7EH-iM-ZMn"/>
+                    <connections>
+                        <outlet property="foolScreenVideo" destination="k51-DR-9Ke" id="2Bh-mC-5Yb"/>
+                        <outlet property="localVideoView" destination="c4j-E3-LXf" id="PA9-S6-U64"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="wHb-I1-bsv" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="932" y="139"/>
+            <point key="canvasLocation" x="931.88405797101461" y="138.61607142857142"/>
         </scene>
     </scenes>
     <resources>
@@ -81,6 +122,9 @@
         </namedColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemRedColor">
+            <color red="1" green="0.23137254901960785" blue="0.18823529411764706" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>
