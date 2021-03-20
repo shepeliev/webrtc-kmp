@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -13,9 +13,8 @@
 		FA4E5AB925F7FFF40056CF72 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FA4E5AB725F7FFF40056CF72 /* Main.storyboard */; };
 		FA4E5ABB25F7FFF70056CF72 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FA4E5ABA25F7FFF70056CF72 /* Assets.xcassets */; };
 		FA4E5ABE25F7FFF70056CF72 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FA4E5ABC25F7FFF70056CF72 /* LaunchScreen.storyboard */; };
-		FA72BD0325FE277B00259593 /* CallViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA72BD0225FE277B00259593 /* CallViewController.swift */; };
+		FA616F13260629D8005DFF7A /* WebRTC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FADAD6672602909A0088AF3C /* WebRTC.framework */; };
 		FADAD666260286D40088AF3C /* shared.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAEAB2FA2601EED0007DF8F4 /* shared.framework */; };
-		FADAD6682602909A0088AF3C /* WebRTC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FADAD6672602909A0088AF3C /* WebRTC.framework */; };
 		FAEAB2FB2601EED0007DF8F4 /* shared.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAEAB2FA2601EED0007DF8F4 /* shared.framework */; };
 		FAEAB2FC2601EED0007DF8F4 /* shared.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FAEAB2FA2601EED0007DF8F4 /* shared.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
@@ -43,7 +42,6 @@
 		FA4E5ABA25F7FFF70056CF72 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FA4E5ABD25F7FFF70056CF72 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		FA4E5ABF25F7FFF70056CF72 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		FA72BD0225FE277B00259593 /* CallViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallViewController.swift; sourceTree = "<group>"; };
 		FADAD6672602909A0088AF3C /* WebRTC.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebRTC.framework; path = ../shared/src/nativeInterop/Carthage/Build/iOS/WebRTC.framework; sourceTree = "<group>"; };
 		FAEAB2FA2601EED0007DF8F4 /* shared.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = shared.framework; path = "../shared/build/xcode-frameworks/shared.framework"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -55,7 +53,7 @@
 			files = (
 				FAEAB2FB2601EED0007DF8F4 /* shared.framework in Frameworks */,
 				FADAD666260286D40088AF3C /* shared.framework in Frameworks */,
-				FADAD6682602909A0088AF3C /* WebRTC.framework in Frameworks */,
+				FA616F13260629D8005DFF7A /* WebRTC.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -89,7 +87,6 @@
 				FA4E5ABA25F7FFF70056CF72 /* Assets.xcassets */,
 				FA4E5ABC25F7FFF70056CF72 /* LaunchScreen.storyboard */,
 				FA4E5ABF25F7FFF70056CF72 /* Info.plist */,
-				FA72BD0225FE277B00259593 /* CallViewController.swift */,
 			);
 			path = iosAppSwift;
 			sourceTree = "<group>";
@@ -114,6 +111,7 @@
 				FA4E5AAB25F7FFF40056CF72 /* Frameworks */,
 				FA4E5AAC25F7FFF40056CF72 /* Resources */,
 				FAEAB2FD2601EED0007DF8F4 /* Embed Frameworks */,
+				FA616F1626062E76005DFF7A /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -169,6 +167,28 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		FA616F1626062E76005DFF7A /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"$(SRCROOT)/input.xcfilelist",
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+				"$(SRCROOT)/output.xcfilelist",
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\n/usr/local/bin/carthage copy-frameworks\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		FA4E5AAA25F7FFF40056CF72 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -176,7 +196,6 @@
 			files = (
 				FA4E5AB625F7FFF40056CF72 /* WelcomeViewController.swift in Sources */,
 				FA4E5AB225F7FFF40056CF72 /* AppDelegate.swift in Sources */,
-				FA72BD0325FE277B00259593 /* CallViewController.swift in Sources */,
 				FA4E5AB425F7FFF40056CF72 /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -339,6 +358,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = NO;
 			};
 			name = Debug;
 		};

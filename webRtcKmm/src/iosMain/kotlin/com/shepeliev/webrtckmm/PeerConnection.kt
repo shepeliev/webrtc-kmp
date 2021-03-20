@@ -80,6 +80,12 @@ actual class PeerConnection internal constructor() :  CoroutineScope by MainScop
     private val _renegotiationNeeded = MutableSharedFlow<Unit>()
     actual val renegotiationNeeded: Flow<Unit> = _renegotiationNeeded.asSharedFlow()
 
+    private val _addStreamFlow = MutableSharedFlow<MediaStream>()
+    actual val addStreamFlow: Flow<MediaStream> = _addStreamFlow.asSharedFlow()
+
+    private val _removeStreamFlow = MutableSharedFlow<MediaStream>()
+    actual val removeStreamFlow: Flow<MediaStream> = _removeStreamFlow.asSharedFlow()
+
     private val _addTrackFlow = MutableSharedFlow<Pair<RtpReceiver, List<MediaStream>>>()
     actual val addTrackFlow: Flow<Pair<RtpReceiver, List<MediaStream>>> =
         _addTrackFlow.asSharedFlow()
@@ -185,12 +191,12 @@ actual class PeerConnection internal constructor() :  CoroutineScope by MainScop
         return true
     }
 
-//    actual fun addStream(stream: MediaStream): Boolean {
-//        native.addStream(stream.native)
-//        return true
-//    }
-//
-//    actual fun removeStream(stream: MediaStream) = native.removeStream(stream.native)
+    actual fun addStream(stream: MediaStream): Boolean {
+        native.addStream(stream.native)
+        return true
+    }
+
+    actual fun removeStream(stream: MediaStream) = native.removeStream(stream.native)
 
     actual fun createSender(kind: String, streamId: String): RtpSender? {
         return RtpSender(native.senderWithKind(kind, streamId))
@@ -266,10 +272,8 @@ actual class PeerConnection internal constructor() :  CoroutineScope by MainScop
     }
 
     actual fun stopRtcEventLog() = native.stopRtcEventLog()
+
     actual fun close() = native.close()
-    actual fun dispose() {
-        // not applicable
-    }
 
     private fun rtcSignalingStateAsCommon(state: RTCSignalingState): SignalingState {
         return when (state) {
@@ -373,6 +377,7 @@ actual class PeerConnection internal constructor() :  CoroutineScope by MainScop
             peerConnection: RTCPeerConnection,
             didAddStream: RTCMediaStream
         ) {
+            launch { _addStreamFlow.emit(MediaStream(didAddStream)) }
         }
 
         @Suppress("CONFLICTING_OVERLOADS")
@@ -380,6 +385,7 @@ actual class PeerConnection internal constructor() :  CoroutineScope by MainScop
             peerConnection: RTCPeerConnection,
             didRemoveStream: RTCMediaStream
         ) {
+            launch { _removeStreamFlow.emit(MediaStream(didRemoveStream)) }
         }
 
         override fun peerConnection(

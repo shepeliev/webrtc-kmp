@@ -4,6 +4,7 @@ import androidx.navigation.NavController
 import com.arkivanov.mvikotlin.core.view.BaseMviView
 import com.shepeliev.apprtckmm.databinding.FragmentCallBinding
 import com.shepeliev.apprtckmm.shared.call.CallView
+import com.shepeliev.webrtckmm.android.EglBaseProvider
 import org.webrtc.RendererCommon
 
 class AndroidCallView(
@@ -16,12 +17,14 @@ class AndroidCallView(
         binding.btnSwitchCamera.setOnClickListener { dispatch(CallView.Event.SwitchCameraClicked) }
 
         with(binding.localVideoPreview) {
+            init(EglBaseProvider.getEglBase().eglBaseContext, null)
             setEnableHardwareScaler(true)
             setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FIT)
             setMirror(true)
         }
 
         with(binding.fullScreenVideo) {
+            init(EglBaseProvider.getEglBase().eglBaseContext, null)
             setEnableHardwareScaler(true)
             setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FIT)
         }
@@ -29,8 +32,8 @@ class AndroidCallView(
 
     override fun render(model: CallView.Model) {
         super.render(model)
-        binding.fullScreenVideo.userMedia = model.remoteUserMedia
-        binding.localVideoPreview.userMedia = model.localUserMedia
+        model.remoteVideo?.videoTrack()?.native?.addSink(binding.fullScreenVideo)
+        model.localVideo?.videoTrack()?.native?.addSink(binding.localVideoPreview)
     }
 
     override fun navigateBack() {

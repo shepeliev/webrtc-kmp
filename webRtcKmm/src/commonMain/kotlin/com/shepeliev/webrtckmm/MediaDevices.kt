@@ -1,25 +1,20 @@
 package com.shepeliev.webrtckmm
 
 expect object MediaDevices {
-    suspend fun getUserMedia(audio: Boolean = true, video: Boolean = false): UserMedia
+    suspend fun getUserMedia(audio: Boolean = true, video: Boolean = false): MediaStream
 
-    suspend fun enumerateDevices(): List<DeviceInfo>
+    suspend fun enumerateDevices(): List<MediaDeviceInfo>
 
-    suspend fun switchCamera(): SwitchCameraResult
+    suspend fun switchCamera(): MediaDeviceInfo
 
-    suspend fun switchCamera(cameraId: String): SwitchCameraResult
+    suspend fun switchCamera(cameraId: String): MediaDeviceInfo
 }
 
-data class DeviceInfo(
+data class MediaDeviceInfo(
     val deviceId: String,
     val label: String,
-    val kind: DeviceKind,
+    val kind: MediaDeviceKind,
     val isFrontFacing: Boolean
 )
 
-data class SwitchCameraResult(
-    val isFrontCamera: Boolean = false,
-    val errorDescription: String? = null
-)
-
-enum class DeviceKind { videoInput, audioInput }
+enum class MediaDeviceKind { VideoInput, AudioInput }

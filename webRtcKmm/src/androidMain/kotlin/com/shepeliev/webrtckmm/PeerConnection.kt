@@ -76,6 +76,12 @@ actual class PeerConnection internal constructor() {
     private val _renegotiationNeeded = MutableSharedFlow<Unit>()
     actual val renegotiationNeeded: Flow<Unit> = _renegotiationNeeded.asSharedFlow()
 
+    private val _addStreamFlow = MutableSharedFlow<MediaStream>()
+    actual val addStreamFlow: Flow<MediaStream> = _addStreamFlow.asSharedFlow()
+
+    private val _removeStreamFlow = MutableSharedFlow<MediaStream>()
+    actual val removeStreamFlow: Flow<MediaStream> = _removeStreamFlow.asSharedFlow()
+
     private val _addTrackFlow = MutableSharedFlow<Pair<RtpReceiver, List<MediaStream>>>()
     actual val addTrackFlow: Flow<Pair<RtpReceiver, List<MediaStream>>> =
         _addTrackFlow.asSharedFlow()
@@ -184,8 +190,13 @@ actual class PeerConnection internal constructor() {
         return native.removeIceCandidates(candidates.map { it.native }.toTypedArray())
     }
 
-//    actual fun addStream(stream: MediaStream): Boolean = native.addStream(stream.native)
-//    actual fun removeStream(stream: MediaStream) = native.removeStream(stream.native)
+    actual fun addStream(stream: MediaStream): Boolean {
+        return native.addStream(stream.native)
+    }
+
+    actual fun removeStream(stream: MediaStream) {
+        native.removeStream(stream.native)
+    }
 
     actual fun createSender(kind: String, streamId: String): RtpSender? {
         return native.createSender(kind, streamId)?.asCommon()
@@ -254,8 +265,8 @@ actual class PeerConnection internal constructor() {
     }
 
     actual fun stopRtcEventLog() = native.stopRtcEventLog()
-    actual fun close() = native.close()
-    actual fun dispose() {
+
+    actual fun close() {
         GlobalScope.launch(Dispatchers.Default) { native.dispose() }
     }
 
@@ -289,9 +300,13 @@ actual class PeerConnection internal constructor() {
 
         override fun onSelectedCandidatePairChanged(event: NativeCandidatePairChangeEvent) {}
 
-        override fun onAddStream(stream: NativeMediaStream) {}
+        override fun onAddStream(nativeStream: NativeMediaStream) {
+            launch { _addStreamFlow.emit(MediaStream(nativeStream)) }
+        }
 
-        override fun onRemoveStream(stream: NativeMediaStream) {}
+        override fun onRemoveStream(nativeStream: NativeMediaStream) {
+            launch { _removeStreamFlow.emit(MediaStream(nativeStream)) }
+        }
 
         override fun onDataChannel(dataChannel: NativeDataChannel) {
             launch { _dataChannelFlow.emit(DataChannel(dataChannel)) }
@@ -303,11 +318,10 @@ actual class PeerConnection internal constructor() {
 
         override fun onAddTrack(
             receiver: NativeRtpReceiver,
-            streams: Array<out NativeMediaStream>
+            nativeStreams: Array<out NativeMediaStream>
         ) {
-            launch {
-                _addTrackFlow.emit(Pair(RtpReceiver(receiver), streams.map { MediaStream(it) }))
-            }
+            val streams = nativeStreams.map { MediaStream(it) }
+            launch { _addTrackFlow.emit(Pair(RtpReceiver(receiver), streams)) }
         }
 
         override fun onTrack(transceiver: NativeRtpTransceiver) {}

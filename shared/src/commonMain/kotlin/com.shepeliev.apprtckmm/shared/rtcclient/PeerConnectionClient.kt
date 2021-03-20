@@ -12,6 +12,7 @@ package com.shepeliev.apprtckmm.shared.rtcclient
 import com.shepeliev.apprtckmm.shared.Log
 import com.shepeliev.apprtckmm.shared.SignalingParameters
 import com.shepeliev.webrtckmm.AudioTrack
+import com.shepeliev.webrtckmm.CameraVideoCapturerException
 import com.shepeliev.webrtckmm.ContinualGatheringPolicy
 import com.shepeliev.webrtckmm.DataChannel
 import com.shepeliev.webrtckmm.IceCandidate
@@ -30,7 +31,7 @@ import com.shepeliev.webrtckmm.RtpSender
 import com.shepeliev.webrtckmm.SdpSemantics
 import com.shepeliev.webrtckmm.SessionDescription
 import com.shepeliev.webrtckmm.TcpCandidatePolicy
-import com.shepeliev.webrtckmm.UserMedia
+import com.shepeliev.webrtckmm.VideoStream
 import com.shepeliev.webrtckmm.VideoTrack
 import com.shepeliev.webrtckmm.mediaConstraints
 import kotlinx.coroutines.CoroutineScope
@@ -96,7 +97,7 @@ class PeerConnectionClient(
         dataChannel?.dispose()
         dataChannel = null
         peerConnection?.getSenders()?.forEach { it.track?.stop() }
-        peerConnection?.dispose()
+        peerConnection?.close()
         peerConnection = null
         events.onPeerConnectionClosed()
         scope.cancel()
@@ -199,17 +200,17 @@ class PeerConnectionClient(
         dataChannel = peerConnection!!.createDataChannel("ApprtcDemo data")
         isInitiator = false
 
-        val userMedia = MediaDevices.getUserMedia(audio = true, video = true)
-        events.onLocalStream(userMedia)
+        val stream = MediaDevices.getUserMedia(audio = true, video = true)
+        events.onLocalVideoStream(stream)
 
         val mediaStreamLabels = listOf("ARDAMS")
-        peerConnection!!.addTrack(userMedia.videoTracks.first(), mediaStreamLabels)
+        peerConnection!!.addTrack(stream.videoTracks.first(), mediaStreamLabels)
         // We can add the renderers right away because we don't need to wait for an
         // answer to get the remote track.
         remoteVideoTrack = getRemoteVideoTrack()
         remoteVideoTrack!!.enabled = renderVideo
-        events.onRemoteStream(UserMedia(emptyList(), listOf(remoteVideoTrack!!)))
-        peerConnection!!.addTrack(userMedia.audioTracks.first(), mediaStreamLabels)
+        events.onRemoteVideoStream { remoteVideoTrack }
+        peerConnection!!.addTrack(stream.audioTracks.first(), mediaStreamLabels)
         findVideoSender()
         Log.d(TAG, "Peer connection created.")
     }
@@ -381,8 +382,10 @@ class PeerConnectionClient(
     }
 
     suspend fun switchCamera() {
-        MediaDevices.switchCamera().takeIf { it.errorDescription != null }?.run {
-            Log.e(TAG, "Failed to switch camera. Error : $errorDescription")
+        try {
+            MediaDevices.switchCamera()
+        } catch (e: CameraVideoCapturerException) {
+            Log.e(TAG, "Failed to switch camera. Error : ${e.message}")
         }
     }
 
@@ -536,9 +539,9 @@ class PeerConnectionClient(
              */
             fun onPeerConnectionError(description: String?)
 
-            fun onLocalStream(stream: UserMedia)
+            fun onLocalVideoStream(stream: VideoStream)
 
-            fun onRemoteStream(stream: UserMedia)
+            fun onRemoteVideoStream(stream: VideoStream)
         }
     }
 }

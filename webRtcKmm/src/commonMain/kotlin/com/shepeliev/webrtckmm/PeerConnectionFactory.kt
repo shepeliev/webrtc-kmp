@@ -30,8 +30,7 @@ expect class PeerConnectionFactory {
         fun build(options: Options? = null): PeerConnectionFactory
     }
 
-    fun createLocalMediaStream(label: String): MediaStream
-    fun createVideoSource(isScreencast: Boolean, alignTimestamps: Boolean = true): VideoSource
+    fun createVideoSource(isScreencast: Boolean = false, alignTimestamps: Boolean = true): VideoSource
     fun createVideoTrack(id: String, videoSource: VideoSource): VideoTrack
     fun createAudioSource(constraints: MediaConstraints): AudioSource
     fun createAudioTrack(id: String, audioSource: AudioSource): AudioTrack

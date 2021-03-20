@@ -14,10 +14,10 @@ kotlin {
     android()
 
     val iosTarget: (String, KotlinNativeTarget.() -> Unit) -> KotlinNativeTarget =
-        if (System.getenv("SDK_NAME")?.startsWith("iphoneos") == true)
-            ::iosArm64
-        else
+        if (project.extra["ideaActive"] as Boolean)
             ::iosX64
+        else
+            ::iosArm64
 
     iosTarget("ios") {
         binaries {
@@ -27,9 +27,19 @@ kotlin {
                 linkerOpts("-F$projectDir/src/nativeInterop/Carthage/Build/iOS")
 
                 export(project(":webRtcKmm"))
-                export("com.arkivanov.mvikotlin:mvikotlin-iosx64:$mviKotlinVersion")
-                export("com.arkivanov.mvikotlin:mvikotlin-main-iosx64:$mviKotlinVersion")
             }
+        }
+    }
+
+    targets.withType(KotlinNativeTarget::class.java).all {
+        val arch = when (this.konanTarget) {
+            org.jetbrains.kotlin.konan.target.KonanTarget.IOS_ARM64 -> "iosarm64"
+            org.jetbrains.kotlin.konan.target.KonanTarget.IOS_X64 -> "iosx64"
+            else -> throw IllegalArgumentException()
+        }
+        binaries.withType(org.jetbrains.kotlin.gradle.plugin.mpp.Framework::class.java).all {
+            export("com.arkivanov.mvikotlin:mvikotlin-$arch:$mviKotlinVersion")
+            export("com.arkivanov.mvikotlin:mvikotlin-main-$arch:$mviKotlinVersion")
         }
     }
 

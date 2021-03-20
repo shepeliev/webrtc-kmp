@@ -1,10 +1,12 @@
 package com.shepeliev.webrtckmm
 
 import cocoapods.GoogleWebRTC.RTCAudioTrack
+import cocoapods.GoogleWebRTC.RTCMediaStream
 import cocoapods.GoogleWebRTC.RTCMediaStreamTrack
 import cocoapods.GoogleWebRTC.RTCMediaStreamTrackState
 import cocoapods.GoogleWebRTC.RTCRtpMediaType
 import cocoapods.GoogleWebRTC.RTCVideoTrack
+import platform.Foundation.NSLog
 
 abstract class BaseMediaStreamTrack : MediaStreamTrack {
     abstract val native: RTCMediaStreamTrack
@@ -25,7 +27,16 @@ abstract class BaseMediaStreamTrack : MediaStreamTrack {
         get() = rtcMediaStreamTrackStateAsCommon(native.readyState)
 
     override fun stop() {
-        // not applicable
+        enabled = false
+
+        when (this.kind) {
+            MediaStreamTrack.AUDIO_TRACK_KIND -> {
+                MediaDevices.onAudioTrackStopped(id)
+            }
+            MediaStreamTrack.VIDEO_TRACK_KIND -> {
+                MediaDevices.onVideoTrackStopped(id)
+            }
+        }
     }
 
     companion object {

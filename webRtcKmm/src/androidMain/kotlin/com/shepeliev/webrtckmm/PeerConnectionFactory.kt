@@ -45,20 +45,6 @@ actual class PeerConnectionFactory private constructor(val native: AndroidPeerCo
         }
     }
 
-//    actual fun createPeerConnection(
-//        rtcConfig: RtcConfiguration,
-//        observer: PeerConnectionObserver
-//    ): PeerConnection? {
-//        return native.createPeerConnection(
-//            rtcConfig.native,
-//            CommonPeerConnectionObserverAdapter(observer)
-//        )?.let { PeerConnection(it) }
-//    }
-
-    actual fun createLocalMediaStream(label: String): MediaStream {
-        return MediaStream(native.createLocalMediaStream(label))
-    }
-
     actual fun createVideoSource(
         isScreencast: Boolean,
         alignTimestamps: Boolean

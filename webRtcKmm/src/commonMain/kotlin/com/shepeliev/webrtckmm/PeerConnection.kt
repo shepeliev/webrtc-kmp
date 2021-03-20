@@ -19,6 +19,8 @@ expect class PeerConnection {
     val removedIceCandidatesFlow: Flow<List<IceCandidate>>
     val dataChannelFlow: Flow<DataChannel>
     val renegotiationNeeded: Flow<Unit>
+    val addStreamFlow: Flow<MediaStream>
+    val removeStreamFlow: Flow<MediaStream>
     val addTrackFlow: Flow<Pair<RtpReceiver, List<MediaStream>>>
     val removeTrackFlow: Flow<RtpReceiver>
 
@@ -59,19 +61,19 @@ expect class PeerConnection {
     fun addIceCandidate(candidate: IceCandidate): Boolean
     fun removeIceCandidates(candidates: List<IceCandidate>): Boolean
 
-//    /**
-//     * Adds a new MediaStream to be sent on this peer connection.
-//     * Note: This method is not supported with SdpSemantics.UNIFIED_PLAN. Please
-//     * use addTrack instead.
-//     */
-//    fun addStream(stream: MediaStream): Boolean
-//
-//    /**
-//     * Removes the given media stream from this peer connection.
-//     * This method is not supported with SdpSemantics.UNIFIED_PLAN. Please use
-//     * removeTrack instead.
-//     */
-//    fun removeStream(stream: MediaStream)
+    /**
+     * Adds a new MediaStream to be sent on this peer connection.
+     * Note: This method is not supported with SdpSemantics.UNIFIED_PLAN. Please
+     * use addTrack instead.
+     */
+    fun addStream(stream: MediaStream): Boolean
+
+    /**
+     * Removes the given media stream from this peer connection.
+     * This method is not supported with SdpSemantics.UNIFIED_PLAN. Please use
+     * removeTrack instead.
+     */
+    fun removeStream(stream: MediaStream)
 
     /**
      * Creates an RtpSender without a track.
@@ -225,8 +227,6 @@ expect class PeerConnection {
      */
     fun stopRtcEventLog()
 
-    fun close()
-
     /**
      * Free native resources associated with this PeerConnection instance.
      *
@@ -243,7 +243,7 @@ expect class PeerConnection {
      * must do this asynchronously (in other words, unwind the stack first). See
      * [bug 3721](https://bugs.chromium.org/p/webrtc/issues/detail?id=3721) for more details.
      */
-    fun dispose()
+    fun close()
 }
 
 enum class SdpSemantics { PlanB, UnifiedPlan }

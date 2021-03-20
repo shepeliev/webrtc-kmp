@@ -25,7 +25,7 @@ import com.shepeliev.apprtckmm.shared.rtcclient.WebSocketRtcClient
 import com.shepeliev.webrtckmm.IceCandidate
 import com.shepeliev.webrtckmm.RtcStatsReport
 import com.shepeliev.webrtckmm.SessionDescription
-import com.shepeliev.webrtckmm.UserMedia
+import com.shepeliev.webrtckmm.VideoStream
 
 internal class CallStoreFactory(private val storeFactory: StoreFactory) {
 
@@ -47,8 +47,8 @@ internal class CallStoreFactory(private val storeFactory: StoreFactory) {
     }
 
     private sealed class Result {
-        data class LocalStream(val stream: UserMedia) : Result()
-        data class RemoteStream(val stream: UserMedia) : Result()
+        data class LocalStream(val stream: VideoStream) : Result()
+        data class RemoteStream(val stream: VideoStream) : Result()
     }
 
     private object ReducerImpl : Reducer<State, Result> {
@@ -211,11 +211,11 @@ internal class CallStoreFactory(private val storeFactory: StoreFactory) {
                 disconnectWithErrorMessage("$description")
             }
 
-            override fun onLocalStream(stream: UserMedia) {
+            override fun onLocalVideoStream(stream: VideoStream) {
                 dispatch(LocalStream(stream))
             }
 
-            override fun onRemoteStream(stream: UserMedia) {
+            override fun onRemoteVideoStream(stream: VideoStream) {
                 dispatch(RemoteStream(stream))
             }
         }

@@ -1,14 +1,18 @@
 package com.shepeliev.webrtckmm
 
-expect class MediaStream {
+expect class MediaStream : VideoStream {
     val id: String
     val audioTracks: List<AudioTrack>
     val videoTracks: List<VideoTrack>
 
-    fun addTrack(track: AudioTrack): Boolean
-    fun addTrack(track: VideoTrack): Boolean
-    fun addPreservedTrack(track: VideoTrack): Boolean
-    fun removeTrack(track: AudioTrack): Boolean
-    fun removeTrack(track: VideoTrack): Boolean
-    override fun toString(): String
+    fun addTrack(audioTrack: AudioTrack): Boolean
+    fun addTrack(videoTrack: VideoTrack): Boolean
+    fun removeTrack(audioTrack: AudioTrack): Boolean
+    fun removeTrack(videoTrack: VideoTrack): Boolean
+
+    override fun videoTrack(): VideoTrack?
+}
+
+fun interface VideoStream {
+    fun videoTrack(): VideoTrack?
 }

@@ -11,10 +11,10 @@ kotlin {
     android()
 
     val iosTarget: (String, KotlinNativeTarget.() -> Unit) -> KotlinNativeTarget =
-        if (System.getenv("SDK_NAME")?.startsWith("iphoneos") == true)
-            ::iosArm64
-        else
+        if (project.extra["ideaActive"] as Boolean)
             ::iosX64
+        else
+            ::iosArm64
 
     iosTarget("ios") {
         val frameworksPath = "${projectDir}/src/nativeInterop/cinterop/Carthage/Build/iOS"

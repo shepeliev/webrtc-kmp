@@ -47,9 +47,9 @@ actual class PeerConnectionFactory private constructor(val native: RTCPeerConnec
 //        ).let { RtcPeerConnection(it) }
 //    }
 
-    actual fun createLocalMediaStream(label: String): MediaStream {
-        return MediaStream(native.mediaStreamWithStreamId(label))
-    }
+//    actual fun createLocalMediaStream(label: String): MediaStream {
+//        return MediaStream(native.mediaStreamWithStreamId(label))
+//    }
 
     actual fun createVideoSource(
         isScreencast: Boolean,

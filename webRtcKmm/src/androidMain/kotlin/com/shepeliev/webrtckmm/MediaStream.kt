@@ -2,27 +2,31 @@ package com.shepeliev.webrtckmm
 
 import org.webrtc.MediaStream as NativeMediaStream
 
-actual class MediaStream internal constructor(val native: NativeMediaStream) {
+actual class MediaStream internal constructor(val native: NativeMediaStream) : VideoStream {
     actual val id: String
         get() = native.id
 
     actual val audioTracks: List<AudioTrack>
-        get() = native.audioTracks.map { it.asCommon() }
+        get() = native.audioTracks.map { AudioTrack(it) }
 
     actual val videoTracks: List<VideoTrack>
-        get() {
-            return native.videoTracks.map { it.asCommon() as VideoTrack } +
-                native.preservedVideoTracks.map { it.asCommon() as VideoTrack }
-        }
+        get() = native.videoTracks.map { VideoTrack(it) }
 
-    actual fun addTrack(track: AudioTrack): Boolean = native.addTrack(track.native)
-    actual fun addTrack(track: VideoTrack): Boolean = native.addTrack(track.native)
-
-    actual fun addPreservedTrack(track: VideoTrack): Boolean {
-        return native.addPreservedTrack(track.native)
+    actual fun addTrack(audioTrack: AudioTrack): Boolean {
+        return native.addTrack(audioTrack.native)
     }
 
-    actual fun removeTrack(track: AudioTrack): Boolean = native.removeTrack(track.native)
-    actual fun removeTrack(track: VideoTrack): Boolean = native.removeTrack(track.native)
-    actual override fun toString(): String = native.toString()
+    actual fun addTrack(videoTrack: VideoTrack): Boolean {
+        return native.addTrack(videoTrack.native)
+    }
+
+    actual fun removeTrack(audioTrack: AudioTrack): Boolean {
+        return native.removeTrack(audioTrack.native)
+    }
+
+    actual fun removeTrack(videoTrack: VideoTrack): Boolean {
+        return native.removeTrack(videoTrack.native)
+    }
+
+    actual override fun videoTrack(): VideoTrack? = videoTracks.firstOrNull()
 }

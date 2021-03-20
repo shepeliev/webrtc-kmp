@@ -4,7 +4,7 @@ import cocoapods.GoogleWebRTC.RTCAudioTrack
 import cocoapods.GoogleWebRTC.RTCMediaStream
 import cocoapods.GoogleWebRTC.RTCVideoTrack
 
-actual class MediaStream internal constructor(val native: RTCMediaStream) {
+actual class MediaStream internal constructor(val native: RTCMediaStream) : VideoStream {
     actual val id: String
         get() = native.streamId
 
@@ -14,30 +14,25 @@ actual class MediaStream internal constructor(val native: RTCMediaStream) {
     actual val videoTracks: List<VideoTrack>
         get() = native.videoTracks.map { VideoTrack(it as RTCVideoTrack) }
 
-    actual fun addTrack(track: AudioTrack): Boolean {
-        native.addAudioTrack(track.native)
+    actual fun addTrack(audioTrack: AudioTrack): Boolean {
+        native.addAudioTrack(audioTrack.native)
         return true
     }
 
-    actual fun addTrack(track: VideoTrack): Boolean {
-        native.addVideoTrack(track.native)
+    actual fun addTrack(videoTrack: VideoTrack): Boolean {
+        native.addVideoTrack(videoTrack.native)
         return true
     }
 
-    actual fun addPreservedTrack(track: VideoTrack): Boolean {
-        native.addVideoTrack(track.native)
+    actual fun removeTrack(audioTrack: AudioTrack): Boolean {
+        native.removeAudioTrack(audioTrack.native)
         return true
     }
 
-    actual fun removeTrack(track: AudioTrack): Boolean {
-        native.removeAudioTrack(track.native)
+    actual fun removeTrack(videoTrack: VideoTrack): Boolean {
+        native.removeVideoTrack(videoTrack.native)
         return true
     }
 
-    actual fun removeTrack(track: VideoTrack): Boolean {
-        native.removeVideoTrack(track.native)
-        return true
-    }
-
-    actual override fun toString(): String = native.toString()
+    actual override fun videoTrack(): VideoTrack? = videoTracks.firstOrNull()
 }

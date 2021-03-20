@@ -1,6 +1,8 @@
 package com.shepeliev.webrtckmm
 
+import org.webrtc.AudioTrack as NativeAudioTrack
 import org.webrtc.MediaStreamTrack as NativeMediaStreamTrack
+import org.webrtc.VideoTrack as NativeVideoTrack
 
 abstract class BaseMediaStreamTrack : MediaStreamTrack {
     abstract val native: NativeMediaStreamTrack
@@ -12,28 +14,28 @@ abstract class BaseMediaStreamTrack : MediaStreamTrack {
         get() = native.kind()
 
     override var enabled: Boolean
-        get() = native.enabled() && !isStopped
-        set(value) { native.setEnabled(value && !isStopped) }
+        get() = native.enabled()
+        set(value) {
+            native.setEnabled(value)
+        }
 
     override val state: MediaStreamTrack.State
         get() = native.state().asCommon()
 
-
-    private var isStopped = false
-
     override fun stop() {
-        isStopped = true
-        enabled = false
-
         when (this.kind) {
-            MediaStreamTrack.AUDIO_TRACK_KIND -> MediaDevices.onAudioTrackStopped(this)
-            MediaStreamTrack.VIDEO_TRACK_KIND -> MediaDevices.onVideoTrackStopped(this)
+            MediaStreamTrack.AUDIO_TRACK_KIND -> {
+                MediaDevices.onAudioTrackStopped(id)
+            }
+            MediaStreamTrack.VIDEO_TRACK_KIND -> {
+                MediaDevices.onVideoTrackStopped(id)
+            }
         }
     }
 }
 
 fun MediaStreamTrack.MediaType.asNative(): NativeMediaStreamTrack.MediaType {
-    return when(this) {
+    return when (this) {
         MediaStreamTrack.MediaType.Audio -> {
             NativeMediaStreamTrack.MediaType.MEDIA_TYPE_AUDIO
         }
@@ -48,8 +50,8 @@ fun MediaStreamTrack.MediaType.asNative(): NativeMediaStreamTrack.MediaType {
     }
 }
 
-fun NativeMediaStreamTrack.MediaType.asCommon() : MediaStreamTrack.MediaType {
-    return when(this) {
+fun NativeMediaStreamTrack.MediaType.asCommon(): MediaStreamTrack.MediaType {
+    return when (this) {
         NativeMediaStreamTrack.MediaType.MEDIA_TYPE_AUDIO -> {
             MediaStreamTrack.MediaType.Audio
         }
@@ -62,14 +64,14 @@ fun NativeMediaStreamTrack.MediaType.asCommon() : MediaStreamTrack.MediaType {
 
 fun NativeMediaStreamTrack.asCommon(): MediaStreamTrack {
     return when (this) {
-        is org.webrtc.AudioTrack -> AudioTrack(this)
-        is org.webrtc.VideoTrack -> VideoTrack(this)
+        is NativeAudioTrack -> AudioTrack(this)
+        is NativeVideoTrack -> VideoTrack(this)
         else -> error("Unknown native MediaStreamTrack: $this")
     }
 }
 
 private fun NativeMediaStreamTrack.State.asCommon(): MediaStreamTrack.State {
-    return when(this) {
+    return when (this) {
         org.webrtc.MediaStreamTrack.State.LIVE -> MediaStreamTrack.State.Live
         org.webrtc.MediaStreamTrack.State.ENDED -> MediaStreamTrack.State.Ended
     }
