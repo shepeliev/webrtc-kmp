@@ -94,9 +94,9 @@ class PeerConnectionClient(
 
     fun close() {
         Log.d(TAG, "Closing peer connection.")
-        dataChannel?.dispose()
+        dataChannel?.close()
         dataChannel = null
-        peerConnection?.getSenders()?.forEach { it.track?.stop() }
+//        peerConnection?.getSenders()?.forEach { it.track?.stop() }
         peerConnection?.close()
         peerConnection = null
         events.onPeerConnectionClosed()

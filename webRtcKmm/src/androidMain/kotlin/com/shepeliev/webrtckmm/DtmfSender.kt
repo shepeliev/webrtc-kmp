@@ -18,5 +18,4 @@ actual class DtmfSender(val native: NativeDtmfSender) {
     }
 
     actual fun tones(): String = native.tones()
-    actual fun dispose() = native.dispose()
 }

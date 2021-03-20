@@ -9,10 +9,6 @@ abstract class BaseMediaSource(): MediaSource {
 
     override val state: MediaSource.State
         get() = rtcMediaSourceStateAsCommon(native.state())
-
-    override fun dispose() {
-        // not applicable
-    }
 }
 
 private fun rtcMediaSourceStateAsCommon(state: RTCSourceState): MediaSource.State {

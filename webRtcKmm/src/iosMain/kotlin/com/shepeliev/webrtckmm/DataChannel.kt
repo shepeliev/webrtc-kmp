@@ -41,10 +41,6 @@ actual class DataChannel(val native: RTCDataChannel) {
 
     actual fun send(buffer: DataChannelBuffer): Boolean = native.sendData(buffer.native)
     actual fun close() = native.close()
-
-    actual fun dispose() {
-        // not applicable
-    }
 }
 
 actual class DataChannelBuffer internal constructor(val native: RTCDataBuffer){

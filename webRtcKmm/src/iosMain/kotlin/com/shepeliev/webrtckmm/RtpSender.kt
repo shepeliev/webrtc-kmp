@@ -22,8 +22,4 @@ actual class RtpSender(val native: RTCRtpSender) {
         native.setTrack((track as? BaseMediaStreamTrack)?.native)
         return true
     }
-
-    actual fun dispose() {
-        // not applicable
-    }
 }

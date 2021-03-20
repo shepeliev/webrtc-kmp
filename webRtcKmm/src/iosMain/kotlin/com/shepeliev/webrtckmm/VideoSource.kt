@@ -9,9 +9,6 @@ actual class VideoSource internal constructor(override val native: RTCVideoSourc
     actual override val state: MediaSource.State
         get() = super.state
 
-    actual val capturerObserver: CapturerObserver
-        get() {  TODO() }
-
     val nativeCapturerObserver: RTCVideoCapturerDelegateProtocol
         get() = native
 
@@ -21,20 +18,5 @@ actual class VideoSource internal constructor(override val native: RTCVideoSourc
 
     actual fun adaptOutputFormat(width: Int, height: Int, fps: Int) {
         native.adaptOutputFormatToWidth(width, height, fps)
-    }
-
-    actual override fun dispose() {
-        super.dispose()
-    }
-}
-
-private inline class NativeCapturerObserverAdapter(val native: RTCVideoCapturerDelegateProtocol) : CapturerObserver {
-    override fun onCapturerStarted(success: Boolean) {
-    }
-
-    override fun onCapturerStopped() {
-    }
-
-    override fun onFrameCaptured(frame: VideoFrame) {
     }
 }

@@ -9,10 +9,6 @@ abstract class BaseMediaSource(): MediaSource {
     override val state: MediaSource.State
         get() = native.state().toCommon()
 
-    override fun dispose() {
-        native.dispose()
-    }
-
     private fun NativeMediaSource.State.toCommon(): MediaSource.State {
         return when(this) {
             org.webrtc.MediaSource.State.INITIALIZING -> MediaSource.State.Initializing

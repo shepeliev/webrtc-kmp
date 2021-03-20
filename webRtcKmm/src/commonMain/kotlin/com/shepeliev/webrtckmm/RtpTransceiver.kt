@@ -10,7 +10,6 @@ expect class RtpTransceiver {
     val isStopped: Boolean
 
     fun stop()
-    fun dispose()
 }
 
 enum class RtpTransceiverDirection { SendRecv, SendOnly, RecvOnly, Inactive, Stopped; }

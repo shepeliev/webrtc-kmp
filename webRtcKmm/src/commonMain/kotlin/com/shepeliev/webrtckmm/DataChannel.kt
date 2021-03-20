@@ -10,7 +10,6 @@ expect class DataChannel {
     fun unregisterObserver()
     fun send(buffer: DataChannelBuffer): Boolean
     fun close()
-    fun dispose()
 }
 
 enum class DataChannelState { Connecting, Open, Closing, Closed; }

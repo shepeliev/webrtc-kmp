@@ -93,7 +93,7 @@ actual object MediaDevices {
             it?.stopCapture()
             it?.dispose()
             cameraEnumerator.createCapturer(cameraId, CameraEventsHandler()).apply {
-                initialize(surfaceTextureHelper, context, videoSource.nativeCapturerObserver)
+                initialize(surfaceTextureHelper, context, videoSource.native.capturerObserver)
                 startCapture(1280, 720, 30)
             }
         }
@@ -157,7 +157,7 @@ actual object MediaDevices {
 
         if (audioTracks.isEmpty()) {
             audioSourceRef.getAndUpdate { null }?.also {
-                GlobalScope.launch(Dispatchers.Default) { it.dispose() }
+                GlobalScope.launch(Dispatchers.Default) { it.native.dispose() }
             }
         }
     }
@@ -173,7 +173,7 @@ actual object MediaDevices {
                 }
             }
             videoSourceRef.getAndUpdate { null }?.also {
-                GlobalScope.launch(Dispatchers.Default) { it.dispose() }
+                GlobalScope.launch(Dispatchers.Default) { it.native.dispose() }
             }
         }
     }

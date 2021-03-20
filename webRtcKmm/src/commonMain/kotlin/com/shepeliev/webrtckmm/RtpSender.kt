@@ -7,5 +7,4 @@ expect class RtpSender {
     val dtmf: DtmfSender?
 
     fun setTrack(track: MediaStreamTrack?, takeOwnership: Boolean): Boolean
-    fun dispose()
 }

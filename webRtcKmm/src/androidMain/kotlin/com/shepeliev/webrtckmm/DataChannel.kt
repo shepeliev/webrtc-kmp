@@ -39,8 +39,7 @@ actual class DataChannel(val native: NativeDataChannel) {
     }
 
     actual fun send(buffer: DataChannelBuffer): Boolean = native.send(buffer.native)
-    actual fun close() = native.close()
-    actual fun dispose() = native.dispose()
+    actual fun close() = native.dispose()
 
     private fun NativeDataChannel.State.toCommon(): DataChannelState {
         return when(this) {

@@ -475,7 +475,7 @@ class PeerConnectionClient(
         Log.d(TAG, "Closing peer connection.")
         statsTimer.cancel()
         if (dataChannel != null) {
-            dataChannel!!.dispose()
+            dataChannel!!.native.dispose()
             dataChannel = null
         }
         if (rtcEventLog != null) {
@@ -484,12 +484,12 @@ class PeerConnectionClient(
             rtcEventLog = null
         }
         if (peerConnection != null) {
-            peerConnection!!.dispose()
+            peerConnection!!.native.dispose()
             peerConnection = null
         }
         Log.d(TAG, "Closing audio source.")
         if (audioSource != null) {
-            audioSource!!.dispose()
+            audioSource!!.native.dispose()
             audioSource = null
         }
         Log.d(TAG, "Stopping capture.")
@@ -505,7 +505,7 @@ class PeerConnectionClient(
         }
         Log.d(TAG, "Closing video source.")
         if (videoSource != null) {
-            videoSource!!.dispose()
+            videoSource!!.native.dispose()
             videoSource = null
         }
         if (surfaceTextureHelper != null) {
@@ -763,7 +763,7 @@ class PeerConnectionClient(
         surfaceTextureHelper =
             SurfaceTextureHelper.create("CaptureThread", rootEglBase.eglBaseContext)
         videoSource = factory!!.createVideoSource(capturer!!.isScreencast)
-        capturer.initialize(surfaceTextureHelper, appContext, videoSource!!.nativeCapturerObserver)
+        capturer.initialize(surfaceTextureHelper, appContext, videoSource!!.native.capturerObserver)
         capturer.startCapture(videoWidth, videoHeight, videoFps)
         localVideoTrack = factory!!.createVideoTrack(VIDEO_TRACK_ID, videoSource!!)
         localVideoTrack!!.enabled = renderVideo

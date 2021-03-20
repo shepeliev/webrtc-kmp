@@ -21,8 +21,6 @@ actual class RtpSender internal constructor(val native: NativeRtpSender) {
     actual fun setTrack(track: MediaStreamTrack?, takeOwnership: Boolean): Boolean {
         return native.setTrack((track as? BaseMediaStreamTrack)?.native, takeOwnership)
     }
-
-    actual fun dispose() = native.dispose()
 }
 
 internal fun NativeRtpSender.asCommon() = RtpSender(this)

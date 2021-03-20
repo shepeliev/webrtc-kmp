@@ -91,6 +91,8 @@ actual class PeerConnection internal constructor() {
 
     internal val pcObserver = PcObserver()
 
+    private val mediaStreamTracks = mutableListOf<MediaStreamTrack>()
+
     actual fun createDataChannel(
         label: String,
         id: Int,
@@ -191,10 +193,15 @@ actual class PeerConnection internal constructor() {
     }
 
     actual fun addStream(stream: MediaStream): Boolean {
+        mediaStreamTracks += stream.audioTracks + stream.videoTracks
         return native.addStream(stream.native)
     }
 
     actual fun removeStream(stream: MediaStream) {
+        mediaStreamTracks.removeIf { track ->
+            stream.videoTracks.any { it.id == track.id } ||
+                    stream.audioTracks.any { it.id == track.id }
+        }
         native.removeStream(stream.native)
     }
 
@@ -207,10 +214,14 @@ actual class PeerConnection internal constructor() {
     actual fun getTransceivers(): List<RtpTransceiver> = native.transceivers.map { it.asCommon() }
 
     actual fun addTrack(track: MediaStreamTrack, streamIds: List<String>): RtpSender {
+        mediaStreamTracks += track
         return native.addTrack((track as BaseMediaStreamTrack).native, streamIds).asCommon()
     }
 
-    actual fun removeTrack(sender: RtpSender): Boolean = native.removeTrack(sender.native)
+    actual fun removeTrack(sender: RtpSender): Boolean {
+        mediaStreamTracks.removeIf { it.id == sender.track?.id }
+        return native.removeTrack(sender.native)
+    }
 
     actual fun addTransceiver(
         track: MediaStreamTrack,
@@ -267,6 +278,7 @@ actual class PeerConnection internal constructor() {
     actual fun stopRtcEventLog() = native.stopRtcEventLog()
 
     actual fun close() {
+        mediaStreamTracks.forEach { it.stop() }
         GlobalScope.launch(Dispatchers.Default) { native.dispose() }
     }
 

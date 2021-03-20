@@ -28,7 +28,6 @@ actual class RtpTransceiver(val native: NativeRtpTransceiver) {
         get() = native.isStopped
 
     actual fun stop() = native.stop()
-    actual fun dispose() = native.dispose()
 }
 
 internal fun NativeRtpTransceiver.asCommon() = RtpTransceiver(this)

@@ -36,10 +36,6 @@ actual class RtpTransceiver(val native: RTCRtpTransceiver) {
         get() = native.isStopped
 
     actual fun stop() = native.stop()
-
-    actual fun dispose() {
-        // not applicable
-    }
 }
 
 private fun rtcRtpTransceiverDirectionAsCommon(direction: RTCRtpTransceiverDirection): RtpTransceiverDirection {

@@ -18,8 +18,4 @@ actual class DtmfSender(val native: RTCDtmfSenderProtocol) {
     }
 
     actual fun tones(): String = native.remainingTones()
-
-    actual fun dispose() {
-        // not applicable
-    }
 }
