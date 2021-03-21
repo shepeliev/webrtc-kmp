@@ -338,6 +338,8 @@ actual class PeerConnection internal constructor() {
 
         override fun onTrack(transceiver: NativeRtpTransceiver) {}
     }
+
+    actual companion object
 }
 
 actual fun RtcPeerConnection(rtcConfiguration: RtcConfiguration): PeerConnection {

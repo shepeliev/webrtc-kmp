@@ -64,5 +64,10 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>RtcFieldTrials</key>
+	<dict>
+		<key>WebRTC-FlexFEC-03-Advertised</key>
+		<string>Enabled</string>
+	</dict>
 </dict>
 </plist>

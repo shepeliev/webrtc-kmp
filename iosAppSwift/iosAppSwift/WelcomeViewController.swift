@@ -18,6 +18,8 @@ class WelcomeViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        let f = PeerConnectionFactory.Companion()
+        f.build(options: nil)
     }
     
     @IBAction func startVideoPressed(_ sender: UIButton) {

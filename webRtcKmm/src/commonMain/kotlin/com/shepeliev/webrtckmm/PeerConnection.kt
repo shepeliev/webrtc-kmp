@@ -244,6 +244,12 @@ expect class PeerConnection {
      * [bug 3721](https://bugs.chromium.org/p/webrtc/issues/detail?id=3721) for more details.
      */
     fun close()
+
+    companion object
+}
+
+fun PeerConnection.Companion.create(configuration: RtcConfiguration): PeerConnection {
+    return peerConnectionFactory.createPeerConnection(configuration)
 }
 
 enum class SdpSemantics { PlanB, UnifiedPlan }

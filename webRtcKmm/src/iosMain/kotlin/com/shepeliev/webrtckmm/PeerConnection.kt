@@ -425,6 +425,8 @@ actual class PeerConnection internal constructor() :  CoroutineScope by MainScop
             }
         }
     }
+
+    actual companion object
 }
 
 actual fun RtcPeerConnection(rtcConfiguration: RtcConfiguration): PeerConnection {

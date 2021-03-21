@@ -49,6 +49,7 @@ kotlin {
 
         val androidMain by getting {
             dependencies {
+                implementation("androidx.appcompat:appcompat:1.2.0")
                 api("org.webrtc:google-webrtc:1.0.32006")
             }
         }

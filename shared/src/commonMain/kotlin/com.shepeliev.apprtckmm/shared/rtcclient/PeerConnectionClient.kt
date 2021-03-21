@@ -24,7 +24,6 @@ import com.shepeliev.webrtckmm.MediaStreamTrack
 import com.shepeliev.webrtckmm.PeerConnection
 import com.shepeliev.webrtckmm.PeerConnectionState
 import com.shepeliev.webrtckmm.RtcConfiguration
-import com.shepeliev.webrtckmm.RtcPeerConnection
 import com.shepeliev.webrtckmm.RtcStatsReport
 import com.shepeliev.webrtckmm.RtcpMuxPolicy
 import com.shepeliev.webrtckmm.RtpSender
@@ -33,6 +32,7 @@ import com.shepeliev.webrtckmm.SessionDescription
 import com.shepeliev.webrtckmm.TcpCandidatePolicy
 import com.shepeliev.webrtckmm.VideoStream
 import com.shepeliev.webrtckmm.VideoTrack
+import com.shepeliev.webrtckmm.create
 import com.shepeliev.webrtckmm.mediaConstraints
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -126,7 +126,7 @@ class PeerConnectionClient(
             keyType = KeyType.ECDSA,
             sdpSemantics = SdpSemantics.UnifiedPlan
         )
-        peerConnection = RtcPeerConnection(rtcConfiguration).apply {
+        peerConnection = PeerConnection.create(rtcConfiguration).apply {
 
             iceConnectionStateFlow.onEach {
                 Log.d(TAG, "IceConnectionState: $it")

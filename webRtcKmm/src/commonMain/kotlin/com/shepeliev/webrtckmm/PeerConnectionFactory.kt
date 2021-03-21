@@ -28,8 +28,11 @@ expect class PeerConnectionFactory {
 
     companion object {
         fun build(options: Options? = null): PeerConnectionFactory
+        fun dispose()
     }
 
+    fun createPeerConnection(rtcConfiguration: RtcConfiguration): PeerConnection
+    fun createLocalMediaStream(id: String): MediaStream
     fun createVideoSource(isScreencast: Boolean = false, alignTimestamps: Boolean = true): VideoSource
     fun createVideoTrack(id: String, videoSource: VideoSource): VideoTrack
     fun createAudioSource(constraints: MediaConstraints): AudioSource
@@ -40,8 +43,6 @@ expect class PeerConnectionFactory {
     /* TODO
     fun printInternalStackTraces(printNativeStackTraces: Boolean)
      */
-
-    fun dispose()
 }
 
 var options: Options? = null

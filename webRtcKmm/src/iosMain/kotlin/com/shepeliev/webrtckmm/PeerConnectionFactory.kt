@@ -1,13 +1,36 @@
 package com.shepeliev.webrtckmm
 
+import cocoapods.GoogleWebRTC.RTCCleanupSSL
 import cocoapods.GoogleWebRTC.RTCDefaultVideoDecoderFactory
 import cocoapods.GoogleWebRTC.RTCDefaultVideoEncoderFactory
+import cocoapods.GoogleWebRTC.RTCInitFieldTrialDictionary
+import cocoapods.GoogleWebRTC.RTCInitializeSSL
+import cocoapods.GoogleWebRTC.RTCLoggingSeverity
 import cocoapods.GoogleWebRTC.RTCPeerConnectionFactory
 import cocoapods.GoogleWebRTC.RTCPeerConnectionFactoryOptions
+import cocoapods.GoogleWebRTC.RTCSetMinDebugLogLevel
+import cocoapods.GoogleWebRTC.RTCSetupInternalTracer
+import cocoapods.GoogleWebRTC.RTCShutdownInternalTracer
+import platform.Foundation.NSBundle
 
 actual class PeerConnectionFactory private constructor(val native: RTCPeerConnectionFactory) {
     actual companion object {
+
+        @Suppress("UNCHECKED_CAST")
         actual fun build(options: Options?): PeerConnectionFactory {
+
+            val trials = NSBundle.mainBundle
+                .objectForInfoDictionaryKey("WebRtcKMM_FieldTrials") as? Map<Any?, *>
+                ?: emptyMap<Any?, Any?>()
+
+            RTCInitFieldTrialDictionary(trials)
+            RTCInitializeSSL()
+            RTCSetupInternalTracer()
+
+            if (!Platform.isDebugBinary) {
+                RTCSetMinDebugLogLevel(RTCLoggingSeverity.RTCLoggingSeverityWarning)
+            }
+
             val native = RTCPeerConnectionFactory(
                 RTCDefaultVideoEncoderFactory(),
                 RTCDefaultVideoDecoderFactory()
@@ -28,28 +51,31 @@ actual class PeerConnectionFactory private constructor(val native: RTCPeerConnec
 
             return PeerConnectionFactory(native)
         }
+
+        actual fun dispose() {
+            RTCShutdownInternalTracer()
+            RTCCleanupSSL()
+        }
     }
 
-//    actual fun createPeerConnection(
-//        rtcConfig: RtcConfiguration,
-//        observer: PeerConnectionObserver
-//    ): RtcPeerConnection? {
-//
-//        val constraints = mediaConstraints {
-//            optional { "RtpDataChannels" to "${rtcConfig.enableRtpDataChannel}" }
-//            rtcConfig.enableDtlsSrtp?.let { optional { "DtlsSrtpKeyAgreement" to "$it" } }
-//        }
-//
-//        return native.peerConnectionWithConfiguration(
-//            rtcConfig.native,
-//            constraints.native,
-//            CommonPeerConnectionObserverAdapter(observer)
-//        ).let { RtcPeerConnection(it) }
-//    }
+    actual fun createPeerConnection(rtcConfiguration: RtcConfiguration): PeerConnection {
+        return PeerConnection().apply {
+            val constraints = mediaConstraints {
+                optional { "RtpDataChannels" to "${rtcConfiguration.enableRtpDataChannel}" }
+                rtcConfiguration.enableDtlsSrtp?.let { optional { "DtlsSrtpKeyAgreement" to "$it" } }
+            }
 
-//    actual fun createLocalMediaStream(label: String): MediaStream {
-//        return MediaStream(native.mediaStreamWithStreamId(label))
-//    }
+            native = peerConnectionFactory.native.peerConnectionWithConfiguration(
+                rtcConfiguration.native,
+                constraints.native,
+                pcObserver
+            )
+        }
+    }
+
+    actual fun createLocalMediaStream(id: String): MediaStream {
+        return MediaStream(native.mediaStreamWithStreamId(id))
+    }
 
     actual fun createVideoSource(
         isScreencast: Boolean,
@@ -75,8 +101,4 @@ actual class PeerConnectionFactory private constructor(val native: RTCPeerConnec
     }
 
     actual fun stopAecDump() = native.stopAecDump()
-
-    actual fun dispose() {
-        // not applicable
-    }
 }
