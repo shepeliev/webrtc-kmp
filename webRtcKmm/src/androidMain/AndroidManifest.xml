@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
     <application>
         <provider
-            android:authorities="com.shepeliev.webrtckmm.context.provider"
+            android:authorities="${applicationId}.webrtckmm.context.provider"
             android:name=".android.ApplicationContextProvider"
             android:exported="false"/>
     </application>

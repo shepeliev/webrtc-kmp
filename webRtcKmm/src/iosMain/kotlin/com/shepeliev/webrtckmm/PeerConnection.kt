@@ -428,18 +428,3 @@ actual class PeerConnection internal constructor() :  CoroutineScope by MainScop
 
     actual companion object
 }
-
-actual fun RtcPeerConnection(rtcConfiguration: RtcConfiguration): PeerConnection {
-    return PeerConnection().apply {
-        val constraints = mediaConstraints {
-            optional { "RtpDataChannels" to "${rtcConfiguration.enableRtpDataChannel}" }
-            rtcConfiguration.enableDtlsSrtp?.let { optional { "DtlsSrtpKeyAgreement" to "$it" } }
-        }
-
-        native = peerConnectionFactory.native.peerConnectionWithConfiguration(
-            rtcConfiguration.native,
-            constraints.native,
-            pcObserver
-        )
-    }
-}

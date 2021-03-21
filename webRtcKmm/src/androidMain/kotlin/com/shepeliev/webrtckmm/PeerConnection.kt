@@ -341,10 +341,3 @@ actual class PeerConnection internal constructor() {
 
     actual companion object
 }
-
-actual fun RtcPeerConnection(rtcConfiguration: RtcConfiguration): PeerConnection {
-    return PeerConnection().apply {
-        native =
-            peerConnectionFactory.native.createPeerConnection(rtcConfiguration.native, pcObserver)!!
-    }
-}

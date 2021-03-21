@@ -7,8 +7,11 @@ import kotlin.native.concurrent.ThreadLocal
 @ThreadLocal
 object MediaDevices {
     private var audioSource: AudioSource? = null
-    private var videoSource: VideoSource? = null
-    private var cameraCapturer: CameraVideoCapturer? = null
+    private var videoSource: VideoSource = peerConnectionFactory.createVideoSource()
+
+    private var cameraCapturer: CameraVideoCapturer =
+        CameraEnumerator.createCameraVideoCapturer(videoSource)
+
     private val audioTracks = mutableMapOf<String, Unit>()
     private val videoTracks = mutableMapOf<String, Unit>()
 
@@ -26,17 +29,10 @@ object MediaDevices {
 
         var videoTrack: VideoTrack? = null
         if (video) {
-            val source = videoSource ?: factory.createVideoSource(
-                isScreencast = false,
-                alignTimestamps = true
-            )
-            videoSource = source
-            if (cameraCapturer == null) {
-                cameraCapturer = CameraEnumerator.createCameraVideoCapturer(source).apply {
-                    startCapture(VideoConstraints())
-                }
-            }
-            videoTrack = factory.createVideoTrack(uuid(), source)
+            cameraCapturer.stopCapture()
+            cameraCapturer.startCapture(VideoConstraints())
+
+            videoTrack = factory.createVideoTrack(uuid(), videoSource)
             videoTracks += videoTrack.id to Unit
         }
 
@@ -72,9 +68,7 @@ object MediaDevices {
     internal fun onVideoTrackStopped(trackId: String) {
         videoTracks.remove(trackId)
         if (videoTracks.isEmpty()) {
-            cameraCapturer?.stopCapture()
-            cameraCapturer = null
-            videoSource = null
+            cameraCapturer.stopCapture()
         }
     }
 }

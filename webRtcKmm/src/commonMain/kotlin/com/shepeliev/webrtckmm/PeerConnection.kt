@@ -319,5 +319,3 @@ enum class IceConnectionState {
 enum class PeerConnectionState { New, Connecting, Connected, Disconnected, Failed, Closed; }
 
 enum class IceGatheringState { New, Gathering, Complete }
-
-expect fun RtcPeerConnection(rtcConfiguration: RtcConfiguration): PeerConnection

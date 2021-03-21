@@ -23,6 +23,8 @@ abstract class BaseMediaStreamTrack : MediaStreamTrack {
         get() = native.state().asCommon()
 
     override fun stop() {
+        enabled = false
+
         when (this.kind) {
             MediaStreamTrack.AUDIO_TRACK_KIND -> {
                 MediaDevices.onAudioTrackStopped(id)
