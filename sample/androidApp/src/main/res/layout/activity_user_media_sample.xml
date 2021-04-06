@@ -4,29 +4,44 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".UserMediaSampleActivity">
+
+    <org.webrtc.SurfaceViewRenderer
+        android:id="@+id/video"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintDimensionRatio="1:1"
+        />
 
     <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:gravity="center"
+        android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/video">
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_user_media_sample"
+            android:id="@+id/btn_start_video"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="User media"/>
+            android:text="Start video" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_loopback_sample"
+            android:id="@+id/btn_stop_video"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Loopback"/>
+            android:text="Stop video" />
 
-
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_switch_camera"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Switch camera" />
     </androidx.appcompat.widget.LinearLayoutCompat>
+
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

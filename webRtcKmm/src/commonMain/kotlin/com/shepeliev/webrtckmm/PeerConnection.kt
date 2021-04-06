@@ -15,7 +15,7 @@ expect class PeerConnection {
     val iceConnectionStateFlow: Flow<IceConnectionState>
     val connectionStateFlow: Flow<PeerConnectionState>
     val iceGatheringStateFlow: Flow<IceGatheringState>
-    val iceCandidateFlow:  Flow<IceCandidate>
+    val iceCandidateFlow: Flow<IceCandidate>
     val removedIceCandidatesFlow: Flow<List<IceCandidate>>
     val dataChannelFlow: Flow<DataChannel>
     val renegotiationNeeded: Flow<Unit>
@@ -248,8 +248,11 @@ expect class PeerConnection {
     companion object
 }
 
-fun PeerConnection.Companion.create(configuration: RtcConfiguration): PeerConnection {
-    return peerConnectionFactory.createPeerConnection(configuration)
+fun PeerConnection.Companion.create(
+    configuration: RtcConfiguration,
+    constraints: MediaConstraints
+): PeerConnection {
+    return peerConnectionFactory.createPeerConnection(configuration, constraints)
 }
 
 enum class SdpSemantics { PlanB, UnifiedPlan }

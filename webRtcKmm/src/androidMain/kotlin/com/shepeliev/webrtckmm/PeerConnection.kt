@@ -91,7 +91,8 @@ actual class PeerConnection internal constructor() {
 
     internal val pcObserver = PcObserver()
 
-    private val mediaStreamTracks = mutableListOf<MediaStreamTrack>()
+    private val mediaStreams = mutableMapOf<String, MediaStream>()
+    private val mediaStreamTracks = mutableMapOf<String, MediaStreamTrack>()
 
     actual fun createDataChannel(
         label: String,
@@ -193,15 +194,12 @@ actual class PeerConnection internal constructor() {
     }
 
     actual fun addStream(stream: MediaStream): Boolean {
-        mediaStreamTracks += stream.audioTracks + stream.videoTracks
+        mediaStreams += stream.id to stream
         return native.addStream(stream.native)
     }
 
     actual fun removeStream(stream: MediaStream) {
-        mediaStreamTracks.removeIf { track ->
-            stream.videoTracks.any { it.id == track.id } ||
-                    stream.audioTracks.any { it.id == track.id }
-        }
+        mediaStreams.remove(stream.id)
         native.removeStream(stream.native)
     }
 
@@ -214,12 +212,12 @@ actual class PeerConnection internal constructor() {
     actual fun getTransceivers(): List<RtpTransceiver> = native.transceivers.map { it.asCommon() }
 
     actual fun addTrack(track: MediaStreamTrack, streamIds: List<String>): RtpSender {
-        mediaStreamTracks += track
+        mediaStreamTracks += track.id to track
         return native.addTrack((track as BaseMediaStreamTrack).native, streamIds).asCommon()
     }
 
     actual fun removeTrack(sender: RtpSender): Boolean {
-        mediaStreamTracks.removeIf { it.id == sender.track?.id }
+        mediaStreamTracks.remove(sender.track?.id)
         return native.removeTrack(sender.native)
     }
 
@@ -278,8 +276,29 @@ actual class PeerConnection internal constructor() {
     actual fun stopRtcEventLog() = native.stopRtcEventLog()
 
     actual fun close() {
-        mediaStreamTracks.forEach { it.stop() }
+        stopTracksInMediaStreams()
+        stopTracks()
         GlobalScope.launch(Dispatchers.Default) { native.dispose() }
+    }
+
+    private fun stopTracks() {
+        mediaStreamTracks.forEach { (_, track) ->
+            track.stop()
+
+            // VideoTrack added to the Android `PeerConnection` by `PeerConnection.addTrack()`
+            // method is not disposed on PeerConnection.dispose() call. We have to dispose it
+            // in order to remove all `VideoSink`s from the track.
+            if (track is VideoTrack) {
+                track.native.dispose()
+            }
+        }
+    }
+
+    private fun stopTracksInMediaStreams() {
+        mediaStreams.forEach { (_, stream) ->
+            stream.audioTracks.forEach { it.stop() }
+            stream.videoTracks.forEach { it.stop() }
+        }
     }
 
     internal inner class PcObserver() : NativePeerConnection.Observer,

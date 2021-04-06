@@ -31,7 +31,10 @@ expect class PeerConnectionFactory {
         fun dispose()
     }
 
-    fun createPeerConnection(rtcConfiguration: RtcConfiguration): PeerConnection
+    fun createPeerConnection(
+        rtcConfiguration: RtcConfiguration,
+        constraints: MediaConstraints = mediaConstraints(),
+    ): PeerConnection
     fun createLocalMediaStream(id: String): MediaStream
     fun createVideoSource(isScreencast: Boolean = false, alignTimestamps: Boolean = true): VideoSource
     fun createVideoTrack(id: String, videoSource: VideoSource): VideoTrack

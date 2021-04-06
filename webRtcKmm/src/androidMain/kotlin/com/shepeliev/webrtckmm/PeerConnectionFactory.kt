@@ -55,7 +55,10 @@ actual class PeerConnectionFactory private constructor(val native: NativePeerCon
         }
     }
 
-    actual fun createPeerConnection(rtcConfiguration: RtcConfiguration): PeerConnection {
+    actual fun createPeerConnection(
+        rtcConfiguration: RtcConfiguration,
+        constraints: MediaConstraints,
+    ): PeerConnection {
         val factory = native
 
         return PeerConnection().apply {

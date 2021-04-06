@@ -11,7 +11,9 @@ interface LocalVideoListener {
     fun onError(description: String?)
 }
 
-class LocalVideo(private val listener: LocalVideoListener) : CoroutineScope by CommonMainScope() {
+class UserMediaSample(private val listener: LocalVideoListener) : CoroutineScope by CommonMainScope() {
+
+    private val tag = "UserMediaSample"
 
     var videoRenderer: VideoRenderer? = null
         set(value) {
@@ -33,8 +35,9 @@ class LocalVideo(private val listener: LocalVideoListener) : CoroutineScope by C
 
         launch {
             try {
-                MediaDevices.getUserMedia(audio = true, video = true)
+                MediaDevices.getUserMedia(audio = false, video = true)
             } catch (e: Throwable) {
+                Log.e(tag, "Error", e)
                 listener.onError(e.message)
                 null
             }?.also { stream ->

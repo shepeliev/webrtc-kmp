@@ -20,8 +20,11 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="false"
-        tools:ignore="HardcodedDebugMode"
-        android:theme="@style/Theme.WebRtcKmmSample">
+        android:theme="@style/Theme.WebRtcKmmSample"
+        tools:ignore="HardcodedDebugMode">
+        <activity
+            android:name=".LoopbackSampleActivity"
+            android:exported="true"></activity>
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -31,6 +34,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".UserMediaSampleActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

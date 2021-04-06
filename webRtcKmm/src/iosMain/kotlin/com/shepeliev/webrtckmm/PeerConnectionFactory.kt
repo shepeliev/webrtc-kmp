@@ -58,12 +58,15 @@ actual class PeerConnectionFactory private constructor(val native: RTCPeerConnec
         }
     }
 
-    actual fun createPeerConnection(rtcConfiguration: RtcConfiguration): PeerConnection {
+    actual fun createPeerConnection(
+        rtcConfiguration: RtcConfiguration,
+        constraints: MediaConstraints,
+    ): PeerConnection {
         return PeerConnection().apply {
-            val constraints = mediaConstraints {
-                optional { "RtpDataChannels" to "${rtcConfiguration.enableRtpDataChannel}" }
-                rtcConfiguration.enableDtlsSrtp?.let { optional { "DtlsSrtpKeyAgreement" to "$it" } }
-            }
+//            val constraints = mediaConstraints {
+//                optional { "RtpDataChannels" to "${rtcConfiguration.enableRtpDataChannel}" }
+//                rtcConfiguration.enableDtlsSrtp?.let { optional { "DtlsSrtpKeyAgreement" to "$it" } }
+//            }
 
             native = peerConnectionFactory.native.peerConnectionWithConfiguration(
                 rtcConfiguration.native,
