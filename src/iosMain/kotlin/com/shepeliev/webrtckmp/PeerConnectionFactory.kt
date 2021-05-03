@@ -8,7 +8,7 @@ import kotlin.native.concurrent.freeze
 
 internal actual class PeerConnectionFactory private constructor(
     val native: RTCPeerConnectionFactory,
-    ) {
+) {
 
     actual companion object {
         @Suppress("UNCHECKED_CAST")
