@@ -5,15 +5,14 @@ pluginManagement {
         gradlePluginPortal()
         mavenCentral()
     }
-
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.namespace == "com.android") {
+                useModule("com.android.tools.build:gradle:4.1.1")
+            }
+        }
+    }
 }
-rootProject.name = "AppRtcKmm"
+rootProject.name = "WebRtcKmp"
 enableFeaturePreview("GRADLE_METADATA")
-
-//include(":androidAppKt")
-//include(":androidApp")
-//include(":shared")
-include(":webRtcKmm")
-include(":sample:shared")
-include(":sample:androidApp")
 
