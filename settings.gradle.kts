@@ -13,6 +13,6 @@ pluginManagement {
         }
     }
 }
-rootProject.name = "WebRtcKmp"
+rootProject.name = "webrtc-kmp"
 enableFeaturePreview("GRADLE_METADATA")
 
