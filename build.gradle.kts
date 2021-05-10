@@ -1,4 +1,3 @@
-
 plugins {
     id("com.android.library")
     kotlin("multiplatform") version "1.4.31"
@@ -34,9 +33,20 @@ kotlin {
 
     val iosArm64 = iosArm64()
     val iosX64 = iosX64("ios") {
-        val webRtcFrameworkPath = "$buildDir/cocoapods/synthetic/IOS/${project.name.replace("-", "_")}/Pods/GoogleWebRTC/Frameworks/frameworks"
+        val webRtcFrameworkPath = "$buildDir/cocoapods/synthetic/IOS/${
+            project.name.replace(
+                "-",
+                "_"
+            )
+        }/Pods/GoogleWebRTC/Frameworks/frameworks"
         binaries.getTest(DEBUG).apply {
-            linkerOpts("-F$webRtcFrameworkPath", "-framework", "WebRTC", "-rpath", webRtcFrameworkPath)
+            linkerOpts(
+                "-F$webRtcFrameworkPath",
+                "-framework",
+                "WebRTC",
+                "-rpath",
+                webRtcFrameworkPath
+            )
         }
     }
 
@@ -57,7 +67,7 @@ kotlin {
         val androidMain by getting {
             dependencies {
                 implementation("androidx.core:core:1.3.2")
-                api("org.webrtc:google-webrtc:1.0.32006")
+                api(fileTree("libs") { include("*.jar") })
             }
         }
 
@@ -76,21 +86,6 @@ kotlin {
                 source(sourceSets.get("iosMain"))
             }
         }
-
-//        val iosMain by getting
-//        val iosTest by getting
-
-//        val iosX64Main by getting {
-//            kotlin.srcDir(file("src/iosMain/kotlin"))
-//        }
-//
-//        val iosX64Test by getting {
-//            kotlin.srcDir(file("src/iosTest/kotlin"))
-//        }
-//
-//        val iosArm64Main by getting {
-//            dependsOn(iosMain)
-//        }
     }
 }
 
@@ -101,15 +96,13 @@ android {
         targetSdkVersion(30)
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-//    sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
 
     sourceSets {
         getByName("main") {
             manifest.srcFile("src/androidMain/AndroidManifest.xml")
         }
-        getByName("androidTest"){
+        getByName("androidTest") {
             java.srcDir(file("src/androidTest/kotlin"))
-//            manifest.srcFile("src/androidTest/AndroidManifest.xml")
         }
     }
 
