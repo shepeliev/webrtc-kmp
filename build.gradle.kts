@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("com.android.library")
@@ -7,7 +8,7 @@ plugins {
 }
 
 group = "com.shepeliev"
-version = "1.0-alpha02"
+version = "1.89-alpha02"
 
 repositories {
     google()
@@ -21,7 +22,8 @@ kotlin {
     }
 
     fun configureNativeTarget(): KotlinNativeTarget.() -> Unit = {
-        val webRtcFrameworkPath = projectDir.resolve("framework/WebRTC.xcframework/ios-x86_64-simulator/")
+        val webRtcFrameworkPath =
+            projectDir.resolve("framework/WebRTC.xcframework/ios-x86_64-simulator/")
         binaries {
             getTest("DEBUG").apply {
                 linkerOpts(
@@ -103,8 +105,22 @@ android {
     }
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
-    kotlinOptions {
-        jvmTarget = "1.8"
+tasks {
+    withType<KotlinCompile>().all {
+        kotlinOptions {
+            jvmTarget = "1.8"
+        }
+    }
+
+    val updatePodspecVersion by registering(Copy::class) {
+        val from = file("webrtc-kmp.podspec")
+        from.writeText(
+            from.readText()
+                .replace("version\\s*=\\s*'(.+)'".toRegex(), "version = '${project.version}'")
+        )
+    }
+
+    withType<AbstractPublishToMaven>().all {
+        dependsOn(updatePodspecVersion)
     }
 }
