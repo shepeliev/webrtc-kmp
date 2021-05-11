@@ -50,7 +50,7 @@ internal fun MediaStreamTrack.MediaType.asNative(): RTCRtpMediaType {
         MediaStreamTrack.MediaType.Audio -> RTCRtpMediaTypeAudio
         MediaStreamTrack.MediaType.Video -> RTCRtpMediaTypeVideo
         MediaStreamTrack.MediaType.Data -> RTCRtpMediaTypeData
-        MediaStreamTrack.MediaType.Unsupported -> TODO() // RTCRtpMediaTypeUnsupported
+        MediaStreamTrack.MediaType.Unsupported -> RTCRtpMediaTypeUnsupported
     }
 }
 
@@ -59,7 +59,7 @@ internal fun rtcRtpMediaTypeAsCommon(type: RTCRtpMediaType): MediaStreamTrack.Me
         RTCRtpMediaTypeAudio -> MediaStreamTrack.MediaType.Audio
         RTCRtpMediaTypeVideo -> MediaStreamTrack.MediaType.Video
         RTCRtpMediaTypeData -> MediaStreamTrack.MediaType.Data
-//        RTCRtpMediaTypeUnsupported -> MediaStreamTrack.MediaType.Unsupported
+        RTCRtpMediaTypeUnsupported -> MediaStreamTrack.MediaType.Unsupported
     }
 }
 

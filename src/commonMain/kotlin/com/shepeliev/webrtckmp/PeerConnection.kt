@@ -10,19 +10,6 @@ expect class PeerConnection {
     val iceGatheringState: IceGatheringState
     val events: PeerConnectionEvents
 
-//    val signalingStateFlow: Flow<SignalingState>
-//    val iceConnectionStateFlow: Flow<IceConnectionState>
-//    val connectionStateFlow: Flow<PeerConnectionState>
-//    val iceGatheringStateFlow: Flow<IceGatheringState>
-//    val iceCandidateFlow: Flow<IceCandidate>
-//    val removedIceCandidatesFlow: Flow<List<IceCandidate>>
-//    val dataChannelFlow: Flow<DataChannel>
-//    val renegotiationNeeded: Flow<Unit>
-//    val addStreamFlow: Flow<MediaStream>
-//    val removeStreamFlow: Flow<MediaStream>
-//    val addTrackFlow: Flow<Pair<RtpReceiver, List<MediaStream>>>
-//    val removeTrackFlow: Flow<RtpReceiver>
-
     fun createDataChannel(
         label: String,
         id: Int = -1,

@@ -1,0 +1,5 @@
+language = Objective-C
+package = WebRTC
+modules = WebRTC
+compilerOpts = -framework WebRTC
+linkerOpts = -framework WebRTC

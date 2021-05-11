@@ -1,44 +1,47 @@
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("com.android.library")
     kotlin("multiplatform") version "1.4.31"
-    kotlin("native.cocoapods") version "1.4.31"
     id("maven-publish")
 }
 
 group = "com.shepeliev"
-version = "1.0-alpha01"
+version = "1.89-alpha02"
 
 repositories {
     google()
-    jcenter()
     mavenCentral()
 }
 
 
 kotlin {
-    cocoapods {
-        ios.deploymentTarget = "11.0"
-        summary = "WebRTC Kotlin Multiplatform"
-        homepage = "https://github.com/shepeliev/webrtc-kmp"
-
-        pod("GoogleWebRTC") {
-            moduleName = "WebRTC"
-            packageName = "WebRTC"
-        }
-    }
-
     android {
-        publishLibraryVariants("release", "debug")
+        publishAllLibraryVariants()
     }
 
-    val iosArm64 = iosArm64()
-    val iosX64 = iosX64("ios") {
-        val webRtcFrameworkPath = "$buildDir/cocoapods/synthetic/IOS/${project.name.replace("-", "_")}/Pods/GoogleWebRTC/Frameworks/frameworks"
-        binaries.getTest(DEBUG).apply {
-            linkerOpts("-F$webRtcFrameworkPath", "-framework", "WebRTC", "-rpath", webRtcFrameworkPath)
+    fun configureNativeTarget(): KotlinNativeTarget.() -> Unit = {
+        val webRtcFrameworkPath =
+            projectDir.resolve("framework/WebRTC.xcframework/ios-x86_64-simulator/")
+        binaries {
+            getTest("DEBUG").apply {
+                linkerOpts(
+                    "-F$webRtcFrameworkPath",
+                    "-rpath",
+                    "$webRtcFrameworkPath"
+                )
+            }
+            compilations.getByName("main") {
+                cinterops.create("WebRTC") {
+                    compilerOpts("-F$webRtcFrameworkPath")
+                }
+            }
         }
     }
+
+    val iosX64 = iosX64("ios", configureNativeTarget())
+    val iosArm64 = iosArm64(configure = configureNativeTarget())
 
     sourceSets {
         val commonMain by getting {
@@ -57,7 +60,7 @@ kotlin {
         val androidMain by getting {
             dependencies {
                 implementation("androidx.core:core:1.3.2")
-                api("org.webrtc:google-webrtc:1.0.32006")
+                api(fileTree("libs") { include("*.jar") })
             }
         }
 
@@ -73,24 +76,9 @@ kotlin {
 
         configure(listOf(iosArm64, iosX64)) {
             compilations.getByName("main") {
-                source(sourceSets.get("iosMain"))
+                source(sourceSets["iosMain"])
             }
         }
-
-//        val iosMain by getting
-//        val iosTest by getting
-
-//        val iosX64Main by getting {
-//            kotlin.srcDir(file("src/iosMain/kotlin"))
-//        }
-//
-//        val iosX64Test by getting {
-//            kotlin.srcDir(file("src/iosTest/kotlin"))
-//        }
-//
-//        val iosArm64Main by getting {
-//            dependsOn(iosMain)
-//        }
     }
 }
 
@@ -101,15 +89,13 @@ android {
         targetSdkVersion(30)
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-//    sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
 
     sourceSets {
         getByName("main") {
             manifest.srcFile("src/androidMain/AndroidManifest.xml")
         }
-        getByName("androidTest"){
+        getByName("androidTest") {
             java.srcDir(file("src/androidTest/kotlin"))
-//            manifest.srcFile("src/androidTest/AndroidManifest.xml")
         }
     }
 
@@ -119,8 +105,22 @@ android {
     }
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
-    kotlinOptions {
-        jvmTarget = "1.8"
+tasks {
+    withType<KotlinCompile>().all {
+        kotlinOptions {
+            jvmTarget = "1.8"
+        }
+    }
+
+    val updatePodspecVersion by registering(Copy::class) {
+        val from = file("webrtc-kmp.podspec")
+        from.writeText(
+            from.readText()
+                .replace("version\\s*=\\s*'(.+)'".toRegex(), "version = '${project.version}'")
+        )
+    }
+
+    withType<AbstractPublishToMaven>().all {
+        dependsOn(updatePodspecVersion)
     }
 }

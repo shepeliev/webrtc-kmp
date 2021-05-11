@@ -12,6 +12,10 @@ class PeerConnectionEvents internal constructor() {
     internal val onIceConnectionStateInternal = MutableSharedFlow<IceConnectionState>()
     val onIceConnectionState: Flow<IceConnectionState> = onIceConnectionStateInternal.asSharedFlow()
 
+    internal val onStandardizedIceConnectionInternal = MutableSharedFlow<IceConnectionState>()
+    val onStandardizedIceConnection: Flow<IceConnectionState> =
+        onStandardizedIceConnectionInternal.asSharedFlow()
+
     internal val onConnectionStateInternal = MutableSharedFlow<PeerConnectionState>()
     val onConnectionState: Flow<PeerConnectionState> = onConnectionStateInternal.asSharedFlow()
 

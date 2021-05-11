@@ -223,8 +223,8 @@ actual class PeerConnection internal constructor() {
         val fileDescriptor = ParcelFileDescriptor.open(
             File(filePath),
             ParcelFileDescriptor.MODE_READ_WRITE or
-                    ParcelFileDescriptor.MODE_CREATE or
-                    ParcelFileDescriptor.MODE_TRUNCATE
+                ParcelFileDescriptor.MODE_CREATE or
+                ParcelFileDescriptor.MODE_TRUNCATE
         )
         return native.startRtcEventLog(fileDescriptor.detachFd(), maxSizeBytes)
     }
@@ -257,13 +257,21 @@ actual class PeerConnection internal constructor() {
         }
     }
 
-    internal inner class PcObserver() : NativePeerConnection.Observer {
+    internal inner class PcObserver : NativePeerConnection.Observer {
         override fun onSignalingChange(newState: NativePeerConnection.SignalingState) {
             coroutineScope.launch { events.onSignalingStateInternal.emit(newState.asCommon()) }
         }
 
         override fun onIceConnectionChange(newState: NativePeerConnection.IceConnectionState) {
             coroutineScope.launch { events.onIceConnectionStateInternal.emit(newState.asCommon()) }
+        }
+
+        override fun onStandardizedIceConnectionChange(
+            newState: NativePeerConnection.IceConnectionState
+        ) {
+            coroutineScope.launch {
+                events.onStandardizedIceConnectionInternal.emit(newState.asCommon())
+            }
         }
 
         override fun onConnectionChange(newState: NativePeerConnection.PeerConnectionState) {

@@ -7,7 +7,6 @@ import platform.Foundation.NSLog
 
 class RTCVideoRendererProtocolAdapter(val native: RTCVideoRendererProtocol) : VideoRenderer {
     override fun onFrame(frame: VideoFrame) {
-//        NSLog("Render frame: ${frame.rotatedWidth}x${frame.rotatedHeight}")
         NSLog("Render frame")
         native.renderFrame(frame.native)
     }

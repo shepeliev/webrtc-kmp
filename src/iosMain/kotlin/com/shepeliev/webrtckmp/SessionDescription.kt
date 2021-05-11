@@ -23,7 +23,7 @@ private fun rtcSdpTypeAsCommon(type: RTCSdpType): SessionDescriptionType {
         RTCSdpType.RTCSdpTypeOffer -> SessionDescriptionType.Offer
         RTCSdpType.RTCSdpTypePrAnswer -> SessionDescriptionType.Pranswer
         RTCSdpType.RTCSdpTypeAnswer -> SessionDescriptionType.Answer
-//        RTCSdpType.RTCSdpTypeRollback -> SessionDescriptionType.Rollback
+        RTCSdpType.RTCSdpTypeRollback -> SessionDescriptionType.Rollback
     }
 }
 
@@ -32,6 +32,6 @@ private fun SessionDescriptionType.asNative(): RTCSdpType {
         SessionDescriptionType.Offer -> RTCSdpType.RTCSdpTypeOffer
         SessionDescriptionType.Pranswer -> RTCSdpType.RTCSdpTypePrAnswer
         SessionDescriptionType.Answer -> RTCSdpType.RTCSdpTypeAnswer
-        SessionDescriptionType.Rollback -> TODO() //RTCSdpType.RTCSdpTypeRollback
+        SessionDescriptionType.Rollback -> RTCSdpType.RTCSdpTypeRollback
     }
 }
