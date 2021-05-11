@@ -1,54 +1,45 @@
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+
 plugins {
     id("com.android.library")
     kotlin("multiplatform") version "1.4.31"
-    kotlin("native.cocoapods") version "1.4.31"
     id("maven-publish")
 }
 
 group = "com.shepeliev"
-version = "1.0-alpha01"
+version = "1.0-alpha02"
 
 repositories {
     google()
-    jcenter()
     mavenCentral()
 }
 
 
 kotlin {
-    cocoapods {
-        ios.deploymentTarget = "11.0"
-        summary = "WebRTC Kotlin Multiplatform"
-        homepage = "https://github.com/shepeliev/webrtc-kmp"
-
-        pod("GoogleWebRTC") {
-            moduleName = "WebRTC"
-            packageName = "WebRTC"
-        }
-    }
-
     android {
-        publishLibraryVariants("release", "debug")
+        publishAllLibraryVariants()
     }
 
-    val iosArm64 = iosArm64()
-    val iosX64 = iosX64("ios") {
-        val webRtcFrameworkPath = "$buildDir/cocoapods/synthetic/IOS/${
-            project.name.replace(
-                "-",
-                "_"
-            )
-        }/Pods/GoogleWebRTC/Frameworks/frameworks"
-        binaries.getTest(DEBUG).apply {
-            linkerOpts(
-                "-F$webRtcFrameworkPath",
-                "-framework",
-                "WebRTC",
-                "-rpath",
-                webRtcFrameworkPath
-            )
+    fun configureNativeTarget(): KotlinNativeTarget.() -> Unit = {
+        val webRtcFrameworkPath = projectDir.resolve("framework/WebRTC.xcframework/ios-x86_64-simulator/")
+        binaries {
+            getTest("DEBUG").apply {
+                linkerOpts(
+                    "-F$webRtcFrameworkPath",
+                    "-rpath",
+                    "$webRtcFrameworkPath"
+                )
+            }
+            compilations.getByName("main") {
+                cinterops.create("WebRTC") {
+                    compilerOpts("-F$webRtcFrameworkPath")
+                }
+            }
         }
     }
+
+    val iosX64 = iosX64("ios", configureNativeTarget())
+    val iosArm64 = iosArm64(configure = configureNativeTarget())
 
     sourceSets {
         val commonMain by getting {
@@ -83,7 +74,7 @@ kotlin {
 
         configure(listOf(iosArm64, iosX64)) {
             compilations.getByName("main") {
-                source(sourceSets.get("iosMain"))
+                source(sourceSets["iosMain"])
             }
         }
     }

@@ -8,13 +8,3 @@ build/
 .externalNativeBuild
 .cxx
 local.properties
-
-# XCode
-Pods/
-xcuserdata/
-*.podspec
-
-# Carthage
-Cartfile.resolved
-Build/
-Checkouts/
