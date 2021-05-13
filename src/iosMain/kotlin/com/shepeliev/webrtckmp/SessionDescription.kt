@@ -13,11 +13,6 @@ actual class SessionDescription internal constructor(val native: RTCSessionDescr
     actual val description: String = native.description!!
 }
 
-actual fun sessionDescriptionTypeFromCanonicalForm(canonical: String): SessionDescriptionType {
-//    return NativeSessionDescription.Type.fromCanonicalForm(canonical).asCommon()
-    TODO()
-}
-
 private fun rtcSdpTypeAsCommon(type: RTCSdpType): SessionDescriptionType {
     return when (type) {
         RTCSdpType.RTCSdpTypeOffer -> SessionDescriptionType.Offer

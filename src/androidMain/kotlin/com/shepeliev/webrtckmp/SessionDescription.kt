@@ -12,10 +12,6 @@ actual class SessionDescription internal constructor(val native: NativeSessionDe
     actual val description: String = native.description
 }
 
-actual fun sessionDescriptionTypeFromCanonicalForm(canonical: String): SessionDescriptionType {
-    return NativeSessionDescription.Type.fromCanonicalForm(canonical).asCommon()
-}
-
 fun NativeSessionDescription.Type.asCommon(): SessionDescriptionType {
     return when (this) {
         NativeSessionDescription.Type.OFFER -> SessionDescriptionType.Offer

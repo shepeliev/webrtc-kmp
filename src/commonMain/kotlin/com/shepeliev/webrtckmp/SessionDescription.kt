@@ -6,5 +6,3 @@ expect class SessionDescription(type: SessionDescriptionType, description: Strin
 }
 
 enum class SessionDescriptionType { Offer, Pranswer, Answer, Rollback }
-
-expect fun sessionDescriptionTypeFromCanonicalForm(canonical: String): SessionDescriptionType
