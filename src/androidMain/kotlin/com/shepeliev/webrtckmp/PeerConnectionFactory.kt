@@ -11,18 +11,6 @@ import org.webrtc.PeerConnectionFactory as NativePeerConnectionFactory
 
 internal actual class PeerConnectionFactory(val native: NativePeerConnectionFactory) {
 
-    actual fun createPeerConnection(
-        rtcConfiguration: RtcConfiguration,
-        constraints: MediaConstraints,
-    ): PeerConnection {
-        val factory = native
-
-        return PeerConnection().apply {
-            native = factory.createPeerConnection(rtcConfiguration.native, pcObserver)
-                ?: error("Creating PeerConnection failed")
-        }
-    }
-
     actual fun createLocalMediaStream(id: String): MediaStream {
         return MediaStream(native.createLocalMediaStream(id))
     }

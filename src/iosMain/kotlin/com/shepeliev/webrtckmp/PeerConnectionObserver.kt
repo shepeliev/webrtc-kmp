@@ -105,7 +105,11 @@ internal class PeerConnectionObserver(
         peerConnection: RTCPeerConnection,
         didChangeStandardizedIceConnectionState: RTCIceConnectionState
     ) {
-        // TODO not implemented
+        WebRtcKmp.mainScope.launch {
+            events.onStandardizedIceConnectionInternal.emit(
+                rtcIceConnectionStateAsCommon(didChangeStandardizedIceConnectionState)
+            )
+        }
     }
 
     override fun peerConnection(

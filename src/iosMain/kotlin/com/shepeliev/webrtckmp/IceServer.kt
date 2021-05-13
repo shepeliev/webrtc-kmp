@@ -1,6 +1,7 @@
 package com.shepeliev.webrtckmp
 
 import WebRTC.RTCIceServer
+import WebRTC.RTCTlsCertPolicy
 
 actual class IceServer internal constructor(val native: RTCIceServer) {
     actual constructor(
@@ -24,4 +25,14 @@ actual class IceServer internal constructor(val native: RTCIceServer) {
     )
 
     actual override fun toString(): String = native.toString()
+}
+
+private fun TlsCertPolicy.asNative(): RTCTlsCertPolicy {
+    return when (this) {
+        TlsCertPolicy.TlsCertPolicySecure -> RTCTlsCertPolicy.RTCTlsCertPolicySecure
+
+        TlsCertPolicy.TlsCertPolicyInsecureNoCheck -> {
+            RTCTlsCertPolicy.RTCTlsCertPolicyInsecureNoCheck
+        }
+    }
 }

@@ -20,18 +20,18 @@ import org.webrtc.RtpReceiver as NativeRtpReceiver
 import org.webrtc.RtpTransceiver as NativeRtpTransceiver
 import org.webrtc.SessionDescription as NativeSessionDescription
 
-actual class PeerConnection internal constructor() {
+actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguration) {
 
-    lateinit var native: NativePeerConnection
+    val native: NativePeerConnection
 
     actual val localDescription: SessionDescription?
-        get() = native.localDescription?.asCommon()
+        get() = native.localDescription?.let { SessionDescription(it) }
 
     actual val remoteDescription: SessionDescription?
-        get() = native.remoteDescription?.asCommon()
+        get() = native.remoteDescription?.let { SessionDescription(it) }
 
     actual val certificate: RtcCertificatePem?
-        get() = native.certificate?.asCommon()
+        get() = native.certificate?.let { RtcCertificatePem(it) }
 
     actual val signalingState: SignalingState
         get() = native.signalingState().asCommon()
@@ -47,9 +47,15 @@ actual class PeerConnection internal constructor() {
 
     actual val events = PeerConnectionEvents()
 
-    internal val pcObserver = PcObserver()
+    private val pcObserver = PcObserver()
     private val mediaStreams = mutableMapOf<String, MediaStream>()
     private val mediaStreamTracks = mutableMapOf<String, MediaStreamTrack>()
+
+    init {
+        native = WebRtcKmp.peerConnectionFactory.native
+            .createPeerConnection(rtcConfiguration.native, pcObserver)
+            ?: error("Creating PeerConnection failed")
+    }
 
     actual fun createDataChannel(
         label: String,
@@ -86,7 +92,7 @@ actual class PeerConnection internal constructor() {
     private fun createSdpObserver(continuation: Continuation<SessionDescription>): SdpObserver {
         return object : SdpObserver {
             override fun onCreateSuccess(description: NativeSessionDescription) {
-                continuation.resume(description.asCommon())
+                continuation.resume(SessionDescription(description))
             }
 
             override fun onSetSuccess() {
@@ -161,16 +167,16 @@ actual class PeerConnection internal constructor() {
     }
 
     actual fun createSender(kind: String, streamId: String): RtpSender {
-        return native.createSender(kind, streamId).asCommon()
+        return RtpSender(native.createSender(kind, streamId))
     }
 
-    actual fun getSenders(): List<RtpSender> = native.senders.map { it.asCommon() }
-    actual fun getReceivers(): List<RtpReceiver> = native.receivers.map { it.asCommon() }
+    actual fun getSenders(): List<RtpSender> = native.senders.map { RtpSender(it) }
+    actual fun getReceivers(): List<RtpReceiver> = native.receivers.map { RtpReceiver(it) }
     actual fun getTransceivers(): List<RtpTransceiver> = native.transceivers.map { it.asCommon() }
 
     actual fun addTrack(track: MediaStreamTrack, streamIds: List<String>): RtpSender {
         mediaStreamTracks += track.id to track
-        return native.addTrack((track as BaseMediaStreamTrack).native, streamIds).asCommon()
+        return RtpSender(native.addTrack((track as BaseMediaStreamTrack).native, streamIds))
     }
 
     actual fun removeTrack(sender: RtpSender): Boolean {
@@ -286,12 +292,12 @@ actual class PeerConnection internal constructor() {
         }
 
         override fun onIceCandidate(candidate: NativeIceCandidate) {
-            mainScope.launch { events.onIceCandidateInternal.emit(candidate.asCommon()) }
+            mainScope.launch { events.onIceCandidateInternal.emit(IceCandidate(candidate)) }
         }
 
         override fun onIceCandidatesRemoved(candidates: Array<out NativeIceCandidate>) {
             mainScope.launch {
-                events.onRemovedIceCandidatesInternal.emit(candidates.map { it.asCommon() })
+                events.onRemovedIceCandidatesInternal.emit(candidates.map { IceCandidate(it) })
             }
         }
 
@@ -327,4 +333,46 @@ actual class PeerConnection internal constructor() {
     }
 
     actual companion object
+}
+
+private fun NativePeerConnection.SignalingState.asCommon(): SignalingState {
+    return when(this) {
+        NativePeerConnection.SignalingState.STABLE -> SignalingState.Stable
+        NativePeerConnection.SignalingState.HAVE_LOCAL_OFFER -> SignalingState.HaveLocalOffer
+        NativePeerConnection.SignalingState.HAVE_LOCAL_PRANSWER -> SignalingState.HaveLocalPranswer
+        NativePeerConnection.SignalingState.HAVE_REMOTE_OFFER -> SignalingState.HaveRemoteOffer
+        NativePeerConnection.SignalingState.HAVE_REMOTE_PRANSWER -> SignalingState.HaveRemotePranswer
+        NativePeerConnection.SignalingState.CLOSED -> SignalingState.Closed
+    }
+}
+
+private fun NativePeerConnection.IceConnectionState.asCommon(): IceConnectionState {
+    return when(this) {
+        NativePeerConnection.IceConnectionState.NEW -> IceConnectionState.New
+        NativePeerConnection.IceConnectionState.CHECKING -> IceConnectionState.Checking
+        NativePeerConnection.IceConnectionState.CONNECTED -> IceConnectionState.Connected
+        NativePeerConnection.IceConnectionState.COMPLETED -> IceConnectionState.Completed
+        NativePeerConnection.IceConnectionState.FAILED -> IceConnectionState.Failed
+        NativePeerConnection.IceConnectionState.DISCONNECTED -> IceConnectionState.Disconnected
+        NativePeerConnection.IceConnectionState.CLOSED -> IceConnectionState.Closed
+    }
+}
+
+private fun NativePeerConnection.PeerConnectionState.asCommon(): PeerConnectionState {
+    return when(this) {
+        NativePeerConnection.PeerConnectionState.NEW -> PeerConnectionState.New
+        NativePeerConnection.PeerConnectionState.CONNECTING -> PeerConnectionState.Connecting
+        NativePeerConnection.PeerConnectionState.CONNECTED -> PeerConnectionState.Connected
+        NativePeerConnection.PeerConnectionState.DISCONNECTED -> PeerConnectionState.Disconnected
+        NativePeerConnection.PeerConnectionState.FAILED -> PeerConnectionState.Failed
+        NativePeerConnection.PeerConnectionState.CLOSED -> PeerConnectionState.Closed
+    }
+}
+
+private fun NativePeerConnection.IceGatheringState.asCommon(): IceGatheringState {
+    return when(this) {
+        NativePeerConnection.IceGatheringState.NEW -> IceGatheringState.New
+        NativePeerConnection.IceGatheringState.GATHERING -> IceGatheringState.Gathering
+        NativePeerConnection.IceGatheringState.COMPLETE -> IceGatheringState.Complete
+    }
 }

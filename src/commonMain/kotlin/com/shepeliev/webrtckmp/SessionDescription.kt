@@ -1,8 +1,8 @@
 package com.shepeliev.webrtckmp
 
-expect class SessionDescription(type: SessionDescriptionType, description: String) {
+expect class SessionDescription {
     val type: SessionDescriptionType
-    val description: String
+    val sdp: String
 }
 
 enum class SessionDescriptionType { Offer, Pranswer, Answer, Rollback }

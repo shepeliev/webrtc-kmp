@@ -68,7 +68,7 @@ fun NativeMediaStreamTrack.MediaType.asCommon(): MediaStreamTrack.MediaType {
     }
 }
 
-fun NativeMediaStreamTrack.asCommon(): MediaStreamTrack {
+internal fun NativeMediaStreamTrack.asCommon(): MediaStreamTrack {
     return when (this) {
         is NativeAudioTrack -> AudioTrack(this)
         is NativeVideoTrack -> VideoTrack(this)

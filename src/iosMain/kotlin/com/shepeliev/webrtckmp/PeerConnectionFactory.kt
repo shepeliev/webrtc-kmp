@@ -4,20 +4,6 @@ import WebRTC.RTCPeerConnectionFactory
 import kotlin.native.concurrent.freeze
 
 internal actual class PeerConnectionFactory(val native: RTCPeerConnectionFactory) {
-    actual fun createPeerConnection(
-        rtcConfiguration: RtcConfiguration,
-        constraints: MediaConstraints,
-    ): PeerConnection {
-        val pcEvents = PeerConnectionEvents().freeze()
-        val nativePc = WebRtcKmp.peerConnectionFactory.native.peerConnectionWithConfiguration(
-            rtcConfiguration.native.freeze(),
-            constraints.native.freeze(),
-            PeerConnectionObserver(pcEvents).freeze()
-        ).freeze()
-
-        return PeerConnection(nativePc, pcEvents)
-    }
-
     actual fun createLocalMediaStream(id: String): MediaStream {
         return MediaStream(native.mediaStreamWithStreamId(id).freeze()).freeze()
     }

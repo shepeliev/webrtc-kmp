@@ -24,8 +24,8 @@ class DataChannelTest {
 
     @Test
     fun data_channel_should_work() = runTest {
-        val pc1 = PeerConnection.create(RtcConfiguration(), mediaConstraints())
-        val pc2 = PeerConnection.create(RtcConfiguration(), mediaConstraints())
+        val pc1 = PeerConnection()
+        val pc2 = PeerConnection()
 
         val channel = Channel<String>()
 

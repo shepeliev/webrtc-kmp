@@ -24,3 +24,13 @@ actual class IceServer internal constructor(val native: PeerConnection.IceServer
 
     actual override fun toString(): String = native.toString()
 }
+
+private fun TlsCertPolicy.asNative(): PeerConnection.TlsCertPolicy {
+    return when (this) {
+        TlsCertPolicy.TlsCertPolicySecure -> PeerConnection.TlsCertPolicy.TLS_CERT_POLICY_SECURE
+
+        TlsCertPolicy.TlsCertPolicyInsecureNoCheck -> {
+            PeerConnection.TlsCertPolicy.TLS_CERT_POLICY_INSECURE_NO_CHECK
+        }
+    }
+}

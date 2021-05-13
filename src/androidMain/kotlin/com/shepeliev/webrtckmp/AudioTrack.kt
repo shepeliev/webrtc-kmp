@@ -9,5 +9,3 @@ actual class AudioTrack internal constructor(override val native: NativeAudioTra
         native.setVolume(volume)
     }
 }
-
-internal fun NativeAudioTrack.asCommon() = AudioTrack(this)

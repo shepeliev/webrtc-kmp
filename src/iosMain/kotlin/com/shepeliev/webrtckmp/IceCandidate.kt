@@ -1,17 +1,11 @@
 package com.shepeliev.webrtckmp
 
 import WebRTC.RTCIceCandidate
-actual class IceCandidate constructor(val native: RTCIceCandidate) {
 
-    actual constructor(
-        sdpMid: String,
-        sdpMLineIndex: Int,
-        sdp: String,
-    ) : this(RTCIceCandidate(sdp, sdpMLineIndex, sdpMid))
-
+actual class IceCandidate internal constructor(val native: RTCIceCandidate) {
     actual val sdpMid: String = native.sdpMid!!
     actual val sdpMLineIndex: Int = native.sdpMLineIndex
-    actual val sdp: String = native.sdp
+    actual val candidate: String = native.sdp
 
-    actual override fun toString(): String = sdp
+    actual override fun toString(): String = candidate
 }

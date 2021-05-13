@@ -4,6 +4,8 @@ import WebRTC.RTCDataBuffer
 import WebRTC.RTCDataChannel
 import WebRTC.RTCDataChannelDelegateProtocol
 import WebRTC.RTCDataChannelState
+import com.shepeliev.webrtckmp.ios.toByteArray
+import com.shepeliev.webrtckmp.ios.toNSData
 import platform.darwin.NSObject
 import platform.posix.uint64_t
 import kotlin.native.concurrent.freeze

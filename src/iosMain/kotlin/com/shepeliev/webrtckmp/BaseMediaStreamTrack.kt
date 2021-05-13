@@ -1,7 +1,14 @@
 package com.shepeliev.webrtckmp
 
-import WebRTC.*
-import WebRTC.RTCRtpMediaType.*
+import WebRTC.RTCAudioTrack
+import WebRTC.RTCMediaStreamTrack
+import WebRTC.RTCMediaStreamTrackState
+import WebRTC.RTCRtpMediaType
+import WebRTC.RTCRtpMediaType.RTCRtpMediaTypeAudio
+import WebRTC.RTCRtpMediaType.RTCRtpMediaTypeData
+import WebRTC.RTCRtpMediaType.RTCRtpMediaTypeUnsupported
+import WebRTC.RTCRtpMediaType.RTCRtpMediaTypeVideo
+import WebRTC.RTCVideoTrack
 
 abstract class BaseMediaStreamTrack : MediaStreamTrack {
     abstract val native: RTCMediaStreamTrack
@@ -45,29 +52,12 @@ abstract class BaseMediaStreamTrack : MediaStreamTrack {
     }
 }
 
-internal fun MediaStreamTrack.MediaType.asNative(): RTCRtpMediaType {
-    return when (this) {
-        MediaStreamTrack.MediaType.Audio -> RTCRtpMediaTypeAudio
-        MediaStreamTrack.MediaType.Video -> RTCRtpMediaTypeVideo
-        MediaStreamTrack.MediaType.Data -> RTCRtpMediaTypeData
-        MediaStreamTrack.MediaType.Unsupported -> RTCRtpMediaTypeUnsupported
-    }
-}
-
 internal fun rtcRtpMediaTypeAsCommon(type: RTCRtpMediaType): MediaStreamTrack.MediaType {
     return when (type) {
         RTCRtpMediaTypeAudio -> MediaStreamTrack.MediaType.Audio
         RTCRtpMediaTypeVideo -> MediaStreamTrack.MediaType.Video
         RTCRtpMediaTypeData -> MediaStreamTrack.MediaType.Data
         RTCRtpMediaTypeUnsupported -> MediaStreamTrack.MediaType.Unsupported
-    }
-}
-
-internal fun RTCMediaStreamTrack.asCommon(): MediaStreamTrack {
-    return when (this) {
-        is RTCAudioTrack -> AudioTrack(this)
-        is RTCVideoTrack -> VideoTrack(this)
-        else -> error("Unknown native MediaStreamTrack: $this")
     }
 }
 

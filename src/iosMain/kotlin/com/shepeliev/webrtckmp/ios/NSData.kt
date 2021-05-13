@@ -1,4 +1,4 @@
-package com.shepeliev.webrtckmp
+package com.shepeliev.webrtckmp.ios
 
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.allocArrayOf

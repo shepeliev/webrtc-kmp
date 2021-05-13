@@ -4,6 +4,7 @@ import WebRTC.RTCDataChannel
 import WebRTC.RTCDataChannelConfiguration
 import WebRTC.RTCMediaConstraints
 import WebRTC.RTCPeerConnection
+import WebRTC.RTCRtpMediaType
 import WebRTC.RTCRtpReceiver
 import WebRTC.RTCRtpSender
 import WebRTC.RTCRtpTransceiver
@@ -25,10 +26,10 @@ import kotlin.native.concurrent.freeze
 
 private typealias CompletionHandler<T> = (result: T?, error: NSError?) -> Unit
 
-actual class PeerConnection internal constructor(
-    private val native: RTCPeerConnection,
-    actual val events: PeerConnectionEvents,
-) {
+actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguration) {
+
+    val native: RTCPeerConnection
+    actual val events: PeerConnectionEvents = PeerConnectionEvents().freeze()
 
     actual val localDescription: SessionDescription?
         get() = native.localDescription?.let { SessionDescription(it) }
@@ -70,6 +71,14 @@ actual class PeerConnection internal constructor(
             it.isNegotiated = negotiated
         }
         return native.dataChannelForLabel(label, config)?.let { DataChannel(it.freeze()) }
+    }
+
+    init {
+        native = WebRtcKmp.peerConnectionFactory.native.peerConnectionWithConfiguration(
+            rtcConfiguration.native.freeze(),
+            RTCMediaConstraints().freeze(),
+            PeerConnectionObserver(events).freeze()
+        ).freeze()
     }
 
     actual suspend fun createOffer(constraints: MediaConstraints): SessionDescription {
@@ -239,4 +248,13 @@ actual class PeerConnection internal constructor(
     actual fun close() = native.close()
 
     actual companion object
+}
+
+private fun MediaStreamTrack.MediaType.asNative(): RTCRtpMediaType {
+    return when (this) {
+        MediaStreamTrack.MediaType.Audio -> RTCRtpMediaType.RTCRtpMediaTypeAudio
+        MediaStreamTrack.MediaType.Video -> RTCRtpMediaType.RTCRtpMediaTypeVideo
+        MediaStreamTrack.MediaType.Data -> RTCRtpMediaType.RTCRtpMediaTypeData
+        MediaStreamTrack.MediaType.Unsupported -> RTCRtpMediaType.RTCRtpMediaTypeUnsupported
+    }
 }

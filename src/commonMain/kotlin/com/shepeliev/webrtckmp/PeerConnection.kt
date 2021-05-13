@@ -1,6 +1,9 @@
+@file:JvmName("AndroidPeerConnection")
 package com.shepeliev.webrtckmp
 
-expect class PeerConnection {
+import kotlin.jvm.JvmName
+
+expect class PeerConnection(rtcConfiguration: RtcConfiguration = RtcConfiguration()) {
     val localDescription: SessionDescription?
     val remoteDescription: SessionDescription?
     val certificate: RtcCertificatePem?
@@ -234,38 +237,11 @@ expect class PeerConnection {
     companion object
 }
 
-fun PeerConnection.Companion.create(
-    configuration: RtcConfiguration,
-    constraints: MediaConstraints
-): PeerConnection {
-    return WebRtcKmp.peerConnectionFactory.createPeerConnection(configuration, constraints)
-}
-
-enum class SdpSemantics { PlanB, UnifiedPlan }
-enum class PortPrunePolicy { NoPrune, PruneBasedOnPriority, KeepFirstReady }
-enum class ContinualGatheringPolicy { GatherOnce, GatherContinually }
 enum class TlsCertPolicy { TlsCertPolicySecure, TlsCertPolicyInsecureNoCheck }
 enum class KeyType { RSA, ECDSA }
-enum class CandidateNetworkPolicy { All, LowCost }
-enum class TcpCandidatePolicy { Enabled, Disabled }
 enum class RtcpMuxPolicy { Negotiate, Require }
-enum class BundlePolicy { Balanced, Maxbundle, Maxcompat }
-enum class IceTransportsType { None, Relay, Nohost, All }
-
-enum class AdapterType(val bitMask: Int) {
-    Unknown(0),
-    Ethernet(1),
-    WiFi(2),
-    Cellular(4),
-    Vpn(8),
-    Loopback(16),
-    AdapterTypeAny(32),
-    Cellular2g(64),
-    Cellular3g(128),
-    Cellular4g(256),
-    Cellular5g(512);
-}
-
+enum class BundlePolicy { Balanced, MaxBundle, MaxCompat }
+enum class IceTransportPolicy { None, Relay, NoHost, All }
 
 enum class SignalingState {
     Stable,

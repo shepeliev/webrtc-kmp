@@ -95,8 +95,8 @@ private fun getDefaultPeerConnectionBuilder(): AndroidPeerConnectionFactory.Buil
 
 fun WebRtcKmp.dispose() {
     peerConnectionFactoryInternal?.native?.dispose()
-    peerConnectionFactoryInternal = null
     AndroidPeerConnectionFactory.shutdownInternalTracer()
+    peerConnectionFactoryInternal = null
     eglBaseInternal?.release()
     eglBaseInternal = null
     mainScopeInternal?.cancel()
