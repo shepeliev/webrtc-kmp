@@ -1,5 +1,7 @@
 package com.shepeliev.webrtckmp.android
 
+import com.shepeliev.webrtckmp.WebRtcKmp
+import com.shepeliev.webrtckmp.eglBase
 import org.webrtc.DefaultVideoEncoderFactory
 import org.webrtc.VideoEncoderFactory
 
@@ -8,7 +10,7 @@ fun interface VideoEncoderFactoryProvider {
 
     companion object : VideoEncoderFactoryProvider {
         private var provider = VideoEncoderFactoryProvider {
-            val eglBase = EglBaseProvider.getEglBase()
+            val eglBase = WebRtcKmp.eglBase
             DefaultVideoEncoderFactory(eglBase.eglBaseContext, true, true)
         }
 

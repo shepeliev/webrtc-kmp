@@ -1,53 +1,69 @@
+@file:JvmName("WebRtcKmpAndroid")
+
 package com.shepeliev.webrtckmp
 
-import com.shepeliev.webrtckmp.android.ApplicationContextProvider
+import android.content.Context
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
+import org.webrtc.EglBase
 import org.webrtc.Logging
 import org.webrtc.PeerConnectionFactory
 
 actual object WebRtcKmp {
-    actual fun initialize(
-        fieldTrials: Map<String, String>,
-        enableInternalTracer: Boolean,
-        loggingSeverity: WebRtcLoggingSeverity,
-    ) {
-        _coroutineScope = MainScope()
-
-        if (loggingSeverity != WebRtcLoggingSeverity.None) {
-            val severity = when(loggingSeverity) {
-                WebRtcLoggingSeverity.Verbose -> Logging.Severity.LS_VERBOSE
-                WebRtcLoggingSeverity.Info -> Logging.Severity.LS_INFO
-                WebRtcLoggingSeverity.Warning -> Logging.Severity.LS_WARNING
-                WebRtcLoggingSeverity.Error -> Logging.Severity.LS_ERROR
-                WebRtcLoggingSeverity.None -> Logging.Severity.LS_NONE
-            }
-            Logging.enableLogToDebugOutput(severity)
+    actual val mainScope: CoroutineScope
+        get() {
+            check(mainScopeInternal != null) { NOT_INITIALIZED_ERROR_MESSAGE }
+            return mainScopeInternal!!
         }
-
-        val fieldTrialsString = fieldTrials.entries.joinToString(separator = "/") {
-            "${it.key}/${it.value}"
-        }
-        val initOptions = PeerConnectionFactory.InitializationOptions.builder(
-            ApplicationContextProvider.applicationContext
-        )
-            .setFieldTrials(fieldTrialsString)
-            .setEnableInternalTracer(enableInternalTracer)
-            .createInitializationOptions()
-        PeerConnectionFactory.initialize(initOptions)
-    }
-
-    actual fun dispose() {
-        PeerConnectionFactory.shutdownInternalTracer()
-        _coroutineScope?.cancel()
-        _coroutineScope = null
-    }
 }
 
-private var _coroutineScope: CoroutineScope? = null;
-actual val coroutineScope: CoroutineScope
-get() {
-    check(_coroutineScope != null) { "WebRTC KMM is not initialized!" }
-    return _coroutineScope!!
+private var mainScopeInternal: CoroutineScope? = null
+private var eglBaseInternal: EglBase? = null
+private var applicationContextInternal: Context? = null
+
+val WebRtcKmp.eglBase: EglBase
+    get() {
+        check(eglBaseInternal != null) { NOT_INITIALIZED_ERROR_MESSAGE }
+        return eglBaseInternal!!
+    }
+
+internal val WebRtcKmp.applicationContext: Context
+    get() {
+        check(applicationContextInternal != null) { NOT_INITIALIZED_ERROR_MESSAGE }
+        return applicationContextInternal!!
+    }
+
+
+fun WebRtcKmp.initialize(
+    context: Context,
+    eglBase: EglBase,
+    fieldTrials: Map<String, String> = emptyMap(),
+    enableInternalTracer: Boolean = false,
+    loggingSeverity: Logging.Severity? = null
+) {
+    applicationContextInternal = context
+    mainScopeInternal = MainScope()
+
+    val fieldTrialsString = fieldTrials.entries.joinToString(separator = "/") {
+        "${it.key}/${it.value}"
+    }
+    val initOptions = PeerConnectionFactory.InitializationOptions.builder(context)
+        .setFieldTrials(fieldTrialsString)
+        .setEnableInternalTracer(enableInternalTracer)
+        .createInitializationOptions()
+    PeerConnectionFactory.initialize(initOptions)
+
+    loggingSeverity?.also { Logging.enableLogToDebugOutput(it) }
+
+    eglBaseInternal = eglBase
+}
+
+fun WebRtcKmp.dispose() {
+    PeerConnectionFactory.shutdownInternalTracer()
+    eglBaseInternal?.release()
+    eglBaseInternal = null
+    mainScopeInternal?.cancel()
+    mainScopeInternal = null
+    applicationContextInternal = null
 }

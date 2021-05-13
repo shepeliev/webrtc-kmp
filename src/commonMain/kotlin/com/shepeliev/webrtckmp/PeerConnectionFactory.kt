@@ -41,9 +41,6 @@ internal expect class PeerConnectionFactory {
 
     fun startAecDump(filePath: String, fileSizeLimitBytes: Int)
     fun stopAecDump()
-    /* TODO
-    fun printInternalStackTraces(printNativeStackTraces: Boolean)
-     */
     fun dispose()
 }
 

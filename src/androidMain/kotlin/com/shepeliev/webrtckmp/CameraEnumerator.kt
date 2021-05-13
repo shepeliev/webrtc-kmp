@@ -2,8 +2,6 @@ package com.shepeliev.webrtckmp
 
 import android.content.Context
 import android.util.Log
-import com.shepeliev.webrtckmp.android.ApplicationContextProvider
-import com.shepeliev.webrtckmp.android.EglBaseProvider
 import com.shepeliev.webrtckmp.utils.uuid
 import org.webrtc.Camera1Enumerator
 import org.webrtc.Camera2Enumerator
@@ -18,7 +16,7 @@ import org.webrtc.CameraVideoCapturer as NativeCameraVideoCapturer
 
 internal actual object CameraEnumerator {
     private val enumerator by lazy {
-        val context = ApplicationContextProvider.applicationContext
+        val context = WebRtcKmp.applicationContext
         if (Camera2Enumerator.isSupported(context)) {
             Camera2Enumerator(context)
         } else {
@@ -26,10 +24,10 @@ internal actual object CameraEnumerator {
         }
     }
 
-    private val applicationContext by lazy { ApplicationContextProvider.applicationContext }
+    private val applicationContext by lazy { WebRtcKmp.applicationContext }
 
     private val surfaceTextureHelper by lazy {
-        val eglBase = EglBaseProvider.getEglBase()
+        val eglBase = WebRtcKmp.eglBase
         SurfaceTextureHelper.create(uuid(), eglBase.eglBaseContext)
     }
 

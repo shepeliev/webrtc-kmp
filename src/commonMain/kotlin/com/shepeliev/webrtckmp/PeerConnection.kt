@@ -104,7 +104,7 @@ expect class PeerConnection {
      * should use the same stream ID.
      * @return  A new RtpSender object if successful, or null otherwise.
      */
-    fun createSender(kind: String, streamId: String): RtpSender?
+    fun createSender(kind: String, streamId: String): RtpSender
 
     /**
      * Gets all RtpSenders associated with this peer connection.

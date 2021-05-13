@@ -3,15 +3,7 @@ package com.shepeliev.webrtckmp
 import kotlinx.coroutines.CoroutineScope
 
 expect object WebRtcKmp {
-    fun initialize(
-        fieldTrials: Map<String, String> = emptyMap(),
-        enableInternalTracer: Boolean = false,
-        loggingSeverity: WebRtcLoggingSeverity = WebRtcLoggingSeverity.None,
-    )
-
-    fun dispose()
+    val mainScope: CoroutineScope
 }
 
-enum class WebRtcLoggingSeverity { Verbose, Info, Warning, Error, None }
-
-internal expect val coroutineScope: CoroutineScope
+internal const val NOT_INITIALIZED_ERROR_MESSAGE = "WebRTC KMM not initialized."

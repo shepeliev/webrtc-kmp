@@ -1,6 +1,7 @@
 package com.shepeliev.webrtckmp
 
 import android.os.ParcelFileDescriptor
+import com.shepeliev.webrtckmp.WebRtcKmp.mainScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -159,8 +160,8 @@ actual class PeerConnection internal constructor() {
         native.removeStream(stream.native)
     }
 
-    actual fun createSender(kind: String, streamId: String): RtpSender? {
-        return native.createSender(kind, streamId)?.asCommon()
+    actual fun createSender(kind: String, streamId: String): RtpSender {
+        return native.createSender(kind, streamId).asCommon()
     }
 
     actual fun getSenders(): List<RtpSender> = native.senders.map { it.asCommon() }
@@ -259,37 +260,37 @@ actual class PeerConnection internal constructor() {
 
     internal inner class PcObserver : NativePeerConnection.Observer {
         override fun onSignalingChange(newState: NativePeerConnection.SignalingState) {
-            coroutineScope.launch { events.onSignalingStateInternal.emit(newState.asCommon()) }
+            mainScope.launch { events.onSignalingStateInternal.emit(newState.asCommon()) }
         }
 
         override fun onIceConnectionChange(newState: NativePeerConnection.IceConnectionState) {
-            coroutineScope.launch { events.onIceConnectionStateInternal.emit(newState.asCommon()) }
+            mainScope.launch { events.onIceConnectionStateInternal.emit(newState.asCommon()) }
         }
 
         override fun onStandardizedIceConnectionChange(
             newState: NativePeerConnection.IceConnectionState
         ) {
-            coroutineScope.launch {
+            mainScope.launch {
                 events.onStandardizedIceConnectionInternal.emit(newState.asCommon())
             }
         }
 
         override fun onConnectionChange(newState: NativePeerConnection.PeerConnectionState) {
-            coroutineScope.launch { events.onConnectionStateInternal.emit(newState.asCommon()) }
+            mainScope.launch { events.onConnectionStateInternal.emit(newState.asCommon()) }
         }
 
         override fun onIceConnectionReceivingChange(receiving: Boolean) {}
 
         override fun onIceGatheringChange(newState: NativePeerConnection.IceGatheringState) {
-            coroutineScope.launch { events.onIceGatheringStateInternal.emit(newState.asCommon()) }
+            mainScope.launch { events.onIceGatheringStateInternal.emit(newState.asCommon()) }
         }
 
         override fun onIceCandidate(candidate: NativeIceCandidate) {
-            coroutineScope.launch { events.onIceCandidateInternal.emit(candidate.asCommon()) }
+            mainScope.launch { events.onIceCandidateInternal.emit(candidate.asCommon()) }
         }
 
         override fun onIceCandidatesRemoved(candidates: Array<out NativeIceCandidate>) {
-            coroutineScope.launch {
+            mainScope.launch {
                 events.onRemovedIceCandidatesInternal.emit(candidates.map { it.asCommon() })
             }
         }
@@ -297,19 +298,19 @@ actual class PeerConnection internal constructor() {
         override fun onSelectedCandidatePairChanged(event: NativeCandidatePairChangeEvent) {}
 
         override fun onAddStream(nativeStream: NativeMediaStream) {
-            coroutineScope.launch { events.onAddStreamInternal.emit(MediaStream(nativeStream)) }
+            mainScope.launch { events.onAddStreamInternal.emit(MediaStream(nativeStream)) }
         }
 
         override fun onRemoveStream(nativeStream: NativeMediaStream) {
-            coroutineScope.launch { events.onRemoveStreamInternal.emit(MediaStream(nativeStream)) }
+            mainScope.launch { events.onRemoveStreamInternal.emit(MediaStream(nativeStream)) }
         }
 
         override fun onDataChannel(dataChannel: NativeDataChannel) {
-            coroutineScope.launch { events.onDataChannelInternal.emit(DataChannel(dataChannel)) }
+            mainScope.launch { events.onDataChannelInternal.emit(DataChannel(dataChannel)) }
         }
 
         override fun onRenegotiationNeeded() {
-            coroutineScope.launch { events.onNegotiationNeededInternal.emit(Unit) }
+            mainScope.launch { events.onNegotiationNeededInternal.emit(Unit) }
         }
 
         override fun onAddTrack(
@@ -317,7 +318,7 @@ actual class PeerConnection internal constructor() {
             nativeStreams: Array<out NativeMediaStream>
         ) {
             val streams = nativeStreams.map { MediaStream(it) }
-            coroutineScope.launch {
+            mainScope.launch {
                 events.onAddTrackInternal.emit(Pair(RtpReceiver(receiver), streams))
             }
         }

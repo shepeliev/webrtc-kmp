@@ -98,9 +98,9 @@ actual class PeerConnection internal constructor(
                         cont.resume(result)
                     }
                 }
-                .launchIn(coroutineScope)
+                .launchIn(WebRtcKmp.mainScope)
             val completionHandler = { result: T?, error: NSError? ->
-                coroutineScope.launch { resultFlow.emit(Pair(result, error)) }
+                WebRtcKmp.mainScope.launch { resultFlow.emit(Pair(result, error)) }
                 Unit
             }
             block(completionHandler.freeze())

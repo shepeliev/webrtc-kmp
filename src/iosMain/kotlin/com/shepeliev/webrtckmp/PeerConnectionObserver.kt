@@ -13,6 +13,7 @@ import WebRTC.RTCRtpTransceiver
 import WebRTC.RTCSignalingState
 import kotlinx.coroutines.launch
 import platform.darwin.NSObject
+import kotlin.native.concurrent.freeze
 
 internal class PeerConnectionObserver(
     private val events: PeerConnectionEvents,
@@ -32,14 +33,14 @@ internal class PeerConnectionObserver(
         peerConnection: RTCPeerConnection,
         didChangeSignalingState: RTCSignalingState
     ) {
-        coroutineScope.launch {
+        WebRtcKmp.mainScope.launch {
             events.onSignalingStateInternal.emit(rtcSignalingStateAsCommon(didChangeSignalingState))
         }
     }
 
     @Suppress("CONFLICTING_OVERLOADS")
     override fun peerConnection(peerConnection: RTCPeerConnection, didAddStream: RTCMediaStream) {
-        coroutineScope.launch { events.onAddStreamInternal.emit(MediaStream(didAddStream)) }
+        WebRtcKmp.mainScope.launch { events.onAddStreamInternal.emit(MediaStream(didAddStream)) }
     }
 
     @Suppress("CONFLICTING_OVERLOADS")
@@ -47,7 +48,7 @@ internal class PeerConnectionObserver(
         peerConnection: RTCPeerConnection,
         didRemoveStream: RTCMediaStream
     ) {
-        coroutineScope.launch { events.onRemoveStreamInternal.emit(MediaStream(didRemoveStream)) }
+        WebRtcKmp.mainScope.launch { events.onRemoveStreamInternal.emit(MediaStream(didRemoveStream)) }
     }
 
     @Suppress("CONFLICTING_OVERLOADS")
@@ -55,7 +56,7 @@ internal class PeerConnectionObserver(
         peerConnection: RTCPeerConnection,
         didChangeIceConnectionState: RTCIceConnectionState
     ) {
-        coroutineScope.launch {
+        WebRtcKmp.mainScope.launch {
             events.onIceConnectionStateInternal.emit(
                 rtcIceConnectionStateAsCommon(didChangeIceConnectionState)
             )
@@ -66,7 +67,7 @@ internal class PeerConnectionObserver(
         peerConnection: RTCPeerConnection,
         didChangeIceGatheringState: RTCIceGatheringState
     ) {
-        coroutineScope.launch {
+        WebRtcKmp.mainScope.launch {
             events.onIceGatheringStateInternal.emit(
                 rtcIceGatheringStateAsCommon(didChangeIceGatheringState)
             )
@@ -77,7 +78,7 @@ internal class PeerConnectionObserver(
         peerConnection: RTCPeerConnection,
         didGenerateIceCandidate: RTCIceCandidate
     ) {
-        coroutineScope.launch {
+        WebRtcKmp.mainScope.launch {
             events.onIceCandidateInternal.emit(IceCandidate(didGenerateIceCandidate))
         }
     }
@@ -87,14 +88,16 @@ internal class PeerConnectionObserver(
         didRemoveIceCandidates: List<*>
     ) {
         val candidates = didRemoveIceCandidates.map { IceCandidate(it as RTCIceCandidate) }
-        coroutineScope.launch { events.onRemovedIceCandidatesInternal.emit(candidates) }
+        WebRtcKmp.mainScope.launch { events.onRemovedIceCandidatesInternal.emit(candidates) }
     }
 
     override fun peerConnection(
         peerConnection: RTCPeerConnection,
         didOpenDataChannel: RTCDataChannel
     ) {
-        coroutineScope.launch { events.onDataChannelInternal.emit(DataChannel(didOpenDataChannel)) }
+        WebRtcKmp.mainScope.launch {
+            events.onDataChannelInternal.emit(DataChannel(didOpenDataChannel).freeze())
+        }
     }
 
     @Suppress("CONFLICTING_OVERLOADS")
@@ -109,7 +112,7 @@ internal class PeerConnectionObserver(
         peerConnection: RTCPeerConnection,
         didChangeConnectionState: RTCPeerConnectionState
     ) {
-        coroutineScope.launch {
+        WebRtcKmp.mainScope.launch {
             events.onConnectionStateInternal.emit(
                 rtcPeerConnectionStateAsCommon(didChangeConnectionState)
             )
@@ -120,7 +123,7 @@ internal class PeerConnectionObserver(
         peerConnection: RTCPeerConnection,
         didRemoveReceiver: RTCRtpReceiver
     ) {
-        coroutineScope.launch { events.onRemoveTrackInternal.emit(RtpReceiver(didRemoveReceiver)) }
+        WebRtcKmp.mainScope.launch { events.onRemoveTrackInternal.emit(RtpReceiver(didRemoveReceiver)) }
     }
 
     override fun peerConnection(
@@ -135,7 +138,7 @@ internal class PeerConnectionObserver(
         didAddReceiver: RTCRtpReceiver,
         streams: List<*>
     ) {
-        coroutineScope.launch {
+        WebRtcKmp.mainScope.launch {
             events.onAddTrackInternal.emit(
                 Pair(
                     RtpReceiver(didAddReceiver),
@@ -146,6 +149,6 @@ internal class PeerConnectionObserver(
     }
 
     override fun peerConnectionShouldNegotiate(peerConnection: RTCPeerConnection) {
-        coroutineScope.launch { events.onNegotiationNeededInternal.emit(Unit) }
+        WebRtcKmp.mainScope.launch { events.onNegotiationNeededInternal.emit(Unit) }
     }
 }

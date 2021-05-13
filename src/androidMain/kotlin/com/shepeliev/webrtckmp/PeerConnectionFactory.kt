@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.ParcelFileDescriptor
 import androidx.core.content.ContextCompat
-import com.shepeliev.webrtckmp.android.ApplicationContextProvider
 import com.shepeliev.webrtckmp.android.AudioDeviceModuleProvider
 import com.shepeliev.webrtckmp.android.CameraPermissionException
 import com.shepeliev.webrtckmp.android.RecordAudioPermissionException
@@ -64,7 +63,7 @@ internal actual class PeerConnectionFactory private constructor(
         isScreencast: Boolean,
         alignTimestamps: Boolean
     ): VideoSource {
-        val context = ApplicationContextProvider.applicationContext
+        val context = WebRtcKmp.applicationContext
         val result = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
         if (result == PackageManager.PERMISSION_DENIED) throw CameraPermissionException()
 
@@ -76,7 +75,7 @@ internal actual class PeerConnectionFactory private constructor(
     }
 
     actual fun createAudioSource(constraints: MediaConstraints): AudioSource {
-        val context = ApplicationContextProvider.applicationContext
+        val context = WebRtcKmp.applicationContext
         val result = ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO)
         if (result == PackageManager.PERMISSION_DENIED) throw RecordAudioPermissionException()
 
