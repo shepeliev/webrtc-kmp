@@ -68,7 +68,7 @@ actual class PeerConnection internal constructor(
             it.protocol = protocol
             it.isNegotiated = negotiated
         }
-        return native.dataChannelForLabel(label, config)?.let { DataChannel(it) }
+        return native.dataChannelForLabel(label, config)?.let { DataChannel(it.freeze()) }
     }
 
     actual suspend fun createOffer(constraints: MediaConstraints): SessionDescription {
@@ -154,7 +154,7 @@ actual class PeerConnection internal constructor(
 
     actual fun removeStream(stream: MediaStream) = native.removeStream(stream.native)
 
-    actual fun createSender(kind: String, streamId: String): RtpSender? {
+    actual fun createSender(kind: String, streamId: String): RtpSender {
         return RtpSender(native.senderWithKind(kind, streamId))
     }
 

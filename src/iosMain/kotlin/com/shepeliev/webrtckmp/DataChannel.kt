@@ -5,6 +5,8 @@ import WebRTC.RTCDataChannel
 import WebRTC.RTCDataChannelDelegateProtocol
 import WebRTC.RTCDataChannelState
 import platform.darwin.NSObject
+import platform.posix.uint64_t
+import kotlin.native.concurrent.freeze
 
 actual class DataChannel(val native: RTCDataChannel) {
 
@@ -21,18 +23,27 @@ actual class DataChannel(val native: RTCDataChannel) {
         get() = native.bufferedAmount.toLong()
 
     actual fun registerObserver(observer: DataChannelObserver) {
-        native.delegate = object : NSObject(), RTCDataChannelDelegateProtocol {
+        val frozenObserver = observer.freeze()
+        val delegate = object : NSObject(), RTCDataChannelDelegateProtocol {
+            override fun dataChannel(
+                dataChannel: RTCDataChannel,
+                didChangeBufferedAmount: uint64_t
+            ) {
+                frozenObserver.onBufferedAmountChange(didChangeBufferedAmount.toLong())
+            }
+
             override fun dataChannel(
                 dataChannel: RTCDataChannel,
                 didReceiveMessageWithBuffer: RTCDataBuffer
             ) {
-                observer.onMessage(DataChannelBuffer(didReceiveMessageWithBuffer))
+                frozenObserver.onMessage(DataChannelBuffer(didReceiveMessageWithBuffer).freeze())
             }
 
             override fun dataChannelDidChangeState(dataChannel: RTCDataChannel) {
-                observer.onStateChange()
+                frozenObserver.onStateChange()
             }
         }
+        native.delegate = delegate.freeze()
     }
 
     actual fun unregisterObserver() {
