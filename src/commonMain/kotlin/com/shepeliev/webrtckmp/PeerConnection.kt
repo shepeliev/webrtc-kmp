@@ -238,7 +238,7 @@ fun PeerConnection.Companion.create(
     configuration: RtcConfiguration,
     constraints: MediaConstraints
 ): PeerConnection {
-    return peerConnectionFactory.createPeerConnection(configuration, constraints)
+    return WebRtcKmp.peerConnectionFactory.createPeerConnection(configuration, constraints)
 }
 
 enum class SdpSemantics { PlanB, UnifiedPlan }

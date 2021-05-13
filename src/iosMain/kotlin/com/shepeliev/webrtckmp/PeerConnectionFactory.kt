@@ -1,45 +1,15 @@
 package com.shepeliev.webrtckmp
 
-import WebRTC.RTCDefaultVideoDecoderFactory
-import WebRTC.RTCDefaultVideoEncoderFactory
 import WebRTC.RTCPeerConnectionFactory
-import WebRTC.RTCPeerConnectionFactoryOptions
 import kotlin.native.concurrent.freeze
 
-internal actual class PeerConnectionFactory private constructor(
-    val native: RTCPeerConnectionFactory,
-) {
-
-    actual companion object {
-        @Suppress("UNCHECKED_CAST")
-        actual fun build(options: Options?): PeerConnectionFactory {
-            val native = RTCPeerConnectionFactory(
-                RTCDefaultVideoEncoderFactory().freeze(),
-                RTCDefaultVideoDecoderFactory().freeze()
-            )
-            if (options != null) {
-                val nativeOptions = RTCPeerConnectionFactoryOptions().apply {
-                    disableNetworkMonitor = options.disableNetworkMonitor
-                    disableEncryption = options.disableEncryption
-                    ignoreCellularNetworkAdapter = options.ignoreCellularNetworkAdapter
-                    ignoreEthernetNetworkAdapter = options.ignoreEthernetNetworkAdapter
-                    ignoreLoopbackNetworkAdapter = options.ignoreLoopbackNetworkAdapter
-                    ignoreVPNNetworkAdapter = options.ignoreVpnNetworkAdapter
-                    ignoreWiFiNetworkAdapter = options.ignoreWiFiNetworkAdapter
-                }
-                native.setOptions(nativeOptions.freeze())
-            }
-
-            return PeerConnectionFactory(native)
-        }
-    }
-
+internal actual class PeerConnectionFactory(val native: RTCPeerConnectionFactory) {
     actual fun createPeerConnection(
         rtcConfiguration: RtcConfiguration,
         constraints: MediaConstraints,
     ): PeerConnection {
         val pcEvents = PeerConnectionEvents().freeze()
-        val nativePc = peerConnectionFactory.native.peerConnectionWithConfiguration(
+        val nativePc = WebRtcKmp.peerConnectionFactory.native.peerConnectionWithConfiguration(
             rtcConfiguration.native.freeze(),
             constraints.native.freeze(),
             PeerConnectionObserver(pcEvents).freeze()
@@ -76,8 +46,4 @@ internal actual class PeerConnectionFactory private constructor(
     }
 
     actual fun stopAecDump() = native.stopAecDump()
-
-    actual fun dispose() {
-        // not applicable for iOS
-    }
 }

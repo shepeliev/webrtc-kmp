@@ -4,44 +4,12 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.ParcelFileDescriptor
 import androidx.core.content.ContextCompat
-import com.shepeliev.webrtckmp.android.AudioDeviceModuleProvider
 import com.shepeliev.webrtckmp.android.CameraPermissionException
 import com.shepeliev.webrtckmp.android.RecordAudioPermissionException
-import com.shepeliev.webrtckmp.android.VideoDecoderFactoryProvider
-import com.shepeliev.webrtckmp.android.VideoEncoderFactoryProvider
 import java.io.File
 import org.webrtc.PeerConnectionFactory as NativePeerConnectionFactory
 
-internal actual class PeerConnectionFactory private constructor(
-    val native: NativePeerConnectionFactory
-) {
-
-    actual companion object {
-        actual fun build(options: Options?): PeerConnectionFactory {
-            val nativeOptions = options?.let {
-                NativePeerConnectionFactory.Options().apply {
-                    var ignoreMask = 0
-                    if (it.ignoreEthernetNetworkAdapter) ignoreMask = ignoreMask or 1
-                    if (it.ignoreWiFiNetworkAdapter) ignoreMask = ignoreMask or 2
-                    if (it.ignoreCellularNetworkAdapter) ignoreMask = ignoreMask or 4
-                    if (it.ignoreVpnNetworkAdapter) ignoreMask = ignoreMask or 8
-                    if (it.ignoreLoopbackNetworkAdapter) ignoreMask = ignoreMask or 16
-                    if (ignoreMask == 31) ignoreMask = ignoreMask or 32
-                    networkIgnoreMask = ignoreMask
-                    disableEncryption = it.disableEncryption
-                    disableNetworkMonitor = it.disableNetworkMonitor
-                }
-            }
-
-            val builder = NativePeerConnectionFactory.builder()
-                .setOptions(nativeOptions)
-                .setVideoEncoderFactory(VideoEncoderFactoryProvider.getVideoEncoderFactory())
-                .setVideoDecoderFactory(VideoDecoderFactoryProvider.getVideoDecoderFactory())
-                .setAudioDeviceModule(AudioDeviceModuleProvider.getAudioDeviceModule())
-
-            return PeerConnectionFactory(builder.createPeerConnectionFactory())
-        }
-    }
+internal actual class PeerConnectionFactory(val native: NativePeerConnectionFactory) {
 
     actual fun createPeerConnection(
         rtcConfiguration: RtcConfiguration,
@@ -97,8 +65,4 @@ internal actual class PeerConnectionFactory private constructor(
     }
 
     actual fun stopAecDump() = native.stopAecDump()
-
-    actual fun dispose() {
-        peerConnectionFactory.native.dispose()
-    }
 }

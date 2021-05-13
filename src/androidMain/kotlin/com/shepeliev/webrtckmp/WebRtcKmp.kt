@@ -6,9 +6,11 @@ import android.content.Context
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
+import org.webrtc.DefaultVideoDecoderFactory
+import org.webrtc.DefaultVideoEncoderFactory
 import org.webrtc.EglBase
 import org.webrtc.Logging
-import org.webrtc.PeerConnectionFactory
+import org.webrtc.PeerConnectionFactory as AndroidPeerConnectionFactory
 
 actual object WebRtcKmp {
     actual val mainScope: CoroutineScope
@@ -16,11 +18,18 @@ actual object WebRtcKmp {
             check(mainScopeInternal != null) { NOT_INITIALIZED_ERROR_MESSAGE }
             return mainScopeInternal!!
         }
+
+    internal actual val peerConnectionFactory: PeerConnectionFactory
+        get() {
+            check(peerConnectionFactoryInternal != null) { NOT_INITIALIZED_ERROR_MESSAGE }
+            return peerConnectionFactoryInternal!!
+        }
 }
 
 private var mainScopeInternal: CoroutineScope? = null
 private var eglBaseInternal: EglBase? = null
 private var applicationContextInternal: Context? = null
+private var peerConnectionFactoryInternal: PeerConnectionFactory? = null
 
 val WebRtcKmp.eglBase: EglBase
     get() {
@@ -38,29 +47,56 @@ internal val WebRtcKmp.applicationContext: Context
 fun WebRtcKmp.initialize(
     context: Context,
     eglBase: EglBase,
+    peerConnectionFactoryBuilder: AndroidPeerConnectionFactory.Builder? = null,
     fieldTrials: Map<String, String> = emptyMap(),
     enableInternalTracer: Boolean = false,
     loggingSeverity: Logging.Severity? = null
 ) {
     applicationContextInternal = context
     mainScopeInternal = MainScope()
+    initializePeerConnectionFactory(fieldTrials, enableInternalTracer, loggingSeverity)
+    eglBaseInternal = eglBase
+    buildPeerConnectionFactory(peerConnectionFactoryBuilder)
+}
 
-    val fieldTrialsString = fieldTrials.entries.joinToString(separator = "/") {
-        "${it.key}/${it.value}"
-    }
-    val initOptions = PeerConnectionFactory.InitializationOptions.builder(context)
+private fun initializePeerConnectionFactory(
+    fieldTrials: Map<String, String>,
+    enableInternalTracer: Boolean,
+    loggingSeverity: Logging.Severity?
+) {
+    val fieldTrialsString = fieldTrials.entries
+        .joinToString(separator = "/") { "${it.key}/${it.value}" }
+
+    val initOptions = AndroidPeerConnectionFactory.InitializationOptions
+        .builder(applicationContextInternal)
         .setFieldTrials(fieldTrialsString)
         .setEnableInternalTracer(enableInternalTracer)
         .createInitializationOptions()
-    PeerConnectionFactory.initialize(initOptions)
 
+    AndroidPeerConnectionFactory.initialize(initOptions)
     loggingSeverity?.also { Logging.enableLogToDebugOutput(it) }
+}
 
-    eglBaseInternal = eglBase
+private fun buildPeerConnectionFactory(peerConnectionFactoryBuilder: AndroidPeerConnectionFactory.Builder?) {
+    val builder = peerConnectionFactoryBuilder ?: getDefaultPeerConnectionBuilder()
+    val androidPeerConnectionFactory = builder.createPeerConnectionFactory()
+    peerConnectionFactoryInternal = PeerConnectionFactory(androidPeerConnectionFactory)
+}
+
+private fun getDefaultPeerConnectionBuilder(): AndroidPeerConnectionFactory.Builder {
+    val eglContext = eglBaseInternal?.eglBaseContext ?: error(NOT_INITIALIZED_ERROR_MESSAGE)
+    val videoEncoderFactory = DefaultVideoEncoderFactory(eglContext, true, true)
+    val videoDecoderFactory = DefaultVideoDecoderFactory(eglContext)
+
+    return AndroidPeerConnectionFactory.builder()
+        .setVideoEncoderFactory(videoEncoderFactory)
+        .setVideoDecoderFactory(videoDecoderFactory)
 }
 
 fun WebRtcKmp.dispose() {
-    PeerConnectionFactory.shutdownInternalTracer()
+    peerConnectionFactoryInternal?.native?.dispose()
+    peerConnectionFactoryInternal = null
+    AndroidPeerConnectionFactory.shutdownInternalTracer()
     eglBaseInternal?.release()
     eglBaseInternal = null
     mainScopeInternal?.cancel()

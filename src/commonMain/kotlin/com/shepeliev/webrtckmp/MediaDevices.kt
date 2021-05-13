@@ -7,7 +7,7 @@ import kotlin.native.concurrent.ThreadLocal
 @ThreadLocal
 object MediaDevices {
     private var audioSource: AudioSource? = null
-    private var videoSource: VideoSource = peerConnectionFactory.createVideoSource()
+    private var videoSource: VideoSource = WebRtcKmp.peerConnectionFactory.createVideoSource()
 
     private var cameraCapturer: CameraVideoCapturer =
         CameraEnumerator.createCameraVideoCapturer(videoSource)
@@ -18,7 +18,7 @@ object MediaDevices {
     // TODO implement video constraints
     @Throws(CameraVideoCapturerException::class, CancellationException::class)
     suspend fun getUserMedia(audio: Boolean, video: Boolean): MediaStream {
-        val factory = peerConnectionFactory
+        val factory = WebRtcKmp.peerConnectionFactory
         var audioTrack: AudioTrack? = null
         if (audio) {
             val source = audioSource ?: factory.createAudioSource(mediaConstraints())
