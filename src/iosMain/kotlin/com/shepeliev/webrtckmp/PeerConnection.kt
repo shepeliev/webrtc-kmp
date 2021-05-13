@@ -20,6 +20,7 @@ import platform.Foundation.NSError
 import platform.Foundation.NSNumber
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 import kotlin.native.concurrent.freeze
 
 private typealias CompletionHandler<T> = (result: T?, error: NSError?) -> Unit
@@ -85,8 +86,9 @@ actual class PeerConnection internal constructor(
         return SessionDescription(nativeSdp!!)
     }
 
+    // TODO: replace the workaround after resolving https://github.com/Kotlin/kotlinx.coroutines/issues/2363
     private suspend inline fun <T> suspendCoroutineInternal(crossinline block: (CompletionHandler<T>) -> Unit): T? {
-        return kotlin.coroutines.suspendCoroutine { cont ->
+        return suspendCoroutine { cont ->
             val resultFlow = MutableStateFlow<Pair<T?, NSError?>?>(null).freeze()
             resultFlow
                 .filterNotNull()
