@@ -1,5 +1,8 @@
 package com.shepeliev.webrtckmp
 
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.launch
 import org.webrtc.AudioTrack as NativeAudioTrack
 import org.webrtc.MediaStreamTrack as NativeMediaStreamTrack
 import org.webrtc.VideoTrack as NativeVideoTrack
@@ -22,17 +25,17 @@ abstract class BaseMediaStreamTrack : MediaStreamTrack {
     override val state: MediaStreamTrack.State
         get() = native.state().asCommon()
 
-    override fun stop() {
-        enabled = false
+    private val onStopInternal = MutableSharedFlow<BaseMediaStreamTrack>()
+    override val onStop = onStopInternal.asSharedFlow()
 
-        when (this.kind) {
-            MediaStreamTrack.AUDIO_TRACK_KIND -> {
-                MediaDevices.onAudioTrackStopped(id)
-            }
-            MediaStreamTrack.VIDEO_TRACK_KIND -> {
-                MediaDevices.onVideoTrackStopped(id)
-            }
-        }
+    private var isStopped = false
+
+    override fun stop() {
+        if (isStopped) return
+        isStopped = true
+        enabled = false
+        native.dispose()
+        WebRtcKmp.mainScope.launch { onStopInternal.emit(this@BaseMediaStreamTrack) }
     }
 }
 

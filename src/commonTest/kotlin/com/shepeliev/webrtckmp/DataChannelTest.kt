@@ -87,6 +87,7 @@ class DataChannelTest {
         val text = withTimeout(5000) { channel.receive() }
         assertEquals("Hello WebRTC KMP!", text)
 
-        pc1DataChannel.unregisterObserver()
+        pc1.close()
+        pc2.close()
     }
 }

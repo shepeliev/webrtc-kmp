@@ -10,6 +10,7 @@ import org.webrtc.DefaultVideoDecoderFactory
 import org.webrtc.DefaultVideoEncoderFactory
 import org.webrtc.EglBase
 import org.webrtc.Logging
+import org.webrtc.SurfaceTextureHelper
 import org.webrtc.PeerConnectionFactory as AndroidPeerConnectionFactory
 
 actual object WebRtcKmp {
@@ -30,19 +31,25 @@ private var mainScopeInternal: CoroutineScope? = null
 private var eglBaseInternal: EglBase? = null
 private var applicationContextInternal: Context? = null
 private var peerConnectionFactoryInternal: PeerConnectionFactory? = null
+private var surfaceTextureHelperInternal: SurfaceTextureHelper? = null
 
 val WebRtcKmp.eglBase: EglBase
     get() {
-        check(eglBaseInternal != null) { NOT_INITIALIZED_ERROR_MESSAGE }
+        checkNotNull(eglBaseInternal) { NOT_INITIALIZED_ERROR_MESSAGE }
         return eglBaseInternal!!
     }
 
 internal val WebRtcKmp.applicationContext: Context
     get() {
-        check(applicationContextInternal != null) { NOT_INITIALIZED_ERROR_MESSAGE }
+        checkNotNull(applicationContextInternal) { NOT_INITIALIZED_ERROR_MESSAGE }
         return applicationContextInternal!!
     }
 
+internal val WebRtcKmp.surfaceTextureHelper: SurfaceTextureHelper
+    get() {
+        checkNotNull(surfaceTextureHelperInternal) { NOT_INITIALIZED_ERROR_MESSAGE }
+        return surfaceTextureHelperInternal!!
+    }
 
 fun WebRtcKmp.initialize(
     context: Context,
@@ -56,7 +63,8 @@ fun WebRtcKmp.initialize(
     mainScopeInternal = MainScope()
     initializePeerConnectionFactory(fieldTrials, enableInternalTracer, loggingSeverity)
     eglBaseInternal = eglBase
-    buildPeerConnectionFactory(peerConnectionFactoryBuilder)
+    createPeerConnectionFactory(peerConnectionFactoryBuilder)
+    createSurfaceTextureHelper()
 }
 
 private fun initializePeerConnectionFactory(
@@ -77,7 +85,7 @@ private fun initializePeerConnectionFactory(
     loggingSeverity?.also { Logging.enableLogToDebugOutput(it) }
 }
 
-private fun buildPeerConnectionFactory(peerConnectionFactoryBuilder: AndroidPeerConnectionFactory.Builder?) {
+private fun createPeerConnectionFactory(peerConnectionFactoryBuilder: AndroidPeerConnectionFactory.Builder?) {
     val builder = peerConnectionFactoryBuilder ?: getDefaultPeerConnectionBuilder()
     val androidPeerConnectionFactory = builder.createPeerConnectionFactory()
     peerConnectionFactoryInternal = PeerConnectionFactory(androidPeerConnectionFactory)
@@ -93,13 +101,22 @@ private fun getDefaultPeerConnectionBuilder(): AndroidPeerConnectionFactory.Buil
         .setVideoDecoderFactory(videoDecoderFactory)
 }
 
+private fun createSurfaceTextureHelper() {
+    surfaceTextureHelperInternal = SurfaceTextureHelper.create(
+        "WebRTC.KMP.SurfaceTextureHelper",
+        eglBaseInternal!!.eglBaseContext
+    )
+}
+
 fun WebRtcKmp.dispose() {
-    peerConnectionFactoryInternal?.native?.dispose()
-    AndroidPeerConnectionFactory.shutdownInternalTracer()
-    peerConnectionFactoryInternal = null
+    surfaceTextureHelperInternal?.dispose()
+    surfaceTextureHelperInternal = null
     eglBaseInternal?.release()
     eglBaseInternal = null
+    peerConnectionFactoryInternal?.native?.dispose()
+    peerConnectionFactoryInternal = null
     mainScopeInternal?.cancel()
     mainScopeInternal = null
     applicationContextInternal = null
+    AndroidPeerConnectionFactory.shutdownInternalTracer()
 }

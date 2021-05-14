@@ -2,8 +2,6 @@ package com.shepeliev.webrtckmp
 
 import android.os.ParcelFileDescriptor
 import com.shepeliev.webrtckmp.WebRtcKmp.mainScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.webrtc.SdpObserver
 import java.io.File
@@ -48,7 +46,7 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
     actual val events = PeerConnectionEvents()
 
     private val pcObserver = PcObserver()
-    private val mediaStreams = mutableMapOf<String, MediaStream>()
+
     private val mediaStreamTracks = mutableMapOf<String, MediaStreamTrack>()
 
     init {
@@ -156,22 +154,8 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         return native.removeIceCandidates(candidates.map { it.native }.toTypedArray())
     }
 
-    actual fun addStream(stream: MediaStream): Boolean {
-        mediaStreams += stream.id to stream
-        return native.addStream(stream.native)
-    }
-
-    actual fun removeStream(stream: MediaStream) {
-        mediaStreams.remove(stream.id)
-        native.removeStream(stream.native)
-    }
-
-    actual fun createSender(kind: String, streamId: String): RtpSender {
-        return RtpSender(native.createSender(kind, streamId))
-    }
-
-    actual fun getSenders(): List<RtpSender> = native.senders.map { RtpSender(it) }
     actual fun getReceivers(): List<RtpReceiver> = native.receivers.map { RtpReceiver(it) }
+
     actual fun getTransceivers(): List<RtpTransceiver> = native.transceivers.map { it.asCommon() }
 
     actual fun addTrack(track: MediaStreamTrack, streamIds: List<String>): RtpSender {
@@ -239,29 +223,7 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
     actual fun stopRtcEventLog() = native.stopRtcEventLog()
 
     actual fun close() {
-        stopTracksInMediaStreams()
-        stopTracks()
-        GlobalScope.launch(Dispatchers.Default) { native.dispose() }
-    }
-
-    private fun stopTracks() {
-        mediaStreamTracks.forEach { (_, track) ->
-            track.stop()
-
-            // VideoTrack added to the Android `PeerConnection` by `PeerConnection.addTrack()`
-            // method is not disposed on PeerConnection.dispose() call. We have to dispose it
-            // in order to remove all `VideoSink`s from the track.
-            if (track is VideoTrack) {
-                track.native.dispose()
-            }
-        }
-    }
-
-    private fun stopTracksInMediaStreams() {
-        mediaStreams.forEach { (_, stream) ->
-            stream.audioTracks.forEach { it.stop() }
-            stream.videoTracks.forEach { it.stop() }
-        }
+        native.dispose()
     }
 
     internal inner class PcObserver : NativePeerConnection.Observer {
@@ -304,11 +266,17 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         override fun onSelectedCandidatePairChanged(event: NativeCandidatePairChangeEvent) {}
 
         override fun onAddStream(nativeStream: NativeMediaStream) {
-            mainScope.launch { events.onAddStreamInternal.emit(MediaStream(nativeStream)) }
+            // this deprecated API should not longer be used
+            // https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/onaddstream
         }
 
         override fun onRemoveStream(nativeStream: NativeMediaStream) {
-            mainScope.launch { events.onRemoveStreamInternal.emit(MediaStream(nativeStream)) }
+            // The removestream event has been removed from the WebRTC specification in favor of
+            // the existing removetrack event on the remote MediaStream and the corresponding
+            // MediaStream.onremovetrack event handler property of the remote MediaStream.
+            // The RTCPeerConnection API is now track-based, so having zero tracks in the remote
+            // stream is equivalent to the remote stream being removed and the old removestream event.
+            // https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/onremovestream
         }
 
         override fun onDataChannel(dataChannel: NativeDataChannel) {
@@ -323,9 +291,8 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
             receiver: NativeRtpReceiver,
             nativeStreams: Array<out NativeMediaStream>
         ) {
-            val streams = nativeStreams.map { MediaStream(it) }
             mainScope.launch {
-                events.onAddTrackInternal.emit(Pair(RtpReceiver(receiver), streams))
+                events.onAddTrackInternal.emit(RtpReceiver(receiver))
             }
         }
 

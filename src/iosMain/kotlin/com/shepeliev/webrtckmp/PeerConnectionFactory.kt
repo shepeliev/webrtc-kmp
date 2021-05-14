@@ -4,10 +4,6 @@ import WebRTC.RTCPeerConnectionFactory
 import kotlin.native.concurrent.freeze
 
 internal actual class PeerConnectionFactory(val native: RTCPeerConnectionFactory) {
-    actual fun createLocalMediaStream(id: String): MediaStream {
-        return MediaStream(native.mediaStreamWithStreamId(id).freeze()).freeze()
-    }
-
     actual fun createVideoSource(
         isScreencast: Boolean,
         alignTimestamps: Boolean

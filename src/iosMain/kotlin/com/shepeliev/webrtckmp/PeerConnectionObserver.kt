@@ -40,7 +40,8 @@ internal class PeerConnectionObserver(
 
     @Suppress("CONFLICTING_OVERLOADS")
     override fun peerConnection(peerConnection: RTCPeerConnection, didAddStream: RTCMediaStream) {
-        WebRtcKmp.mainScope.launch { events.onAddStreamInternal.emit(MediaStream(didAddStream)) }
+        // this deprecated API should not longer be used
+        // https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/onaddstream
     }
 
     @Suppress("CONFLICTING_OVERLOADS")
@@ -48,7 +49,12 @@ internal class PeerConnectionObserver(
         peerConnection: RTCPeerConnection,
         didRemoveStream: RTCMediaStream
     ) {
-        WebRtcKmp.mainScope.launch { events.onRemoveStreamInternal.emit(MediaStream(didRemoveStream)) }
+        // The removestream event has been removed from the WebRTC specification in favor of
+        // the existing removetrack event on the remote MediaStream and the corresponding
+        // MediaStream.onremovetrack event handler property of the remote MediaStream.
+        // The RTCPeerConnection API is now track-based, so having zero tracks in the remote
+        // stream is equivalent to the remote stream being removed and the old removestream event.
+        // https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/onremovestream
     }
 
     @Suppress("CONFLICTING_OVERLOADS")
@@ -142,13 +148,9 @@ internal class PeerConnectionObserver(
         didAddReceiver: RTCRtpReceiver,
         streams: List<*>
     ) {
+        val rtpReceiver = didAddReceiver.freeze()
         WebRtcKmp.mainScope.launch {
-            events.onAddTrackInternal.emit(
-                Pair(
-                    RtpReceiver(didAddReceiver),
-                    streams.map { MediaStream(it as RTCMediaStream) }
-                )
-            )
+            events.onAddTrackInternal.emit(RtpReceiver(rtpReceiver))
         }
     }
 

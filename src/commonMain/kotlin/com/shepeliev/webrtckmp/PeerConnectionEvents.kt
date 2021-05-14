@@ -32,14 +32,8 @@ class PeerConnectionEvents internal constructor() {
     internal val onDataChannelInternal = MutableSharedFlow<DataChannel>()
     val onDataChannel: Flow<DataChannel> = onDataChannelInternal.asSharedFlow()
 
-    internal val onAddStreamInternal = MutableSharedFlow<MediaStream>()
-    val onAddStream: Flow<MediaStream> = onAddStreamInternal.asSharedFlow()
-
-    internal val onRemoveStreamInternal = MutableSharedFlow<MediaStream>()
-    val onRemoveStream: Flow<MediaStream> = onRemoveStreamInternal.asSharedFlow()
-
-    internal val onAddTrackInternal = MutableSharedFlow<Pair<RtpReceiver, List<MediaStream>>>()
-    val onAddTrack: Flow<Pair<RtpReceiver, List<MediaStream>>> = onAddTrackInternal.asSharedFlow()
+    internal val onAddTrackInternal = MutableSharedFlow<RtpReceiver>()
+    val onAddTrack: Flow<RtpReceiver> = onAddTrackInternal.asSharedFlow()
 
     internal val onRemoveTrackInternal = MutableSharedFlow<RtpReceiver>()
     val onRemoveTrack: Flow<RtpReceiver> = onRemoveTrackInternal.asSharedFlow()

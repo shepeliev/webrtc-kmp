@@ -9,6 +9,10 @@ import WebRTC.RTCRtpMediaType.RTCRtpMediaTypeData
 import WebRTC.RTCRtpMediaType.RTCRtpMediaTypeUnsupported
 import WebRTC.RTCRtpMediaType.RTCRtpMediaTypeVideo
 import WebRTC.RTCVideoTrack
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.launch
+import kotlin.native.concurrent.AtomicInt
 
 abstract class BaseMediaStreamTrack : MediaStreamTrack {
     abstract val native: RTCMediaStreamTrack
@@ -28,17 +32,15 @@ abstract class BaseMediaStreamTrack : MediaStreamTrack {
     override val state: MediaStreamTrack.State
         get() = rtcMediaStreamTrackStateAsCommon(native.readyState)
 
-    override fun stop() {
-        enabled = false
+    private val onStopInternal = MutableSharedFlow<BaseMediaStreamTrack>()
+    override val onStop = onStopInternal.asSharedFlow()
 
-        when (this.kind) {
-            MediaStreamTrack.AUDIO_TRACK_KIND -> {
-                MediaDevices.onAudioTrackStopped(id)
-            }
-            MediaStreamTrack.VIDEO_TRACK_KIND -> {
-                MediaDevices.onVideoTrackStopped(id)
-            }
-        }
+    private val stoppedFlag = AtomicInt(0)
+
+    override fun stop() {
+        if (!stoppedFlag.compareAndSet(0, 1)) return
+        enabled = false
+        WebRtcKmp.mainScope.launch { onStopInternal.emit(this@BaseMediaStreamTrack) }
     }
 
     companion object {

@@ -11,10 +11,6 @@ import org.webrtc.PeerConnectionFactory as NativePeerConnectionFactory
 
 internal actual class PeerConnectionFactory(val native: NativePeerConnectionFactory) {
 
-    actual fun createLocalMediaStream(id: String): MediaStream {
-        return MediaStream(native.createLocalMediaStream(id))
-    }
-
     actual fun createVideoSource(
         isScreencast: Boolean,
         alignTimestamps: Boolean

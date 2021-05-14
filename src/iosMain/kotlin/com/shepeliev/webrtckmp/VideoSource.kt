@@ -12,11 +12,11 @@ actual class VideoSource internal constructor(override val native: RTCVideoSourc
     val nativeCapturerObserver: RTCVideoCapturerDelegateProtocol
         get() = native
 
-    actual fun setIsScreencast(isScreencast: Boolean) {
-        // not applicable
-    }
-
     actual fun adaptOutputFormat(width: Int, height: Int, fps: Int) {
         native.adaptOutputFormatToWidth(width, height, fps)
+    }
+
+    actual fun dispose() {
+        // not implemented in iOS
     }
 }

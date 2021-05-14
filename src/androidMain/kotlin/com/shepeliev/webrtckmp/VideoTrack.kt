@@ -1,7 +1,7 @@
 package com.shepeliev.webrtckmp
 
-import org.webrtc.VideoTrack as NativeVideoTrack
+import org.webrtc.VideoTrack as AndroidVideoTrack
 
 actual class VideoTrack internal constructor(
-    override val native: NativeVideoTrack,
+    override val native: AndroidVideoTrack,
 ) : BaseMediaStreamTrack(), MediaStreamTrack

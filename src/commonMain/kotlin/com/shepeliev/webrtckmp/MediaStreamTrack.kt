@@ -1,5 +1,7 @@
 package com.shepeliev.webrtckmp
 
+import kotlinx.coroutines.flow.Flow
+
 interface MediaStreamTrack {
 
     companion object {
@@ -11,6 +13,7 @@ interface MediaStreamTrack {
     val kind: String
     var enabled: Boolean
     val state: State
+    val onStop: Flow<MediaStreamTrack>
 
     fun stop()
 

@@ -7,4 +7,6 @@ actual class AudioSource internal constructor(override val native: NativeAudioSo
 
     actual override val state: MediaSource.State
         get() = super.state
+
+    actual fun dispose() = native.dispose()
 }

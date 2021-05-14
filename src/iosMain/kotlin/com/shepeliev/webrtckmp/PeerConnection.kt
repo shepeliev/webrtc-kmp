@@ -6,12 +6,10 @@ import WebRTC.RTCMediaConstraints
 import WebRTC.RTCPeerConnection
 import WebRTC.RTCRtpMediaType
 import WebRTC.RTCRtpReceiver
-import WebRTC.RTCRtpSender
 import WebRTC.RTCRtpTransceiver
 import WebRTC.RTCRtpTransceiverInit
 import WebRTC.RTCSessionDescription
 import WebRTC.dataChannelForLabel
-import WebRTC.senderWithKind
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
@@ -157,19 +155,6 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         native.removeIceCandidates(candidates.map { it.native })
         return true
     }
-
-    actual fun addStream(stream: MediaStream): Boolean {
-        native.addStream(stream.native)
-        return true
-    }
-
-    actual fun removeStream(stream: MediaStream) = native.removeStream(stream.native)
-
-    actual fun createSender(kind: String, streamId: String): RtpSender {
-        return RtpSender(native.senderWithKind(kind, streamId))
-    }
-
-    actual fun getSenders(): List<RtpSender> = native.senders.map { RtpSender(it as RTCRtpSender) }
 
     actual fun getReceivers(): List<RtpReceiver> =
         native.receivers.map { RtpReceiver(it as RTCRtpReceiver) }
