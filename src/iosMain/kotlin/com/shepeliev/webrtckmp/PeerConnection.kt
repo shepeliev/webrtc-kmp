@@ -6,6 +6,7 @@ import WebRTC.RTCMediaConstraints
 import WebRTC.RTCPeerConnection
 import WebRTC.RTCRtpMediaType
 import WebRTC.RTCRtpReceiver
+import WebRTC.RTCRtpSender
 import WebRTC.RTCRtpTransceiver
 import WebRTC.RTCRtpTransceiverInit
 import WebRTC.RTCSessionDescription
@@ -155,6 +156,8 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         native.removeIceCandidates(candidates.map { it.native })
         return true
     }
+
+    actual fun getSenders(): List<RtpSender> = native.senders.map { RtpSender(it as RTCRtpSender) }
 
     actual fun getReceivers(): List<RtpReceiver> =
         native.receivers.map { RtpReceiver(it as RTCRtpReceiver) }

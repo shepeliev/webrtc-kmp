@@ -51,6 +51,13 @@ expect class PeerConnection(rtcConfiguration: RtcConfiguration = RtcConfiguratio
     fun removeIceCandidates(candidates: List<IceCandidate>): Boolean
 
     /**
+     * Gets all RtpSenders associated with this peer connection.
+     * Note that calling getSenders will dispose of the senders previously
+     * returned.
+     */
+    fun getSenders(): List<RtpSender>
+
+    /**
      * Gets all RtpReceivers associated with this peer connection.
      * Note that calling getReceivers will dispose of the receivers previously
      * returned.

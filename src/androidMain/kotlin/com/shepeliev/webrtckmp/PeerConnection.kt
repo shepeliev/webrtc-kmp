@@ -154,6 +154,8 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         return native.removeIceCandidates(candidates.map { it.native }.toTypedArray())
     }
 
+    actual fun getSenders(): List<RtpSender> = native.senders.map { RtpSender(it) }
+
     actual fun getReceivers(): List<RtpReceiver> = native.receivers.map { RtpReceiver(it) }
 
     actual fun getTransceivers(): List<RtpTransceiver> = native.transceivers.map { it.asCommon() }
