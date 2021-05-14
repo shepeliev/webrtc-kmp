@@ -1,6 +1,9 @@
 @file:JvmName("AndroidPeerConnection")
+
 package com.shepeliev.webrtckmp
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlin.jvm.JvmName
 
 expect class PeerConnection(rtcConfiguration: RtcConfiguration = RtcConfiguration()) {
@@ -11,7 +14,7 @@ expect class PeerConnection(rtcConfiguration: RtcConfiguration = RtcConfiguratio
     val iceConnectionState: IceConnectionState
     val connectionState: PeerConnectionState
     val iceGatheringState: IceGatheringState
-    val events: PeerConnectionEvents
+    internal val events: PeerConnectionEvents
 
     fun createDataChannel(
         label: String,
@@ -174,9 +177,71 @@ expect class PeerConnection(rtcConfiguration: RtcConfiguration = RtcConfiguratio
      * [bug 3721](https://bugs.chromium.org/p/webrtc/issues/detail?id=3721) for more details.
      */
     fun close()
-
-    companion object
 }
+
+/**
+ * Emits [PeerConnectionState] events. This happens whenever the aggregate state of the connection
+ * changes.
+ */
+val PeerConnection.onConnectionStateChange: Flow<PeerConnectionState>
+    get() = events.onConnectionStateChange.asSharedFlow()
+
+/**
+ * Emits [DataChannel] events. This event is sent when an [DataChannel] is added to the connection
+ * by the remote peer calling [PeerConnection.createDataChannel]
+ */
+val PeerConnection.onDataChannel: Flow<DataChannel>
+    get() = events.onDataChannel.asSharedFlow()
+
+/**
+ * Emits [IceCandidate] events. This happens whenever the local ICE agent needs to deliver a message
+ * to the other peer through the signaling server.
+ */
+val PeerConnection.onIceCandidate: Flow<IceCandidate>
+    get() = events.onIceCandidate.asSharedFlow()
+
+/**
+ * Emits [IceConnectionState] events. This happens when the state of the connection's ICE agent,
+ * as represented by the [PeerConnection.iceConnectionState] property, changes.
+ */
+val PeerConnection.onIceConnectionStateChange: Flow<IceConnectionState>
+    get() = events.onIceConnectionStateChange.asSharedFlow()
+
+/**
+ * Emits [IceGatheringState] events. This happens when the ICE gathering state—that is, whether or
+ * not the ICE agent is actively gathering candidates—changes.
+ */
+val PeerConnection.onIceGatheringState: Flow<IceGatheringState>
+    get() = events.onIceGatheringStateChange.asSharedFlow()
+
+/**
+ * Emits negotiationneeded events. This event is fired when a change has occurred which requires
+ * session negotiation. This negotiation should be carried out as the offerer, because some session
+ * changes cannot be negotiated as the answerer.
+ */
+val PeerConnection.onNegotiationNeeded: Flow<Unit>
+    get() = events.onNegotiationNeeded.asSharedFlow()
+
+/**
+ * Emits [SignalingState] events..
+ */
+val PeerConnection.onSignalingStateChange: Flow<SignalingState>
+    get() = events.onSignalingStateChange.asSharedFlow()
+
+/**
+ * Emits track events, indicating that a track has been added to the [PeerConnection].
+ */
+val PeerConnection.onTrack: Flow<TrackEvent>
+    get() = events.onTrack.asSharedFlow()
+
+val PeerConnection.onStandardizedIceConnection: Flow<IceConnectionState>
+    get() = events.onStandardizedIceConnectionChange.asSharedFlow()
+
+val PeerConnection.onRemovedIceCandidates: Flow<List<IceCandidate>>
+    get() = events.onRemovedIceCandidates.asSharedFlow()
+
+val PeerConnection.onRemoveTrack: Flow<RtpReceiver>
+    get() = events.onRemoveTrack.asSharedFlow()
 
 enum class TlsCertPolicy { TlsCertPolicySecure, TlsCertPolicyInsecureNoCheck }
 enum class KeyType { RSA, ECDSA }

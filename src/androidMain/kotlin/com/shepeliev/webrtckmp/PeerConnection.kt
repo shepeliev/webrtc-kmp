@@ -3,20 +3,23 @@ package com.shepeliev.webrtckmp
 import android.os.ParcelFileDescriptor
 import com.shepeliev.webrtckmp.WebRtcKmp.mainScope
 import kotlinx.coroutines.launch
+import org.webrtc.CandidatePairChangeEvent
 import org.webrtc.SdpObserver
 import java.io.File
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
-import org.webrtc.CandidatePairChangeEvent as NativeCandidatePairChangeEvent
+import org.webrtc.AudioTrack as AndroidAudioTrack
 import org.webrtc.DataChannel as NativeDataChannel
 import org.webrtc.IceCandidate as NativeIceCandidate
 import org.webrtc.MediaStream as NativeMediaStream
+import org.webrtc.MediaStreamTrack as AndroidMediaStreamTrack
 import org.webrtc.PeerConnection as NativePeerConnection
 import org.webrtc.RtpReceiver as NativeRtpReceiver
 import org.webrtc.RtpTransceiver as NativeRtpTransceiver
 import org.webrtc.SessionDescription as NativeSessionDescription
+import org.webrtc.VideoTrack as AndroidVideoTrack
 
 actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguration) {
 
@@ -43,7 +46,7 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
     actual val iceGatheringState: IceGatheringState
         get() = native.iceGatheringState().asCommon()
 
-    actual val events = PeerConnectionEvents()
+    internal actual val events = PeerConnectionEvents()
 
     private val pcObserver = PcObserver()
 
@@ -230,42 +233,40 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
 
     internal inner class PcObserver : NativePeerConnection.Observer {
         override fun onSignalingChange(newState: NativePeerConnection.SignalingState) {
-            mainScope.launch { events.onSignalingStateInternal.emit(newState.asCommon()) }
+            mainScope.launch { events.onSignalingStateChange.emit(newState.asCommon()) }
         }
 
         override fun onIceConnectionChange(newState: NativePeerConnection.IceConnectionState) {
-            mainScope.launch { events.onIceConnectionStateInternal.emit(newState.asCommon()) }
+            mainScope.launch { events.onIceConnectionStateChange.emit(newState.asCommon()) }
         }
 
         override fun onStandardizedIceConnectionChange(
             newState: NativePeerConnection.IceConnectionState
         ) {
             mainScope.launch {
-                events.onStandardizedIceConnectionInternal.emit(newState.asCommon())
+                events.onStandardizedIceConnectionChange.emit(newState.asCommon())
             }
         }
 
         override fun onConnectionChange(newState: NativePeerConnection.PeerConnectionState) {
-            mainScope.launch { events.onConnectionStateInternal.emit(newState.asCommon()) }
+            mainScope.launch { events.onConnectionStateChange.emit(newState.asCommon()) }
         }
 
         override fun onIceConnectionReceivingChange(receiving: Boolean) {}
 
         override fun onIceGatheringChange(newState: NativePeerConnection.IceGatheringState) {
-            mainScope.launch { events.onIceGatheringStateInternal.emit(newState.asCommon()) }
+            mainScope.launch { events.onIceGatheringStateChange.emit(newState.asCommon()) }
         }
 
         override fun onIceCandidate(candidate: NativeIceCandidate) {
-            mainScope.launch { events.onIceCandidateInternal.emit(IceCandidate(candidate)) }
+            mainScope.launch { events.onIceCandidate.emit(IceCandidate(candidate)) }
         }
 
         override fun onIceCandidatesRemoved(candidates: Array<out NativeIceCandidate>) {
             mainScope.launch {
-                events.onRemovedIceCandidatesInternal.emit(candidates.map { IceCandidate(it) })
+                events.onRemovedIceCandidates.emit(candidates.map { IceCandidate(it) })
             }
         }
-
-        override fun onSelectedCandidatePairChanged(event: NativeCandidatePairChangeEvent) {}
 
         override fun onAddStream(nativeStream: NativeMediaStream) {
             // this deprecated API should not longer be used
@@ -282,30 +283,51 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         }
 
         override fun onDataChannel(dataChannel: NativeDataChannel) {
-            mainScope.launch { events.onDataChannelInternal.emit(DataChannel(dataChannel)) }
+            mainScope.launch { events.onDataChannel.emit(DataChannel(dataChannel)) }
         }
 
         override fun onRenegotiationNeeded() {
-            mainScope.launch { events.onNegotiationNeededInternal.emit(Unit) }
+            mainScope.launch { events.onNegotiationNeeded.emit(Unit) }
         }
 
         override fun onAddTrack(
             receiver: NativeRtpReceiver,
             nativeStreams: Array<out NativeMediaStream>
         ) {
-            mainScope.launch {
-                events.onAddTrackInternal.emit(RtpReceiver(receiver))
-            }
+            // replaced by onTrack
         }
 
-        override fun onTrack(transceiver: NativeRtpTransceiver) {}
-    }
+        override fun onTrack(transceiver: NativeRtpTransceiver) {
+            val sender = transceiver.sender
+            val track = when (transceiver.mediaType) {
+                AndroidMediaStreamTrack.MediaType.MEDIA_TYPE_AUDIO -> {
+                    AudioTrack(transceiver.receiver.track() as AndroidAudioTrack)
+                }
+                AndroidMediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO -> {
+                    VideoTrack(transceiver.receiver.track() as AndroidVideoTrack)
+                }
+                else -> null
+            }
+            val streams = sender.streams.map { id ->
+                MediaStream(id).apply { track?.also { addTrack(it) } }
+            }
+            val trackEvent = TrackEvent(
+                receiver = RtpReceiver(transceiver.receiver),
+                streams = streams,
+                track = track,
+                transceiver = RtpTransceiver(transceiver)
+            )
+            mainScope.launch { events.onTrack.emit(trackEvent) }
+        }
 
-    actual companion object
+        override fun onSelectedCandidatePairChanged(event: CandidatePairChangeEvent) {
+            // not implemented
+        }
+    }
 }
 
 private fun NativePeerConnection.SignalingState.asCommon(): SignalingState {
-    return when(this) {
+    return when (this) {
         NativePeerConnection.SignalingState.STABLE -> SignalingState.Stable
         NativePeerConnection.SignalingState.HAVE_LOCAL_OFFER -> SignalingState.HaveLocalOffer
         NativePeerConnection.SignalingState.HAVE_LOCAL_PRANSWER -> SignalingState.HaveLocalPranswer
@@ -316,7 +338,7 @@ private fun NativePeerConnection.SignalingState.asCommon(): SignalingState {
 }
 
 private fun NativePeerConnection.IceConnectionState.asCommon(): IceConnectionState {
-    return when(this) {
+    return when (this) {
         NativePeerConnection.IceConnectionState.NEW -> IceConnectionState.New
         NativePeerConnection.IceConnectionState.CHECKING -> IceConnectionState.Checking
         NativePeerConnection.IceConnectionState.CONNECTED -> IceConnectionState.Connected
@@ -328,7 +350,7 @@ private fun NativePeerConnection.IceConnectionState.asCommon(): IceConnectionSta
 }
 
 private fun NativePeerConnection.PeerConnectionState.asCommon(): PeerConnectionState {
-    return when(this) {
+    return when (this) {
         NativePeerConnection.PeerConnectionState.NEW -> PeerConnectionState.New
         NativePeerConnection.PeerConnectionState.CONNECTING -> PeerConnectionState.Connecting
         NativePeerConnection.PeerConnectionState.CONNECTED -> PeerConnectionState.Connected
@@ -339,7 +361,7 @@ private fun NativePeerConnection.PeerConnectionState.asCommon(): PeerConnectionS
 }
 
 private fun NativePeerConnection.IceGatheringState.asCommon(): IceGatheringState {
-    return when(this) {
+    return when (this) {
         NativePeerConnection.IceGatheringState.NEW -> IceGatheringState.New
         NativePeerConnection.IceGatheringState.GATHERING -> IceGatheringState.Gathering
         NativePeerConnection.IceGatheringState.COMPLETE -> IceGatheringState.Complete

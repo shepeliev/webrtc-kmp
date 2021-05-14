@@ -28,7 +28,6 @@ private typealias CompletionHandler<T> = (result: T?, error: NSError?) -> Unit
 actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguration) {
 
     val native: RTCPeerConnection
-    actual val events: PeerConnectionEvents = PeerConnectionEvents().freeze()
 
     actual val localDescription: SessionDescription?
         get() = native.localDescription?.let { SessionDescription(it) }
@@ -50,6 +49,8 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
 
     actual val iceGatheringState: IceGatheringState
         get() = rtcIceGatheringStateAsCommon(native.iceGatheringState())
+
+    internal actual val events: PeerConnectionEvents = PeerConnectionEvents().freeze()
 
     actual fun createDataChannel(
         label: String,
@@ -234,8 +235,6 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
     actual fun stopRtcEventLog() = native.stopRtcEventLog()
 
     actual fun close() = native.close()
-
-    actual companion object
 }
 
 private fun MediaStreamTrack.MediaType.asNative(): RTCRtpMediaType {

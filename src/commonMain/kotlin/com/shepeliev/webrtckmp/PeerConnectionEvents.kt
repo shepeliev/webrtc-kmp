@@ -1,43 +1,17 @@
 package com.shepeliev.webrtckmp
 
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 
-class PeerConnectionEvents internal constructor() {
-
-    internal val onSignalingStateInternal = MutableSharedFlow<SignalingState>()
-    val onSignalingState: Flow<SignalingState> = onSignalingStateInternal.asSharedFlow()
-
-    internal val onIceConnectionStateInternal = MutableSharedFlow<IceConnectionState>()
-    val onIceConnectionState: Flow<IceConnectionState> = onIceConnectionStateInternal.asSharedFlow()
-
-    internal val onStandardizedIceConnectionInternal = MutableSharedFlow<IceConnectionState>()
-    val onStandardizedIceConnection: Flow<IceConnectionState> =
-        onStandardizedIceConnectionInternal.asSharedFlow()
-
-    internal val onConnectionStateInternal = MutableSharedFlow<PeerConnectionState>()
-    val onConnectionState: Flow<PeerConnectionState> = onConnectionStateInternal.asSharedFlow()
-
-    internal val onIceGatheringStateInternal = MutableSharedFlow<IceGatheringState>()
-    val onIceGatheringState: Flow<IceGatheringState> = onIceGatheringStateInternal.asSharedFlow()
-
-    internal val onIceCandidateInternal = MutableSharedFlow<IceCandidate>()
-    val onIceCandidate: Flow<IceCandidate> = onIceCandidateInternal.asSharedFlow()
-
-    internal val onRemovedIceCandidatesInternal = MutableSharedFlow<List<IceCandidate>>()
-    val onRemovedIceCandidates: Flow<List<IceCandidate>> =
-        onRemovedIceCandidatesInternal.asSharedFlow()
-
-    internal val onDataChannelInternal = MutableSharedFlow<DataChannel>()
-    val onDataChannel: Flow<DataChannel> = onDataChannelInternal.asSharedFlow()
-
-    internal val onAddTrackInternal = MutableSharedFlow<RtpReceiver>()
-    val onAddTrack: Flow<RtpReceiver> = onAddTrackInternal.asSharedFlow()
-
-    internal val onRemoveTrackInternal = MutableSharedFlow<RtpReceiver>()
-    val onRemoveTrack: Flow<RtpReceiver> = onRemoveTrackInternal.asSharedFlow()
-
-    internal val onNegotiationNeededInternal = MutableSharedFlow<Unit>()
-    val onNegotiationNeeded: Flow<Unit> = onNegotiationNeededInternal.asSharedFlow()
+internal class PeerConnectionEvents internal constructor() {
+    val onSignalingStateChange = MutableSharedFlow<SignalingState>()
+    val onIceConnectionStateChange = MutableSharedFlow<IceConnectionState>()
+    val onStandardizedIceConnectionChange = MutableSharedFlow<IceConnectionState>()
+    val onConnectionStateChange = MutableSharedFlow<PeerConnectionState>()
+    val onIceGatheringStateChange = MutableSharedFlow<IceGatheringState>()
+    val onIceCandidate = MutableSharedFlow<IceCandidate>()
+    val onRemovedIceCandidates = MutableSharedFlow<List<IceCandidate>>()
+    val onDataChannel = MutableSharedFlow<DataChannel>()
+    val onRemoveTrack = MutableSharedFlow<RtpReceiver>()
+    val onNegotiationNeeded = MutableSharedFlow<Unit>()
+    val onTrack = MutableSharedFlow<TrackEvent>()
 }

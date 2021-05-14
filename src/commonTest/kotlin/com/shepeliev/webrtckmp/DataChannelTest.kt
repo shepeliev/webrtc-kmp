@@ -47,7 +47,7 @@ class DataChannelTest {
         val pc1Candidates = mutableListOf<IceCandidate>()
         val pc2Candidates = mutableListOf<IceCandidate>()
 
-        pc1.events.onIceCandidate
+        pc1.onIceCandidate
             .onEach { candidate ->
                 if (pc2.signalingState == SignalingState.Stable) {
                     pc1Candidates.forEach { pc2.addIceCandidate(it) }
@@ -59,7 +59,7 @@ class DataChannelTest {
             }
             .launchIn(WebRtcKmp.mainScope)
 
-        pc2.events.onIceCandidate
+        pc2.onIceCandidate
             .onEach { candidate ->
                 if (pc1.signalingState == SignalingState.Stable) {
                     pc2Candidates.forEach { pc1.addIceCandidate(it) }
@@ -70,7 +70,7 @@ class DataChannelTest {
                 }
             }
             .launchIn(WebRtcKmp.mainScope)
-        pc2.events.onDataChannel
+        pc2.onDataChannel
             .onEach { pc2DataChannel ->
                 val buffer = DataChannelBuffer("Hello WebRTC KMP!".encodeToByteArray(), false)
                 pc2DataChannel.send(buffer)
