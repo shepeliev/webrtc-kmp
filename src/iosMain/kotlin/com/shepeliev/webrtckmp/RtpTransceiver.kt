@@ -13,15 +13,12 @@ actual class RtpTransceiver(val native: RTCRtpTransceiver) {
             native.setDirection(value.asNative(), null)
         }
 
-    actual val currentDirectioin: RtpTransceiverDirection?
+    actual val currentDirection: RtpTransceiverDirection?
         get() = memScoped {
             val d = alloc<RTCRtpTransceiverDirection.Var>()
             native.currentDirection(d.ptr)
             rtcRtpTransceiverDirectionAsCommon(d.value)
         }
-
-    actual val mediaType: MediaStreamTrack.MediaType
-        get() = rtcRtpMediaTypeAsCommon(native.mediaType)
 
     actual val mid: String
         get() = native.mid
@@ -32,7 +29,7 @@ actual class RtpTransceiver(val native: RTCRtpTransceiver) {
     actual val receiver: RtpReceiver
         get() = RtpReceiver(native.receiver)
 
-    actual val isStopped: Boolean
+    actual val stopped: Boolean
         get() = native.isStopped
 
     actual fun stop() = native.stopInternal()

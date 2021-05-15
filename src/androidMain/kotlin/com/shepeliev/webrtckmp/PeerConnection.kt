@@ -11,19 +11,19 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 import org.webrtc.AudioTrack as AndroidAudioTrack
-import org.webrtc.DataChannel as NativeDataChannel
-import org.webrtc.IceCandidate as NativeIceCandidate
-import org.webrtc.MediaStream as NativeMediaStream
+import org.webrtc.DataChannel as AndroidDataChannel
+import org.webrtc.IceCandidate as AndroidIceCandidate
+import org.webrtc.MediaStream as AndroidMediaStream
 import org.webrtc.MediaStreamTrack as AndroidMediaStreamTrack
-import org.webrtc.PeerConnection as NativePeerConnection
-import org.webrtc.RtpReceiver as NativeRtpReceiver
-import org.webrtc.RtpTransceiver as NativeRtpTransceiver
-import org.webrtc.SessionDescription as NativeSessionDescription
+import org.webrtc.PeerConnection as AndroidPeerConnection
+import org.webrtc.RtpReceiver as AndroidRtpReceiver
+import org.webrtc.RtpTransceiver as AndroidRtpTransceiver
+import org.webrtc.SessionDescription as AndroidSessionDescription
 import org.webrtc.VideoTrack as AndroidVideoTrack
 
 actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguration) {
 
-    val native: NativePeerConnection
+    val native: AndroidPeerConnection
 
     actual val localDescription: SessionDescription?
         get() = native.localDescription?.let { SessionDescription(it) }
@@ -67,7 +67,7 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         protocol: String,
         negotiated: Boolean
     ): DataChannel? {
-        val init = NativeDataChannel.Init().also {
+        val init = AndroidDataChannel.Init().also {
             it.id = id
             it.ordered = ordered
             it.maxRetransmitTimeMs = maxRetransmitTimeMs
@@ -92,7 +92,7 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
 
     private fun createSdpObserver(continuation: Continuation<SessionDescription>): SdpObserver {
         return object : SdpObserver {
-            override fun onCreateSuccess(description: NativeSessionDescription) {
+            override fun onCreateSuccess(description: AndroidSessionDescription) {
                 continuation.resume(SessionDescription(description))
             }
 
@@ -124,7 +124,7 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
 
     private fun setSdpObserver(continuation: Continuation<Unit>): SdpObserver {
         return object : SdpObserver {
-            override fun onCreateSuccess(description: NativeSessionDescription) {
+            override fun onCreateSuccess(description: AndroidSessionDescription) {
                 // not applicable for setting SDP
             }
 
@@ -161,7 +161,8 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
 
     actual fun getReceivers(): List<RtpReceiver> = native.receivers.map { RtpReceiver(it) }
 
-    actual fun getTransceivers(): List<RtpTransceiver> = native.transceivers.map { it.asCommon() }
+    actual fun getTransceivers(): List<RtpTransceiver> =
+        native.transceivers.map { RtpTransceiver(it) }
 
     actual fun addTrack(track: MediaStreamTrack, streamIds: List<String>): RtpSender {
         mediaStreamTracks += track.id to track
@@ -179,14 +180,16 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         streamIds: List<String>,
         sendEncodings: List<RtpParameters.Encoding>
     ): RtpTransceiver {
-        return native.addTransceiver(
-            (track as BaseMediaStreamTrack).native,
-            NativeRtpTransceiver.RtpTransceiverInit(
-                direction.asNative(),
-                streamIds,
-                sendEncodings.map { it.native }
+        return RtpTransceiver(
+            native.addTransceiver(
+                (track as BaseMediaStreamTrack).native,
+                AndroidRtpTransceiver.RtpTransceiverInit(
+                    direction.asNative(),
+                    streamIds,
+                    sendEncodings.map { it.native }
+                )
             )
-        ).asCommon()
+        )
     }
 
     actual fun addTransceiver(
@@ -195,14 +198,16 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         streamIds: List<String>,
         sendEncodings: List<RtpParameters.Encoding>
     ): RtpTransceiver {
-        return native.addTransceiver(
-            mediaType.asNative(),
-            NativeRtpTransceiver.RtpTransceiverInit(
-                direction.asNative(),
-                streamIds,
-                sendEncodings.map { it.native }
+        return RtpTransceiver(
+            native.addTransceiver(
+                mediaType.asNative(),
+                AndroidRtpTransceiver.RtpTransceiverInit(
+                    direction.asNative(),
+                    streamIds,
+                    sendEncodings.map { it.native }
+                )
             )
-        ).asCommon()
+        )
     }
 
     actual suspend fun getStats(): RtcStatsReport? {
@@ -231,49 +236,49 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         native.dispose()
     }
 
-    internal inner class PcObserver : NativePeerConnection.Observer {
-        override fun onSignalingChange(newState: NativePeerConnection.SignalingState) {
+    internal inner class PcObserver : AndroidPeerConnection.Observer {
+        override fun onSignalingChange(newState: AndroidPeerConnection.SignalingState) {
             mainScope.launch { events.onSignalingStateChange.emit(newState.asCommon()) }
         }
 
-        override fun onIceConnectionChange(newState: NativePeerConnection.IceConnectionState) {
+        override fun onIceConnectionChange(newState: AndroidPeerConnection.IceConnectionState) {
             mainScope.launch { events.onIceConnectionStateChange.emit(newState.asCommon()) }
         }
 
         override fun onStandardizedIceConnectionChange(
-            newState: NativePeerConnection.IceConnectionState
+            newState: AndroidPeerConnection.IceConnectionState
         ) {
             mainScope.launch {
                 events.onStandardizedIceConnectionChange.emit(newState.asCommon())
             }
         }
 
-        override fun onConnectionChange(newState: NativePeerConnection.PeerConnectionState) {
+        override fun onConnectionChange(newState: AndroidPeerConnection.PeerConnectionState) {
             mainScope.launch { events.onConnectionStateChange.emit(newState.asCommon()) }
         }
 
         override fun onIceConnectionReceivingChange(receiving: Boolean) {}
 
-        override fun onIceGatheringChange(newState: NativePeerConnection.IceGatheringState) {
+        override fun onIceGatheringChange(newState: AndroidPeerConnection.IceGatheringState) {
             mainScope.launch { events.onIceGatheringStateChange.emit(newState.asCommon()) }
         }
 
-        override fun onIceCandidate(candidate: NativeIceCandidate) {
+        override fun onIceCandidate(candidate: AndroidIceCandidate) {
             mainScope.launch { events.onIceCandidate.emit(IceCandidate(candidate)) }
         }
 
-        override fun onIceCandidatesRemoved(candidates: Array<out NativeIceCandidate>) {
+        override fun onIceCandidatesRemoved(candidates: Array<out AndroidIceCandidate>) {
             mainScope.launch {
                 events.onRemovedIceCandidates.emit(candidates.map { IceCandidate(it) })
             }
         }
 
-        override fun onAddStream(nativeStream: NativeMediaStream) {
+        override fun onAddStream(nativeStream: AndroidMediaStream) {
             // this deprecated API should not longer be used
             // https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/onaddstream
         }
 
-        override fun onRemoveStream(nativeStream: NativeMediaStream) {
+        override fun onRemoveStream(nativeStream: AndroidMediaStream) {
             // The removestream event has been removed from the WebRTC specification in favor of
             // the existing removetrack event on the remote MediaStream and the corresponding
             // MediaStream.onremovetrack event handler property of the remote MediaStream.
@@ -282,7 +287,7 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
             // https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/onremovestream
         }
 
-        override fun onDataChannel(dataChannel: NativeDataChannel) {
+        override fun onDataChannel(dataChannel: AndroidDataChannel) {
             mainScope.launch { events.onDataChannel.emit(DataChannel(dataChannel)) }
         }
 
@@ -291,13 +296,13 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         }
 
         override fun onAddTrack(
-            receiver: NativeRtpReceiver,
-            nativeStreams: Array<out NativeMediaStream>
+            receiver: AndroidRtpReceiver,
+            nativeStreams: Array<out AndroidMediaStream>
         ) {
             // replaced by onTrack
         }
 
-        override fun onTrack(transceiver: NativeRtpTransceiver) {
+        override fun onTrack(transceiver: AndroidRtpTransceiver) {
             val sender = transceiver.sender
             val track = when (transceiver.mediaType) {
                 AndroidMediaStreamTrack.MediaType.MEDIA_TYPE_AUDIO -> {
@@ -326,44 +331,44 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
     }
 }
 
-private fun NativePeerConnection.SignalingState.asCommon(): SignalingState {
+private fun AndroidPeerConnection.SignalingState.asCommon(): SignalingState {
     return when (this) {
-        NativePeerConnection.SignalingState.STABLE -> SignalingState.Stable
-        NativePeerConnection.SignalingState.HAVE_LOCAL_OFFER -> SignalingState.HaveLocalOffer
-        NativePeerConnection.SignalingState.HAVE_LOCAL_PRANSWER -> SignalingState.HaveLocalPranswer
-        NativePeerConnection.SignalingState.HAVE_REMOTE_OFFER -> SignalingState.HaveRemoteOffer
-        NativePeerConnection.SignalingState.HAVE_REMOTE_PRANSWER -> SignalingState.HaveRemotePranswer
-        NativePeerConnection.SignalingState.CLOSED -> SignalingState.Closed
+        AndroidPeerConnection.SignalingState.STABLE -> SignalingState.Stable
+        AndroidPeerConnection.SignalingState.HAVE_LOCAL_OFFER -> SignalingState.HaveLocalOffer
+        AndroidPeerConnection.SignalingState.HAVE_LOCAL_PRANSWER -> SignalingState.HaveLocalPranswer
+        AndroidPeerConnection.SignalingState.HAVE_REMOTE_OFFER -> SignalingState.HaveRemoteOffer
+        AndroidPeerConnection.SignalingState.HAVE_REMOTE_PRANSWER -> SignalingState.HaveRemotePranswer
+        AndroidPeerConnection.SignalingState.CLOSED -> SignalingState.Closed
     }
 }
 
-private fun NativePeerConnection.IceConnectionState.asCommon(): IceConnectionState {
+private fun AndroidPeerConnection.IceConnectionState.asCommon(): IceConnectionState {
     return when (this) {
-        NativePeerConnection.IceConnectionState.NEW -> IceConnectionState.New
-        NativePeerConnection.IceConnectionState.CHECKING -> IceConnectionState.Checking
-        NativePeerConnection.IceConnectionState.CONNECTED -> IceConnectionState.Connected
-        NativePeerConnection.IceConnectionState.COMPLETED -> IceConnectionState.Completed
-        NativePeerConnection.IceConnectionState.FAILED -> IceConnectionState.Failed
-        NativePeerConnection.IceConnectionState.DISCONNECTED -> IceConnectionState.Disconnected
-        NativePeerConnection.IceConnectionState.CLOSED -> IceConnectionState.Closed
+        AndroidPeerConnection.IceConnectionState.NEW -> IceConnectionState.New
+        AndroidPeerConnection.IceConnectionState.CHECKING -> IceConnectionState.Checking
+        AndroidPeerConnection.IceConnectionState.CONNECTED -> IceConnectionState.Connected
+        AndroidPeerConnection.IceConnectionState.COMPLETED -> IceConnectionState.Completed
+        AndroidPeerConnection.IceConnectionState.FAILED -> IceConnectionState.Failed
+        AndroidPeerConnection.IceConnectionState.DISCONNECTED -> IceConnectionState.Disconnected
+        AndroidPeerConnection.IceConnectionState.CLOSED -> IceConnectionState.Closed
     }
 }
 
-private fun NativePeerConnection.PeerConnectionState.asCommon(): PeerConnectionState {
+private fun AndroidPeerConnection.PeerConnectionState.asCommon(): PeerConnectionState {
     return when (this) {
-        NativePeerConnection.PeerConnectionState.NEW -> PeerConnectionState.New
-        NativePeerConnection.PeerConnectionState.CONNECTING -> PeerConnectionState.Connecting
-        NativePeerConnection.PeerConnectionState.CONNECTED -> PeerConnectionState.Connected
-        NativePeerConnection.PeerConnectionState.DISCONNECTED -> PeerConnectionState.Disconnected
-        NativePeerConnection.PeerConnectionState.FAILED -> PeerConnectionState.Failed
-        NativePeerConnection.PeerConnectionState.CLOSED -> PeerConnectionState.Closed
+        AndroidPeerConnection.PeerConnectionState.NEW -> PeerConnectionState.New
+        AndroidPeerConnection.PeerConnectionState.CONNECTING -> PeerConnectionState.Connecting
+        AndroidPeerConnection.PeerConnectionState.CONNECTED -> PeerConnectionState.Connected
+        AndroidPeerConnection.PeerConnectionState.DISCONNECTED -> PeerConnectionState.Disconnected
+        AndroidPeerConnection.PeerConnectionState.FAILED -> PeerConnectionState.Failed
+        AndroidPeerConnection.PeerConnectionState.CLOSED -> PeerConnectionState.Closed
     }
 }
 
-private fun NativePeerConnection.IceGatheringState.asCommon(): IceGatheringState {
+private fun AndroidPeerConnection.IceGatheringState.asCommon(): IceGatheringState {
     return when (this) {
-        NativePeerConnection.IceGatheringState.NEW -> IceGatheringState.New
-        NativePeerConnection.IceGatheringState.GATHERING -> IceGatheringState.Gathering
-        NativePeerConnection.IceGatheringState.COMPLETE -> IceGatheringState.Complete
+        AndroidPeerConnection.IceGatheringState.NEW -> IceGatheringState.New
+        AndroidPeerConnection.IceGatheringState.GATHERING -> IceGatheringState.Gathering
+        AndroidPeerConnection.IceGatheringState.COMPLETE -> IceGatheringState.Complete
     }
 }

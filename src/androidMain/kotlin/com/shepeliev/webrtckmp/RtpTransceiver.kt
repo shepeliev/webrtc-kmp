@@ -1,19 +1,16 @@
 package com.shepeliev.webrtckmp
 
-import org.webrtc.RtpTransceiver as NativeRtpTransceiver
+import org.webrtc.RtpTransceiver as AndroidRtpTransceiver
 
-actual class RtpTransceiver(val native: NativeRtpTransceiver) {
+actual class RtpTransceiver(val native: AndroidRtpTransceiver) {
     actual var direction: RtpTransceiverDirection
         get() = native.direction.asCommon()
         set(value) {
             native.direction = value.asNative()
         }
 
-    actual val currentDirectioin: RtpTransceiverDirection?
+    actual val currentDirection: RtpTransceiverDirection?
         get() = native.currentDirection?.asCommon()
-
-    actual val mediaType: MediaStreamTrack.MediaType
-        get() = native.mediaType.asCommon()
 
     actual val mid: String
         get() = native.mid
@@ -24,40 +21,38 @@ actual class RtpTransceiver(val native: NativeRtpTransceiver) {
     actual val receiver: RtpReceiver
         get() = RtpReceiver(native.receiver)
 
-    actual val isStopped: Boolean
+    actual val stopped: Boolean
         get() = native.isStopped
 
     actual fun stop() = native.stop()
 }
 
-internal fun NativeRtpTransceiver.asCommon() = RtpTransceiver(this)
-
-internal fun NativeRtpTransceiver.RtpTransceiverDirection.asCommon(): RtpTransceiverDirection {
+private fun AndroidRtpTransceiver.RtpTransceiverDirection.asCommon(): RtpTransceiverDirection {
     return when (this) {
-        NativeRtpTransceiver.RtpTransceiverDirection.SEND_RECV -> {
+        AndroidRtpTransceiver.RtpTransceiverDirection.SEND_RECV -> {
             RtpTransceiverDirection.SendRecv
         }
 
-        NativeRtpTransceiver.RtpTransceiverDirection.SEND_ONLY -> {
+        AndroidRtpTransceiver.RtpTransceiverDirection.SEND_ONLY -> {
             RtpTransceiverDirection.SendOnly
         }
 
-        NativeRtpTransceiver.RtpTransceiverDirection.RECV_ONLY -> {
+        AndroidRtpTransceiver.RtpTransceiverDirection.RECV_ONLY -> {
             RtpTransceiverDirection.RecvOnly
         }
 
-        NativeRtpTransceiver.RtpTransceiverDirection.INACTIVE -> {
+        AndroidRtpTransceiver.RtpTransceiverDirection.INACTIVE -> {
             RtpTransceiverDirection.Inactive
         }
     }
 }
 
-internal fun RtpTransceiverDirection.asNative(): NativeRtpTransceiver.RtpTransceiverDirection {
+internal fun RtpTransceiverDirection.asNative(): AndroidRtpTransceiver.RtpTransceiverDirection {
     return when (this) {
-        RtpTransceiverDirection.SendRecv -> NativeRtpTransceiver.RtpTransceiverDirection.SEND_RECV
-        RtpTransceiverDirection.SendOnly -> NativeRtpTransceiver.RtpTransceiverDirection.SEND_ONLY
-        RtpTransceiverDirection.RecvOnly -> NativeRtpTransceiver.RtpTransceiverDirection.RECV_ONLY
-        RtpTransceiverDirection.Inactive -> NativeRtpTransceiver.RtpTransceiverDirection.INACTIVE
-        RtpTransceiverDirection.Stopped -> NativeRtpTransceiver.RtpTransceiverDirection.INACTIVE
+        RtpTransceiverDirection.SendRecv -> AndroidRtpTransceiver.RtpTransceiverDirection.SEND_RECV
+        RtpTransceiverDirection.SendOnly -> AndroidRtpTransceiver.RtpTransceiverDirection.SEND_ONLY
+        RtpTransceiverDirection.RecvOnly -> AndroidRtpTransceiver.RtpTransceiverDirection.RECV_ONLY
+        RtpTransceiverDirection.Inactive -> AndroidRtpTransceiver.RtpTransceiverDirection.INACTIVE
+        RtpTransceiverDirection.Stopped -> AndroidRtpTransceiver.RtpTransceiverDirection.INACTIVE
     }
 }
