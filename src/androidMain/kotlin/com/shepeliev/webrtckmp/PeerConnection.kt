@@ -48,8 +48,6 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
 
     private val pcObserver = PcObserver()
 
-    private val mediaStreamTracks = mutableMapOf<String, MediaStreamTrack>()
-
     init {
         native = WebRtcKmp.peerConnectionFactory.native
             .createPeerConnection(rtcConfiguration.native, pcObserver)
@@ -160,18 +158,16 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         native.transceivers.map { RtpTransceiver(it) }
 
     actual fun addTrack(track: MediaStreamTrack, streamIds: List<String>): RtpSender {
-        mediaStreamTracks += track.id to track
-        return RtpSender(native.addTrack((track as BaseMediaStreamTrack).native, streamIds))
+        return RtpSender(native.addTrack(track.native, streamIds))
     }
 
     actual fun removeTrack(sender: RtpSender): Boolean {
-        mediaStreamTracks.remove(sender.track?.id)
         return native.removeTrack(sender.native)
     }
 
     actual suspend fun getStats(): RtcStatsReport? {
         return suspendCoroutine { cont ->
-            native.getStats { cont.resume(it.asCommon()) }
+            native.getStats { cont.resume(RtcStatsReport(it)) }
         }
     }
 
@@ -249,11 +245,19 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
             val sender = transceiver.sender
             val track = when (transceiver.mediaType) {
                 AndroidMediaStreamTrack.MediaType.MEDIA_TYPE_AUDIO -> {
-                    AudioTrack(transceiver.receiver.track() as AndroidAudioTrack)
+                    AudioStreamTrack(
+                        transceiver.receiver.track() as AndroidAudioTrack,
+                        remote = true
+                    )
                 }
+
                 AndroidMediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO -> {
-                    VideoTrack(transceiver.receiver.track() as AndroidVideoTrack)
+                    VideoStreamTrack(
+                        transceiver.receiver.track() as AndroidVideoTrack,
+                        remote = true
+                    )
                 }
+
                 else -> null
             }
             val streams = sender.streams.map { id ->

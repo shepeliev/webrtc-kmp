@@ -6,5 +6,5 @@ expect class RtpSender {
     var parameters: RtpParameters
     val dtmf: DtmfSender?
 
-    fun setTrack(track: MediaStreamTrack?, takeOwnership: Boolean): Boolean
+    suspend fun replaceTrack(track: MediaStreamTrack?)
 }

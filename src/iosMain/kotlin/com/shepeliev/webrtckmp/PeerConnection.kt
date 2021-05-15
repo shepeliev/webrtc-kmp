@@ -156,12 +156,7 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         native.transceivers.map { RtpTransceiver(it as RTCRtpTransceiver) }
 
     actual fun addTrack(track: MediaStreamTrack, streamIds: List<String>): RtpSender {
-        return RtpSender(
-            native.addTrack(
-                (track as BaseMediaStreamTrack).native,
-                streamIds.freeze()
-            ).freeze()
-        )
+        return RtpSender(native.addTrack(track.native, streamIds.freeze()).freeze())
     }
 
     actual fun removeTrack(sender: RtpSender): Boolean = native.removeTrack(sender.native)

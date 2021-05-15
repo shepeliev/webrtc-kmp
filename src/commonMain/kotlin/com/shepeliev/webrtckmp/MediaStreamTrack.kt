@@ -2,23 +2,25 @@ package com.shepeliev.webrtckmp
 
 import kotlinx.coroutines.flow.Flow
 
-interface MediaStreamTrack {
-
-    companion object {
-        const val AUDIO_TRACK_KIND = "audio"
-        const val VIDEO_TRACK_KIND = "video"
-    }
-
+expect open class MediaStreamTrack {
     val id: String
-    val kind: String
+    val kind: MediaStreamTrackKind
+    val label: String
+    val muted: Boolean
+    val readOnly: Boolean
+    val readyState: MediaStreamTrackState
+    val remote: Boolean
+
     var enabled: Boolean
-    val state: State
-    val onStop: Flow<MediaStreamTrack>
+
+    val onEnded: Flow<Unit>
+    val onMute: Flow<Unit>
+    val onUnmute: Flow<Unit>
 
     fun stop()
-
-    enum class State { Live, Ended }
-
-    enum class MediaType { Audio, Video, Data, Unsupported; }
 }
+
+enum class MediaStreamTrackState { Live, Ended }
+
+enum class MediaStreamTrackKind { Audio, Video }
 

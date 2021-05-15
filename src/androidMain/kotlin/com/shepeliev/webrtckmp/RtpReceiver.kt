@@ -7,7 +7,7 @@ actual class RtpReceiver(val native: NativeRtpReceiver) {
         get() = native.id()
 
     actual val track: MediaStreamTrack?
-        get() = native.track()?.asCommon()
+        get() = native.track()?.asCommon(remote = true)
 
     actual val parameters: RtpParameters
         get() = RtpParameters(native.parameters)

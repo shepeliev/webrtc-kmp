@@ -21,17 +21,17 @@ internal object PhoneMediaDevices {
     suspend fun getUserMedia(audio: Boolean, video: Boolean): MediaStream =
         withContext(Dispatchers.Main) {
             val factory = WebRtcKmp.peerConnectionFactory
-            var audioTrack: AudioTrack? = null
+            var audioTrack: AudioStreamTrack? = null
             if (audio) {
                 audioSource =
                     audioSource ?: factory.createAudioSource(mediaConstraints( /* TODO */))
                 audioSourceRefCount += 1
                 audioTrack = factory.createAudioTrack(uuid(), audioSource!!).apply {
-                    onStop.onEach { onAudioTrackStopped() }.launchIn(WebRtcKmp.mainScope)
+                    onEnded.onEach { onAudioTrackStopped() }.launchIn(WebRtcKmp.mainScope)
                 }
             }
 
-            var videoTrack: VideoTrack? = null
+            var videoTrack: VideoStreamTrack? = null
             if (video) {
                 videoCapturer.stopCapture()
 
@@ -40,7 +40,7 @@ internal object PhoneMediaDevices {
                 videoSource = videoSource ?: factory.createVideoSource(false)
                 videoSourceRef += 1
                 videoTrack = factory.createVideoTrack(uuid(), videoSource!!).apply {
-                    onStop.onEach { onVideoTrackStopped() }.launchIn(WebRtcKmp.mainScope)
+                    onEnded.onEach { onVideoTrackStopped() }.launchIn(WebRtcKmp.mainScope)
                 }
 
                 videoCapturer.startCapture(

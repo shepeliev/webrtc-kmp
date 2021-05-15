@@ -7,7 +7,7 @@ actual class RtpReceiver(val native: RTCRtpReceiver) {
         get() = native.receiverId
 
     actual val track: MediaStreamTrack?
-        get() = native.track()?.let { BaseMediaStreamTrack.createCommon(it) }
+        get() = native.track()?.let { MediaStreamTrack.createCommon(it, remote = true) }
 
     actual val parameters: RtpParameters
         get() = RtpParameters(native.parameters)

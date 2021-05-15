@@ -11,16 +11,22 @@ internal actual class PeerConnectionFactory(val native: RTCPeerConnectionFactory
         return VideoSource(native.videoSource().freeze())
     }
 
-    actual fun createVideoTrack(id: String, videoSource: VideoSource): VideoTrack {
-        return VideoTrack(native.videoTrackWithSource(videoSource.native, id).freeze())
+    actual fun createVideoTrack(id: String, videoSource: VideoSource): VideoStreamTrack {
+        return VideoStreamTrack(
+            native.videoTrackWithSource(videoSource.native, id).freeze(),
+            remote = false
+        )
     }
 
     actual fun createAudioSource(constraints: MediaConstraints): AudioSource {
         return AudioSource(native.audioSourceWithConstraints(constraints.native).freeze())
     }
 
-    actual fun createAudioTrack(id: String, audioSource: AudioSource): AudioTrack {
-        return AudioTrack(native.audioTrackWithSource(audioSource.native, id).freeze())
+    actual fun createAudioTrack(id: String, audioSource: AudioSource): AudioStreamTrack {
+        return AudioStreamTrack(
+            native.audioTrackWithSource(audioSource.native, id).freeze(),
+            remote = false
+        )
     }
 
     actual fun startAecDump(filePath: String, fileSizeLimitBytes: Int) {

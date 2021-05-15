@@ -137,11 +137,11 @@ internal class PeerConnectionObserver(
         val receiver = didStartReceivingOnTransceiver.receiver
         val track = when (didStartReceivingOnTransceiver.mediaType) {
             RTCRtpMediaType.RTCRtpMediaTypeAudio -> {
-                AudioTrack(receiver.track as RTCAudioTrack)
+                AudioStreamTrack(receiver.track as RTCAudioTrack, remote = true)
             }
 
             RTCRtpMediaType.RTCRtpMediaTypeVideo -> {
-                VideoTrack(receiver.track as RTCVideoTrack)
+                VideoStreamTrack(receiver.track as RTCVideoTrack, remote = true)
             }
 
             RTCRtpMediaType.RTCRtpMediaTypeData,

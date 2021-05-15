@@ -9,15 +9,15 @@ class MediaStream internal constructor(val id: String = uuid()) {
     val tracks: List<MediaStreamTrack>
         get() = tracksInternal.values.flatten().toList()
 
-    val audioTracks: List<AudioTrack>
+    val audioTracks: List<AudioStreamTrack>
         get() = tracks
-            .filter { it.kind == MediaStreamTrack.AUDIO_TRACK_KIND }
-            .map { it as AudioTrack }
+            .filter { it.kind == MediaStreamTrackKind.Audio }
+            .map { it as AudioStreamTrack }
 
-    val videoTracks: List<VideoTrack>
+    val videoTracks: List<VideoStreamTrack>
         get() = tracks
-            .filter { it.kind == MediaStreamTrack.VIDEO_TRACK_KIND }
-            .map { it as VideoTrack }
+            .filter { it.kind == MediaStreamTrackKind.Video }
+            .map { it as VideoStreamTrack }
 
     private val onAddTrackInternal = MutableSharedFlow<MediaStreamTrack>()
     val onAddTrack = onAddTrackInternal.asSharedFlow()

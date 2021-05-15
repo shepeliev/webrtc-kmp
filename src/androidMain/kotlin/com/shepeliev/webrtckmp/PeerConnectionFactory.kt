@@ -22,8 +22,8 @@ internal actual class PeerConnectionFactory(val native: NativePeerConnectionFact
         return VideoSource(native.createVideoSource(isScreencast, alignTimestamps))
     }
 
-    actual fun createVideoTrack(id: String, videoSource: VideoSource): VideoTrack {
-        return VideoTrack(native.createVideoTrack(id, videoSource.native))
+    actual fun createVideoTrack(id: String, videoSource: VideoSource): VideoStreamTrack {
+        return VideoStreamTrack(native.createVideoTrack(id, videoSource.native), remote = false)
     }
 
     actual fun createAudioSource(constraints: MediaConstraints): AudioSource {
@@ -34,8 +34,8 @@ internal actual class PeerConnectionFactory(val native: NativePeerConnectionFact
         return AudioSource(native.createAudioSource(constraints.native))
     }
 
-    actual fun createAudioTrack(id: String, audioSource: AudioSource): AudioTrack {
-        return AudioTrack(native.createAudioTrack(id, audioSource.native))
+    actual fun createAudioTrack(id: String, audioSource: AudioSource): AudioStreamTrack {
+        return AudioStreamTrack(native.createAudioTrack(id, audioSource.native), remote = false)
     }
 
     actual fun startAecDump(filePath: String, fileSizeLimitBytes: Int) {
