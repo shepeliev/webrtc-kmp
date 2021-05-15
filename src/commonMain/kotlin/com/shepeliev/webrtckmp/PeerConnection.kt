@@ -122,14 +122,14 @@ expect class PeerConnection(rtcConfiguration: RtcConfiguration = RtcConfiguratio
         track: MediaStreamTrack,
         direction: RtpTransceiverDirection = RtpTransceiverDirection.SendRecv,
         streamIds: List<String> = emptyList(),
-        sendEncodings: List<RtpParameters.Encoding> = emptyList()
+        sendEncodings: List<RtpEncodingParameters> = emptyList()
     ): RtpTransceiver
 
     fun addTransceiver(
         mediaType: MediaStreamTrack.MediaType,
         direction: RtpTransceiverDirection = RtpTransceiverDirection.SendRecv,
         streamIds: List<String> = emptyList(),
-        sendEncodings: List<RtpParameters.Encoding> = emptyList()
+        sendEncodings: List<RtpEncodingParameters> = emptyList()
     ): RtpTransceiver
 
     /**

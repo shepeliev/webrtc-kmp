@@ -178,7 +178,7 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         track: MediaStreamTrack,
         direction: RtpTransceiverDirection,
         streamIds: List<String>,
-        sendEncodings: List<RtpParameters.Encoding>
+        sendEncodings: List<RtpEncodingParameters>
     ): RtpTransceiver {
         return RtpTransceiver(
             native.addTransceiver(
@@ -196,7 +196,7 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         mediaType: MediaStreamTrack.MediaType,
         direction: RtpTransceiverDirection,
         streamIds: List<String>,
-        sendEncodings: List<RtpParameters.Encoding>
+        sendEncodings: List<RtpEncodingParameters>
     ): RtpTransceiver {
         return RtpTransceiver(
             native.addTransceiver(

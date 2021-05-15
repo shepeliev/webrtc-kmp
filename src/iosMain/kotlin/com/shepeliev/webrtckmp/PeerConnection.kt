@@ -181,12 +181,12 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         track: MediaStreamTrack,
         direction: RtpTransceiverDirection,
         streamIds: List<String>,
-        sendEncodings: List<RtpParameters.Encoding>
+        sendEncodings: List<RtpEncodingParameters>
     ): RtpTransceiver {
         val init = RTCRtpTransceiverInit().also {
             it.direction = direction.asNative()
             it.streamIds = streamIds
-            it.sendEncodings = sendEncodings.map(RtpParameters.Encoding::native)
+            it.sendEncodings = sendEncodings.map(RtpEncodingParameters::native)
         }
         return RtpTransceiver(
             native.addTransceiverWithTrack(
@@ -200,12 +200,12 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         mediaType: MediaStreamTrack.MediaType,
         direction: RtpTransceiverDirection,
         streamIds: List<String>,
-        sendEncodings: List<RtpParameters.Encoding>
+        sendEncodings: List<RtpEncodingParameters>
     ): RtpTransceiver {
         val init = RTCRtpTransceiverInit().also {
             it.direction = direction.asNative()
             it.streamIds = streamIds
-            it.sendEncodings = sendEncodings.map(RtpParameters.Encoding::native)
+            it.sendEncodings = sendEncodings.map(RtpEncodingParameters::native)
         }
         return RtpTransceiver(
             native.addTransceiverOfType(
