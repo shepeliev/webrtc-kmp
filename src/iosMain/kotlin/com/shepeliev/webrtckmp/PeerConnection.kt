@@ -4,11 +4,9 @@ import WebRTC.RTCDataChannel
 import WebRTC.RTCDataChannelConfiguration
 import WebRTC.RTCMediaConstraints
 import WebRTC.RTCPeerConnection
-import WebRTC.RTCRtpMediaType
 import WebRTC.RTCRtpReceiver
 import WebRTC.RTCRtpSender
 import WebRTC.RTCRtpTransceiver
-import WebRTC.RTCRtpTransceiverInit
 import WebRTC.RTCSessionDescription
 import WebRTC.dataChannelForLabel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +15,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import platform.Foundation.NSError
-import platform.Foundation.NSNumber
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -136,14 +133,6 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         }
     }
 
-    actual fun setAudioPlayout(playout: Boolean) {
-        // TODO not implemented
-    }
-
-    actual fun setAudioRecording(recording: Boolean) {
-        // TODO not implemented
-    }
-
     actual fun setConfiguration(configuration: RtcConfiguration): Boolean {
         return native.setConfiguration(configuration.native)
     }
@@ -177,71 +166,10 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
 
     actual fun removeTrack(sender: RtpSender): Boolean = native.removeTrack(sender.native)
 
-    actual fun addTransceiver(
-        track: MediaStreamTrack,
-        direction: RtpTransceiverDirection,
-        streamIds: List<String>,
-        sendEncodings: List<RtpEncodingParameters>
-    ): RtpTransceiver {
-        val init = RTCRtpTransceiverInit().also {
-            it.direction = direction.asNative()
-            it.streamIds = streamIds
-            it.sendEncodings = sendEncodings.map(RtpEncodingParameters::native)
-        }
-        return RtpTransceiver(
-            native.addTransceiverWithTrack(
-                (track as BaseMediaStreamTrack).native,
-                init
-            )
-        )
-    }
-
-    actual fun addTransceiver(
-        mediaType: MediaStreamTrack.MediaType,
-        direction: RtpTransceiverDirection,
-        streamIds: List<String>,
-        sendEncodings: List<RtpEncodingParameters>
-    ): RtpTransceiver {
-        val init = RTCRtpTransceiverInit().also {
-            it.direction = direction.asNative()
-            it.streamIds = streamIds
-            it.sendEncodings = sendEncodings.map(RtpEncodingParameters::native)
-        }
-        return RtpTransceiver(
-            native.addTransceiverOfType(
-                mediaType.asNative(),
-                init
-            )
-        )
-    }
-
     actual suspend fun getStats(): RtcStatsReport? {
         // TODO not implemented yet
         return null
     }
 
-    actual fun setBitrate(min: Int?, current: Int?, max: Int?): Boolean {
-        return native.setBweMinBitrateBps(
-            min?.let { NSNumber(it) },
-            current?.let { NSNumber(it) },
-            max?.let { NSNumber(it) }
-        )
-    }
-
-    actual fun startRtcEventLog(filePath: String, maxSizeBytes: Int): Boolean {
-        return native.startRtcEventLogWithFilePath(filePath, maxSizeBytes.toLong())
-    }
-
-    actual fun stopRtcEventLog() = native.stopRtcEventLog()
-
     actual fun close() = native.close()
-}
-
-private fun MediaStreamTrack.MediaType.asNative(): RTCRtpMediaType {
-    return when (this) {
-        MediaStreamTrack.MediaType.Audio -> RTCRtpMediaType.RTCRtpMediaTypeAudio
-        MediaStreamTrack.MediaType.Video -> RTCRtpMediaType.RTCRtpMediaTypeVideo
-        MediaStreamTrack.MediaType.Data -> RTCRtpMediaType.RTCRtpMediaTypeData
-        MediaStreamTrack.MediaType.Unsupported -> RTCRtpMediaType.RTCRtpMediaTypeUnsupported
-    }
 }

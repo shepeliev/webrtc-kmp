@@ -1,11 +1,9 @@
 package com.shepeliev.webrtckmp
 
-import android.os.ParcelFileDescriptor
 import com.shepeliev.webrtckmp.WebRtcKmp.mainScope
 import kotlinx.coroutines.launch
 import org.webrtc.CandidatePairChangeEvent
 import org.webrtc.SdpObserver
-import java.io.File
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -142,9 +140,6 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         }
     }
 
-    actual fun setAudioPlayout(playout: Boolean) = native.setAudioPlayout(playout)
-    actual fun setAudioRecording(recording: Boolean) = native.setAudioRecording(recording)
-
     actual fun setConfiguration(configuration: RtcConfiguration): Boolean {
         return native.setConfiguration(configuration.native)
     }
@@ -174,63 +169,11 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         return native.removeTrack(sender.native)
     }
 
-    actual fun addTransceiver(
-        track: MediaStreamTrack,
-        direction: RtpTransceiverDirection,
-        streamIds: List<String>,
-        sendEncodings: List<RtpEncodingParameters>
-    ): RtpTransceiver {
-        return RtpTransceiver(
-            native.addTransceiver(
-                (track as BaseMediaStreamTrack).native,
-                AndroidRtpTransceiver.RtpTransceiverInit(
-                    direction.asNative(),
-                    streamIds,
-                    sendEncodings.map { it.native }
-                )
-            )
-        )
-    }
-
-    actual fun addTransceiver(
-        mediaType: MediaStreamTrack.MediaType,
-        direction: RtpTransceiverDirection,
-        streamIds: List<String>,
-        sendEncodings: List<RtpEncodingParameters>
-    ): RtpTransceiver {
-        return RtpTransceiver(
-            native.addTransceiver(
-                mediaType.asNative(),
-                AndroidRtpTransceiver.RtpTransceiverInit(
-                    direction.asNative(),
-                    streamIds,
-                    sendEncodings.map { it.native }
-                )
-            )
-        )
-    }
-
     actual suspend fun getStats(): RtcStatsReport? {
         return suspendCoroutine { cont ->
             native.getStats { cont.resume(it.asCommon()) }
         }
     }
-
-    actual fun setBitrate(min: Int?, current: Int?, max: Int?): Boolean {
-        return native.setBitrate(min, current, max)
-    }
-
-    actual fun startRtcEventLog(filePath: String, maxSizeBytes: Int): Boolean {
-        val fileDescriptor = ParcelFileDescriptor.open(
-            File(filePath),
-            ParcelFileDescriptor.MODE_READ_WRITE or
-                ParcelFileDescriptor.MODE_CREATE or
-                ParcelFileDescriptor.MODE_TRUNCATE
-        )
-        return native.startRtcEventLog(fileDescriptor.detachFd(), maxSizeBytes)
-    }
-
-    actual fun stopRtcEventLog() = native.stopRtcEventLog()
 
     actual fun close() {
         native.dispose()

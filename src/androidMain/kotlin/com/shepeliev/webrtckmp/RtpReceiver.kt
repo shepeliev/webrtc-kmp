@@ -11,12 +11,4 @@ actual class RtpReceiver(val native: NativeRtpReceiver) {
 
     actual val parameters: RtpParameters
         get() = RtpParameters(native.parameters)
-
-    actual fun setObserver(observer: RtpReceiverObserver) {
-        native.SetObserver { observer.onFirstPacketReceived(it.asCommon()) }
-    }
-
-    actual fun dispose() {
-        native.dispose()
-    }
 }

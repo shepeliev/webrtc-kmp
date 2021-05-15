@@ -39,38 +39,6 @@ abstract class BaseMediaStreamTrack : MediaStreamTrack {
     }
 }
 
-fun MediaStreamTrack.MediaType.asNative(): NativeMediaStreamTrack.MediaType {
-    return when (this) {
-        MediaStreamTrack.MediaType.Audio -> {
-            NativeMediaStreamTrack.MediaType.MEDIA_TYPE_AUDIO
-        }
-
-        MediaStreamTrack.MediaType.Video -> {
-            NativeMediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO
-        }
-
-        MediaStreamTrack.MediaType.Data -> {
-            error("Android doesn't define data media type")
-        }
-
-        MediaStreamTrack.MediaType.Unsupported -> {
-            error("Android doesn't define unsupported media type")
-        }
-    }
-}
-
-fun NativeMediaStreamTrack.MediaType.asCommon(): MediaStreamTrack.MediaType {
-    return when (this) {
-        NativeMediaStreamTrack.MediaType.MEDIA_TYPE_AUDIO -> {
-            MediaStreamTrack.MediaType.Audio
-        }
-
-        NativeMediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO -> {
-            MediaStreamTrack.MediaType.Video
-        }
-    }
-}
-
 internal fun NativeMediaStreamTrack.asCommon(): MediaStreamTrack {
     return when (this) {
         is NativeAudioTrack -> AudioTrack(this)

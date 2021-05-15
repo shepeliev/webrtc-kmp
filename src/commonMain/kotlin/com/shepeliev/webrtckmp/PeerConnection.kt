@@ -31,24 +31,6 @@ expect class PeerConnection(rtcConfiguration: RtcConfiguration = RtcConfiguratio
     suspend fun setLocalDescription(description: SessionDescription)
     suspend fun setRemoteDescription(description: SessionDescription)
 
-    /**
-     * Enables/disables playout of received audio streams. Enabled by default.
-     *
-     * Note that even if playout is enabled, streams will only be played out if
-     * the appropriate SDP is also applied. The main purpose of this API is to
-     * be able to control the exact time when audio playout starts.
-     */
-    fun setAudioPlayout(playout: Boolean)
-
-    /**
-     * Enables/disables recording of transmitted audio streams. Enabled by default.
-     *
-     * Note that even if recording is enabled, streams will only be recorded if
-     * the appropriate SDP is also applied. The main purpose of this API is to
-     * be able to control the exact time when audio recording starts.
-     */
-    fun setAudioRecording(recording: Boolean)
-
     fun setConfiguration(configuration: RtcConfiguration): Boolean
     fun addIceCandidate(candidate: IceCandidate): Boolean
     fun removeIceCandidates(candidates: List<IceCandidate>): Boolean
@@ -94,71 +76,11 @@ expect class PeerConnection(rtcConfiguration: RtcConfiguration = RtcConfiguratio
      */
     fun removeTrack(sender: RtpSender): Boolean
 
-    /**
-     * Creates a new RtpTransceiver and adds it to the set of transceivers. Adding a
-     * transceiver will cause future calls to CreateOffer to add a media description
-     * for the corresponding transceiver.
-     *
-     * The initial value of |mid| in the returned transceiver is null. Setting a
-     * new session description may change it to a non-null value.
-     *
-     * https://w3c.github.io/webrtc-pc/#dom-rtcpeerconnection-addtransceiver
-     *
-     * If a MediaStreamTrack is specified then a transceiver will be added with a
-     * sender set to transmit the given track. The kind
-     * of the transceiver (and sender/receiver) will be derived from the kind of
-     * the track.
-     *
-     * If MediaType is specified then a transceiver will be added based upon that type.
-     * This can be either MEDIA_TYPE_AUDIO or MEDIA_TYPE_VIDEO.
-     *
-     * The transceiver will default to having a direction of kSendRecv and not be part
-     * of any streams.
-     *
-     * Note: These methods are only available with SdpSemantics.UNIFIED_PLAN specified.
-     * @throws IllegalStateException if an error accors in C++ addTransceiver
-     */
-    fun addTransceiver(
-        track: MediaStreamTrack,
-        direction: RtpTransceiverDirection = RtpTransceiverDirection.SendRecv,
-        streamIds: List<String> = emptyList(),
-        sendEncodings: List<RtpEncodingParameters> = emptyList()
-    ): RtpTransceiver
-
-    fun addTransceiver(
-        mediaType: MediaStreamTrack.MediaType,
-        direction: RtpTransceiverDirection = RtpTransceiverDirection.SendRecv,
-        streamIds: List<String> = emptyList(),
-        sendEncodings: List<RtpEncodingParameters> = emptyList()
-    ): RtpTransceiver
 
     /**
      * Gets stats using the new stats collection API, see webrtc/api/stats/.
      */
     suspend fun getStats(): RtcStatsReport?
-
-    /**
-     * Limits the bandwidth allocated for all RTP streams sent by this
-     * PeerConnection. Pass null to leave a value unchanged.
-     */
-    fun setBitrate(min: Int? = null, current: Int? = null, max: Int? = null): Boolean
-
-    /**
-     * Starts recording an RTC event log.
-     *
-     * Ownership of the file is transfered to the native code. If an RTC event
-     * log is already being recorded, it will be stopped and a new one will start
-     * using the provided file. Logging will continue until the stopRtcEventLog
-     * function is called. The max_size_bytes argument is ignored, it is added
-     * for future use.
-     */
-    fun startRtcEventLog(filePath: String, maxSizeBytes: Int): Boolean
-
-    /**
-     * Stops recording an RTC event log. If no RTC event log is currently being
-     * recorded, this call will have no effect.
-     */
-    fun stopRtcEventLog()
 
     /**
      * Free native resources associated with this PeerConnection instance.
