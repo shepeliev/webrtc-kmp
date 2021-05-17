@@ -31,16 +31,16 @@ jobs:
           profile: Nexus 6
           script: ./gradlew connectedAndroidTest
       - name: Upload Android test artifact
-          uses: actions/upload-artifact@v2
-          if: failure()
-          with:
-            name: "Android Instrumented Tests Report HTML"
-            path: "webrtc-kmp/build/reports/androidTests/connected"
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: "Android Instrumented Tests Report HTML"
+          path: "webrtc-kmp/build/reports/androidTests/connected"
       - name: Run iOS Tests
         run: ./gradlew iosTest
       - name: Upload iOS test artifact
-          uses: actions/upload-artifact@v2
-          if: failure()
-          with:
-            name: "iOS Tests Report HTML"
-            path: "webrtc-kmp/build/reports/tests/iosTest"
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: "iOS Tests Report HTML"
+          path: "webrtc-kmp/build/reports/tests/iosTest"
