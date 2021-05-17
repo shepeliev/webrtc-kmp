@@ -6,6 +6,7 @@ expect class DataChannel {
     val state: DataChannelState
     val bufferedAmount: Long
 
+    //TODO(shepeliev): DataChannel should expose event flows instead of observer's callbacks
     fun registerObserver(observer: DataChannelObserver)
     fun unregisterObserver()
     fun send(buffer: DataChannelBuffer): Boolean
