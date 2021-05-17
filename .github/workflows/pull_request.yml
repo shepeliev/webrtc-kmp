@@ -1,0 +1,46 @@
+# This workflow will build a Java project with Gradle
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
+
+name: Pull Request
+
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Assemble
+        run: ./gradlew assemble
+      - name: Run Android Instrumented Tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          target: google_apis
+          arch: x86_64
+          profile: Nexus 6
+          script: ./gradlew connectedAndroidTest
+      - name: Upload Android test artifact
+          uses: actions/upload-artifact@v2
+          if: failure()
+          with:
+            name: "Android Instrumented Tests Report HTML"
+            path: "webrtc-kmp/build/reports/androidTests/connected"
+      - name: Run iOS Tests
+        run: ./gradlew iosTest
+      - name: Upload iOS test artifact
+          uses: actions/upload-artifact@v2
+          if: failure()
+          with:
+            name: "iOS Tests Report HTML"
+            path: "webrtc-kmp/build/reports/tests/iosTest"
