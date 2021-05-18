@@ -1,4 +1,4 @@
-# WebRTC KMP
+# WebRTC KMP ![Maven Central](https://img.shields.io/maven-central/v/com.shepeliev/webrtc-kmp?style=flat-square)
 
 WebRTC Kotlin Multiplatform SDK
 
