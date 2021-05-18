@@ -133,6 +133,8 @@ nexusPublishing {
         System.getenv("SONATYPE_STAGING_PROFILE_ID")
     )
 
+    println("DEBUG: $ossrhUsername")
+
     repositories {
         sonatype {
             stagingProfileId.set(sonatypeStagingProfileId)
