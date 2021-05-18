@@ -1,20 +1,22 @@
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("com.android.library")
     kotlin("multiplatform") version "1.4.31"
+    id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
     id("maven-publish")
+    id("signing")
 }
 
 group = "com.shepeliev"
-version = "1.89-alpha02"
+version = "0.89"
 
 repositories {
     google()
     mavenCentral()
 }
-
 
 kotlin {
     android {
@@ -120,8 +122,76 @@ tasks {
                 .replace("version\\s*=\\s*'(.+)'".toRegex(), "version = '${project.version}'")
         )
     }
+}
 
-    withType<AbstractPublishToMaven>().all {
-        dependsOn(updatePodspecVersion)
+nexusPublishing {
+    val localProps = gradleLocalProperties(rootDir)
+    val ossrhUsername = localProps.getProperty("ossrhUsername", System.getenv("OSSRH_USERNAME"))
+    val ossrhPassword = localProps.getProperty("ossrhPassword", System.getenv("OSSRH_PASSWORD"))
+    val sonatypeStagingProfileId = localProps.getProperty(
+        "sonatypeStagingProfileId",
+        System.getenv("SONATYPE_STAGING_PROFILE_ID")
+    )
+
+    repositories {
+        sonatype {
+            stagingProfileId.set(sonatypeStagingProfileId)
+            username.set(ossrhUsername)
+            password.set(ossrhPassword)
+            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+        }
     }
 }
+
+publishing {
+    publications.all {
+        this as MavenPublication
+
+        pom {
+            name.set(project.name)
+            description.set("WebRTC Kotlin Multiplatform SDK")
+            url.set("https://github.com/shepeliev/webrtc-kmp")
+
+            scm {
+                url.set("https://github.com/shepeliev/webrtc-kmp")
+                connection.set("scm:git:https://github.com/shepeliev/webrtc-kmp.git")
+                developerConnection.set("scm:git:https://github.com/shepeliev/webrtc-kmp.git")
+                tag.set("HEAD")
+            }
+
+            issueManagement {
+                system.set("GitHub Issues")
+                url.set("https://github.com/shepeliev/webrtc-kmp/issues")
+            }
+
+            developers {
+                developer {
+                    name.set("Alex Shepeliev")
+                    email.set("a.shepeliev@gmail.com")
+                }
+            }
+
+            licenses {
+                license {
+                    name.set("The Apache Software License, Version 2.0")
+                    url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                    distribution.set("repo")
+                    comments.set("A business-friendly OSS license")
+                }
+            }
+        }
+    }
+}
+
+signing {
+    val localProps = gradleLocalProperties(rootDir)
+    val signingKey = localProps.getProperty("signing.key", System.getenv("SIGNING_KEY"))
+    val signingPassword = localProps.getProperty(
+        "signing.password",
+        System.getenv("SIGNING_PASSWORD")
+    )
+    useInMemoryPgpKeys(signingKey, signingPassword)
+    sign(publishing.publications)
+}
+
