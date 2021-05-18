@@ -1,4 +1,4 @@
-
+version = '0.89'
 
 Pod::Spec.new do |s|
   s.name                = 'webrtc-kmp'
