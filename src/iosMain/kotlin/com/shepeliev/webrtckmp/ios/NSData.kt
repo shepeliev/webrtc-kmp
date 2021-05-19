@@ -1,15 +1,15 @@
 package com.shepeliev.webrtckmp.ios
 
 import kotlinx.cinterop.addressOf
-import kotlinx.cinterop.allocArrayOf
 import kotlinx.cinterop.memScoped
+import kotlinx.cinterop.toCValues
 import kotlinx.cinterop.usePinned
 import platform.Foundation.NSData
 import platform.Foundation.create
 import platform.posix.memcpy
 
 internal fun ByteArray.toNSData(): NSData = memScoped {
-    NSData.create(bytes = allocArrayOf(this@toNSData), length = size.toULong())
+    NSData.create(bytes = this@toNSData.toCValues().ptr, length = size.toULong())
 }
 
 internal fun NSData.toByteArray(): ByteArray {

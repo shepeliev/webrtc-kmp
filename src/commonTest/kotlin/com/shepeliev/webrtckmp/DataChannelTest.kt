@@ -29,19 +29,13 @@ class DataChannelTest {
 
         val channel = Channel<String>()
 
-        val pc1DataChannel = pc1.createDataChannel("dataChannel")!!.apply {
-            registerObserver(object : DataChannelObserver {
-                override fun onBufferedAmountChange(previousAmount: Long) {
-                }
-
-                override fun onStateChange() {
-                }
-
-                override fun onMessage(buffer: DataChannelBuffer) {
-                    val text = buffer.data.decodeToString()
+        pc1.createDataChannel("dataChannel")!!.apply {
+            onMessage
+                .onEach {
+                    val text = it.decodeToString()
                     WebRtcKmp.mainScope.launch { channel.send(text) }
                 }
-            })
+                .launchIn(WebRtcKmp.mainScope)
         }
 
         val pc1Candidates = mutableListOf<IceCandidate>()
@@ -72,8 +66,8 @@ class DataChannelTest {
             .launchIn(WebRtcKmp.mainScope)
         pc2.onDataChannel
             .onEach { pc2DataChannel ->
-                val buffer = DataChannelBuffer("Hello WebRTC KMP!".encodeToByteArray(), false)
-                pc2DataChannel.send(buffer)
+                val data = "Hello WebRTC KMP!".encodeToByteArray()
+                pc2DataChannel.send(data)
             }
             .launchIn(WebRtcKmp.mainScope)
 
