@@ -1,10 +1,14 @@
 package com.shepeliev.webrtckmp
 
 import com.shepeliev.webrtckmp.utils.toByteArray
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.launch
 import java.nio.ByteBuffer
-import org.webrtc.DataChannel as NativeDataChannel
+import org.webrtc.DataChannel as AndroidDataChannel
 
-actual class DataChannel(val native: NativeDataChannel) {
+actual class DataChannel(val native: AndroidDataChannel) : AndroidDataChannel.Observer {
 
     actual val label: String
         get() = native.label()
@@ -12,53 +16,67 @@ actual class DataChannel(val native: NativeDataChannel) {
     actual val id: Int
         get() = native.id()
 
-    actual val state: DataChannelState
+    actual val readyState: DataChannelState
         get() = native.state().toCommon()
 
     actual val bufferedAmount: Long
         get() = native.bufferedAmount()
 
-    actual fun registerObserver(observer: DataChannelObserver) {
-        native.registerObserver(object : NativeDataChannel.Observer {
-            override fun onBufferedAmountChange(previousAmount: Long) {
-                observer.onBufferedAmountChange(previousAmount)
-            }
+    private val onOpenInternal = MutableSharedFlow<Unit>()
+    actual val onOpen: Flow<Unit> = onOpenInternal.asSharedFlow()
 
-            override fun onStateChange() {
-                observer.onStateChange()
-            }
+    private val onClosingInternal = MutableSharedFlow<Unit>()
+    actual val onClosing: Flow<Unit> = onClosingInternal.asSharedFlow()
 
-            override fun onMessage(buffer: NativeDataChannel.Buffer) {
-                observer.onMessage(DataChannelBuffer(buffer))
-            }
-        })
+    private val onCloseInternal = MutableSharedFlow<Unit>()
+    actual val onClose: Flow<Unit> = onCloseInternal.asSharedFlow()
+
+    private val onErrorInternal = MutableSharedFlow<Throwable>()
+    actual val onError: Flow<Throwable> = onErrorInternal.asSharedFlow()
+
+    private val onMessageInternal = MutableSharedFlow<ByteArray>()
+    actual val onMessage: Flow<ByteArray> = onMessageInternal.asSharedFlow()
+
+    init {
+        native.registerObserver(this)
     }
 
-    actual fun unregisterObserver() {
-        native.unregisterObserver()
+    actual fun send(data: ByteArray): Boolean {
+        val buffer = AndroidDataChannel.Buffer(ByteBuffer.wrap(data), true)
+        return native.send(buffer)
     }
 
-    actual fun send(buffer: DataChannelBuffer): Boolean = native.send(buffer.native)
     actual fun close() = native.dispose()
 
-    private fun NativeDataChannel.State.toCommon(): DataChannelState {
+    private fun AndroidDataChannel.State.toCommon(): DataChannelState {
         return when(this) {
-            NativeDataChannel.State.CONNECTING -> DataChannelState.Connecting
-            NativeDataChannel.State.OPEN -> DataChannelState.Open
-            NativeDataChannel.State.CLOSING -> DataChannelState.Closing
-            NativeDataChannel.State.CLOSED -> DataChannelState.Closed
+            AndroidDataChannel.State.CONNECTING -> DataChannelState.Connecting
+            AndroidDataChannel.State.OPEN -> DataChannelState.Open
+            AndroidDataChannel.State.CLOSING -> DataChannelState.Closing
+            AndroidDataChannel.State.CLOSED -> DataChannelState.Closed
         }
+    }
+
+    override fun onBufferedAmountChange(reviousAmount: Long) {
+        // not implemented
+    }
+
+    override fun onStateChange() {
+        WebRtcKmp.mainScope.launch {
+            when (native.state()) {
+                AndroidDataChannel.State.OPEN -> onOpenInternal.emit(Unit)
+                AndroidDataChannel.State.CLOSING -> onClosingInternal.emit(Unit)
+                AndroidDataChannel.State.CLOSED -> onCloseInternal.emit(Unit)
+                else -> {
+                    // ignore
+                }
+            }
+        }
+    }
+
+    override fun onMessage(buffer: AndroidDataChannel.Buffer) {
+        val data = buffer.data.toByteArray()
+        WebRtcKmp.mainScope.launch { onMessageInternal.emit(data) }
     }
 }
 
-actual class DataChannelBuffer internal constructor(val native: NativeDataChannel.Buffer){
-
-    actual constructor(data: ByteArray, binary: Boolean):
-        this(NativeDataChannel.Buffer(ByteBuffer.wrap(data), binary))
-
-    actual val data: ByteArray
-        get() = native.data.toByteArray()
-
-    actual val binary: Boolean
-        get() = native.binary
-}

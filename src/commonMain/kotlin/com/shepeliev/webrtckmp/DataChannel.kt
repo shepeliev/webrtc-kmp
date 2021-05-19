@@ -1,27 +1,21 @@
 package com.shepeliev.webrtckmp
 
+import kotlinx.coroutines.flow.Flow
+
 expect class DataChannel {
-    val label: String
     val id: Int
-    val state: DataChannelState
+    val label: String
+    val readyState: DataChannelState
     val bufferedAmount: Long
 
-    //TODO(shepeliev): DataChannel should expose event flows instead of observer's callbacks
-    fun registerObserver(observer: DataChannelObserver)
-    fun unregisterObserver()
-    fun send(buffer: DataChannelBuffer): Boolean
+    val onOpen: Flow<Unit>
+    val onClose: Flow<Unit>
+    val onClosing: Flow<Unit>
+    val onError: Flow<Throwable>
+    val onMessage: Flow<ByteArray>
+
+    fun send(data: ByteArray): Boolean
     fun close()
 }
 
 enum class DataChannelState { Connecting, Open, Closing, Closed; }
-
-expect class DataChannelBuffer(data: ByteArray, binary: Boolean) {
-    val data: ByteArray
-    val binary: Boolean
-}
-
-interface DataChannelObserver {
-    fun onBufferedAmountChange(previousAmount: Long)
-    fun onStateChange()
-    fun onMessage(buffer: DataChannelBuffer)
-}
