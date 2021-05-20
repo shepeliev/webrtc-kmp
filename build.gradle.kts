@@ -6,6 +6,7 @@ plugins {
     id("com.android.library")
     kotlin("multiplatform") version "1.4.31"
     id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
+    id("org.jmailen.kotlinter") version "3.4.4"
     id("maven-publish")
     id("signing")
 }
