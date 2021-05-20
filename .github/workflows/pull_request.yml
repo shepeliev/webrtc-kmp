@@ -20,7 +20,9 @@ jobs:
         run: chmod +x gradlew
       - name: Assemble
         run: ./gradlew assemble
-      - name: Run Android Instrumented Tests
+      - name: Run Kotlin linter
+        run: ./gradlew lintKotlin
+      - name: Run Android instrumented tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 29
@@ -34,7 +36,7 @@ jobs:
         with:
           name: "Android Instrumented Tests Report HTML"
           path: "webrtc-kmp/build/reports/androidTests/connected"
-      - name: Run iOS Tests
+      - name: Run iOS tests
         run: ./gradlew iosTest
       - name: Upload iOS test artifact
         uses: actions/upload-artifact@v2

@@ -41,7 +41,7 @@ private fun BundlePolicy.asNative(): RTCBundlePolicy {
 }
 
 private fun IceTransportPolicy.asNative(): RTCIceTransportPolicy {
-    return when(this) {
+    return when (this) {
         IceTransportPolicy.None -> RTCIceTransportPolicy.RTCIceTransportPolicyNone
         IceTransportPolicy.Relay -> RTCIceTransportPolicy.RTCIceTransportPolicyRelay
         IceTransportPolicy.NoHost -> RTCIceTransportPolicy.RTCIceTransportPolicyNoHost

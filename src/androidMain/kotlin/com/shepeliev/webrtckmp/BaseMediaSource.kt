@@ -2,7 +2,7 @@ package com.shepeliev.webrtckmp
 
 import org.webrtc.MediaSource as NativeMediaSource
 
-abstract class BaseMediaSource(): MediaSource {
+abstract class BaseMediaSource() : MediaSource {
 
     abstract val native: NativeMediaSource
 
@@ -10,7 +10,7 @@ abstract class BaseMediaSource(): MediaSource {
         get() = native.state().toCommon()
 
     private fun NativeMediaSource.State.toCommon(): MediaSource.State {
-        return when(this) {
+        return when (this) {
             org.webrtc.MediaSource.State.INITIALIZING -> MediaSource.State.Initializing
             org.webrtc.MediaSource.State.LIVE -> MediaSource.State.Live
             org.webrtc.MediaSource.State.ENDED -> MediaSource.State.Ended

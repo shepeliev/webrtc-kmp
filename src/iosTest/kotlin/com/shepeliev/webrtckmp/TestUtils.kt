@@ -16,7 +16,7 @@ actual inline fun runTest(crossinline block: suspend () -> Unit) {
         val testRun = MainScope().async {
             try {
                 block()
-            }   catch (e: Throwable) {
+            } catch (e: Throwable) {
                 return@async e
             }
 

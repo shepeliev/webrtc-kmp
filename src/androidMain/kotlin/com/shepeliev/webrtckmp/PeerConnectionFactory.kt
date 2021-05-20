@@ -42,8 +42,8 @@ internal actual class PeerConnectionFactory(val native: NativePeerConnectionFact
         val fileDescriptor = ParcelFileDescriptor.open(
             File(filePath),
             ParcelFileDescriptor.MODE_READ_WRITE or
-                    ParcelFileDescriptor.MODE_CREATE or
-                    ParcelFileDescriptor.MODE_TRUNCATE
+                ParcelFileDescriptor.MODE_CREATE or
+                ParcelFileDescriptor.MODE_TRUNCATE
         )
         native.startAecDump(fileDescriptor.detachFd(), fileSizeLimitBytes)
     }

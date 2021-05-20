@@ -95,4 +95,3 @@ actual class RtcpParameters(val native: AndroidRtpParameters.Rtcp) {
     actual val reducedSize: Boolean
         get() = native.reducedSize
 }
-

@@ -3,7 +3,7 @@ package com.shepeliev.webrtckmp
 import WebRTC.RTCMediaSource
 import WebRTC.RTCSourceState
 
-abstract class BaseMediaSource(): MediaSource {
+abstract class BaseMediaSource : MediaSource {
 
     abstract val native: RTCMediaSource
 
@@ -12,7 +12,7 @@ abstract class BaseMediaSource(): MediaSource {
 }
 
 private fun rtcMediaSourceStateAsCommon(state: RTCSourceState): MediaSource.State {
-    return when(state) {
+    return when (state) {
         RTCSourceState.RTCSourceStateInitializing -> MediaSource.State.Initializing
         RTCSourceState.RTCSourceStateLive -> MediaSource.State.Live
         RTCSourceState.RTCSourceStateEnded -> MediaSource.State.Ended

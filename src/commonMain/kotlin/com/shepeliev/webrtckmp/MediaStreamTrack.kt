@@ -23,4 +23,3 @@ expect open class MediaStreamTrack {
 enum class MediaStreamTrackState { Live, Ended }
 
 enum class MediaStreamTrackKind { Audio, Video }
-

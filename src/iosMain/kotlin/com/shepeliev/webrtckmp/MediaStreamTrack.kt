@@ -40,9 +40,9 @@ actual open class MediaStreamTrack(
         set(value) {
             native.isEnabled = value
             if (value) {
-                WebRtcKmp.mainScope.launch {  onUnmuteInternal.emit(Unit) }
+                WebRtcKmp.mainScope.launch { onUnmuteInternal.emit(Unit) }
             } else {
-                WebRtcKmp.mainScope.launch {  onMuteInternal.emit(Unit) }
+                WebRtcKmp.mainScope.launch { onMuteInternal.emit(Unit) }
             }
         }
 

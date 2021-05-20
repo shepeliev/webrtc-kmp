@@ -12,7 +12,7 @@ actual class RtcStatsReport(val native: RTCLegacyStatsReport) {
             timestampUs = timestampUs,
             type = native.type,
             id = native.reportId,
-            members =  native.values
+            members = native.values
                 .filterValues { it != null }
                 .map { (k, v) -> "$k" to v!! }.toMap()
         )

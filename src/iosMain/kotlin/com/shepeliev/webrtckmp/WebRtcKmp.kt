@@ -59,7 +59,7 @@ private fun initializeIosLib(
     }
 }
 
-private fun buildPeerConnectionFactory(    options: RTCPeerConnectionFactoryOptions?) {
+private fun buildPeerConnectionFactory(options: RTCPeerConnectionFactoryOptions?) {
     val iosPeerConnectionFactory = RTCPeerConnectionFactory(
         RTCDefaultVideoEncoderFactory().freeze(),
         RTCDefaultVideoDecoderFactory().freeze()
@@ -75,4 +75,3 @@ fun WebRtcKmp.dispose() {
     mainScopeRef.value?.cancel()
     mainScopeRef.value = null
 }
-

@@ -12,7 +12,7 @@ actual class IceServer internal constructor(val native: RTCIceServer) {
         hostname: String,
         tlsAlpnProtocols: List<String>?,
         tlsEllipticCurves: List<String>?
-    ): this(
+    ) : this(
         RTCIceServer(
             uRLStrings = urls,
             username = username,

@@ -31,7 +31,6 @@ internal actual class CameraVideoCapturer actual constructor() {
             .map { it as AVCaptureDevice }
             .first { it.uniqueID == cameraId }
 
-
         val width = constraints.width ?: DEFAULT_VIDEO_WIDTH
         val height = constraints.height ?: DEFAULT_VIDEO_HEIGHT
         val fps = constraints.fps ?: DEFAULT_FRAME_RATE
@@ -90,7 +89,6 @@ internal actual class CameraVideoCapturer actual constructor() {
         startCapture(camera.deviceId, videoConstraints, videoSource)
         return camera
     }
-
 
     actual fun stopCapture() {
         capturer?.stopCapture()

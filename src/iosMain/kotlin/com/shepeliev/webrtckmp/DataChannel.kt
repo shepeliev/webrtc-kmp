@@ -64,7 +64,9 @@ actual class DataChannel(val native: RTCDataChannel) {
                 WebRtcKmp.mainScope.launch {
                     when (native.readyState) {
                         RTCDataChannelState.RTCDataChannelStateOpen -> onOpenInternal.emit(Unit)
-                        RTCDataChannelState.RTCDataChannelStateClosing -> onClosingInternal.emit(Unit)
+                        RTCDataChannelState.RTCDataChannelStateClosing -> onClosingInternal.emit(
+                            Unit
+                        )
                         RTCDataChannelState.RTCDataChannelStateClosed -> onCloseInternal.emit(Unit)
                         else -> {
                             // ignore
@@ -76,16 +78,16 @@ actual class DataChannel(val native: RTCDataChannel) {
         native.delegate = delegate.freeze()
     }
 
-
     actual fun send(data: ByteArray): Boolean {
         val buffer = RTCDataBuffer(data.toNSData(), true).freeze()
         return native.sendData(buffer)
     }
+
     actual fun close() = native.close()
 }
 
 private fun rtcDataChannelStateAsCommon(state: RTCDataChannelState): DataChannelState {
-    return when(state) {
+    return when (state) {
         RTCDataChannelState.RTCDataChannelStateConnecting -> DataChannelState.Connecting
         RTCDataChannelState.RTCDataChannelStateOpen -> DataChannelState.Open
         RTCDataChannelState.RTCDataChannelStateClosing -> DataChannelState.Closing

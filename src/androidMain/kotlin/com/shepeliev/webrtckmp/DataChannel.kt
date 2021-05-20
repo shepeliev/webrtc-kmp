@@ -49,7 +49,7 @@ actual class DataChannel(val native: AndroidDataChannel) : AndroidDataChannel.Ob
     actual fun close() = native.dispose()
 
     private fun AndroidDataChannel.State.toCommon(): DataChannelState {
-        return when(this) {
+        return when (this) {
             AndroidDataChannel.State.CONNECTING -> DataChannelState.Connecting
             AndroidDataChannel.State.OPEN -> DataChannelState.Open
             AndroidDataChannel.State.CLOSING -> DataChannelState.Closing
@@ -79,4 +79,3 @@ actual class DataChannel(val native: AndroidDataChannel) : AndroidDataChannel.Ob
         WebRtcKmp.mainScope.launch { onMessageInternal.emit(data) }
     }
 }
-
