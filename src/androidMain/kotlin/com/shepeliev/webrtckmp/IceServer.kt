@@ -11,7 +11,7 @@ actual class IceServer internal constructor(val native: PeerConnection.IceServer
         hostname: String,
         tlsAlpnProtocols: List<String>?,
         tlsEllipticCurves: List<String>?
-    ): this(
+    ) : this(
         PeerConnection.IceServer.builder(urls)
             .setUsername(username)
             .setPassword(password)

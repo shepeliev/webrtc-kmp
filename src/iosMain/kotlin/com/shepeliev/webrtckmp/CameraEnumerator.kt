@@ -67,4 +67,3 @@ internal actual object CameraEnumerator {
         return minOf(maxSupportedFramerate, maxFps).toLong()
     }
 }
-

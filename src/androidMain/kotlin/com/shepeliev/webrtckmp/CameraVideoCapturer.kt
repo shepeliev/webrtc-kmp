@@ -6,7 +6,7 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-internal actual class CameraVideoCapturer actual constructor(){
+internal actual class CameraVideoCapturer actual constructor() {
 
     private val tag = "CameraVideoCapturer"
     private var videoCapturer: CameraVideoCapturer? = null
@@ -65,15 +65,18 @@ internal actual class CameraVideoCapturer actual constructor(){
         val capturer = videoCapturer ?: throw CameraVideoCapturerException.capturerStopped()
 
         return suspendCoroutine { cont ->
-            capturer.switchCamera(object : CameraVideoCapturer.CameraSwitchHandler {
-                override fun onCameraSwitchDone(isFrontCamera: Boolean) {
-                    cont.resume(isFrontCamera)
-                }
+            capturer.switchCamera(
+                object : CameraVideoCapturer.CameraSwitchHandler {
+                    override fun onCameraSwitchDone(isFrontCamera: Boolean) {
+                        cont.resume(isFrontCamera)
+                    }
 
-                override fun onCameraSwitchError(errorDescription: String) {
-                    cont.resumeWithException(CameraVideoCapturerException(errorDescription))
-                }
-            }, deviceId)
+                    override fun onCameraSwitchError(errorDescription: String) {
+                        cont.resumeWithException(CameraVideoCapturerException(errorDescription))
+                    }
+                },
+                deviceId
+            )
         }
     }
 

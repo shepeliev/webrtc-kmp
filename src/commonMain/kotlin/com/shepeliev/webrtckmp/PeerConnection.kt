@@ -76,7 +76,6 @@ expect class PeerConnection(rtcConfiguration: RtcConfiguration = RtcConfiguratio
      */
     fun removeTrack(sender: RtpSender): Boolean
 
-
     /**
      * Gets stats using the new stats collection API, see webrtc/api/stats/.
      */
