@@ -11,20 +11,9 @@ import WebRTC.RTCPeerConnectionFactoryOptions
 import WebRTC.RTCSetMinDebugLogLevel
 import WebRTC.RTCSetupInternalTracer
 import WebRTC.RTCShutdownInternalTracer
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.cancel
-import kotlin.native.concurrent.AtomicReference
 import kotlin.native.concurrent.freeze
 
 actual object WebRtcKmp {
-    actual val mainScope: CoroutineScope
-        get() {
-            val scope = mainScopeRef.value
-            check(scope != null) { NOT_INITIALIZED_ERROR_MESSAGE }
-            return scope
-        }
-
     internal actual val peerConnectionFactory: PeerConnectionFactory
         get() {
             check(peerConnectionFactoryInternal != null) { NOT_INITIALIZED_ERROR_MESSAGE }
@@ -32,7 +21,6 @@ actual object WebRtcKmp {
         }
 }
 
-private val mainScopeRef = AtomicReference<CoroutineScope?>(null)
 private var peerConnectionFactoryInternal: PeerConnectionFactory? = null
 
 fun WebRtcKmp.initialize(
@@ -41,7 +29,6 @@ fun WebRtcKmp.initialize(
     enableInternalTracer: Boolean = false,
     loggingSeverity: RTCLoggingSeverity? = null,
 ) {
-    mainScopeRef.value = MainScope().freeze()
     initializeIosLib(fieldTrials, enableInternalTracer, loggingSeverity)
     buildPeerConnectionFactory(peerConnectionFactoryOptions)
 }
@@ -72,6 +59,4 @@ fun WebRtcKmp.dispose() {
     peerConnectionFactoryInternal = null
     RTCShutdownInternalTracer()
     RTCCleanupSSL()
-    mainScopeRef.value?.cancel()
-    mainScopeRef.value = null
 }

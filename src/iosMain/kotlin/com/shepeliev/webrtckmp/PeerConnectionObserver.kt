@@ -14,6 +14,8 @@ import WebRTC.RTCRtpReceiver
 import WebRTC.RTCRtpTransceiver
 import WebRTC.RTCSignalingState
 import WebRTC.RTCVideoTrack
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import platform.darwin.NSObject
 import kotlin.native.concurrent.freeze
@@ -22,11 +24,13 @@ internal class PeerConnectionObserver(
     private val events: PeerConnectionEvents,
 ) : NSObject(), RTCPeerConnectionDelegateProtocol {
 
+    private val scope = MainScope()
+
     override fun peerConnection(
         peerConnection: RTCPeerConnection,
         didChangeSignalingState: RTCSignalingState
     ) {
-        WebRtcKmp.mainScope.launch {
+        scope.launch {
             events.onSignalingStateChange.emit(rtcSignalingStateAsCommon(didChangeSignalingState))
         }
     }
@@ -55,7 +59,7 @@ internal class PeerConnectionObserver(
         peerConnection: RTCPeerConnection,
         didChangeIceConnectionState: RTCIceConnectionState
     ) {
-        WebRtcKmp.mainScope.launch {
+        scope.launch {
             events.onIceConnectionStateChange.emit(
                 rtcIceConnectionStateAsCommon(didChangeIceConnectionState)
             )
@@ -66,7 +70,7 @@ internal class PeerConnectionObserver(
         peerConnection: RTCPeerConnection,
         didChangeIceGatheringState: RTCIceGatheringState
     ) {
-        WebRtcKmp.mainScope.launch {
+        scope.launch {
             events.onIceGatheringStateChange.emit(
                 rtcIceGatheringStateAsCommon(didChangeIceGatheringState)
             )
@@ -77,7 +81,7 @@ internal class PeerConnectionObserver(
         peerConnection: RTCPeerConnection,
         didGenerateIceCandidate: RTCIceCandidate
     ) {
-        WebRtcKmp.mainScope.launch {
+        scope.launch {
             events.onIceCandidate.emit(IceCandidate(didGenerateIceCandidate))
         }
     }
@@ -87,14 +91,14 @@ internal class PeerConnectionObserver(
         didRemoveIceCandidates: List<*>
     ) {
         val candidates = didRemoveIceCandidates.map { IceCandidate(it as RTCIceCandidate) }
-        WebRtcKmp.mainScope.launch { events.onRemovedIceCandidates.emit(candidates) }
+        scope.launch { events.onRemovedIceCandidates.emit(candidates) }
     }
 
     override fun peerConnection(
         peerConnection: RTCPeerConnection,
         didOpenDataChannel: RTCDataChannel
     ) {
-        WebRtcKmp.mainScope.launch {
+        scope.launch {
             events.onDataChannel.emit(DataChannel(didOpenDataChannel).freeze())
         }
     }
@@ -104,7 +108,7 @@ internal class PeerConnectionObserver(
         peerConnection: RTCPeerConnection,
         didChangeStandardizedIceConnectionState: RTCIceConnectionState
     ) {
-        WebRtcKmp.mainScope.launch {
+        scope.launch {
             events.onStandardizedIceConnectionChange.emit(
                 rtcIceConnectionStateAsCommon(didChangeStandardizedIceConnectionState)
             )
@@ -115,10 +119,13 @@ internal class PeerConnectionObserver(
         peerConnection: RTCPeerConnection,
         didChangeConnectionState: RTCPeerConnectionState
     ) {
-        WebRtcKmp.mainScope.launch {
+        scope.launch {
             events.onConnectionStateChange.emit(
                 rtcPeerConnectionStateAsCommon(didChangeConnectionState)
             )
+            if (didChangeConnectionState == RTCPeerConnectionState.RTCPeerConnectionStateClosed) {
+                scope.cancel()
+            }
         }
     }
 
@@ -126,7 +133,7 @@ internal class PeerConnectionObserver(
         peerConnection: RTCPeerConnection,
         didRemoveReceiver: RTCRtpReceiver
     ) {
-        WebRtcKmp.mainScope.launch { events.onRemoveTrack.emit(RtpReceiver(didRemoveReceiver)) }
+        scope.launch { events.onRemoveTrack.emit(RtpReceiver(didRemoveReceiver)) }
     }
 
     override fun peerConnection(
@@ -156,10 +163,10 @@ internal class PeerConnectionObserver(
             track = track,
             transceiver = RtpTransceiver(didStartReceivingOnTransceiver)
         ).freeze()
-        WebRtcKmp.mainScope.launch { events.onTrack.emit(trackEvent) }
+        scope.launch { events.onTrack.emit(trackEvent) }
     }
 
     override fun peerConnectionShouldNegotiate(peerConnection: RTCPeerConnection) {
-        WebRtcKmp.mainScope.launch { events.onNegotiationNeeded.emit(Unit) }
+        scope.launch { events.onNegotiationNeeded.emit(Unit) }
     }
 }

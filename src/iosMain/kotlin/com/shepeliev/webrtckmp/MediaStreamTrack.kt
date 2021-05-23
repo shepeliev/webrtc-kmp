@@ -4,6 +4,8 @@ import WebRTC.RTCAudioTrack
 import WebRTC.RTCMediaStreamTrack
 import WebRTC.RTCMediaStreamTrackState
 import WebRTC.RTCVideoTrack
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -14,6 +16,8 @@ actual open class MediaStreamTrack(
     val native: RTCMediaStreamTrack,
     actual val remote: Boolean,
 ) {
+
+    private val scope = MainScope()
 
     actual val id: String
         get() = native.trackId
@@ -40,9 +44,9 @@ actual open class MediaStreamTrack(
         set(value) {
             native.isEnabled = value
             if (value) {
-                WebRtcKmp.mainScope.launch { onUnmuteInternal.emit(Unit) }
+                scope.launch { onUnmuteInternal.emit(Unit) }
             } else {
-                WebRtcKmp.mainScope.launch { onMuteInternal.emit(Unit) }
+                scope.launch { onMuteInternal.emit(Unit) }
             }
         }
 
@@ -69,8 +73,17 @@ actual open class MediaStreamTrack(
 
     actual fun stop() {
         if (!endedFlag.compareAndSet(0, 1)) return
+
+        when(kind) {
+            MediaStreamTrackKind.Audio -> PhoneMediaDevices.onAudioTrackStopped()
+            MediaStreamTrackKind.Video -> PhoneMediaDevices.onVideoTrackStopped()
+        }
+
         enabled = false
-        WebRtcKmp.mainScope.launch { onEndedInternal.emit(Unit) }
+        scope.launch {
+            onEndedInternal.emit(Unit)
+            scope.cancel()
+        }
     }
 
     companion object {

@@ -1,6 +1,7 @@
 package com.shepeliev.webrtckmp
 
-import com.shepeliev.webrtckmp.WebRtcKmp.mainScope
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import org.webrtc.CandidatePairChangeEvent
 import org.webrtc.SdpObserver
@@ -176,38 +177,45 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
     }
 
     internal inner class PcObserver : AndroidPeerConnection.Observer {
+        private val scope = MainScope()
+
         override fun onSignalingChange(newState: AndroidPeerConnection.SignalingState) {
-            mainScope.launch { events.onSignalingStateChange.emit(newState.asCommon()) }
+            scope.launch { events.onSignalingStateChange.emit(newState.asCommon()) }
         }
 
         override fun onIceConnectionChange(newState: AndroidPeerConnection.IceConnectionState) {
-            mainScope.launch { events.onIceConnectionStateChange.emit(newState.asCommon()) }
+            scope.launch { events.onIceConnectionStateChange.emit(newState.asCommon()) }
         }
 
         override fun onStandardizedIceConnectionChange(
             newState: AndroidPeerConnection.IceConnectionState
         ) {
-            mainScope.launch {
+            scope.launch {
                 events.onStandardizedIceConnectionChange.emit(newState.asCommon())
             }
         }
 
         override fun onConnectionChange(newState: AndroidPeerConnection.PeerConnectionState) {
-            mainScope.launch { events.onConnectionStateChange.emit(newState.asCommon()) }
+            scope.launch {
+                events.onConnectionStateChange.emit(newState.asCommon())
+                if (newState == AndroidPeerConnection.PeerConnectionState.CLOSED) {
+                    cancel()
+                }
+            }
         }
 
         override fun onIceConnectionReceivingChange(receiving: Boolean) {}
 
         override fun onIceGatheringChange(newState: AndroidPeerConnection.IceGatheringState) {
-            mainScope.launch { events.onIceGatheringStateChange.emit(newState.asCommon()) }
+            scope.launch { events.onIceGatheringStateChange.emit(newState.asCommon()) }
         }
 
         override fun onIceCandidate(candidate: AndroidIceCandidate) {
-            mainScope.launch { events.onIceCandidate.emit(IceCandidate(candidate)) }
+            scope.launch { events.onIceCandidate.emit(IceCandidate(candidate)) }
         }
 
         override fun onIceCandidatesRemoved(candidates: Array<out AndroidIceCandidate>) {
-            mainScope.launch {
+            scope.launch {
                 events.onRemovedIceCandidates.emit(candidates.map { IceCandidate(it) })
             }
         }
@@ -227,11 +235,11 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         }
 
         override fun onDataChannel(dataChannel: AndroidDataChannel) {
-            mainScope.launch { events.onDataChannel.emit(DataChannel(dataChannel)) }
+            scope.launch { events.onDataChannel.emit(DataChannel(dataChannel)) }
         }
 
         override fun onRenegotiationNeeded() {
-            mainScope.launch { events.onNegotiationNeeded.emit(Unit) }
+            scope.launch { events.onNegotiationNeeded.emit(Unit) }
         }
 
         override fun onAddTrack(
@@ -269,7 +277,7 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
                 track = track,
                 transceiver = RtpTransceiver(transceiver)
             )
-            mainScope.launch { events.onTrack.emit(trackEvent) }
+            scope.launch { events.onTrack.emit(trackEvent) }
         }
 
         override fun onSelectedCandidatePairChanged(event: CandidatePairChangeEvent) {

@@ -1,10 +1,6 @@
 package com.shepeliev.webrtckmp
 
 import com.shepeliev.webrtckmp.utils.uuid
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.withContext
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.native.concurrent.ThreadLocal
 
@@ -18,17 +14,14 @@ internal object PhoneMediaDevices {
     private var videoSource: VideoSource? = null
     private var videoSourceRef = 0
 
-    suspend fun getUserMedia(audio: Boolean, video: Boolean): MediaStream =
-        withContext(Dispatchers.Main) {
+    fun getUserMedia(audio: Boolean, video: Boolean): MediaStream {
             val factory = WebRtcKmp.peerConnectionFactory
             var audioTrack: AudioStreamTrack? = null
             if (audio) {
                 audioSource =
                     audioSource ?: factory.createAudioSource(mediaConstraints( /* TODO */))
                 audioSourceRefCount += 1
-                audioTrack = factory.createAudioTrack(uuid(), audioSource!!).apply {
-                    onEnded.onEach { onAudioTrackStopped() }.launchIn(WebRtcKmp.mainScope)
-                }
+                audioTrack = factory.createAudioTrack(uuid(), audioSource!!)
             }
 
             var videoTrack: VideoStreamTrack? = null
@@ -39,9 +32,7 @@ internal object PhoneMediaDevices {
 
                 videoSource = videoSource ?: factory.createVideoSource(false)
                 videoSourceRef += 1
-                videoTrack = factory.createVideoTrack(uuid(), videoSource!!).apply {
-                    onEnded.onEach { onVideoTrackStopped() }.launchIn(WebRtcKmp.mainScope)
-                }
+                videoTrack = factory.createVideoTrack(uuid(), videoSource!!)
 
                 videoCapturer.startCapture(
                     device.deviceId,
@@ -50,13 +41,13 @@ internal object PhoneMediaDevices {
                 )
             }
 
-            return@withContext MediaStream().apply {
+            return MediaStream().apply {
                 if (audioTrack != null) addTrack(audioTrack)
                 if (videoTrack != null) addTrack(videoTrack)
             }
-        }
+    }
 
-    private fun onAudioTrackStopped() {
+    internal fun onAudioTrackStopped() {
         check(audioSourceRefCount > 0)
         audioSourceRefCount -= 1
         if (audioSourceRefCount == 0) {
@@ -65,7 +56,7 @@ internal object PhoneMediaDevices {
         }
     }
 
-    private fun onVideoTrackStopped() {
+    internal fun onVideoTrackStopped() {
         check(videoSourceRef > 0)
         videoSourceRef -= 1
         if (videoSourceRef == 0) {

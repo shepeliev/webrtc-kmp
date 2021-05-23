@@ -1,5 +1,7 @@
 package com.shepeliev.webrtckmp
 
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -12,6 +14,8 @@ actual open class MediaStreamTrack internal constructor(
     val native: AndroidMediaStreamTrack,
     actual val remote: Boolean,
 ) {
+
+    internal val scope = MainScope()
 
     actual val id: String
         get() = native.id()
@@ -38,9 +42,9 @@ actual open class MediaStreamTrack internal constructor(
         set(value) {
             native.setEnabled(value)
             if (value) {
-                WebRtcKmp.mainScope.launch { onUnmuteInternal.emit(Unit) }
+                scope.launch { onUnmuteInternal.emit(Unit) }
             } else {
-                WebRtcKmp.mainScope.launch { onMuteInternal.emit(Unit) }
+                scope.launch { onMuteInternal.emit(Unit) }
             }
         }
 
@@ -60,8 +64,17 @@ actual open class MediaStreamTrack internal constructor(
 
     actual fun stop() {
         if (readyState == MediaStreamTrackState.Ended) return
+
+        when(kind) {
+            MediaStreamTrackKind.Audio -> PhoneMediaDevices.onAudioTrackStopped()
+            MediaStreamTrackKind.Video -> PhoneMediaDevices.onVideoTrackStopped()
+        }
+
         native.dispose()
-        WebRtcKmp.mainScope.launch { onEndedInternal.emit(Unit) }
+        scope.launch {
+            onEndedInternal.emit(Unit)
+            scope.cancel()
+        }
     }
 }
 
