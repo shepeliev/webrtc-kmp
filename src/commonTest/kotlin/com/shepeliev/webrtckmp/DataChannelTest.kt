@@ -1,5 +1,8 @@
 package com.shepeliev.webrtckmp
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -12,14 +15,18 @@ import kotlin.test.assertEquals
 
 class DataChannelTest {
 
+    lateinit var appScope: CoroutineScope
+
     @BeforeTest
     fun setUp() {
+        appScope = MainScope()
         initializeWebRtc()
     }
 
     @AfterTest
     fun tearDown() {
         disposeWebRtc()
+        appScope.cancel()
     }
 
     @Test
@@ -33,9 +40,9 @@ class DataChannelTest {
             onMessage
                 .onEach {
                     val text = it.decodeToString()
-                    WebRtcKmp.mainScope.launch { channel.send(text) }
+                    appScope.launch { channel.send(text) }
                 }
-                .launchIn(WebRtcKmp.mainScope)
+                .launchIn(appScope)
         }
 
         val pc1Candidates = mutableListOf<IceCandidate>()
@@ -51,7 +58,7 @@ class DataChannelTest {
                     pc1Candidates += candidate
                 }
             }
-            .launchIn(WebRtcKmp.mainScope)
+            .launchIn(appScope)
 
         pc2.onIceCandidate
             .onEach { candidate ->
@@ -63,13 +70,13 @@ class DataChannelTest {
                     pc2Candidates += candidate
                 }
             }
-            .launchIn(WebRtcKmp.mainScope)
+            .launchIn(appScope)
         pc2.onDataChannel
             .onEach { pc2DataChannel ->
                 val data = "Hello WebRTC KMP!".encodeToByteArray()
                 pc2DataChannel.send(data)
             }
-            .launchIn(WebRtcKmp.mainScope)
+            .launchIn(appScope)
 
         val offer = pc1.createOffer(mediaConstraints())
         pc1.setLocalDescription(offer)

@@ -1,9 +1,6 @@
 package com.shepeliev.webrtckmp
 
-import kotlinx.coroutines.CoroutineScope
-
 expect object WebRtcKmp {
-    val mainScope: CoroutineScope
     internal val peerConnectionFactory: PeerConnectionFactory
 }
 

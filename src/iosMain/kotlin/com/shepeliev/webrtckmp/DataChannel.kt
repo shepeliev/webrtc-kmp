@@ -6,6 +6,8 @@ import WebRTC.RTCDataChannelDelegateProtocol
 import WebRTC.RTCDataChannelState
 import com.shepeliev.webrtckmp.ios.toByteArray
 import com.shepeliev.webrtckmp.ios.toNSData
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -43,6 +45,8 @@ actual class DataChannel(val native: RTCDataChannel) {
     private val onMessageInternal = MutableSharedFlow<ByteArray>()
     actual val onMessage: Flow<ByteArray> = onMessageInternal.asSharedFlow()
 
+    private val scope = MainScope()
+
     init {
         val delegate = object : NSObject(), RTCDataChannelDelegateProtocol {
             override fun dataChannel(
@@ -57,17 +61,20 @@ actual class DataChannel(val native: RTCDataChannel) {
                 didReceiveMessageWithBuffer: RTCDataBuffer
             ) {
                 val data = didReceiveMessageWithBuffer.data.toByteArray().freeze()
-                WebRtcKmp.mainScope.launch { onMessageInternal.emit(data) }
+                scope.launch { onMessageInternal.emit(data) }
             }
 
             override fun dataChannelDidChangeState(dataChannel: RTCDataChannel) {
-                WebRtcKmp.mainScope.launch {
+                scope.launch {
                     when (native.readyState) {
                         RTCDataChannelState.RTCDataChannelStateOpen -> onOpenInternal.emit(Unit)
                         RTCDataChannelState.RTCDataChannelStateClosing -> onClosingInternal.emit(
                             Unit
                         )
-                        RTCDataChannelState.RTCDataChannelStateClosed -> onCloseInternal.emit(Unit)
+                        RTCDataChannelState.RTCDataChannelStateClosed -> {
+                            onCloseInternal.emit(Unit)
+                            scope.cancel()
+                        }
                         else -> {
                             // ignore
                         }

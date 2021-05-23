@@ -1,6 +1,8 @@
 package com.shepeliev.webrtckmp
 
 import com.shepeliev.webrtckmp.utils.toByteArray
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -37,6 +39,8 @@ actual class DataChannel(val native: AndroidDataChannel) : AndroidDataChannel.Ob
     private val onMessageInternal = MutableSharedFlow<ByteArray>()
     actual val onMessage: Flow<ByteArray> = onMessageInternal.asSharedFlow()
 
+    private val scope = MainScope()
+
     init {
         native.registerObserver(this)
     }
@@ -62,11 +66,14 @@ actual class DataChannel(val native: AndroidDataChannel) : AndroidDataChannel.Ob
     }
 
     override fun onStateChange() {
-        WebRtcKmp.mainScope.launch {
+        scope.launch {
             when (native.state()) {
                 AndroidDataChannel.State.OPEN -> onOpenInternal.emit(Unit)
                 AndroidDataChannel.State.CLOSING -> onClosingInternal.emit(Unit)
-                AndroidDataChannel.State.CLOSED -> onCloseInternal.emit(Unit)
+                AndroidDataChannel.State.CLOSED -> {
+                    onCloseInternal.emit(Unit)
+                    scope.cancel()
+                }
                 else -> {
                     // ignore
                 }
@@ -76,6 +83,6 @@ actual class DataChannel(val native: AndroidDataChannel) : AndroidDataChannel.Ob
 
     override fun onMessage(buffer: AndroidDataChannel.Buffer) {
         val data = buffer.data.toByteArray()
-        WebRtcKmp.mainScope.launch { onMessageInternal.emit(data) }
+        scope.launch { onMessageInternal.emit(data) }
     }
 }

@@ -3,9 +3,6 @@
 package com.shepeliev.webrtckmp
 
 import android.content.Context
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.cancel
 import org.webrtc.DefaultVideoDecoderFactory
 import org.webrtc.DefaultVideoEncoderFactory
 import org.webrtc.EglBase
@@ -14,12 +11,6 @@ import org.webrtc.SurfaceTextureHelper
 import org.webrtc.PeerConnectionFactory as AndroidPeerConnectionFactory
 
 actual object WebRtcKmp {
-    actual val mainScope: CoroutineScope
-        get() {
-            check(mainScopeInternal != null) { NOT_INITIALIZED_ERROR_MESSAGE }
-            return mainScopeInternal!!
-        }
-
     internal actual val peerConnectionFactory: PeerConnectionFactory
         get() {
             check(peerConnectionFactoryInternal != null) { NOT_INITIALIZED_ERROR_MESSAGE }
@@ -27,7 +18,6 @@ actual object WebRtcKmp {
         }
 }
 
-private var mainScopeInternal: CoroutineScope? = null
 private var eglBaseInternal: EglBase? = null
 private var applicationContextInternal: Context? = null
 private var peerConnectionFactoryInternal: PeerConnectionFactory? = null
@@ -60,7 +50,6 @@ fun WebRtcKmp.initialize(
     loggingSeverity: Logging.Severity? = null
 ) {
     applicationContextInternal = context
-    mainScopeInternal = MainScope()
     initializePeerConnectionFactory(fieldTrials, enableInternalTracer, loggingSeverity)
     eglBaseInternal = eglBase
     createPeerConnectionFactory(peerConnectionFactoryBuilder)
@@ -115,8 +104,6 @@ fun WebRtcKmp.dispose() {
     eglBaseInternal = null
     peerConnectionFactoryInternal?.native?.dispose()
     peerConnectionFactoryInternal = null
-    mainScopeInternal?.cancel()
-    mainScopeInternal = null
     applicationContextInternal = null
     AndroidPeerConnectionFactory.shutdownInternalTracer()
 }
