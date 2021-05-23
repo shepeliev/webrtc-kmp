@@ -15,36 +15,36 @@ internal object PhoneMediaDevices {
     private var videoSourceRef = 0
 
     fun getUserMedia(audio: Boolean, video: Boolean): MediaStream {
-            val factory = WebRtcKmp.peerConnectionFactory
-            var audioTrack: AudioStreamTrack? = null
-            if (audio) {
-                audioSource =
-                    audioSource ?: factory.createAudioSource(mediaConstraints( /* TODO */))
-                audioSourceRefCount += 1
-                audioTrack = factory.createAudioTrack(uuid(), audioSource!!)
-            }
+        val factory = WebRtcKmp.peerConnectionFactory
+        var audioTrack: AudioStreamTrack? = null
+        if (audio) {
+            audioSource =
+                audioSource ?: factory.createAudioSource(mediaConstraints( /* TODO */))
+            audioSourceRefCount += 1
+            audioTrack = factory.createAudioTrack(uuid(), audioSource!!)
+        }
 
-            var videoTrack: VideoStreamTrack? = null
-            if (video) {
-                videoCapturer.stopCapture()
+        var videoTrack: VideoStreamTrack? = null
+        if (video) {
+            videoCapturer.stopCapture()
 
-                val device = CameraEnumerator.selectDevice(VideoConstraints( /* TODO */))
+            val device = CameraEnumerator.selectDevice(VideoConstraints( /* TODO */))
 
-                videoSource = videoSource ?: factory.createVideoSource(false)
-                videoSourceRef += 1
-                videoTrack = factory.createVideoTrack(uuid(), videoSource!!)
+            videoSource = videoSource ?: factory.createVideoSource(false)
+            videoSourceRef += 1
+            videoTrack = factory.createVideoTrack(uuid(), videoSource!!)
 
-                videoCapturer.startCapture(
-                    device.deviceId,
-                    VideoConstraints( /* TODO */),
-                    videoSource!!
-                )
-            }
+            videoCapturer.startCapture(
+                device.deviceId,
+                VideoConstraints( /* TODO */),
+                videoSource!!
+            )
+        }
 
-            return MediaStream().apply {
-                if (audioTrack != null) addTrack(audioTrack)
-                if (videoTrack != null) addTrack(videoTrack)
-            }
+        return MediaStream().apply {
+            if (audioTrack != null) addTrack(audioTrack)
+            if (videoTrack != null) addTrack(videoTrack)
+        }
     }
 
     internal fun onAudioTrackStopped() {

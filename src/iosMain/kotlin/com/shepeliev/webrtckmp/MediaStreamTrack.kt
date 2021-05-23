@@ -74,7 +74,7 @@ actual open class MediaStreamTrack(
     actual fun stop() {
         if (!endedFlag.compareAndSet(0, 1)) return
 
-        when(kind) {
+        when (kind) {
             MediaStreamTrackKind.Audio -> PhoneMediaDevices.onAudioTrackStopped()
             MediaStreamTrackKind.Video -> PhoneMediaDevices.onVideoTrackStopped()
         }

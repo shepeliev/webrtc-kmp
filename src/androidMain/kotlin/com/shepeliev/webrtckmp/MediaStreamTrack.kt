@@ -65,7 +65,7 @@ actual open class MediaStreamTrack internal constructor(
     actual fun stop() {
         if (readyState == MediaStreamTrackState.Ended) return
 
-        when(kind) {
+        when (kind) {
             MediaStreamTrackKind.Audio -> PhoneMediaDevices.onAudioTrackStopped()
             MediaStreamTrackKind.Video -> PhoneMediaDevices.onVideoTrackStopped()
         }
