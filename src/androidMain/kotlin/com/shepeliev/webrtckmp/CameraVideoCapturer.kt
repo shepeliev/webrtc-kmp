@@ -61,13 +61,14 @@ internal actual class CameraVideoCapturer actual constructor() {
         )
     }
 
-    private suspend fun switchCameraInternal(deviceId: String): Boolean {
+    private suspend fun switchCameraInternal(cameraId: String): Boolean {
         val capturer = videoCapturer ?: throw CameraVideoCapturerException.capturerStopped()
 
         return suspendCoroutine { cont ->
             capturer.switchCamera(
                 object : CameraVideoCapturer.CameraSwitchHandler {
                     override fun onCameraSwitchDone(isFrontCamera: Boolean) {
+                        currentCameraId = cameraId
                         cont.resume(isFrontCamera)
                     }
 
@@ -75,7 +76,7 @@ internal actual class CameraVideoCapturer actual constructor() {
                         cont.resumeWithException(CameraVideoCapturerException(errorDescription))
                     }
                 },
-                deviceId
+                cameraId
             )
         }
     }
