@@ -1,10 +1,9 @@
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("com.android.library")
-    kotlin("multiplatform") version "1.4.31"
+    kotlin("multiplatform") version "1.5.10"
     id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
     id("org.jmailen.kotlinter") version "3.4.4"
     id("maven-publish")
@@ -47,9 +46,11 @@ kotlin {
     val iosArm64 = iosArm64(configure = configureNativeTarget())
 
     sourceSets {
+        val coroutinesVersion = "1.5.0-native-mt"
+
         val commonMain by getting {
             dependencies {
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3-native-mt")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
             }
         }
 
@@ -62,7 +63,7 @@ kotlin {
 
         val androidMain by getting {
             dependencies {
-                implementation("androidx.core:core:1.3.2")
+                implementation("androidx.core:core:1.5.0")
                 api(fileTree("libs") { include("*.jar") })
             }
         }
@@ -70,11 +71,11 @@ kotlin {
         val androidTest by getting {
             dependencies {
                 implementation(kotlin("test-junit"))
-                implementation("junit:junit:4.13")
+                implementation("junit:junit:4.13.2")
                 implementation("androidx.test:core:1.3.0")
                 implementation("androidx.test.ext:junit:1.1.2")
                 implementation("androidx.test:runner:1.3.0")
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.3-native-mt")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
             }
         }
 
@@ -102,20 +103,9 @@ android {
             java.srcDir(file("src/androidTest/kotlin"))
         }
     }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
 }
 
 tasks {
-    withType<KotlinCompile>().all {
-        kotlinOptions {
-            jvmTarget = "1.8"
-        }
-    }
-
     val updatePodspecVersion by registering(Copy::class) {
         val from = file("webrtc-kmp.podspec")
         from.writeText(
