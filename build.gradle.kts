@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "com.shepeliev"
-version = "0.89.1"
+version = "1.89.0-SNAPSHOT"
 
 repositories {
     google()
@@ -44,6 +44,16 @@ kotlin {
 
     val iosX64 = iosX64("ios", configureNativeTarget())
     val iosArm64 = iosArm64(configure = configureNativeTarget())
+
+    js {
+        browser {
+            testTask {
+                useKarma {
+                    useChromeHeadless()
+                }
+            }
+        }
+    }
 
     sourceSets {
         val coroutinesVersion = "1.5.0-native-mt"
