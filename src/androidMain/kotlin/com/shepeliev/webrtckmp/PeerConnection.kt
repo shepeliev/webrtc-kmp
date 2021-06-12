@@ -4,6 +4,7 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import org.webrtc.CandidatePairChangeEvent
+import org.webrtc.MediaConstraints
 import org.webrtc.SdpObserver
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
@@ -22,36 +23,35 @@ import org.webrtc.VideoTrack as AndroidVideoTrack
 
 actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguration) {
 
-    val native: AndroidPeerConnection
+    val android: AndroidPeerConnection
 
     actual val localDescription: SessionDescription?
-        get() = native.localDescription?.let { SessionDescription(it) }
+        get() = android.localDescription?.let { SessionDescription(it) }
 
     actual val remoteDescription: SessionDescription?
-        get() = native.remoteDescription?.let { SessionDescription(it) }
+        get() = android.remoteDescription?.let { SessionDescription(it) }
 
     actual val certificate: RtcCertificatePem?
-        get() = native.certificate?.let { RtcCertificatePem(it) }
+        get() = android.certificate?.let { RtcCertificatePem(it) }
 
     actual val signalingState: SignalingState
-        get() = native.signalingState().asCommon()
+        get() = android.signalingState().asCommon()
 
     actual val iceConnectionState: IceConnectionState
-        get() = native.iceConnectionState().asCommon()
+        get() = android.iceConnectionState().asCommon()
 
     actual val connectionState: PeerConnectionState
-        get() = native.connectionState().asCommon()
+        get() = android.connectionState().asCommon()
 
     actual val iceGatheringState: IceGatheringState
-        get() = native.iceGatheringState().asCommon()
+        get() = android.iceGatheringState().asCommon()
 
     internal actual val events = PeerConnectionEvents()
 
     private val pcObserver = PcObserver()
 
     init {
-        native = WebRtcKmp.peerConnectionFactory.native
-            .createPeerConnection(rtcConfiguration.native, pcObserver)
+        android = peerConnectionFactory.createPeerConnection(rtcConfiguration.native, pcObserver)
             ?: error("Creating PeerConnection failed")
     }
 
@@ -72,18 +72,33 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
             it.protocol = protocol
             it.negotiated = negotiated
         }
-        return native.createDataChannel(label, init)?.let { DataChannel(it) }
+        return android.createDataChannel(label, init)?.let { DataChannel(it) }
     }
 
-    actual suspend fun createOffer(constraints: MediaConstraints): SessionDescription {
+    actual suspend fun createOffer(options: OfferAnswerOptions): SessionDescription {
         return suspendCoroutine { cont ->
-            native.createOffer(createSdpObserver(cont), constraints.native)
+            android.createOffer(createSdpObserver(cont), options.toMediaConstraints())
         }
     }
 
-    actual suspend fun createAnswer(constraints: MediaConstraints): SessionDescription {
+    actual suspend fun createAnswer(options: OfferAnswerOptions): SessionDescription {
         return suspendCoroutine { cont ->
-            native.createAnswer(createSdpObserver(cont), constraints.native)
+            android.createAnswer(createSdpObserver(cont), options.toMediaConstraints())
+        }
+    }
+
+    private fun OfferAnswerOptions.toMediaConstraints(): MediaConstraints {
+        return MediaConstraints().apply {
+            iceRestart?.let { mandatory += MediaConstraints.KeyValuePair("iceRestart", "$it") }
+            offerToReceiveAudio?.let {
+                mandatory += MediaConstraints.KeyValuePair("offerToReceiveAudio", "$it")
+            }
+            offerToReceiveVideo?.let {
+                mandatory += MediaConstraints.KeyValuePair("offerToReceiveVideo", "$it")
+            }
+            voiceActivityDetection?.let {
+                mandatory += MediaConstraints.KeyValuePair("voiceActivityDetection", "$it")
+            }
         }
     }
 
@@ -109,13 +124,13 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
 
     actual suspend fun setLocalDescription(description: SessionDescription) {
         return suspendCoroutine {
-            native.setLocalDescription(setSdpObserver(it), description.native)
+            android.setLocalDescription(setSdpObserver(it), description.native)
         }
     }
 
     actual suspend fun setRemoteDescription(description: SessionDescription) {
         return suspendCoroutine {
-            native.setRemoteDescription(setSdpObserver(it), description.native)
+            android.setRemoteDescription(setSdpObserver(it), description.native)
         }
     }
 
@@ -140,40 +155,40 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
     }
 
     actual fun setConfiguration(configuration: RtcConfiguration): Boolean {
-        return native.setConfiguration(configuration.native)
+        return android.setConfiguration(configuration.native)
     }
 
     actual fun addIceCandidate(candidate: IceCandidate): Boolean {
-        return native.addIceCandidate(candidate.native)
+        return android.addIceCandidate(candidate.native)
     }
 
     actual fun removeIceCandidates(candidates: List<IceCandidate>): Boolean {
-        return native.removeIceCandidates(candidates.map { it.native }.toTypedArray())
+        return android.removeIceCandidates(candidates.map { it.native }.toTypedArray())
     }
 
-    actual fun getSenders(): List<RtpSender> = native.senders.map { RtpSender(it) }
+    actual fun getSenders(): List<RtpSender> = android.senders.map { RtpSender(it) }
 
-    actual fun getReceivers(): List<RtpReceiver> = native.receivers.map { RtpReceiver(it) }
+    actual fun getReceivers(): List<RtpReceiver> = android.receivers.map { RtpReceiver(it) }
 
     actual fun getTransceivers(): List<RtpTransceiver> =
-        native.transceivers.map { RtpTransceiver(it) }
+        android.transceivers.map { RtpTransceiver(it) }
 
     actual fun addTrack(track: MediaStreamTrack, streamIds: List<String>): RtpSender {
-        return RtpSender(native.addTrack(track.native, streamIds))
+        return RtpSender(android.addTrack(track.android, streamIds))
     }
 
     actual fun removeTrack(sender: RtpSender): Boolean {
-        return native.removeTrack(sender.native)
+        return android.removeTrack(sender.native)
     }
 
     actual suspend fun getStats(): RtcStatsReport? {
         return suspendCoroutine { cont ->
-            native.getStats { cont.resume(RtcStatsReport(it)) }
+            android.getStats { cont.resume(RtcStatsReport(it)) }
         }
     }
 
     actual fun close() {
-        native.dispose()
+        android.dispose()
     }
 
     internal inner class PcObserver : AndroidPeerConnection.Observer {
@@ -253,27 +268,18 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
             val sender = transceiver.sender
             val track = when (transceiver.mediaType) {
                 AndroidMediaStreamTrack.MediaType.MEDIA_TYPE_AUDIO -> {
-                    AudioStreamTrack(
-                        transceiver.receiver.track() as AndroidAudioTrack,
-                        remote = true
-                    )
+                    AudioStreamTrack(transceiver.receiver.track() as AndroidAudioTrack)
                 }
 
                 AndroidMediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO -> {
-                    VideoStreamTrack(
-                        transceiver.receiver.track() as AndroidVideoTrack,
-                        remote = true
-                    )
+                    VideoStreamTrack(transceiver.receiver.track() as AndroidVideoTrack)
                 }
 
                 else -> null
             }
-            val streams = sender.streams.map { id ->
-                MediaStream(id).apply { track?.also { addTrack(it) } }
-            }
             val trackEvent = TrackEvent(
                 receiver = RtpReceiver(transceiver.receiver),
-                streams = streams,
+                streams = sender.streams,
                 track = track,
                 transceiver = RtpTransceiver(transceiver)
             )

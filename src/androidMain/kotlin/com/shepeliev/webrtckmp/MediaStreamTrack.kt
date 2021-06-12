@@ -6,25 +6,26 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
+import org.webrtc.MediaSource
 import org.webrtc.AudioTrack as AndroidAudioTrack
 import org.webrtc.MediaStreamTrack as AndroidMediaStreamTrack
 import org.webrtc.VideoTrack as AndroidVideoTrack
 
 actual open class MediaStreamTrack internal constructor(
-    val native: AndroidMediaStreamTrack,
-    actual val remote: Boolean,
+    val android: org.webrtc.MediaStreamTrack,
+    private val mediaSource: MediaSource?,
 ) {
 
-    internal val scope = MainScope()
+    protected val scope = MainScope()
 
     actual val id: String
-        get() = native.id()
+        get() = android.id()
 
     actual val kind: MediaStreamTrackKind
-        get() = when (native.kind()) {
+        get() = when (android.kind()) {
             AndroidMediaStreamTrack.AUDIO_TRACK_KIND -> MediaStreamTrackKind.Audio
             AndroidMediaStreamTrack.VIDEO_TRACK_KIND -> MediaStreamTrackKind.Video
-            else -> throw IllegalStateException("Unknown track kind: ${native.kind()}")
+            else -> throw IllegalStateException("Unknown track kind: ${android.kind()}")
         }
 
     actual val label: String
@@ -38,9 +39,9 @@ actual open class MediaStreamTrack internal constructor(
         get() = !enabled
 
     actual var enabled: Boolean
-        get() = native.enabled()
+        get() = android.enabled()
         set(value) {
-            native.setEnabled(value)
+            android.setEnabled(value)
             if (value) {
                 scope.launch { onUnmuteInternal.emit(Unit) }
             } else {
@@ -48,40 +49,33 @@ actual open class MediaStreamTrack internal constructor(
             }
         }
 
-    actual val readOnly: Boolean = true
-
     actual val readyState: MediaStreamTrackState
-        get() = native.state().asCommon()
+        get() = android.state().asCommon()
 
     private val onEndedInternal = MutableSharedFlow<Unit>()
     actual val onEnded: Flow<Unit> = onEndedInternal.asSharedFlow()
 
     private val onMuteInternal = MutableSharedFlow<Unit>()
-    actual val onMute: Flow<Unit> = onEndedInternal.asSharedFlow()
+    actual val onMute: Flow<Unit> = onMuteInternal.asSharedFlow()
 
     private val onUnmuteInternal = MutableSharedFlow<Unit>()
-    actual val onUnmute: Flow<Unit> = onEndedInternal.asSharedFlow()
+    actual val onUnmute: Flow<Unit> = onUnmuteInternal.asSharedFlow()
 
-    actual fun stop() {
+    actual open fun stop() {
         if (readyState == MediaStreamTrackState.Ended) return
-
-        when (kind) {
-            MediaStreamTrackKind.Audio -> PhoneMediaDevices.onAudioTrackStopped()
-            MediaStreamTrackKind.Video -> PhoneMediaDevices.onVideoTrackStopped()
-        }
-
-        native.dispose()
+        android.dispose()
         scope.launch {
             onEndedInternal.emit(Unit)
             scope.cancel()
         }
+        mediaSource?.dispose()
     }
 }
 
-internal fun AndroidMediaStreamTrack.asCommon(remote: Boolean): MediaStreamTrack {
+internal fun AndroidMediaStreamTrack.asCommon(): MediaStreamTrack {
     return when (this) {
-        is AndroidAudioTrack -> AudioStreamTrack(this, remote)
-        is AndroidVideoTrack -> VideoStreamTrack(this, remote)
+        is AndroidAudioTrack -> AudioStreamTrack(this)
+        is AndroidVideoTrack -> VideoStreamTrack(this)
         else -> error("Unknown native MediaStreamTrack: $this")
     }
 }

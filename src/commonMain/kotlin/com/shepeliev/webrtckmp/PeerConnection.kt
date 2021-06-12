@@ -26,8 +26,8 @@ expect class PeerConnection(rtcConfiguration: RtcConfiguration = RtcConfiguratio
         negotiated: Boolean = false,
     ): DataChannel?
 
-    suspend fun createOffer(constraints: MediaConstraints): SessionDescription
-    suspend fun createAnswer(constraints: MediaConstraints): SessionDescription
+    suspend fun createOffer(options: OfferAnswerOptions): SessionDescription
+    suspend fun createAnswer(options: OfferAnswerOptions): SessionDescription
     suspend fun setLocalDescription(description: SessionDescription)
     suspend fun setRemoteDescription(description: SessionDescription)
 

@@ -26,28 +26,28 @@ private typealias CompletionHandler<T> = (result: T?, error: NSError?) -> Unit
 
 actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguration) {
 
-    val native: RTCPeerConnection
+    val ios: RTCPeerConnection
 
     actual val localDescription: SessionDescription?
-        get() = native.localDescription?.let { SessionDescription(it) }
+        get() = ios.localDescription?.let { SessionDescription(it) }
 
     actual val remoteDescription: SessionDescription?
-        get() = native.remoteDescription?.let { SessionDescription(it) }
+        get() = ios.remoteDescription?.let { SessionDescription(it) }
 
     actual val certificate: RtcCertificatePem?
-        get() = native.configuration.certificate?.let { RtcCertificatePem(it) }
+        get() = ios.configuration.certificate?.let { RtcCertificatePem(it) }
 
     actual val signalingState: SignalingState
-        get() = rtcSignalingStateAsCommon(native.signalingState())
+        get() = rtcSignalingStateAsCommon(ios.signalingState())
 
     actual val iceConnectionState: IceConnectionState
-        get() = rtcIceConnectionStateAsCommon(native.iceConnectionState())
+        get() = rtcIceConnectionStateAsCommon(ios.iceConnectionState())
 
     actual val connectionState: PeerConnectionState
-        get() = rtcPeerConnectionStateAsCommon(native.connectionState())
+        get() = rtcPeerConnectionStateAsCommon(ios.connectionState())
 
     actual val iceGatheringState: IceGatheringState
-        get() = rtcIceGatheringStateAsCommon(native.iceGatheringState())
+        get() = rtcIceGatheringStateAsCommon(ios.iceGatheringState())
 
     internal actual val events: PeerConnectionEvents = PeerConnectionEvents().freeze()
 
@@ -71,29 +71,43 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
             it.protocol = protocol
             it.isNegotiated = negotiated
         }
-        return native.dataChannelForLabel(label, config)?.let { DataChannel(it.freeze()) }
+        return ios.dataChannelForLabel(label, config)?.let { DataChannel(it.freeze()) }
     }
 
     init {
-        native = WebRtcKmp.peerConnectionFactory.native.peerConnectionWithConfiguration(
+        ios = factory.peerConnectionWithConfiguration(
             rtcConfiguration.native.freeze(),
             RTCMediaConstraints().freeze(),
             PeerConnectionObserver(events).freeze()
         ).freeze()
     }
 
-    actual suspend fun createOffer(constraints: MediaConstraints): SessionDescription {
-        return sessionDescription(constraints, native::offerForConstraints)
+    actual suspend fun createOffer(options: OfferAnswerOptions): SessionDescription {
+        return sessionDescription(options, ios::offerForConstraints)
+    }
+
+    actual suspend fun createAnswer(options: OfferAnswerOptions): SessionDescription {
+        return sessionDescription(options, ios::answerForConstraints)
     }
 
     private suspend fun sessionDescription(
-        constraints: MediaConstraints,
+        options: OfferAnswerOptions,
         createSdp: (RTCMediaConstraints, CompletionHandler<RTCSessionDescription>) -> Unit
     ): SessionDescription {
         val nativeSdp = suspendCoroutineInternal<RTCSessionDescription> {
-            createSdp(constraints.native, it)
+            createSdp(options.toRTCMediaConstraints(), it)
         }
         return SessionDescription(nativeSdp!!)
+    }
+
+    private fun OfferAnswerOptions.toRTCMediaConstraints(): RTCMediaConstraints {
+        val mandatory = mutableMapOf<Any?, String?>().apply {
+            iceRestart?.let { this += "iceRestart" to "$it" }
+            offerToReceiveAudio?.let { this += "offerToReceiveAudio" to "$it" }
+            offerToReceiveVideo?.let { this += "offerToReceiveVideo" to "$it" }
+            voiceActivityDetection?.let { this += "voiceActivityDetection" to "$it" }
+        }
+        return RTCMediaConstraints(mandatory, null)
     }
 
     // TODO: replace the workaround after resolving https://github.com/Kotlin/kotlinx.coroutines/issues/2363
@@ -119,51 +133,47 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         }
     }
 
-    actual suspend fun createAnswer(constraints: MediaConstraints): SessionDescription {
-        return sessionDescription(constraints, native::answerForConstraints)
-    }
-
     actual suspend fun setLocalDescription(description: SessionDescription) {
         suspendCoroutineInternal<Unit> { completion ->
             val handler = { error: NSError? -> completion(null, error) }
-            native.setLocalDescription(description.native, handler.freeze())
+            ios.setLocalDescription(description.native, handler.freeze())
         }
     }
 
     actual suspend fun setRemoteDescription(description: SessionDescription) {
         suspendCoroutineInternal<Unit> { completion ->
             val handler = { error: NSError? -> completion(null, error) }
-            native.setRemoteDescription(description.native, handler.freeze())
+            ios.setRemoteDescription(description.native, handler.freeze())
         }
     }
 
     actual fun setConfiguration(configuration: RtcConfiguration): Boolean {
-        return native.setConfiguration(configuration.native)
+        return ios.setConfiguration(configuration.native)
     }
 
     actual fun addIceCandidate(candidate: IceCandidate): Boolean {
-        native.addIceCandidate(candidate.native)
+        ios.addIceCandidate(candidate.native)
         return true
     }
 
     actual fun removeIceCandidates(candidates: List<IceCandidate>): Boolean {
-        native.removeIceCandidates(candidates.map { it.native })
+        ios.removeIceCandidates(candidates.map { it.native })
         return true
     }
 
-    actual fun getSenders(): List<RtpSender> = native.senders.map { RtpSender(it as RTCRtpSender) }
+    actual fun getSenders(): List<RtpSender> = ios.senders.map { RtpSender(it as RTCRtpSender) }
 
     actual fun getReceivers(): List<RtpReceiver> =
-        native.receivers.map { RtpReceiver(it as RTCRtpReceiver) }
+        ios.receivers.map { RtpReceiver(it as RTCRtpReceiver) }
 
     actual fun getTransceivers(): List<RtpTransceiver> =
-        native.transceivers.map { RtpTransceiver(it as RTCRtpTransceiver) }
+        ios.transceivers.map { RtpTransceiver(it as RTCRtpTransceiver) }
 
     actual fun addTrack(track: MediaStreamTrack, streamIds: List<String>): RtpSender {
-        return RtpSender(native.addTrack(track.native, streamIds.freeze()).freeze())
+        return RtpSender(ios.addTrack(track.ios, streamIds.freeze()).freeze())
     }
 
-    actual fun removeTrack(sender: RtpSender): Boolean = native.removeTrack(sender.native)
+    actual fun removeTrack(sender: RtpSender): Boolean = ios.removeTrack(sender.native)
 
     actual suspend fun getStats(): RtcStatsReport? {
         // TODO not implemented yet
@@ -172,6 +182,6 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
 
     actual fun close() {
         scope.cancel()
-        native.close()
+        ios.close()
     }
 }

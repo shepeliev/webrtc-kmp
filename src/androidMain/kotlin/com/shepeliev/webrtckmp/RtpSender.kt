@@ -7,7 +7,7 @@ actual class RtpSender internal constructor(val native: NativeRtpSender) {
         get() = native.id()
 
     actual val track: MediaStreamTrack?
-        get() = native.track()?.asCommon(remote = false)
+        get() = native.track()?.asCommon()
 
     actual var parameters: RtpParameters
         get() = RtpParameters(native.parameters)
@@ -19,6 +19,6 @@ actual class RtpSender internal constructor(val native: NativeRtpSender) {
         get() = native.dtmf()?.let { DtmfSender(it) }
 
     actual suspend fun replaceTrack(track: MediaStreamTrack?) {
-        native.setTrack(track?.native, true)
+        native.setTrack(track?.android, true)
     }
 }

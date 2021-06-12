@@ -12,21 +12,18 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import kotlin.native.concurrent.AtomicInt
 
-actual open class MediaStreamTrack(
-    val native: RTCMediaStreamTrack,
-    actual val remote: Boolean,
-) {
+actual open class MediaStreamTrack internal constructor(val ios: RTCMediaStreamTrack) {
 
-    private val scope = MainScope()
+    protected val scope = MainScope()
 
     actual val id: String
-        get() = native.trackId
+        get() = ios.trackId
 
     actual val kind: MediaStreamTrackKind
-        get() = when (native.kind()) {
+        get() = when (ios.kind()) {
             "audio" -> MediaStreamTrackKind.Audio
             "video" -> MediaStreamTrackKind.Video
-            else -> throw IllegalStateException("Unknown track kind: ${native.kind()}")
+            else -> throw IllegalStateException("Unknown track kind: ${ios.kind()}")
         }
 
     actual val label: String
@@ -40,9 +37,9 @@ actual open class MediaStreamTrack(
         get() = !enabled
 
     actual var enabled: Boolean
-        get() = native.isEnabled
+        get() = ios.isEnabled
         set(value) {
-            native.isEnabled = value
+            ios.isEnabled = value
             if (value) {
                 scope.launch { onUnmuteInternal.emit(Unit) }
             } else {
@@ -50,35 +47,27 @@ actual open class MediaStreamTrack(
             }
         }
 
-    actual val readOnly: Boolean = true
-
     actual val readyState: MediaStreamTrackState
         get() {
             if (endedFlag.value == 1) {
                 return MediaStreamTrackState.Ended
             }
-            return rtcMediaStreamTrackStateAsCommon(native.readyState)
+            return rtcMediaStreamTrackStateAsCommon(ios.readyState)
         }
 
     private val onEndedInternal = MutableSharedFlow<Unit>()
     actual val onEnded: Flow<Unit> = onEndedInternal.asSharedFlow()
 
     private val onMuteInternal = MutableSharedFlow<Unit>()
-    actual val onMute: Flow<Unit> = onEndedInternal.asSharedFlow()
+    actual val onMute: Flow<Unit> = onMuteInternal.asSharedFlow()
 
     private val onUnmuteInternal = MutableSharedFlow<Unit>()
-    actual val onUnmute: Flow<Unit> = onEndedInternal.asSharedFlow()
+    actual val onUnmute: Flow<Unit> = onUnmuteInternal.asSharedFlow()
 
     private val endedFlag = AtomicInt(0)
 
-    actual fun stop() {
+    actual open fun stop() {
         if (!endedFlag.compareAndSet(0, 1)) return
-
-        when (kind) {
-            MediaStreamTrackKind.Audio -> PhoneMediaDevices.onAudioTrackStopped()
-            MediaStreamTrackKind.Video -> PhoneMediaDevices.onVideoTrackStopped()
-        }
-
         enabled = false
         scope.launch {
             onEndedInternal.emit(Unit)
@@ -87,10 +76,10 @@ actual open class MediaStreamTrack(
     }
 
     companion object {
-        fun createCommon(native: RTCMediaStreamTrack, remote: Boolean): MediaStreamTrack {
-            return when (native) {
-                is RTCAudioTrack -> AudioStreamTrack(native, remote)
-                is RTCVideoTrack -> VideoStreamTrack(native, remote)
+        fun createCommon(ios: RTCMediaStreamTrack): MediaStreamTrack {
+            return when (ios) {
+                is RTCAudioTrack -> AudioStreamTrack(ios)
+                is RTCVideoTrack -> VideoStreamTrack(ios)
                 else -> error("Unknown native MediaStreamTrack: $this")
             }
         }

@@ -144,22 +144,19 @@ internal class PeerConnectionObserver(
         val receiver = didStartReceivingOnTransceiver.receiver
         val track = when (didStartReceivingOnTransceiver.mediaType) {
             RTCRtpMediaType.RTCRtpMediaTypeAudio -> {
-                AudioStreamTrack(receiver.track as RTCAudioTrack, remote = true)
+                AudioStreamTrack(receiver.track as RTCAudioTrack)
             }
 
             RTCRtpMediaType.RTCRtpMediaTypeVideo -> {
-                VideoStreamTrack(receiver.track as RTCVideoTrack, remote = true)
+                VideoStreamTrack(receiver.track as RTCVideoTrack)
             }
 
             RTCRtpMediaType.RTCRtpMediaTypeData,
             RTCRtpMediaType.RTCRtpMediaTypeUnsupported -> null
         }
-        val streams = sender.streamIds.map { id ->
-            MediaStream("$id").apply { track?.also { addTrack(it) } }
-        }
         val trackEvent = TrackEvent(
             receiver = RtpReceiver(didStartReceivingOnTransceiver.receiver),
-            streams = streams,
+            streams = sender.streamIds.map { "$it" },
             track = track,
             transceiver = RtpTransceiver(didStartReceivingOnTransceiver)
         ).freeze()

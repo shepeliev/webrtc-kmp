@@ -1,16 +1,26 @@
 package com.shepeliev.webrtckmp
 
-import kotlin.coroutines.cancellation.CancellationException
+const val DEFAULT_VIDEO_WIDTH = 1280
+const val DEFAULT_VIDEO_HEIGHT = 720
+const val DEFAULT_FRAME_RATE = 30
 
-expect object MediaDevices {
-    @Throws(CameraVideoCapturerException::class, CancellationException::class)
-    suspend fun getUserMedia(audio: Boolean, video: Boolean): MediaStream
-
+interface MediaDevices {
+    suspend fun getUserMedia(streamConstraints: MediaStreamConstraintsBuilder.() -> Unit = {}): MediaStream
     suspend fun enumerateDevices(): List<MediaDeviceInfo>
+}
 
-    @Throws(CameraVideoCapturerException::class, CancellationException::class)
-    suspend fun switchCamera(): MediaDeviceInfo
+fun MediaTrackConstraints.toMandatoryMap(): Map<Any?, *> {
+    return mutableMapOf<Any?, String>().apply {
+        echoCancellation?.exact?.let { this += "googEchoCancellation" to "$it" }
+        autoiGainControl?.exact?.let { this += "googAutoGainControl" to "$it" }
+        noiseSuppression?.exact?.let { this += "googNoiseSuppression" to "$it" }
+    }
+}
 
-    @Throws(CameraVideoCapturerException::class, CancellationException::class)
-    suspend fun switchCamera(cameraId: String): MediaDeviceInfo
+fun MediaTrackConstraints.toOptionalMap(): Map<Any?, *> {
+    return mutableMapOf<Any?, String>().apply {
+        echoCancellation?.ideal?.let { this += "googEchoCancellation" to "$it" }
+        autoiGainControl?.ideal?.let { this += "googAutoGainControl" to "$it" }
+        noiseSuppression?.ideal?.let { this += "googNoiseSuppression" to "$it" }
+    }
 }
