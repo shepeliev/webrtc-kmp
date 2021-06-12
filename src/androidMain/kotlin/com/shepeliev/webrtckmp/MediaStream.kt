@@ -17,7 +17,6 @@ actual class MediaStream internal constructor(val android: MediaStream) {
     private var videoTracksInternal = mutableListOf<VideoStreamTrack>()
     actual val videoTracks: List<VideoStreamTrack> = videoTracksInternal
 
-
     actual fun addTrack(track: AudioStreamTrack) {
         android.addTrack(track.android as AudioTrack)
         audioTracksInternal += track

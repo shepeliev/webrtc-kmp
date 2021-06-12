@@ -21,10 +21,12 @@ internal object MediaDevicesImpl : MediaDevices {
             val mediaConstraints = MediaConstraints().apply {
                 mandatory.addAll(
                     constraints.audio.toMandatoryMap()
-                        .map { (k, v) -> MediaConstraints.KeyValuePair("$k", "$v") })
+                        .map { (k, v) -> MediaConstraints.KeyValuePair("$k", "$v") }
+                )
                 optional.addAll(
                     constraints.audio.toOptionalMap()
-                        .map { (k, v) -> MediaConstraints.KeyValuePair("$k", "$v") })
+                        .map { (k, v) -> MediaConstraints.KeyValuePair("$k", "$v") }
+                )
             }
             val audioSource = peerConnectionFactory.createAudioSource(mediaConstraints)
             val track =

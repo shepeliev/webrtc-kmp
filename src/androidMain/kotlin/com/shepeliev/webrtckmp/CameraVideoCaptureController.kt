@@ -62,7 +62,6 @@ class CameraVideoCaptureController(private val constraints: MediaTrackConstraint
             ?: constraints.frameRate?.ideal
             ?: DEFAULT_FRAME_RATE
 
-
         val formats = enumerator.getSupportedFormats(device)
         val framerates = formats?.map { it.framerate } ?: emptyList()
         if (framerates.isEmpty()) throw CameraVideoCapturerException.notFound(constraints)
