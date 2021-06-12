@@ -4,8 +4,6 @@ import WebRTC.RTCDataBuffer
 import WebRTC.RTCDataChannel
 import WebRTC.RTCDataChannelDelegateProtocol
 import WebRTC.RTCDataChannelState
-import com.shepeliev.webrtckmp.ios.toByteArray
-import com.shepeliev.webrtckmp.ios.toNSData
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow

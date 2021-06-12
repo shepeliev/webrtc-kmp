@@ -1,3 +1,3 @@
-package com.shepeliev.webrtckmp.android
+package com.shepeliev.webrtckmp
 
 class RecordAudioPermissionException : Exception()

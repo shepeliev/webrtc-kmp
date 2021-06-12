@@ -1,13 +1,6 @@
-package com.shepeliev.webrtckmp.android
+package com.shepeliev.webrtckmp
 
 import android.util.Log
-import com.shepeliev.webrtckmp.CameraVideoCapturerException
-import com.shepeliev.webrtckmp.DEFAULT_FRAME_RATE
-import com.shepeliev.webrtckmp.DEFAULT_VIDEO_HEIGHT
-import com.shepeliev.webrtckmp.DEFAULT_VIDEO_WIDTH
-import com.shepeliev.webrtckmp.FacingMode
-import com.shepeliev.webrtckmp.MediaTrackConstraints
-import com.shepeliev.webrtckmp.applicationContext
 import org.webrtc.Camera2Enumerator
 import org.webrtc.CameraEnumerationAndroid
 import org.webrtc.CameraVideoCapturer

@@ -1,7 +1,5 @@
-package com.shepeliev.webrtckmp.android
+package com.shepeliev.webrtckmp
 
-import com.shepeliev.webrtckmp.applicationContext
-import com.shepeliev.webrtckmp.eglBaseContext
 import org.webrtc.CapturerObserver
 import org.webrtc.Size
 import org.webrtc.SurfaceTextureHelper
@@ -13,6 +11,8 @@ abstract class AbstractVideoCaptureController {
 
     protected val videoCapturer: VideoCapturer by lazy { createVideoCapturer() }
 
+    private var textureHelper: SurfaceTextureHelper? = null
+
     abstract fun createVideoCapturer(): VideoCapturer
 
     abstract fun selectVideoSize(): Size
@@ -20,8 +20,8 @@ abstract class AbstractVideoCaptureController {
     abstract fun selectFps(): Int
 
     fun initialize(observer: CapturerObserver) {
-        val helper = SurfaceTextureHelper.create("VideoCapturerTextureHelper", eglBaseContext)
-        videoCapturer.initialize(helper, applicationContext, observer)
+        textureHelper = SurfaceTextureHelper.create("VideoCapturerTextureHelper", eglBaseContext)
+        videoCapturer.initialize(textureHelper, applicationContext, observer)
     }
 
     fun startCapture() {
@@ -32,5 +32,7 @@ abstract class AbstractVideoCaptureController {
 
     fun stopCapture() {
         videoCapturer.stopCapture()
+        textureHelper?.dispose()
+        textureHelper = null
     }
 }

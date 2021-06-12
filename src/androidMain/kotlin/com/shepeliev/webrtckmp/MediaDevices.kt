@@ -3,9 +3,6 @@ package com.shepeliev.webrtckmp
 import android.Manifest
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
-import com.shepeliev.webrtckmp.android.CameraPermissionException
-import com.shepeliev.webrtckmp.android.CameraVideoCaptureController
-import com.shepeliev.webrtckmp.android.RecordAudioPermissionException
 import org.webrtc.Camera2Enumerator
 import org.webrtc.MediaConstraints
 import java.util.UUID
