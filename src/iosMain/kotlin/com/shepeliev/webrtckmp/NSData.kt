@@ -1,4 +1,4 @@
-package com.shepeliev.webrtckmp.ios
+package com.shepeliev.webrtckmp
 
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.memScoped

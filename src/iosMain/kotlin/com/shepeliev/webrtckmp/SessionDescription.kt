@@ -3,9 +3,9 @@ package com.shepeliev.webrtckmp
 import WebRTC.RTCSdpType
 import WebRTC.RTCSessionDescription
 
-actual class SessionDescription internal constructor(val native: RTCSessionDescription) {
-    actual val type: SessionDescriptionType = rtcSdpTypeAsCommon(native.type)
-    actual val sdp: String = native.description!!
+actual class SessionDescription internal constructor(val ios: RTCSessionDescription) {
+    actual val type: SessionDescriptionType = rtcSdpTypeAsCommon(ios.type)
+    actual val sdp: String = ios.description!!
 }
 
 private fun rtcSdpTypeAsCommon(type: RTCSdpType): SessionDescriptionType {

@@ -4,14 +4,16 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import kotlinx.coroutines.runBlocking
 import org.webrtc.EglBase
+import org.webrtc.PeerConnectionFactory
 
 actual inline fun runTest(crossinline block: suspend () -> Unit) = runBlocking { block() }
 
-actual fun initializeWebRtc() {
+actual fun initialize() {
     val context = ApplicationProvider.getApplicationContext<Context>()
-    WebRtcKmp.initialize(context, EglBase.create())
+    initializeWebRtc(context, EglBase.create())
 }
 
 actual fun disposeWebRtc() {
-    WebRtcKmp.dispose()
+    peerConnectionFactory.dispose()
+    PeerConnectionFactory.shutdownInternalTracer()
 }

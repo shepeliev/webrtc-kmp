@@ -7,9 +7,7 @@ expect open class MediaStreamTrack {
     val kind: MediaStreamTrackKind
     val label: String
     val muted: Boolean
-    val readOnly: Boolean
     val readyState: MediaStreamTrackState
-    val remote: Boolean
 
     var enabled: Boolean
 
@@ -17,7 +15,7 @@ expect open class MediaStreamTrack {
     val onMute: Flow<Unit>
     val onUnmute: Flow<Unit>
 
-    fun stop()
+    open fun stop()
 }
 
 enum class MediaStreamTrackState { Live, Ended }

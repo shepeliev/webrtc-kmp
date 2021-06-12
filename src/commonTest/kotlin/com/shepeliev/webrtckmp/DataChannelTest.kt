@@ -20,12 +20,11 @@ class DataChannelTest {
     @BeforeTest
     fun setUp() {
         appScope = MainScope()
-        initializeWebRtc()
+        initialize()
     }
 
     @AfterTest
     fun tearDown() {
-        disposeWebRtc()
         appScope.cancel()
     }
 
@@ -78,10 +77,10 @@ class DataChannelTest {
             }
             .launchIn(appScope)
 
-        val offer = pc1.createOffer(mediaConstraints())
+        val offer = pc1.createOffer(OfferAnswerOptions())
         pc1.setLocalDescription(offer)
         pc2.setRemoteDescription(offer)
-        val answer = pc2.createAnswer(mediaConstraints())
+        val answer = pc2.createAnswer(OfferAnswerOptions())
         pc2.setLocalDescription(answer)
         pc1.setRemoteDescription(answer)
 
