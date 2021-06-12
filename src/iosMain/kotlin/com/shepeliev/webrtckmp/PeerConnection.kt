@@ -7,22 +7,10 @@ import WebRTC.RTCPeerConnection
 import WebRTC.RTCRtpReceiver
 import WebRTC.RTCRtpSender
 import WebRTC.RTCRtpTransceiver
-import WebRTC.RTCSessionDescription
 import WebRTC.dataChannelForLabel
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
-import platform.Foundation.NSError
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 import kotlin.native.concurrent.freeze
-
-private typealias CompletionHandler<T> = (result: T?, error: NSError?) -> Unit
 
 actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguration) {
 
@@ -83,21 +71,13 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
     }
 
     actual suspend fun createOffer(options: OfferAnswerOptions): SessionDescription {
-        return sessionDescription(options, ios::offerForConstraints)
+        val constraints = options.toRTCMediaConstraints()
+        return SessionDescription(ios.awaitResult { offerForConstraints(constraints, it) })
     }
 
     actual suspend fun createAnswer(options: OfferAnswerOptions): SessionDescription {
-        return sessionDescription(options, ios::answerForConstraints)
-    }
-
-    private suspend fun sessionDescription(
-        options: OfferAnswerOptions,
-        createSdp: (RTCMediaConstraints, CompletionHandler<RTCSessionDescription>) -> Unit
-    ): SessionDescription {
-        val nativeSdp = suspendCoroutineInternal<RTCSessionDescription> {
-            createSdp(options.toRTCMediaConstraints(), it)
-        }
-        return SessionDescription(nativeSdp!!)
+        val constraints = options.toRTCMediaConstraints()
+        return SessionDescription(ios.awaitResult { answerForConstraints(constraints, it) })
     }
 
     private fun OfferAnswerOptions.toRTCMediaConstraints(): RTCMediaConstraints {
@@ -110,41 +90,12 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         return RTCMediaConstraints(mandatory, null)
     }
 
-    // TODO: replace the workaround after resolving https://github.com/Kotlin/kotlinx.coroutines/issues/2363
-    private suspend inline fun <T> suspendCoroutineInternal(crossinline block: (CompletionHandler<T>) -> Unit): T? {
-        return suspendCoroutine { cont ->
-            val resultFlow = MutableStateFlow<Pair<T?, NSError?>?>(null).freeze()
-            resultFlow
-                .filterNotNull()
-                .onEach { (result, error) ->
-                    if (error != null) {
-                        val errorText = error.localizedDescription
-                        cont.resumeWithException(RuntimeException(errorText))
-                    } else {
-                        cont.resume(result)
-                    }
-                }
-                .launchIn(scope)
-            val completionHandler = { result: T?, error: NSError? ->
-                scope.launch { resultFlow.emit(Pair(result, error)) }
-                Unit
-            }
-            block(completionHandler.freeze())
-        }
-    }
-
     actual suspend fun setLocalDescription(description: SessionDescription) {
-        suspendCoroutineInternal<Unit> { completion ->
-            val handler = { error: NSError? -> completion(null, error) }
-            ios.setLocalDescription(description.native, handler.freeze())
-        }
+        ios.await { setLocalDescription(description.ios, it) }
     }
 
     actual suspend fun setRemoteDescription(description: SessionDescription) {
-        suspendCoroutineInternal<Unit> { completion ->
-            val handler = { error: NSError? -> completion(null, error) }
-            ios.setRemoteDescription(description.native, handler.freeze())
-        }
+        ios.await { setRemoteDescription(description.ios, it) }
     }
 
     actual fun setConfiguration(configuration: RtcConfiguration): Boolean {
