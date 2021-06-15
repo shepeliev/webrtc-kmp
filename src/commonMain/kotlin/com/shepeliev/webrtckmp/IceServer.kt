@@ -1,8 +1,6 @@
 package com.shepeliev.webrtckmp
 
-import kotlin.jvm.JvmOverloads
-
-expect class IceServer @JvmOverloads constructor(
+expect class IceServer(
     urls: List<String>,
     username: String = "",
     password: String = "",

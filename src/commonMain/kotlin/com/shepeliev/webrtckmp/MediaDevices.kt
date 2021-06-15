@@ -12,7 +12,7 @@ interface MediaDevices {
 fun MediaTrackConstraints.toMandatoryMap(): Map<Any?, *> {
     return mutableMapOf<Any?, String>().apply {
         echoCancellation?.exact?.let { this += "googEchoCancellation" to "$it" }
-        autoiGainControl?.exact?.let { this += "googAutoGainControl" to "$it" }
+        autoGainControl?.exact?.let { this += "googAutoGainControl" to "$it" }
         noiseSuppression?.exact?.let { this += "googNoiseSuppression" to "$it" }
     }
 }
@@ -20,7 +20,7 @@ fun MediaTrackConstraints.toMandatoryMap(): Map<Any?, *> {
 fun MediaTrackConstraints.toOptionalMap(): Map<Any?, *> {
     return mutableMapOf<Any?, String>().apply {
         echoCancellation?.ideal?.let { this += "googEchoCancellation" to "$it" }
-        autoiGainControl?.ideal?.let { this += "googAutoGainControl" to "$it" }
+        autoGainControl?.ideal?.let { this += "googAutoGainControl" to "$it" }
         noiseSuppression?.ideal?.let { this += "googNoiseSuppression" to "$it" }
     }
 }

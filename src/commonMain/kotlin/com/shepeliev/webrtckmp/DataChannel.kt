@@ -11,7 +11,7 @@ expect class DataChannel {
     val onOpen: Flow<Unit>
     val onClose: Flow<Unit>
     val onClosing: Flow<Unit>
-    val onError: Flow<Throwable>
+    val onError: Flow<String>
     val onMessage: Flow<ByteArray>
 
     fun send(data: ByteArray): Boolean

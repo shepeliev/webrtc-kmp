@@ -1,6 +1,5 @@
 package com.shepeliev.webrtckmp
 
-import WebRTC.RTCDataChannel
 import WebRTC.RTCDataChannelConfiguration
 import WebRTC.RTCMediaConstraints
 import WebRTC.RTCPeerConnection
@@ -21,9 +20,6 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
 
     actual val remoteDescription: SessionDescription?
         get() = ios.remoteDescription?.let { SessionDescription(it) }
-
-    actual val certificate: RtcCertificatePem?
-        get() = ios.configuration.certificate?.let { RtcCertificatePem(it) }
 
     actual val signalingState: SignalingState
         get() = rtcSignalingStateAsCommon(ios.signalingState())
@@ -50,7 +46,6 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         protocol: String,
         negotiated: Boolean
     ): DataChannel? {
-        RTCDataChannel()
         val config = RTCDataChannelConfiguration().also {
             it.channelId = id
             it.isOrdered = ordered

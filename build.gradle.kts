@@ -46,6 +46,7 @@ kotlin {
     val iosArm64 = iosArm64(configure = configureNativeTarget())
 
     js {
+        useCommonJs()
         browser {
             testTask {
                 useKarma {
@@ -86,6 +87,18 @@ kotlin {
                 implementation("androidx.test.ext:junit:1.1.2")
                 implementation("androidx.test:runner:1.3.0")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
+            }
+        }
+
+        val jsMain by getting {
+            dependencies {
+                implementation(kotlin("stdlib-js"))
+            }
+        }
+
+        val jsTest by getting {
+            dependencies {
+                implementation(kotlin("test-js"))
             }
         }
 

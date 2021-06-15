@@ -3,6 +3,9 @@ package com.shepeliev.webrtckmp
 import org.w3c.dom.mediacapture.MediaStream as JsMediaStream
 
 actual class MediaStream internal constructor(val js: JsMediaStream) {
+    actual val id: String
+        get() = js.id
+
     actual val tracks: List<MediaStreamTrack>
         get() = audioTracks + videoTracks
 
@@ -20,15 +23,7 @@ actual class MediaStream internal constructor(val js: JsMediaStream) {
         js.addTrack(track.js)
     }
 
-    actual fun getTrackById(id: String): MediaStreamTrack? {
-        return js.getTrackById(id)?.let {
-            when (it.kind) {
-                "audio" -> AudioStreamTrack(it)
-                "video" -> VideoStreamTrack(it)
-                else -> error("Unknown kind of media stream track: ${it.kind}")
-            }
-        }
-    }
+    actual fun getTrackById(id: String): MediaStreamTrack? = js.getTrackById(id)?.asCommon()
 
     actual fun removeTrack(track: AudioStreamTrack) {
         js.removeTrack(track.js)
@@ -38,7 +33,7 @@ actual class MediaStream internal constructor(val js: JsMediaStream) {
         js.removeTrack(track.js)
     }
 
-    actual fun dispose() {
+    actual fun release() {
         tracks.forEach(MediaStreamTrack::stop)
     }
 }

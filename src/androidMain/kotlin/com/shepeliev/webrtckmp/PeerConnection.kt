@@ -31,9 +31,6 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
     actual val remoteDescription: SessionDescription?
         get() = android.remoteDescription?.let { SessionDescription(it) }
 
-    actual val certificate: RtcCertificatePem?
-        get() = android.certificate?.let { RtcCertificatePem(it) }
-
     actual val signalingState: SignalingState
         get() = android.signalingState().asCommon()
 
@@ -72,7 +69,7 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
             it.protocol = protocol
             it.negotiated = negotiated
         }
-        return android.createDataChannel(label, init)?.let { DataChannel(it) }
+        return android.createDataChannel(label, init)?.let {  DataChannel(it) }
     }
 
     actual suspend fun createOffer(options: OfferAnswerOptions): SessionDescription {

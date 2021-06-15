@@ -2,30 +2,22 @@ package com.shepeliev.webrtckmp
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class DataChannelTest {
 
-    lateinit var appScope: CoroutineScope
+    private val appScope: CoroutineScope = MainScope()
 
     @BeforeTest
     fun setUp() {
-        appScope = MainScope()
         initialize()
-    }
-
-    @AfterTest
-    fun tearDown() {
-        appScope.cancel()
     }
 
     @Test
@@ -33,17 +25,7 @@ class DataChannelTest {
         val pc1 = PeerConnection()
         val pc2 = PeerConnection()
 
-        val channel = Channel<String>()
-
-        pc1.createDataChannel("dataChannel")!!.apply {
-            onMessage
-                .onEach {
-                    val text = it.decodeToString()
-                    appScope.launch { channel.send(text) }
-                }
-                .launchIn(appScope)
-        }
-
+        val dataChannel = pc1.createDataChannel("dataChannel")!!
         val pc1Candidates = mutableListOf<IceCandidate>()
         val pc2Candidates = mutableListOf<IceCandidate>()
 
@@ -84,8 +66,10 @@ class DataChannelTest {
         pc2.setLocalDescription(answer)
         pc1.setRemoteDescription(answer)
 
-        val text = withTimeout(5000) { channel.receive() }
-        assertEquals("Hello WebRTC KMP!", text)
+        val message = withTimeout(5000) {
+            dataChannel.onMessage.map { it.decodeToString() }.first()
+        }
+        assertEquals("Hello WebRTC KMP!", message)
 
         pc1.close()
         pc2.close()

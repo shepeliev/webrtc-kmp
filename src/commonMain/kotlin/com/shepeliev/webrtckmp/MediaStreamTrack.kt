@@ -15,7 +15,7 @@ expect open class MediaStreamTrack {
     val onMute: Flow<Unit>
     val onUnmute: Flow<Unit>
 
-    open fun stop()
+    fun stop()
 }
 
 enum class MediaStreamTrackState { Live, Ended }

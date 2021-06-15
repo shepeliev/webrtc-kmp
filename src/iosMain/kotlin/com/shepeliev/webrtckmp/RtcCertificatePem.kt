@@ -10,7 +10,7 @@ actual class RtcCertificatePem(val native: RTCCertificate) {
         get() = native.certificate
 
     actual companion object {
-        actual fun generateCertificate(keyType: KeyType, expires: Long): RtcCertificatePem {
+        actual suspend fun generateCertificate(keyType: KeyType, expires: Long): RtcCertificatePem {
             val keyTypeValue = when (keyType) {
                 KeyType.ECDSA -> "ECDSA"
                 KeyType.RSA -> "RSASSA-PKCS1-v1_5"

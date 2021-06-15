@@ -81,3 +81,9 @@ actual open class MediaStreamTrack internal constructor(val js: JsMediaStreamTra
         }
     }
 }
+
+internal fun JsMediaStreamTrack.asCommon(): MediaStreamTrack = when (kind) {
+    "audio" -> AudioStreamTrack(this)
+    "video" -> VideoStreamTrack(this)
+    else -> error("Unknown kind of media stream track: $kind")
+}

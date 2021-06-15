@@ -9,7 +9,6 @@ import kotlin.jvm.JvmName
 expect class PeerConnection(rtcConfiguration: RtcConfiguration = RtcConfiguration()) {
     val localDescription: SessionDescription?
     val remoteDescription: SessionDescription?
-    val certificate: RtcCertificatePem?
     val signalingState: SignalingState
     val iceConnectionState: IceConnectionState
     val connectionState: PeerConnectionState

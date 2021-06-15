@@ -33,8 +33,8 @@ actual class DataChannel(val native: AndroidDataChannel) : AndroidDataChannel.Ob
     private val onCloseInternal = MutableSharedFlow<Unit>()
     actual val onClose: Flow<Unit> = onCloseInternal.asSharedFlow()
 
-    private val onErrorInternal = MutableSharedFlow<Throwable>()
-    actual val onError: Flow<Throwable> = onErrorInternal.asSharedFlow()
+    private val onErrorInternal = MutableSharedFlow<String>()
+    actual val onError: Flow<String> = onErrorInternal.asSharedFlow()
 
     private val onMessageInternal = MutableSharedFlow<ByteArray>()
     actual val onMessage: Flow<ByteArray> = onMessageInternal.asSharedFlow()

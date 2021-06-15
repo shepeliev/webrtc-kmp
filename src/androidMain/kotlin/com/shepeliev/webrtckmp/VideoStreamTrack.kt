@@ -23,12 +23,12 @@ actual class VideoStreamTrack internal constructor(
         }.launchIn(scope)
     }
 
-    actual suspend fun switchCamera() {
-        (videoCaptureController as? CameraVideoCaptureController)?.switchCamera()
-    }
-
-    actual suspend fun switchCamera(deviceId: String) {
-        (videoCaptureController as? CameraVideoCaptureController)?.switchCamera(deviceId)
+    actual suspend fun switchCamera(deviceId: String?) {
+        if (deviceId == null) {
+            (videoCaptureController as? CameraVideoCaptureController)?.switchCamera()
+        } else {
+            (videoCaptureController as? CameraVideoCaptureController)?.switchCamera(deviceId)
+        }
     }
 
     fun addSink(sink: VideoSink) {
@@ -39,7 +39,7 @@ actual class VideoStreamTrack internal constructor(
         (android as VideoTrack).removeSink(sink)
     }
 
-    actual override fun stop() {
+    override fun stop() {
         videoCaptureController?.stopCapture()
         super.stop()
     }

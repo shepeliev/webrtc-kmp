@@ -41,7 +41,7 @@ internal class CameraVideoCaptureController(private val constraints: MediaTrackC
     }
 
     private fun selectDevice() {
-        val deviceId = constraints.deviceId.firstOrNull()
+        val deviceId = constraints.deviceId
         val isFrontFacing = constraints.facingMode?.exact == FacingMode.User ||
             constraints.facingMode?.ideal == FacingMode.User
         position = when (isFrontFacing) {
