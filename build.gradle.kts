@@ -129,15 +129,15 @@ android {
     }
 }
 
-tasks {
-    val updatePodspecVersion by registering(Copy::class) {
-        val from = file("webrtc-kmp.podspec")
-        from.writeText(
-            from.readText()
-                .replace("version\\s*=\\s*'(.+)'".toRegex(), "version = '${project.version}'")
-        )
-    }
-}
+//tasks {
+//    val updatePodspecVersion by registering(Copy::class) {
+//        val from = file("webrtc-kmp.podspec")
+//        from.writeText(
+//            from.readText()
+//                .replace("version\\s*=\\s*'(.+)'".toRegex(), "version = '${project.version}'")
+//        )
+//    }
+//}
 
 nexusPublishing {
     val localProps = gradleLocalProperties(rootDir)
