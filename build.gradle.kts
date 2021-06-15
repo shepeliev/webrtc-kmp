@@ -92,6 +92,7 @@ kotlin {
 
         val jsMain by getting {
             dependencies {
+                implementation(npm("webrtc-adapter", "8.0.0"))
                 implementation(kotlin("stdlib-js"))
             }
         }

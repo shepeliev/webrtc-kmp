@@ -5,6 +5,9 @@ import org.w3c.dom.mediacapture.MediaStreamTrack
 import kotlin.js.Date
 import kotlin.js.Promise
 
+@JsModule("webrtc-adapter")
+external object adapter
+
 external class RTCPeerConnection(configuration: dynamic) {
     val localDescription: RTCSessionDescription?
     val remoteDescription: RTCSessionDescription?
