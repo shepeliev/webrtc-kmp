@@ -15,7 +15,6 @@ actual inline fun runTest(crossinline block: suspend () -> Unit) = GlobalScope
         }
     }.asDynamic()
 
-
 fun Throwable.log() {
     console.error(this)
     cause?.let {
@@ -28,4 +27,5 @@ actual fun initialize() {
 }
 
 actual fun disposeWebRtc() {
+    // no implementation for JS
 }

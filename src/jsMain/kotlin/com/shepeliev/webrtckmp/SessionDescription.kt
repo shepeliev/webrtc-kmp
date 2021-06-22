@@ -12,4 +12,3 @@ actual class SessionDescription internal constructor(val js: RTCSessionDescripti
         else -> throw IllegalArgumentException("Illegal session description type: $this")
     }
 }
-
