@@ -45,7 +45,7 @@ jobs:
           name: "iOS Tests Report HTML"
           path: "webrtc-kmp/build/reports/tests/iosTest"
       - name: Run JS tests
-          run: ./gradlew jsTest
+        run: ./gradlew jsTest
       - name: Upload JS test artifact
         uses: actions/upload-artifact@v2
         if: failure()
