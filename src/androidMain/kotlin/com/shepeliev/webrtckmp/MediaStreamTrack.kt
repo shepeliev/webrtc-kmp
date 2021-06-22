@@ -12,7 +12,7 @@ import org.webrtc.MediaStreamTrack as AndroidMediaStreamTrack
 import org.webrtc.VideoTrack as AndroidVideoTrack
 
 actual open class MediaStreamTrack internal constructor(
-    val android: org.webrtc.MediaStreamTrack,
+    val android: AndroidMediaStreamTrack,
     private val mediaSource: MediaSource?,
 ) {
 
@@ -63,7 +63,6 @@ actual open class MediaStreamTrack internal constructor(
 
     actual open fun stop() {
         if (readyState == MediaStreamTrackState.Ended) return
-        android.dispose()
         scope.launch {
             onEndedInternal.emit(Unit)
             scope.cancel()
@@ -82,7 +81,7 @@ internal fun AndroidMediaStreamTrack.asCommon(): MediaStreamTrack {
 
 private fun AndroidMediaStreamTrack.State.asCommon(): MediaStreamTrackState {
     return when (this) {
-        org.webrtc.MediaStreamTrack.State.LIVE -> MediaStreamTrackState.Live
-        org.webrtc.MediaStreamTrack.State.ENDED -> MediaStreamTrackState.Ended
+        AndroidMediaStreamTrack.State.LIVE -> MediaStreamTrackState.Live
+        AndroidMediaStreamTrack.State.ENDED -> MediaStreamTrackState.Ended
     }
 }

@@ -3,11 +3,12 @@ package com.shepeliev.webrtckmp
 import org.webrtc.AudioTrack
 import org.webrtc.MediaStream
 import org.webrtc.VideoTrack
+import java.util.UUID
 
-actual class MediaStream internal constructor(val android: MediaStream) {
-    actual val id: String
-        get() = android.id
-
+actual class MediaStream internal constructor(
+    val android: MediaStream?,
+    actual val id: String = android?.id ?: UUID.randomUUID().toString()
+) {
     actual val tracks: List<MediaStreamTrack>
         get() = audioTracks + videoTracks
 
@@ -18,12 +19,12 @@ actual class MediaStream internal constructor(val android: MediaStream) {
     actual val videoTracks: List<VideoStreamTrack> = videoTracksInternal
 
     actual fun addTrack(track: AudioStreamTrack) {
-        android.addTrack(track.android as AudioTrack)
+        android?.addTrack(track.android as AudioTrack)
         audioTracksInternal += track
     }
 
     actual fun addTrack(track: VideoStreamTrack) {
-        android.addTrack(track.android as VideoTrack)
+        android?.addTrack(track.android as VideoTrack)
         videoTracksInternal += track
     }
 
@@ -32,17 +33,17 @@ actual class MediaStream internal constructor(val android: MediaStream) {
     }
 
     actual fun removeTrack(track: AudioStreamTrack) {
-        android.removeTrack(track.android as AudioTrack)
+        android?.removeTrack(track.android as AudioTrack)
         audioTracksInternal -= track
     }
 
     actual fun removeTrack(track: VideoStreamTrack) {
-        android.removeTrack(track.android as VideoTrack)
+        android?.removeTrack(track.android as VideoTrack)
         videoTracksInternal -= track
     }
 
     actual fun release() {
         tracks.forEach(MediaStreamTrack::stop)
-        android.dispose()
+        android?.dispose()
     }
 }

@@ -6,9 +6,9 @@ data class MediaStreamConstraints(
 )
 
 data class MediaTrackConstraints(
-    val deviceId: List<String> = emptyList(),
-    val groupId: List<String> = emptyList(),
-    val autoiGainControl: Constrain<Boolean>? = null,
+    val deviceId: String? = null,
+    val groupId: String? = null,
+    val autoGainControl: Constrain<Boolean>? = null,
     val channelCount: Constrain<Int>? = null,
     val echoCancellation: Constrain<Boolean>? = null,
     val latency: Constrain<Double>? = null,
@@ -81,11 +81,11 @@ class MediaStreamConstraintsBuilder {
 class MediaTrackConstraintsBuilder(internal var constraints: MediaTrackConstraints) {
 
     fun deviceId(id: String) {
-        constraints = constraints.copy(deviceId = constraints.deviceId + id)
+        constraints = constraints.copy(deviceId = id)
     }
 
     fun groupId(id: String) {
-        constraints = constraints.copy(groupId = constraints.groupId + id)
+        constraints = constraints.copy(groupId = id)
     }
 
     fun autoGainControl(enable: Boolean = true) {
@@ -95,7 +95,7 @@ class MediaTrackConstraintsBuilder(internal var constraints: MediaTrackConstrain
     fun autoGainControl(build: Constrain<Boolean>.() -> Unit) {
         val constrain = Constrain<Boolean>()
         build(constrain)
-        constraints = constraints.copy(autoiGainControl = constrain)
+        constraints = constraints.copy(autoGainControl = constrain)
     }
 
     fun channelCount(count: Int) {

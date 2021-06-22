@@ -11,7 +11,7 @@ actual class RtcCertificatePem internal constructor(val native: NativeRtcCertifi
         get() = native.certificate
 
     actual companion object {
-        actual fun generateCertificate(keyType: KeyType, expires: Long): RtcCertificatePem {
+        actual suspend fun generateCertificate(keyType: KeyType, expires: Long): RtcCertificatePem {
             return RtcCertificatePem(
                 NativeRtcCertificatePem.generateCertificate(keyType.asNative(), expires)
             )

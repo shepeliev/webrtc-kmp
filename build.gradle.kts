@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "com.shepeliev"
-version = "0.89.1"
+version = "0.89.2-SNAPSHOT"
 
 repositories {
     google()
@@ -44,6 +44,17 @@ kotlin {
 
     val iosX64 = iosX64("ios", configureNativeTarget())
     val iosArm64 = iosArm64(configure = configureNativeTarget())
+
+    js {
+        useCommonJs()
+        browser {
+            testTask {
+                useKarma {
+                    useChromeHeadless()
+                }
+            }
+        }
+    }
 
     sourceSets {
         val coroutinesVersion = "1.5.0-native-mt"
@@ -79,6 +90,19 @@ kotlin {
             }
         }
 
+        val jsMain by getting {
+            dependencies {
+                implementation(npm("webrtc-adapter", "8.0.0"))
+                implementation(kotlin("stdlib-js"))
+            }
+        }
+
+        val jsTest by getting {
+            dependencies {
+                implementation(kotlin("test-js"))
+            }
+        }
+
         configure(listOf(iosArm64, iosX64)) {
             compilations.getByName("main") {
                 source(sourceSets["iosMain"])
@@ -105,15 +129,15 @@ android {
     }
 }
 
-tasks {
-    val updatePodspecVersion by registering(Copy::class) {
-        val from = file("webrtc-kmp.podspec")
-        from.writeText(
-            from.readText()
-                .replace("version\\s*=\\s*'(.+)'".toRegex(), "version = '${project.version}'")
-        )
-    }
-}
+//tasks {
+//    val updatePodspecVersion by registering(Copy::class) {
+//        val from = file("webrtc-kmp.podspec")
+//        from.writeText(
+//            from.readText()
+//                .replace("version\\s*=\\s*'(.+)'".toRegex(), "version = '${project.version}'")
+//        )
+//    }
+//}
 
 nexusPublishing {
     val localProps = gradleLocalProperties(rootDir)

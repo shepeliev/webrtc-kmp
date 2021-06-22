@@ -29,15 +29,15 @@ actual class VideoStreamTrack internal constructor(
         (ios as RTCVideoTrack).removeRenderer(renderer)
     }
 
-    actual suspend fun switchCamera() {
-        videoCaptureController?.switchCamera()
+    actual suspend fun switchCamera(deviceId: String?) {
+        if (deviceId == null) {
+            videoCaptureController?.switchCamera()
+        } else {
+            videoCaptureController?.switchCamera(deviceId)
+        }
     }
 
-    actual suspend fun switchCamera(deviceId: String) {
-        videoCaptureController?.switchCamera(deviceId)
-    }
-
-    actual override fun stop() {
+    override fun stop() {
         videoCaptureController?.stopCapture()
         super.stop()
     }

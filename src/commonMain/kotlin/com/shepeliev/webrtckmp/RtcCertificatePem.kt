@@ -5,7 +5,7 @@ expect class RtcCertificatePem {
     val certificate: String
 
     companion object {
-        fun generateCertificate(
+        suspend fun generateCertificate(
             keyType: KeyType = KeyType.ECDSA,
             expires: Long = 2592000L
         ): RtcCertificatePem
