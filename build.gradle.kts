@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "com.shepeliev"
-version = "1.89.0-SNAPSHOT"
+version = "0.89.1"
 
 repositories {
     google()
