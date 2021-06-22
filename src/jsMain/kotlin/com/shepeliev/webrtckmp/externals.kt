@@ -26,7 +26,7 @@ external class RTCPeerConnection(configuration: dynamic) {
     var ontrack: ((RTCTrackEvent) -> Unit)?
 
     fun addIceCandidate(candidate: RTCIceCandidate): Promise<Unit>
-    fun addTrack(track: MediaStreamTrack, vararg streams: dynamic): RTCRtpSender
+    fun addTrack(track: MediaStreamTrack, vararg streams: MediaStream): RTCRtpSender
     fun close()
     fun createAnswer(options: dynamic): Promise<RTCSessionDescription>
     fun createDataChannel(label: String, options: dynamic): RTCDataChannel?

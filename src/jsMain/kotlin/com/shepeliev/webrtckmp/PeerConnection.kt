@@ -75,7 +75,7 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
                 scope.launch {
                     val trackEvent = TrackEvent(
                         receiver = RtpReceiver(rtcTrackEvent.receiver),
-                        streams = rtcTrackEvent.streams.map { it.id },
+                        streams = rtcTrackEvent.streams.map { MediaStream(it) },
                         track = rtcTrackEvent.track.asCommon(),
                         transceiver = RtpTransceiver(rtcTrackEvent.transceiver)
                     )
@@ -150,8 +150,9 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         return js.getTransceivers().map { RtpTransceiver(it) }
     }
 
-    actual fun addTrack(track: MediaStreamTrack, streamIds: List<String>): RtpSender {
-        return RtpSender(js.addTrack(track.js))
+    actual fun addTrack(track: MediaStreamTrack, vararg streams: MediaStream): RtpSender {
+        val jsStreams = streams.map { it.js }.toTypedArray()
+        return RtpSender(js.addTrack(track.js, *jsStreams))
     }
 
     actual fun removeTrack(sender: RtpSender): Boolean {

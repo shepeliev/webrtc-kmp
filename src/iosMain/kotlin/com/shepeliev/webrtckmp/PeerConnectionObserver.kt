@@ -154,9 +154,17 @@ internal class PeerConnectionObserver(
             RTCRtpMediaType.RTCRtpMediaTypeData,
             RTCRtpMediaType.RTCRtpMediaTypeUnsupported -> null
         }
+        val streams = sender.streamIds.map { id ->
+            MediaStream(ios = null, "$id").apply {
+                track?.also { safeTrack ->
+                    if (safeTrack is AudioStreamTrack) addTrack(safeTrack)
+                    if (safeTrack is VideoStreamTrack) addTrack(safeTrack)
+                }
+            }
+        }
         val trackEvent = TrackEvent(
             receiver = RtpReceiver(didStartReceivingOnTransceiver.receiver),
-            streams = sender.streamIds.map { "$it" },
+            streams = streams,
             track = track,
             transceiver = RtpTransceiver(didStartReceivingOnTransceiver)
         ).freeze()

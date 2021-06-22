@@ -66,7 +66,7 @@ expect class PeerConnection(rtcConfiguration: RtcConfiguration = RtcConfiguratio
      * - A sender already exists for the track.
      * - The peer connection is closed.
      */
-    fun addTrack(track: MediaStreamTrack, streamIds: List<String> = emptyList()): RtpSender
+    fun addTrack(track: MediaStreamTrack, vararg streams: MediaStream): RtpSender
 
     /**
      * Stops sending media from sender. The sender will still appear in getSenders. Future

@@ -10,7 +10,7 @@ actual class MediaStream internal constructor(val js: JsMediaStream) {
         get() = audioTracks + videoTracks
 
     actual val audioTracks: List<AudioStreamTrack>
-        get() = js.getVideoTracks().map { AudioStreamTrack(it) }
+        get() = js.getAudioTracks().map { AudioStreamTrack(it) }
 
     actual val videoTracks: List<VideoStreamTrack>
         get() = js.getVideoTracks().map { VideoStreamTrack(it) }

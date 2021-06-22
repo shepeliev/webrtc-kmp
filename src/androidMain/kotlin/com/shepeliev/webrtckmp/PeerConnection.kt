@@ -69,7 +69,7 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
             it.protocol = protocol
             it.negotiated = negotiated
         }
-        return android.createDataChannel(label, init)?.let {  DataChannel(it) }
+        return android.createDataChannel(label, init)?.let { DataChannel(it) }
     }
 
     actual suspend fun createOffer(options: OfferAnswerOptions): SessionDescription {
@@ -170,7 +170,8 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
     actual fun getTransceivers(): List<RtpTransceiver> =
         android.transceivers.map { RtpTransceiver(it) }
 
-    actual fun addTrack(track: MediaStreamTrack, streamIds: List<String>): RtpSender {
+    actual fun addTrack(track: MediaStreamTrack, vararg streams: MediaStream): RtpSender {
+        val streamIds = streams.map { it.id }
         return RtpSender(android.addTrack(track.android, streamIds))
     }
 
@@ -274,9 +275,17 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
 
                 else -> null
             }
+            val streams = sender.streams.map { id ->
+                MediaStream(android = null, id).apply {
+                    track?.also { safeTrack ->
+                        if (safeTrack is AudioStreamTrack) this.addTrack(safeTrack)
+                        if (safeTrack is VideoStreamTrack) this.addTrack(safeTrack)
+                    }
+                }
+            }
             val trackEvent = TrackEvent(
                 receiver = RtpReceiver(transceiver.receiver),
-                streams = sender.streams,
+                streams = streams,
                 track = track,
                 transceiver = RtpTransceiver(transceiver)
             )

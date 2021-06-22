@@ -115,7 +115,8 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
     actual fun getTransceivers(): List<RtpTransceiver> =
         ios.transceivers.map { RtpTransceiver(it as RTCRtpTransceiver) }
 
-    actual fun addTrack(track: MediaStreamTrack, streamIds: List<String>): RtpSender {
+    actual fun addTrack(track: MediaStreamTrack, vararg streams: MediaStream): RtpSender {
+        val streamIds = streams.map { it.id }
         return RtpSender(ios.addTrack(track.ios, streamIds.freeze()).freeze())
     }
 
