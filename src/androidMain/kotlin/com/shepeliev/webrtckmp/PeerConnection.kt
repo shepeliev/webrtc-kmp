@@ -121,13 +121,13 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
 
     actual suspend fun setLocalDescription(description: SessionDescription) {
         return suspendCoroutine {
-            android.setLocalDescription(setSdpObserver(it), description.native)
+            android.setLocalDescription(setSdpObserver(it), description.android)
         }
     }
 
     actual suspend fun setRemoteDescription(description: SessionDescription) {
         return suspendCoroutine {
-            android.setRemoteDescription(setSdpObserver(it), description.native)
+            android.setRemoteDescription(setSdpObserver(it), description.android)
         }
     }
 
