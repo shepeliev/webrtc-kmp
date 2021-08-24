@@ -11,11 +11,9 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
 
     val js: RTCPeerConnection
 
-    actual val localDescription: SessionDescription?
-        get() = js.localDescription?.let { SessionDescription(it) }
+    actual val localDescription: SessionDescription? get() = js.localDescription?.asCommon()
 
-    actual val remoteDescription: SessionDescription?
-        get() = js.remoteDescription?.let { SessionDescription(it) }
+    actual val remoteDescription: SessionDescription? get() = js.remoteDescription?.asCommon()
 
     actual val signalingState: SignalingState
         get() = js.signalingState.toSignalingState()
@@ -112,19 +110,21 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
     }
 
     actual suspend fun createOffer(options: OfferAnswerOptions): SessionDescription {
-        return SessionDescription(js.createOffer(options.toJson()).await())
+        val sessionDescription = js.createOffer(options.toJson()).await()
+        return sessionDescription.asCommon()
     }
 
     actual suspend fun createAnswer(options: OfferAnswerOptions): SessionDescription {
-        return SessionDescription(js.createAnswer(options.toJson()).await())
+        val sessionDescription = js.createAnswer(options.toJson()).await()
+        return sessionDescription.asCommon()
     }
 
     actual suspend fun setLocalDescription(description: SessionDescription) {
-        js.setLocalDescription(description.js).await()
+        js.setLocalDescription(description.asJs()).await()
     }
 
     actual suspend fun setRemoteDescription(description: SessionDescription) {
-        js.setRemoteDescription(description.js).await()
+        js.setRemoteDescription(description.asJs()).await()
     }
 
     actual fun setConfiguration(configuration: RtcConfiguration): Boolean {
