@@ -26,10 +26,10 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
     val android: AndroidPeerConnection
 
     actual val localDescription: SessionDescription?
-        get() = android.localDescription?.let { SessionDescription(it) }
+        get() = android.localDescription?.asCommon()
 
     actual val remoteDescription: SessionDescription?
-        get() = android.remoteDescription?.let { SessionDescription(it) }
+        get() = android.remoteDescription?.asCommon()
 
     actual val signalingState: SignalingState
         get() = android.signalingState().asCommon()
@@ -102,7 +102,7 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
     private fun createSdpObserver(continuation: Continuation<SessionDescription>): SdpObserver {
         return object : SdpObserver {
             override fun onCreateSuccess(description: AndroidSessionDescription) {
-                continuation.resume(SessionDescription(description))
+                continuation.resume(description.asCommon())
             }
 
             override fun onSetSuccess() {
@@ -121,13 +121,13 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
 
     actual suspend fun setLocalDescription(description: SessionDescription) {
         return suspendCoroutine {
-            android.setLocalDescription(setSdpObserver(it), description.android)
+            android.setLocalDescription(setSdpObserver(it), description.asAndroid())
         }
     }
 
     actual suspend fun setRemoteDescription(description: SessionDescription) {
         return suspendCoroutine {
-            android.setRemoteDescription(setSdpObserver(it), description.android)
+            android.setRemoteDescription(setSdpObserver(it), description.asAndroid())
         }
     }
 

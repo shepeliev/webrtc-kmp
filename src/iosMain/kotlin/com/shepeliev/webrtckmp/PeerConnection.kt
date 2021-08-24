@@ -6,6 +6,7 @@ import WebRTC.RTCPeerConnection
 import WebRTC.RTCRtpReceiver
 import WebRTC.RTCRtpSender
 import WebRTC.RTCRtpTransceiver
+import WebRTC.RTCSessionDescription
 import WebRTC.dataChannelForLabel
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
@@ -15,11 +16,9 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
 
     val ios: RTCPeerConnection
 
-    actual val localDescription: SessionDescription?
-        get() = ios.localDescription?.let { SessionDescription(it) }
+    actual val localDescription: SessionDescription? get() = ios.localDescription?.asCommon()
 
-    actual val remoteDescription: SessionDescription?
-        get() = ios.remoteDescription?.let { SessionDescription(it) }
+    actual val remoteDescription: SessionDescription? get() = ios.remoteDescription?.asCommon()
 
     actual val signalingState: SignalingState
         get() = rtcSignalingStateAsCommon(ios.signalingState())
@@ -67,12 +66,18 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
 
     actual suspend fun createOffer(options: OfferAnswerOptions): SessionDescription {
         val constraints = options.toRTCMediaConstraints()
-        return SessionDescription(ios.awaitResult { offerForConstraints(constraints, it) })
+        val sessionDescription: RTCSessionDescription = ios.awaitResult {
+            offerForConstraints(constraints, it)
+        }
+        return sessionDescription.asCommon()
     }
 
     actual suspend fun createAnswer(options: OfferAnswerOptions): SessionDescription {
         val constraints = options.toRTCMediaConstraints()
-        return SessionDescription(ios.awaitResult { answerForConstraints(constraints, it) })
+        val sessionDescription: RTCSessionDescription = ios.awaitResult {
+            answerForConstraints(constraints, it)
+        }
+        return sessionDescription.asCommon()
     }
 
     private fun OfferAnswerOptions.toRTCMediaConstraints(): RTCMediaConstraints {
@@ -86,11 +91,11 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
     }
 
     actual suspend fun setLocalDescription(description: SessionDescription) {
-        ios.await { setLocalDescription(description.ios, it) }
+        ios.await { setLocalDescription(description.asIos(), it) }
     }
 
     actual suspend fun setRemoteDescription(description: SessionDescription) {
-        ios.await { setRemoteDescription(description.ios, it) }
+        ios.await { setRemoteDescription(description.asIos(), it) }
     }
 
     actual fun setConfiguration(configuration: RtcConfiguration): Boolean {
