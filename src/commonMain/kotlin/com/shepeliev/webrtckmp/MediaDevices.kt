@@ -17,7 +17,7 @@ interface MediaDevices {
     suspend fun enumerateDevices(): List<MediaDeviceInfo>
 }
 
-internal fun MediaTrackConstraints.toMandatoryMap(): Map<Any?, *> {
+internal fun AudioTrackConstraints.toMandatoryMap(): Map<Any?, *> {
     return mutableMapOf<Any?, String>().apply {
         echoCancellation?.exact?.let { this += "googEchoCancellation" to "$it" }
         autoGainControl?.exact?.let { this += "googAutoGainControl" to "$it" }
@@ -25,7 +25,7 @@ internal fun MediaTrackConstraints.toMandatoryMap(): Map<Any?, *> {
     }
 }
 
-internal fun MediaTrackConstraints.toOptionalMap(): Map<Any?, *> {
+internal fun AudioTrackConstraints.toOptionalMap(): Map<Any?, *> {
     return mutableMapOf<Any?, String>().apply {
         echoCancellation?.ideal?.let { this += "googEchoCancellation" to "$it" }
         autoGainControl?.ideal?.let { this += "googAutoGainControl" to "$it" }

@@ -1,20 +1,17 @@
 package com.shepeliev.webrtckmp
 
 import android.util.Log
-import org.webrtc.Camera2Enumerator
-import org.webrtc.CameraEnumerationAndroid
-import org.webrtc.CameraVideoCapturer
+import org.webrtc.*
 import org.webrtc.Size
-import org.webrtc.VideoCapturer
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-class CameraVideoCaptureController(private val constraints: MediaTrackConstraints) :
+class CameraVideoCaptureController(private val constraints: VideoTrackConstraints) :
     AbstractVideoCaptureController() {
 
-    private val tag = "CameraVideoCaptureController"
+    private val tag = "CameraCaptureController"
     private val enumerator = Camera2Enumerator(applicationContext)
     private var device: String? = null
 
