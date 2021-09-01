@@ -3,7 +3,13 @@ package com.shepeliev.webrtckmp
 import WebRTC.RTCCameraVideoCapturer
 import WebRTC.RTCVideoCapturerDelegateProtocol
 import kotlinx.cinterop.useContents
-import platform.AVFoundation.*
+import platform.AVFoundation.AVCaptureDevice
+import platform.AVFoundation.AVCaptureDeviceFormat
+import platform.AVFoundation.AVCaptureDevicePosition
+import platform.AVFoundation.AVCaptureDevicePositionBack
+import platform.AVFoundation.AVCaptureDevicePositionFront
+import platform.AVFoundation.AVFrameRateRange
+import platform.AVFoundation.position
 import platform.CoreMedia.CMFormatDescriptionGetMediaSubType
 import platform.CoreMedia.CMVideoFormatDescriptionGetDimensions
 import kotlin.math.abs
