@@ -11,10 +11,10 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-class CameraVideoCaptureController(private val constraints: MediaTrackConstraints) :
+class CameraVideoCaptureController(private val constraints: VideoTrackConstraints) :
     AbstractVideoCaptureController() {
 
-    private val tag = "CameraVideoCaptureController"
+    private val tag = "CameraCaptureController"
     private val enumerator = Camera2Enumerator(applicationContext)
     private var device: String? = null
 

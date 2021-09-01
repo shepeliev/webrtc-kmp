@@ -1,11 +1,11 @@
 package com.shepeliev.webrtckmp
 
 data class MediaStreamConstraints(
-    val audio: MediaTrackConstraints? = null,
-    val video: MediaTrackConstraints? = null,
+    val audio: AudioTrackConstraints? = null,
+    val video: VideoTrackConstraints? = null,
 )
 
-data class MediaTrackConstraints(
+data class AudioTrackConstraints(
     val deviceId: String? = null,
     val groupId: String? = null,
     val autoGainControl: Constrain<Boolean>? = null,
@@ -15,7 +15,11 @@ data class MediaTrackConstraints(
     val noiseSuppression: Constrain<Boolean>? = null,
     val sampleRate: Constrain<Int>? = null,
     val volume: Constrain<Double>? = null,
+)
 
+data class VideoTrackConstraints(
+    val deviceId: String? = null,
+    val groupId: String? = null,
     val aspectRatio: Constrain<Double>? = null,
     val facingMode: Constrain<FacingMode>? = null,
     val frameRate: Constrain<Double>? = null,
@@ -30,13 +34,7 @@ enum class FacingMode { User, Environment }
 
 enum class ResizeMode { None, CropAndScale }
 
-class Constrain<T> {
-    var exact: T? = null
-        private set
-
-    var ideal: T? = null
-        private set
-
+data class Constrain<T>(var exact: T? = null, var ideal: T? = null) {
     fun exact(value: T) {
         exact = value
     }
@@ -55,9 +53,9 @@ class MediaStreamConstraintsBuilder {
         }
     }
 
-    fun audio(build: MediaTrackConstraintsBuilder.() -> Unit) {
-        val trackConstraintsBuilder = MediaTrackConstraintsBuilder(
-            constraints.audio ?: MediaTrackConstraints()
+    fun audio(build: AudioTrackConstraintsBuilder.() -> Unit) {
+        val trackConstraintsBuilder = AudioTrackConstraintsBuilder(
+            constraints.audio ?: AudioTrackConstraints()
         )
         build(trackConstraintsBuilder)
         constraints = constraints.copy(audio = trackConstraintsBuilder.constraints)
@@ -69,16 +67,16 @@ class MediaStreamConstraintsBuilder {
         }
     }
 
-    fun video(build: MediaTrackConstraintsBuilder.() -> Unit) {
-        val trackConstraintsBuilder = MediaTrackConstraintsBuilder(
-            constraints.video ?: MediaTrackConstraints()
+    fun video(build: VideoTrackConstraintsBuilder.() -> Unit) {
+        val trackConstraintsBuilder = VideoTrackConstraintsBuilder(
+            constraints.video ?: VideoTrackConstraints()
         )
         build(trackConstraintsBuilder)
         constraints = constraints.copy(video = trackConstraintsBuilder.constraints)
     }
 }
 
-class MediaTrackConstraintsBuilder(internal var constraints: MediaTrackConstraints) {
+class AudioTrackConstraintsBuilder(internal var constraints: AudioTrackConstraints) {
 
     fun deviceId(id: String) {
         constraints = constraints.copy(deviceId = id)
@@ -135,7 +133,7 @@ class MediaTrackConstraintsBuilder(internal var constraints: MediaTrackConstrain
     fun noiseSuppression(build: Constrain<Boolean>.() -> Unit) {
         val constrain = Constrain<Boolean>()
         build(constrain)
-        constraints = constraints.copy(echoCancellation = constrain)
+        constraints = constraints.copy(noiseSuppression = constrain)
     }
 
     fun sampleRate(count: Int) {
@@ -156,6 +154,17 @@ class MediaTrackConstraintsBuilder(internal var constraints: MediaTrackConstrain
         val constrain = Constrain<Double>()
         build(constrain)
         constraints = constraints.copy(volume = constrain)
+    }
+}
+
+class VideoTrackConstraintsBuilder(internal var constraints: VideoTrackConstraints) {
+
+    fun deviceId(id: String) {
+        constraints = constraints.copy(deviceId = id)
+    }
+
+    fun groupId(id: String) {
+        constraints = constraints.copy(groupId = id)
     }
 
     fun aspectRatio(ratio: Double) {
@@ -199,7 +208,7 @@ class MediaTrackConstraintsBuilder(internal var constraints: MediaTrackConstrain
     }
 
     fun width(width: Int) {
-        height { exact(width) }
+        width { exact(width) }
     }
 
     fun width(build: Constrain<Int>.() -> Unit) {
