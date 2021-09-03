@@ -2,9 +2,11 @@ package com.shepeliev.webrtckmp
 
 import WebRTC.RTCCleanupSSL
 import WebRTC.RTCShutdownInternalTracer
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.yield
 import platform.Foundation.NSDate
 import platform.Foundation.NSDefaultRunLoopMode
@@ -13,16 +15,13 @@ import platform.Foundation.NSRunLoop
 import platform.Foundation.create
 import platform.Foundation.runMode
 
-actual inline fun runTest(crossinline block: suspend () -> Unit) {
+actual inline fun runTest(
+    timeout: Long,
+    crossinline block: suspend CoroutineScope.() -> Unit
+) {
     val exception = runBlocking {
         val testRun = MainScope().async {
-            try {
-                block()
-            } catch (e: Throwable) {
-                return@async e
-            }
-
-            return@async null
+            runCatching { withTimeout(timeout) { block() } }.exceptionOrNull()
         }
         while (testRun.isActive) {
             NSRunLoop.mainRunLoop.runMode(
