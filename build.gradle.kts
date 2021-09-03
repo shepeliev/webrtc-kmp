@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
 plugins {
     id("com.android.library")
-    kotlin("multiplatform") version "1.5.10"
+    kotlin("multiplatform") version "1.5.30"
     id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
     id("org.jmailen.kotlinter") version "3.4.4"
     id("maven-publish")
@@ -57,7 +57,7 @@ kotlin {
     }
 
     sourceSets {
-        val coroutinesVersion = "1.5.0-native-mt"
+        val coroutinesVersion = "1.5.2-native-mt"
 
         val commonMain by getting {
             dependencies {
@@ -74,7 +74,7 @@ kotlin {
 
         val androidMain by getting {
             dependencies {
-                implementation("androidx.core:core:1.5.0")
+                implementation("androidx.core:core:1.6.0")
                 api(fileTree("libs") { include("*.jar") })
             }
         }
@@ -83,9 +83,9 @@ kotlin {
             dependencies {
                 implementation(kotlin("test-junit"))
                 implementation("junit:junit:4.13.2")
-                implementation("androidx.test:core:1.3.0")
-                implementation("androidx.test.ext:junit:1.1.2")
-                implementation("androidx.test:runner:1.3.0")
+                implementation("androidx.test:core:1.4.0")
+                implementation("androidx.test.ext:junit:1.1.3")
+                implementation("androidx.test:runner:1.4.0")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
             }
         }
