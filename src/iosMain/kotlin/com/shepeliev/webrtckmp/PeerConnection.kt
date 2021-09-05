@@ -8,8 +8,6 @@ import WebRTC.RTCRtpSender
 import WebRTC.RTCRtpTransceiver
 import WebRTC.RTCSessionDescription
 import WebRTC.dataChannelForLabel
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.cancel
 import kotlin.native.concurrent.freeze
 
 actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguration) {
@@ -33,8 +31,6 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         get() = rtcIceGatheringStateAsCommon(ios.iceGatheringState())
 
     internal actual val events: PeerConnectionEvents = PeerConnectionEvents().freeze()
-
-    private val scope = MainScope()
 
     actual fun createDataChannel(
         label: String,
@@ -133,7 +129,6 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
     }
 
     actual fun close() {
-        scope.cancel()
         ios.close()
     }
 }
