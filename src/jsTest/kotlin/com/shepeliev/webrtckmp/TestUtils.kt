@@ -14,7 +14,7 @@ actual inline fun runTest(
     return GlobalScope.promise {
         runCatching { withTimeout(timeout) { block() } }
             .onFailure { it.log() }
-            .exceptionOrNull()?.also { throw  it }
+            .exceptionOrNull()?.also { throw it }
     }.asDynamic()
 }
 

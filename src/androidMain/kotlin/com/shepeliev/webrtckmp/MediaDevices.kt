@@ -1,4 +1,5 @@
 @file:JvmName("AndroidMediaDevices")
+
 package com.shepeliev.webrtckmp
 
 import android.Manifest
@@ -6,7 +7,7 @@ import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
 import org.webrtc.Camera2Enumerator
 import org.webrtc.MediaConstraints
-import java.util.*
+import java.util.UUID
 
 internal actual val mediaDevices: MediaDevices = MediaDevicesImpl
 

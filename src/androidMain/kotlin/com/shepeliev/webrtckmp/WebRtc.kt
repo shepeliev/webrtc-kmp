@@ -14,13 +14,16 @@ actual object WebRtc {
 
     @Deprecated(
         message = "Use MediaDevices companion object.",
-        replaceWith = ReplaceWith(
-            "MediaDevices"
-        ))
+        replaceWith = ReplaceWith("MediaDevices")
+    )
     actual val mediaDevices: MediaDevices = MediaDevices
 }
 
-fun initializeWebRtc(context: Context, eglBaseInstance: EglBase = EglBase.create(), build: WebRtcBuilder.() -> Unit = {}) {
+fun initializeWebRtc(
+    context: Context,
+    eglBaseInstance: EglBase = EglBase.create(),
+    build: WebRtcBuilder.() -> Unit = {}
+) {
     applicationContext = context
     eglBase = eglBaseInstance
     build(webRtcBuilder)

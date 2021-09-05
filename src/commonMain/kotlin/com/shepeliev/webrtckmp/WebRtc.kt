@@ -5,8 +5,7 @@ expect object WebRtc {
 
     @Deprecated(
         message = "Use MediaDevices companion object.",
-        replaceWith = ReplaceWith(
-            "MediaDevices"
-        ))
+        replaceWith = ReplaceWith("MediaDevices")
+    )
     val mediaDevices: MediaDevices
 }
