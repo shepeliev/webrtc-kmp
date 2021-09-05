@@ -1,3 +1,5 @@
+@file:JvmName("AndroidMediaDevices")
+
 package com.shepeliev.webrtckmp
 
 import android.Manifest
@@ -7,7 +9,9 @@ import org.webrtc.Camera2Enumerator
 import org.webrtc.MediaConstraints
 import java.util.UUID
 
-internal object MediaDevicesImpl : MediaDevices {
+internal actual val mediaDevices: MediaDevices = MediaDevicesImpl
+
+private object MediaDevicesImpl : MediaDevices {
 
     override suspend fun getUserMedia(streamConstraints: MediaStreamConstraintsBuilder.() -> Unit): MediaStream {
         val constraints = MediaStreamConstraintsBuilder().let {

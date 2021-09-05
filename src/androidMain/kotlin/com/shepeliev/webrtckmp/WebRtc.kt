@@ -9,11 +9,21 @@ import org.webrtc.EglBase
 import org.webrtc.Logging
 import org.webrtc.PeerConnectionFactory
 
+@Deprecated("It will be removed in one of the future releases.")
 actual object WebRtc {
-    actual val mediaDevices: MediaDevices = MediaDevicesImpl
+
+    @Deprecated(
+        message = "Use MediaDevices companion object.",
+        replaceWith = ReplaceWith("MediaDevices")
+    )
+    actual val mediaDevices: MediaDevices = MediaDevices
 }
 
-fun initializeWebRtc(context: Context, eglBaseInstance: EglBase = EglBase.create(), build: WebRtcBuilder.() -> Unit = {}) {
+fun initializeWebRtc(
+    context: Context,
+    eglBaseInstance: EglBase = EglBase.create(),
+    build: WebRtcBuilder.() -> Unit = {}
+) {
     applicationContext = context
     eglBase = eglBaseInstance
     build(webRtcBuilder)

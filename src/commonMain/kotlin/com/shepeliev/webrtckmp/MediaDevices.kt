@@ -15,7 +15,11 @@ interface MediaDevices {
     }
 
     suspend fun enumerateDevices(): List<MediaDeviceInfo>
+
+    companion object : MediaDevices by mediaDevices
 }
+
+internal expect val mediaDevices: MediaDevices
 
 internal fun AudioTrackConstraints.toMandatoryMap(): Map<Any?, *> {
     return mutableMapOf<Any?, String>().apply {

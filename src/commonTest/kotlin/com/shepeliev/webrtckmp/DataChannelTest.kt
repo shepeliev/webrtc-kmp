@@ -1,7 +1,6 @@
 package com.shepeliev.webrtckmp
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -13,8 +12,6 @@ import kotlin.test.assertEquals
 
 class DataChannelTest {
 
-    private val appScope: CoroutineScope = MainScope()
-
     @BeforeTest
     fun setUp() {
         initialize()
@@ -22,6 +19,8 @@ class DataChannelTest {
 
     @Test
     fun data_channel_should_work() = runTest {
+        val jobs = mutableListOf<Job>()
+
         val pc1 = PeerConnection()
         val pc2 = PeerConnection()
 
@@ -29,7 +28,7 @@ class DataChannelTest {
         val pc1Candidates = mutableListOf<IceCandidate>()
         val pc2Candidates = mutableListOf<IceCandidate>()
 
-        pc1.onIceCandidate
+        jobs += pc1.onIceCandidate
             .onEach { candidate ->
                 if (pc2.signalingState == SignalingState.Stable) {
                     pc1Candidates.forEach { pc2.addIceCandidate(it) }
@@ -39,9 +38,9 @@ class DataChannelTest {
                     pc1Candidates += candidate
                 }
             }
-            .launchIn(appScope)
+            .launchIn(this)
 
-        pc2.onIceCandidate
+        jobs += pc2.onIceCandidate
             .onEach { candidate ->
                 if (pc1.signalingState == SignalingState.Stable) {
                     pc2Candidates.forEach { pc1.addIceCandidate(it) }
@@ -51,13 +50,14 @@ class DataChannelTest {
                     pc2Candidates += candidate
                 }
             }
-            .launchIn(appScope)
-        pc2.onDataChannel
+            .launchIn(this)
+
+        jobs += pc2.onDataChannel
             .onEach { pc2DataChannel ->
                 val data = "Hello WebRTC KMP!".encodeToByteArray()
                 pc2DataChannel.send(data)
             }
-            .launchIn(appScope)
+            .launchIn(this)
 
         val offer = pc1.createOffer(OfferAnswerOptions())
         pc1.setLocalDescription(offer)
@@ -73,5 +73,7 @@ class DataChannelTest {
 
         pc1.close()
         pc2.close()
+
+        jobs.forEach(Job::cancel)
     }
 }

@@ -5,7 +5,9 @@ import WebRTC.RTCMediaConstraints
 import platform.AVFoundation.AVCaptureDevice
 import platform.Foundation.NSUUID
 
-internal object MediaDevicesImpl : MediaDevices {
+internal actual val mediaDevices: MediaDevices = MediaDevicesImpl
+
+private object MediaDevicesImpl : MediaDevices {
     override suspend fun getUserMedia(streamConstraints: MediaStreamConstraintsBuilder.() -> Unit): MediaStream {
         val constraints = MediaStreamConstraintsBuilder().let {
             streamConstraints(it)
