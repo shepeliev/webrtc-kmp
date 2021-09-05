@@ -9,7 +9,9 @@ import kotlin.js.json
 import org.w3c.dom.mediacapture.MediaDeviceKind.Companion as JsMediaDeviceKind
 import org.w3c.dom.mediacapture.MediaStreamConstraints as JsMediaStreamConstraints
 
-internal object MediaDevicesImpl : MediaDevices {
+internal actual val mediaDevices: MediaDevices = MediaDevicesImpl
+
+private object MediaDevicesImpl : MediaDevices {
     override suspend fun getUserMedia(streamConstraints: MediaStreamConstraintsBuilder.() -> Unit): MediaStream {
         val constraints = MediaStreamConstraintsBuilder().let {
             streamConstraints(it)
