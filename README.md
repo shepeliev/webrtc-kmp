@@ -40,7 +40,7 @@ kotlin {
       val commonMain by getting {
           dependencies {
               api("com.shepeliev:webrtc-kmp:$webRtcKmmVersion")
-              implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0-native-mt")
+              implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2-native-mt")
           }
       }
   }
