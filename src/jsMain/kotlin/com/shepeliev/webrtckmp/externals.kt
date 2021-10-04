@@ -64,7 +64,7 @@ external class RTCPeerConnectionIceEvent {
     val candidate: RTCIceCandidate?
 }
 
-external class RTCIceCandidate {
+external class RTCIceCandidate(candidateInfo: dynamic) {
     val candidate: String
     val sdpMid: String
     val sdpMLineIndex: Int
