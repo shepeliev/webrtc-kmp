@@ -14,7 +14,7 @@ private object MediaDevicesImpl : MediaDevices {
             it.constraints
         }
 
-        val audioTrack = constraints.audio?.let { audioConstraints  ->
+        val audioTrack = constraints.audio?.let { audioConstraints ->
             val mediaConstraints = RTCMediaConstraints(
                 mandatoryConstraints = audioConstraints.toMandatoryMap(),
                 optionalConstraints = audioConstraints.toOptionalMap()
