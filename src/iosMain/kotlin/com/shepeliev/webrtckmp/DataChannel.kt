@@ -97,5 +97,6 @@ private fun rtcDataChannelStateAsCommon(state: RTCDataChannelState): DataChannel
         RTCDataChannelState.RTCDataChannelStateOpen -> DataChannelState.Open
         RTCDataChannelState.RTCDataChannelStateClosing -> DataChannelState.Closing
         RTCDataChannelState.RTCDataChannelStateClosed -> DataChannelState.Closed
+        else -> error("Unknown RTCDataChannelState: $state")
     }
 }

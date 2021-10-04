@@ -13,6 +13,7 @@ internal fun rtcSignalingStateAsCommon(state: RTCSignalingState): SignalingState
         RTCSignalingState.RTCSignalingStateHaveRemoteOffer -> SignalingState.HaveRemoteOffer
         RTCSignalingState.RTCSignalingStateHaveRemotePrAnswer -> SignalingState.HaveRemotePranswer
         RTCSignalingState.RTCSignalingStateClosed -> SignalingState.Closed
+        else -> error("Unknown RTCSignalingState: $state")
     }
 }
 
@@ -26,6 +27,7 @@ internal fun rtcIceConnectionStateAsCommon(state: RTCIceConnectionState): IceCon
         RTCIceConnectionState.RTCIceConnectionStateDisconnected -> IceConnectionState.Disconnected
         RTCIceConnectionState.RTCIceConnectionStateClosed -> IceConnectionState.Closed
         RTCIceConnectionState.RTCIceConnectionStateCount -> IceConnectionState.Count
+        else -> error("Unknown RTCIceConnectionState: $state")
     }
 }
 
@@ -37,6 +39,7 @@ internal fun rtcPeerConnectionStateAsCommon(state: RTCPeerConnectionState): Peer
         RTCPeerConnectionState.RTCPeerConnectionStateDisconnected -> PeerConnectionState.Disconnected
         RTCPeerConnectionState.RTCPeerConnectionStateFailed -> PeerConnectionState.Failed
         RTCPeerConnectionState.RTCPeerConnectionStateClosed -> PeerConnectionState.Closed
+        else -> error("Unknown RTCPeerConnectionStateState: $state")
     }
 }
 
@@ -45,5 +48,6 @@ internal fun rtcIceGatheringStateAsCommon(state: RTCIceGatheringState): IceGathe
         RTCIceGatheringState.RTCIceGatheringStateNew -> IceGatheringState.New
         RTCIceGatheringState.RTCIceGatheringStateGathering -> IceGatheringState.Gathering
         RTCIceGatheringState.RTCIceGatheringStateComplete -> IceGatheringState.Complete
+        else -> error("Unknown RTCIceGatheringState: $state")
     }
 }

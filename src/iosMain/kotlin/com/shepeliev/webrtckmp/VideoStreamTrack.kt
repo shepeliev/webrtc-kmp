@@ -19,6 +19,9 @@ actual class VideoStreamTrack internal constructor(
             videoCaptureController?.initialize(ios.source)
             videoCaptureController?.startCapture()
         }.launchIn(scope)
+
+        videoCaptureController?.initialize(ios.source)
+        videoCaptureController?.startCapture()
     }
 
     fun addRenderer(renderer: RTCVideoRendererProtocol) {

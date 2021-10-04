@@ -152,7 +152,10 @@ internal class PeerConnectionObserver(
             }
 
             RTCRtpMediaType.RTCRtpMediaTypeData,
+
             RTCRtpMediaType.RTCRtpMediaTypeUnsupported -> null
+
+            else -> error("Unknown RTCRtpMediaType: ${didStartReceivingOnTransceiver.mediaType}")
         }
         val streams = sender.streamIds.map { id ->
             MediaStream(ios = null, "$id").apply {

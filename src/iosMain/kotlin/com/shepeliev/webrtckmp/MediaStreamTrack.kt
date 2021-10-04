@@ -90,5 +90,6 @@ private fun rtcMediaStreamTrackStateAsCommon(state: RTCMediaStreamTrackState): M
     return when (state) {
         RTCMediaStreamTrackState.RTCMediaStreamTrackStateLive -> MediaStreamTrackState.Live
         RTCMediaStreamTrackState.RTCMediaStreamTrackStateEnded -> MediaStreamTrackState.Ended
+        else -> error("Unknown RTCMediaStreamTrackState: $state")
     }
 }

@@ -14,25 +14,22 @@ private object MediaDevicesImpl : MediaDevices {
             it.constraints
         }
 
-        var audioTrack: AudioStreamTrack? = null
-        if (constraints.audio != null) {
+        val audioTrack = constraints.audio?.let { audioConstraints  ->
             val mediaConstraints = RTCMediaConstraints(
-                mandatoryConstraints = constraints.audio.toMandatoryMap(),
-                optionalConstraints = constraints.audio.toOptionalMap()
+                mandatoryConstraints = audioConstraints.toMandatoryMap(),
+                optionalConstraints = audioConstraints.toOptionalMap()
             )
             val audioSource = factory.audioSourceWithConstraints(mediaConstraints)
             val track = factory.audioTrackWithSource(audioSource, NSUUID.UUID().UUIDString())
-            audioTrack = AudioStreamTrack(track)
+            AudioStreamTrack(track)
         }
 
-        var videoTrack: VideoStreamTrack? = null
-        if (constraints.video != null) {
-            val videoCaptureController = CameraVideoCaptureController(constraints.video)
-            val videoSource = factory.videoSource()
-            videoCaptureController.initialize(videoSource)
-            val track = factory.videoTrackWithSource(videoSource, NSUUID.UUID().UUIDString())
-            videoTrack = VideoStreamTrack(track, videoCaptureController)
-            videoCaptureController.startCapture()
+        val videoTrack = constraints.video?.let { videoConstraints ->
+            CameraVideoCaptureController(videoConstraints).let { videoCaptureController ->
+                val videoSource = factory.videoSource()
+                val track = factory.videoTrackWithSource(videoSource, NSUUID.UUID().UUIDString())
+                VideoStreamTrack(track, videoCaptureController)
+            }
         }
 
         val localMediaStream = factory.mediaStreamWithStreamId(NSUUID.UUID().UUIDString())
