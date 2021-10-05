@@ -1,5 +1,4 @@
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
-import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
 plugins {
     id("com.android.library")
@@ -11,7 +10,7 @@ plugins {
 }
 
 group = "com.shepeliev"
-version = "0.89.4"
+version = "0.89.5"
 
 repositories {
     google()
