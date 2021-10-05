@@ -23,7 +23,7 @@ kotlin {
         publishAllLibraryVariants()
     }
 
-    fun configureNativeTarget(): KotlinNativeTarget.() -> Unit = {
+    ios {
         val webRtcFrameworkPath =
             projectDir.resolve("framework/WebRTC.xcframework/ios-x86_64-simulator/")
         binaries {
@@ -41,9 +41,6 @@ kotlin {
             }
         }
     }
-
-    val iosX64 = iosX64("ios", configureNativeTarget())
-    val iosArm64 = iosArm64(configure = configureNativeTarget())
 
     js {
         useCommonJs()
@@ -102,12 +99,6 @@ kotlin {
                 implementation(kotlin("test-js"))
             }
         }
-
-        configure(listOf(iosArm64, iosX64)) {
-            compilations.getByName("main") {
-                source(sourceSets["iosMain"])
-            }
-        }
     }
 }
 
@@ -128,16 +119,6 @@ android {
         }
     }
 }
-
-//tasks {
-//    val updatePodspecVersion by registering(Copy::class) {
-//        val from = file("webrtc-kmp.podspec")
-//        from.writeText(
-//            from.readText()
-//                .replace("version\\s*=\\s*'(.+)'".toRegex(), "version = '${project.version}'")
-//        )
-//    }
-//}
 
 nexusPublishing {
     val localProps = gradleLocalProperties(rootDir)

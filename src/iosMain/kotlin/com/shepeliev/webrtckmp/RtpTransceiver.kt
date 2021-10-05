@@ -52,9 +52,12 @@ private fun rtcRtpTransceiverDirectionAsCommon(direction: RTCRtpTransceiverDirec
         RTCRtpTransceiverDirection.RTCRtpTransceiverDirectionInactive -> {
             RtpTransceiverDirection.Inactive
         }
+
         RTCRtpTransceiverDirection.RTCRtpTransceiverDirectionStopped -> {
             RtpTransceiverDirection.Stopped
         }
+
+        else -> error("Unknown RTCRtpTransceiverDirection: $direction")
     }
 }
 

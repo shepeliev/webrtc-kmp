@@ -26,5 +26,6 @@ private fun rtcSdpTypeAsCommon(type: RTCSdpType): SessionDescriptionType {
         RTCSdpType.RTCSdpTypePrAnswer -> SessionDescriptionType.Pranswer
         RTCSdpType.RTCSdpTypeAnswer -> SessionDescriptionType.Answer
         RTCSdpType.RTCSdpTypeRollback -> SessionDescriptionType.Rollback
+        else -> error("Unknown RTCSdpType: $type")
     }
 }

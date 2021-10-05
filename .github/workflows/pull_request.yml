@@ -37,7 +37,7 @@ jobs:
           name: "Android Instrumented Tests Report HTML"
           path: "webrtc-kmp/build/reports/androidTests/connected"
       - name: Run iOS tests
-        run: ./gradlew iosTest
+        run: ./gradlew iosX64Test
       - name: Upload iOS test artifact
         uses: actions/upload-artifact@v2
         if: failure()
