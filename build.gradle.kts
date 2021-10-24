@@ -2,7 +2,7 @@ import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 
 plugins {
     id("com.android.library")
-    kotlin("multiplatform") version "1.5.30"
+    kotlin("multiplatform") version "1.5.31"
     id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
     id("org.jmailen.kotlinter") version "3.4.4"
     id("maven-publish")
@@ -103,10 +103,10 @@ kotlin {
 }
 
 android {
-    compileSdkVersion(30)
+    compileSdkVersion(31)
     defaultConfig {
         minSdkVersion(21)
-        targetSdkVersion(30)
+        targetSdkVersion(31)
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
