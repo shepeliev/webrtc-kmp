@@ -36,6 +36,7 @@ kotlin {
             compilations.getByName("main") {
                 cinterops.create("WebRTC") {
                     compilerOpts("-F$webRtcFrameworkPath")
+                    extraOpts = listOf("-compiler-option", "-DNS_FORMAT_ARGUMENT(A)=", "-verbose")
                 }
             }
         }
