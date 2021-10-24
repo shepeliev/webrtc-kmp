@@ -2,7 +2,7 @@ import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 
 plugins {
     id("com.android.library")
-    kotlin("multiplatform") version "1.5.30"
+    kotlin("multiplatform") version "1.5.31"
     id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
     id("org.jmailen.kotlinter") version "3.4.4"
     id("maven-publish")
@@ -189,4 +189,3 @@ signing {
     useInMemoryPgpKeys(signingKey, signingPassword)
     sign(publishing.publications)
 }
-
