@@ -35,7 +35,7 @@ jobs:
         if: failure()
         with:
           name: "Android Instrumented Tests Report HTML"
-          path: "webrtc-kmp/build/reports/androidTests/connected"
+          path: "build/reports/androidTests/connected"
       - name: Run iOS tests
         run: ./gradlew iosX64Test
       - name: Upload iOS test artifact
@@ -43,7 +43,7 @@ jobs:
         if: failure()
         with:
           name: "iOS Tests Report HTML"
-          path: "webrtc-kmp/build/reports/tests/iosTest"
+          path: "build/reports/tests/iosTest"
       - name: Run JS tests
         run: ./gradlew jsTest
       - name: Upload JS test artifact
@@ -51,4 +51,4 @@ jobs:
         if: failure()
         with:
           name: "JS Tests Report HTML"
-          path: "webrtc-kmp/build/reports/tests/jsTest"
+          path: "build/reports/tests/jsTest"
