@@ -59,6 +59,12 @@ private object MediaDevicesImpl : MediaDevices {
         }
     }
 
+    override suspend fun getDisplayMedia(): MediaStream {
+        TODO("Not yet implemented for Android platform")
+    }
+
+    override suspend fun supportsDisplayMedia(): Boolean = false
+
     private fun checkRecordAudioPermission() {
         val result = ContextCompat.checkSelfPermission(
             applicationContext,

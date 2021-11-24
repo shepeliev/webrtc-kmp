@@ -14,6 +14,10 @@ interface MediaDevices {
         }
     }
 
+    suspend fun getDisplayMedia(): MediaStream
+
+    suspend fun supportsDisplayMedia(): Boolean
+
     suspend fun enumerateDevices(): List<MediaDeviceInfo>
 
     companion object : MediaDevices by mediaDevices

@@ -7,7 +7,7 @@ WebRTC Kotlin Multiplatform SDK
  :-: | :-----: | :-: | :---: 
  Audio/Video |  :white_check_mark: | :white_check_mark: | :white_check_mark:
  Data channel | :white_check_mark: | :white_check_mark: | :white_check_mark:
- Screen Capture | | | 
+ Screen Capture | | | :white_check_mark:
 
 ## WebRTC revision
 Current revision: M89
