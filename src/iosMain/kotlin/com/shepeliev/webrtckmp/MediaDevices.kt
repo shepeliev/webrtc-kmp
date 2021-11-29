@@ -39,6 +39,12 @@ private object MediaDevicesImpl : MediaDevices {
         }
     }
 
+    override suspend fun getDisplayMedia(): MediaStream {
+        TODO("Not yet implemented for iOS platform")
+    }
+
+    override suspend fun supportsDisplayMedia(): Boolean = false
+
     override suspend fun enumerateDevices(): List<MediaDeviceInfo> {
         return RTCCameraVideoCapturer.captureDevices().map {
             val device = it as AVCaptureDevice

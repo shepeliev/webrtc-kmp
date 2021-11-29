@@ -21,6 +21,17 @@ private object MediaDevicesImpl : MediaDevices {
         return MediaStream(jsStream)
     }
 
+    override suspend fun getDisplayMedia(): MediaStream {
+        if (!supportsDisplayMedia()) {
+            error("getDisplayMedia is not supported in this environment")
+        }
+
+        val jsStream = window.navigator.mediaDevices.getDisplayMedia().await()
+        return MediaStream(jsStream)
+    }
+
+    override suspend fun supportsDisplayMedia(): Boolean = window.navigator.mediaDevices.supportsDisplayMedia()
+
     override suspend fun enumerateDevices(): List<MediaDeviceInfo> {
         val devices = window.navigator.mediaDevices.enumerateDevices().await()
         return devices.map {
