@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "com.shepeliev"
-version = "0.89.5"
+version = "0.89.6"
 
 repositories {
     google()
