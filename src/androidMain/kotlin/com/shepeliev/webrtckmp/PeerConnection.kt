@@ -86,15 +86,15 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
 
     private fun OfferAnswerOptions.toMediaConstraints(): MediaConstraints {
         return MediaConstraints().apply {
-            iceRestart?.let { mandatory += MediaConstraints.KeyValuePair("iceRestart", "$it") }
+            iceRestart?.let { mandatory += MediaConstraints.KeyValuePair("IceRestart", "$it") }
             offerToReceiveAudio?.let {
-                mandatory += MediaConstraints.KeyValuePair("offerToReceiveAudio", "$it")
+                mandatory += MediaConstraints.KeyValuePair("OfferToReceiveAudio", "$it")
             }
             offerToReceiveVideo?.let {
-                mandatory += MediaConstraints.KeyValuePair("offerToReceiveVideo", "$it")
+                mandatory += MediaConstraints.KeyValuePair("OfferToReceiveVideo", "$it")
             }
             voiceActivityDetection?.let {
-                mandatory += MediaConstraints.KeyValuePair("voiceActivityDetection", "$it")
+                mandatory += MediaConstraints.KeyValuePair("VoiceActivityDetection", "$it")
             }
         }
     }
