@@ -2,7 +2,7 @@ import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 
 plugins {
     id("com.android.library")
-    kotlin("multiplatform") version "1.5.31"
+    kotlin("multiplatform") version "1.6.0"
     id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
     id("org.jmailen.kotlinter") version "3.4.4"
     id("maven-publish")
@@ -54,7 +54,7 @@ kotlin {
     }
 
     sourceSets {
-        val coroutinesVersion = "1.5.2-native-mt"
+        val coroutinesVersion = "1.6.0-native-mt"
 
         val commonMain by getting {
             dependencies {
@@ -71,7 +71,7 @@ kotlin {
 
         val androidMain by getting {
             dependencies {
-                implementation("androidx.core:core:1.6.0")
+                implementation("androidx.core:core:1.7.0")
                 api(fileTree("libs") { include("*.jar") })
             }
         }
