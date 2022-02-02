@@ -8,7 +8,6 @@ expect open class MediaStreamTrack {
     val label: String
     val muted: Boolean
     val readyState: MediaStreamTrackState
-
     var enabled: Boolean
 
     val onEnded: Flow<Unit>

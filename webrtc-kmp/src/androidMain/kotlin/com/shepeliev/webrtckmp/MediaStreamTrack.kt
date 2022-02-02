@@ -4,15 +4,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.emptyFlow
-import org.webrtc.MediaSource
 import org.webrtc.AudioTrack as AndroidAudioTrack
 import org.webrtc.MediaStreamTrack as AndroidMediaStreamTrack
 import org.webrtc.VideoTrack as AndroidVideoTrack
 
-actual open class MediaStreamTrack internal constructor(
-    val android: AndroidMediaStreamTrack,
-    private val mediaSource: MediaSource?,
-) {
+actual open class MediaStreamTrack internal constructor(val android: AndroidMediaStreamTrack) {
 
     actual val id: String
         get() = android.id()
@@ -31,6 +27,9 @@ actual open class MediaStreamTrack internal constructor(
             MediaStreamTrackKind.Video -> "camera"
         }
 
+    actual val readyState: MediaStreamTrackState
+        get() = android.state().asCommon()
+
     // not implemented for Android
     actual val muted: Boolean = false
 
@@ -39,9 +38,6 @@ actual open class MediaStreamTrack internal constructor(
         set(value) {
             android.setEnabled(value)
         }
-
-    actual val readyState: MediaStreamTrackState
-        get() = android.state().asCommon()
 
     private val _onEnded = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     actual val onEnded: Flow<Unit> = _onEnded.asSharedFlow()
@@ -55,7 +51,6 @@ actual open class MediaStreamTrack internal constructor(
     actual open fun stop() {
         if (readyState == MediaStreamTrackState.Ended) return
         _onEnded.tryEmit(Unit)
-        mediaSource?.dispose()
     }
 }
 

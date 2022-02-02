@@ -29,6 +29,14 @@ actual open class MediaStreamTrack internal constructor(val ios: RTCMediaStreamT
             MediaStreamTrackKind.Video -> "camera"
         }
 
+    actual val readyState: MediaStreamTrackState
+        get() {
+            if (endedFlag.value == 1) {
+                return MediaStreamTrackState.Ended
+            }
+            return rtcMediaStreamTrackStateAsCommon(ios.readyState)
+        }
+
     // not implemented for iOS
     actual val muted: Boolean = false
 
@@ -36,14 +44,6 @@ actual open class MediaStreamTrack internal constructor(val ios: RTCMediaStreamT
         get() = ios.isEnabled
         set(value) {
             ios.isEnabled = value
-        }
-
-    actual val readyState: MediaStreamTrackState
-        get() {
-            if (endedFlag.value == 1) {
-                return MediaStreamTrackState.Ended
-            }
-            return rtcMediaStreamTrackStateAsCommon(ios.readyState)
         }
 
     private val _onEnded = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
