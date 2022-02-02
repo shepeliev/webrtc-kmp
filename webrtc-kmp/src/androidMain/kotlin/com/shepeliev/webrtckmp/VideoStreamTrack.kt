@@ -12,17 +12,6 @@ actual class VideoStreamTrack internal constructor(
     private val videoCaptureController: AbstractVideoCaptureController? = null
 ) : MediaStreamTrack(android, videoSource) {
 
-    init {
-        onMute.onEach { videoCaptureController?.stopCapture() }.launchIn(scope)
-
-        onUnmute.onEach {
-            videoSource?.also {
-                videoCaptureController?.initialize(it.capturerObserver)
-                videoCaptureController?.startCapture()
-            }
-        }.launchIn(scope)
-    }
-
     actual suspend fun switchCamera(deviceId: String?) {
         if (deviceId == null) {
             (videoCaptureController as? CameraVideoCaptureController)?.switchCamera()

@@ -7,6 +7,7 @@ import WebRTC.RTCVideoTrack
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlin.native.concurrent.AtomicInt
 
 actual open class MediaStreamTrack internal constructor(val ios: RTCMediaStreamTrack) {
@@ -28,18 +29,13 @@ actual open class MediaStreamTrack internal constructor(val ios: RTCMediaStreamT
             MediaStreamTrackKind.Video -> "camera"
         }
 
-    actual val muted: Boolean
-        get() = !enabled
+    // not implemented for iOS
+    actual val muted: Boolean = false
 
     actual var enabled: Boolean
         get() = ios.isEnabled
         set(value) {
             ios.isEnabled = value
-            if (value) {
-                _onUnmute.tryEmit(Unit)
-            } else {
-                _onMute.tryEmit(Unit)
-            }
         }
 
     actual val readyState: MediaStreamTrackState
@@ -50,14 +46,12 @@ actual open class MediaStreamTrack internal constructor(val ios: RTCMediaStreamT
             return rtcMediaStreamTrackStateAsCommon(ios.readyState)
         }
 
-    private val _onEnded = MutableSharedFlow<Unit>(extraBufferCapacity = FLOW_BUFFER_CAPACITY)
+    private val _onEnded = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     actual val onEnded: Flow<Unit> = _onEnded.asSharedFlow()
 
-    private val _onMute = MutableSharedFlow<Unit>(extraBufferCapacity = FLOW_BUFFER_CAPACITY)
-    actual val onMute: Flow<Unit> = _onMute.asSharedFlow()
+    actual val onMute: Flow<Unit> = emptyFlow()
 
-    private val _onUnmute = MutableSharedFlow<Unit>(extraBufferCapacity = FLOW_BUFFER_CAPACITY)
-    actual val onUnmute: Flow<Unit> = _onUnmute.asSharedFlow()
+    actual val onUnmute: Flow<Unit> = emptyFlow()
 
     private val endedFlag = AtomicInt(0)
 

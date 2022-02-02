@@ -3,6 +3,7 @@ package com.shepeliev.webrtckmp
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.emptyFlow
 import org.webrtc.MediaSource
 import org.webrtc.AudioTrack as AndroidAudioTrack
 import org.webrtc.MediaStreamTrack as AndroidMediaStreamTrack
@@ -30,31 +31,26 @@ actual open class MediaStreamTrack internal constructor(
             MediaStreamTrackKind.Video -> "camera"
         }
 
-    actual val muted: Boolean
-        get() = !enabled
+    // not implemented for Android
+    actual val muted: Boolean = false
 
     actual var enabled: Boolean
         get() = android.enabled()
         set(value) {
             android.setEnabled(value)
-            if (value) {
-                _onUnmute.tryEmit(Unit)
-            } else {
-                _onMute.tryEmit(Unit)
-            }
         }
 
     actual val readyState: MediaStreamTrackState
         get() = android.state().asCommon()
 
-    private val _onEnded = MutableSharedFlow<Unit>(extraBufferCapacity = FLOW_BUFFER_CAPACITY)
+    private val _onEnded = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     actual val onEnded: Flow<Unit> = _onEnded.asSharedFlow()
 
-    private val _onMute = MutableSharedFlow<Unit>(extraBufferCapacity = FLOW_BUFFER_CAPACITY)
-    actual val onMute: Flow<Unit> = _onMute.asSharedFlow()
+    // not implemented for Android
+    actual val onMute: Flow<Unit> = emptyFlow()
 
-    private val _onUnmute = MutableSharedFlow<Unit>(extraBufferCapacity = FLOW_BUFFER_CAPACITY)
-    actual val onUnmute: Flow<Unit> = _onUnmute.asSharedFlow()
+    // not implemented for Android
+    actual val onUnmute: Flow<Unit> = emptyFlow()
 
     actual open fun stop() {
         if (readyState == MediaStreamTrackState.Ended) return

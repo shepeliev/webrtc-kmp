@@ -11,15 +11,6 @@ actual class VideoStreamTrack internal constructor(
 ) : MediaStreamTrack(ios) {
 
     init {
-        onMute.onEach {
-            videoCaptureController?.stopCapture()
-        }.launchIn(scope)
-
-        onUnmute.onEach {
-            videoCaptureController?.initialize(ios.source)
-            videoCaptureController?.startCapture()
-        }.launchIn(scope)
-
         videoCaptureController?.initialize(ios.source)
         videoCaptureController?.startCapture()
     }

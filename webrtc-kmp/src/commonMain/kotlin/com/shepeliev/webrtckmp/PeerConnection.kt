@@ -4,6 +4,9 @@ package com.shepeliev.webrtckmp
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
 import kotlin.jvm.JvmName
 
 expect class PeerConnection(rtcConfiguration: RtcConfiguration = RtcConfiguration()) {
@@ -13,7 +16,8 @@ expect class PeerConnection(rtcConfiguration: RtcConfiguration = RtcConfiguratio
     val iceConnectionState: IceConnectionState
     val connectionState: PeerConnectionState
     val iceGatheringState: IceGatheringState
-    internal val events: PeerConnectionEvents
+
+    internal val peerConnectionEvent: Flow<PeerConnectionEvent>
 
     fun createDataChannel(
         label: String,
@@ -104,35 +108,53 @@ expect class PeerConnection(rtcConfiguration: RtcConfiguration = RtcConfiguratio
  * changes.
  */
 val PeerConnection.onConnectionStateChange: Flow<PeerConnectionState>
-    get() = events.onConnectionStateChange.asSharedFlow()
+    get() = peerConnectionEvent
+        .map { it as? PeerConnectionEvent.ConnectionStateChange }
+        .filterNotNull()
+        .map { it.state }
 
 /**
  * Emits [DataChannel] events. This event is sent when an [DataChannel] is added to the connection
  * by the remote peer calling [PeerConnection.createDataChannel]
  */
 val PeerConnection.onDataChannel: Flow<DataChannel>
-    get() = events.onDataChannel.asSharedFlow()
+    get() = peerConnectionEvent
+        .map { it as? PeerConnectionEvent.NewDataChannel }
+        .filterNotNull()
+        .map { it.dataChannel }
+
 
 /**
  * Emits [IceCandidate] events. This happens whenever the local ICE agent needs to deliver a message
  * to the other peer through the signaling server.
  */
 val PeerConnection.onIceCandidate: Flow<IceCandidate>
-    get() = events.onIceCandidate.asSharedFlow()
+    get() = peerConnectionEvent
+        .map { it as? PeerConnectionEvent.NewIceCandidate }
+        .filterNotNull()
+        .map { it.candidate }
+
 
 /**
  * Emits [IceConnectionState] events. This happens when the state of the connection's ICE agent,
  * as represented by the [PeerConnection.iceConnectionState] property, changes.
  */
 val PeerConnection.onIceConnectionStateChange: Flow<IceConnectionState>
-    get() = events.onIceConnectionStateChange.asSharedFlow()
+    get() = peerConnectionEvent
+        .map { it as? PeerConnectionEvent.IceConnectionStateChange }
+        .filterNotNull()
+        .map { it.state }
+
 
 /**
  * Emits [IceGatheringState] events. This happens when the ICE gathering state—that is, whether or
  * not the ICE agent is actively gathering candidates—changes.
  */
 val PeerConnection.onIceGatheringState: Flow<IceGatheringState>
-    get() = events.onIceGatheringStateChange.asSharedFlow()
+    get() = peerConnectionEvent
+        .map { it as? PeerConnectionEvent.IceGatheringStateChange }
+        .filterNotNull()
+        .map { it.state }
 
 /**
  * Emits negotiationneeded events. This event is fired when a change has occurred which requires
@@ -140,28 +162,46 @@ val PeerConnection.onIceGatheringState: Flow<IceGatheringState>
  * changes cannot be negotiated as the answerer.
  */
 val PeerConnection.onNegotiationNeeded: Flow<Unit>
-    get() = events.onNegotiationNeeded.asSharedFlow()
+    get() = peerConnectionEvent
+        .filter { it is PeerConnectionEvent.NegotiationNeeded }
+        .map {  }
 
 /**
  * Emits [SignalingState] events..
  */
 val PeerConnection.onSignalingStateChange: Flow<SignalingState>
-    get() = events.onSignalingStateChange.asSharedFlow()
+    get() = peerConnectionEvent
+        .map { it as? PeerConnectionEvent.SignalingStateChange }
+        .filterNotNull()
+        .map { it.state }
 
 /**
  * Emits track events, indicating that a track has been added to the [PeerConnection].
  */
 val PeerConnection.onTrack: Flow<TrackEvent>
-    get() = events.onTrack.asSharedFlow()
+    get() = peerConnectionEvent
+        .map { it as? PeerConnectionEvent.Track }
+        .filterNotNull()
+        .map { it.trackEvent }
+
 
 val PeerConnection.onStandardizedIceConnection: Flow<IceConnectionState>
-    get() = events.onStandardizedIceConnectionChange.asSharedFlow()
+    get() = peerConnectionEvent
+        .map { it as? PeerConnectionEvent.StandardizedIceConnectionChange }
+        .filterNotNull()
+        .map { it.state }
 
 val PeerConnection.onRemovedIceCandidates: Flow<List<IceCandidate>>
-    get() = events.onRemovedIceCandidates.asSharedFlow()
+    get() = peerConnectionEvent
+        .map { it as? PeerConnectionEvent.RemovedIceCandidates }
+        .filterNotNull()
+        .map { it.candidates }
 
 val PeerConnection.onRemoveTrack: Flow<RtpReceiver>
-    get() = events.onRemoveTrack.asSharedFlow()
+    get() = peerConnectionEvent
+        .map { it as? PeerConnectionEvent.RemoveTrack }
+        .filterNotNull()
+        .map { it.rtpReceiver }
 
 enum class TlsCertPolicy { TlsCertPolicySecure, TlsCertPolicyInsecureNoCheck }
 enum class KeyType { RSA, ECDSA }
