@@ -1,19 +1,14 @@
 package com.shepeliev.webrtckmp
 
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.launch
 import org.w3c.dom.mediacapture.ENDED
 import org.w3c.dom.mediacapture.LIVE
 import org.w3c.dom.mediacapture.MediaStreamTrack as JsMediaStreamTrack
 import org.w3c.dom.mediacapture.MediaStreamTrackState as JsMediaStreamTrackState
 
 actual open class MediaStreamTrack internal constructor(val js: JsMediaStreamTrack) {
-    private val scope = MainScope()
-
     actual val id: String
         get() = js.id
 
@@ -35,30 +30,19 @@ actual open class MediaStreamTrack internal constructor(val js: JsMediaStreamTra
             js.enabled = value
         }
 
-    private val onEndedInternal = MutableSharedFlow<Unit>()
-    actual val onEnded: Flow<Unit> = onEndedInternal.asSharedFlow()
+    private val _onEnded = MutableSharedFlow<Unit>(extraBufferCapacity = FLOW_BUFFER_CAPACITY)
+    actual val onEnded: Flow<Unit> = _onEnded.asSharedFlow()
 
-    private val onMuteInternal = MutableSharedFlow<Unit>()
-    actual val onMute: Flow<Unit> = onEndedInternal.asSharedFlow()
+    private val _onMute = MutableSharedFlow<Unit>(extraBufferCapacity = FLOW_BUFFER_CAPACITY)
+    actual val onMute: Flow<Unit> = _onEnded.asSharedFlow()
 
-    private val onUnmuteInternal = MutableSharedFlow<Unit>()
-    actual val onUnmute: Flow<Unit> = onEndedInternal.asSharedFlow()
+    private val _onUnmute = MutableSharedFlow<Unit>(extraBufferCapacity = FLOW_BUFFER_CAPACITY)
+    actual val onUnmute: Flow<Unit> = _onEnded.asSharedFlow()
 
     init {
-        js.onended = {
-            scope.launch {
-                onEndedInternal.emit(Unit)
-                cancel()
-            }
-        }
-
-        js.onmute = {
-            scope.launch { onMuteInternal.emit(Unit) }
-        }
-
-        js.onunmute = {
-            scope.launch { onUnmuteInternal.emit(Unit) }
-        }
+        js.onended = { _onEnded.tryEmit(Unit) }
+        js.onmute = { _onMute.tryEmit(Unit) }
+        js.onunmute = { _onUnmute.tryEmit(Unit) }
     }
 
     actual fun stop() {

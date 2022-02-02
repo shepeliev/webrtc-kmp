@@ -39,11 +39,11 @@ actual class DataChannel internal constructor(val js: RTCDataChannel) {
     actual val onMessage: Flow<ByteArray> = _onMessage.asSharedFlow()
 
     init {
-        js.onopen = { check(_onOpen.tryEmit(Unit)) {"onOpen"} }
-        js.onclosing = { check(_onClosing.tryEmit(Unit)) {"onCLosing"} }
-        js.onclose = { check(_onClose.tryEmit(Unit)) {"onClose"} }
-        js.onerror = { check(_onError.tryEmit(it.message)) {"onError"} }
-        js.onmessage = { check(_onMessage.tryEmit(it.data.encodeToByteArray())) { "onMessage" } }
+        js.onopen = { _onOpen.tryEmit(Unit) }
+        js.onclosing = { _onClosing.tryEmit(Unit) }
+        js.onclose = { _onClose.tryEmit(Unit) }
+        js.onerror = { _onError.tryEmit(it.message) }
+        js.onmessage = { _onMessage.tryEmit(it.data.encodeToByteArray()) }
     }
 
     actual fun send(data: ByteArray): Boolean {
@@ -55,6 +55,3 @@ actual class DataChannel internal constructor(val js: RTCDataChannel) {
         js.close()
     }
 }
-
-// TODO: the value is just an assumption and might be adjusted
-private const val FLOW_BUFFER_CAPACITY = 42

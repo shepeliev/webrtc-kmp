@@ -1,11 +1,8 @@
 package com.shepeliev.webrtckmp
 
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.launch
 import org.webrtc.MediaSource
 import org.webrtc.AudioTrack as AndroidAudioTrack
 import org.webrtc.MediaStreamTrack as AndroidMediaStreamTrack
@@ -15,8 +12,6 @@ actual open class MediaStreamTrack internal constructor(
     val android: AndroidMediaStreamTrack,
     private val mediaSource: MediaSource?,
 ) {
-
-    protected val scope = MainScope()
 
     actual val id: String
         get() = android.id()
@@ -43,30 +38,27 @@ actual open class MediaStreamTrack internal constructor(
         set(value) {
             android.setEnabled(value)
             if (value) {
-                scope.launch { onUnmuteInternal.emit(Unit) }
+                _onUnmute.tryEmit(Unit)
             } else {
-                scope.launch { onMuteInternal.emit(Unit) }
+                _onMute.tryEmit(Unit)
             }
         }
 
     actual val readyState: MediaStreamTrackState
         get() = android.state().asCommon()
 
-    private val onEndedInternal = MutableSharedFlow<Unit>()
-    actual val onEnded: Flow<Unit> = onEndedInternal.asSharedFlow()
+    private val _onEnded = MutableSharedFlow<Unit>(extraBufferCapacity = FLOW_BUFFER_CAPACITY)
+    actual val onEnded: Flow<Unit> = _onEnded.asSharedFlow()
 
-    private val onMuteInternal = MutableSharedFlow<Unit>()
-    actual val onMute: Flow<Unit> = onMuteInternal.asSharedFlow()
+    private val _onMute = MutableSharedFlow<Unit>(extraBufferCapacity = FLOW_BUFFER_CAPACITY)
+    actual val onMute: Flow<Unit> = _onMute.asSharedFlow()
 
-    private val onUnmuteInternal = MutableSharedFlow<Unit>()
-    actual val onUnmute: Flow<Unit> = onUnmuteInternal.asSharedFlow()
+    private val _onUnmute = MutableSharedFlow<Unit>(extraBufferCapacity = FLOW_BUFFER_CAPACITY)
+    actual val onUnmute: Flow<Unit> = _onUnmute.asSharedFlow()
 
     actual open fun stop() {
         if (readyState == MediaStreamTrackState.Ended) return
-        scope.launch {
-            onEndedInternal.emit(Unit)
-            scope.cancel()
-        }
+        _onEnded.tryEmit(Unit)
         mediaSource?.dispose()
     }
 }

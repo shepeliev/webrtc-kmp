@@ -4,17 +4,12 @@ import WebRTC.RTCAudioTrack
 import WebRTC.RTCMediaStreamTrack
 import WebRTC.RTCMediaStreamTrackState
 import WebRTC.RTCVideoTrack
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.launch
 import kotlin.native.concurrent.AtomicInt
 
 actual open class MediaStreamTrack internal constructor(val ios: RTCMediaStreamTrack) {
-
-    protected val scope = MainScope()
 
     actual val id: String
         get() = ios.trackId
@@ -41,9 +36,9 @@ actual open class MediaStreamTrack internal constructor(val ios: RTCMediaStreamT
         set(value) {
             ios.isEnabled = value
             if (value) {
-                scope.launch { onUnmuteInternal.emit(Unit) }
+                _onUnmute.tryEmit(Unit)
             } else {
-                scope.launch { onMuteInternal.emit(Unit) }
+                _onMute.tryEmit(Unit)
             }
         }
 
@@ -55,24 +50,21 @@ actual open class MediaStreamTrack internal constructor(val ios: RTCMediaStreamT
             return rtcMediaStreamTrackStateAsCommon(ios.readyState)
         }
 
-    private val onEndedInternal = MutableSharedFlow<Unit>()
-    actual val onEnded: Flow<Unit> = onEndedInternal.asSharedFlow()
+    private val _onEnded = MutableSharedFlow<Unit>(extraBufferCapacity = FLOW_BUFFER_CAPACITY)
+    actual val onEnded: Flow<Unit> = _onEnded.asSharedFlow()
 
-    private val onMuteInternal = MutableSharedFlow<Unit>()
-    actual val onMute: Flow<Unit> = onMuteInternal.asSharedFlow()
+    private val _onMute = MutableSharedFlow<Unit>(extraBufferCapacity = FLOW_BUFFER_CAPACITY)
+    actual val onMute: Flow<Unit> = _onMute.asSharedFlow()
 
-    private val onUnmuteInternal = MutableSharedFlow<Unit>()
-    actual val onUnmute: Flow<Unit> = onUnmuteInternal.asSharedFlow()
+    private val _onUnmute = MutableSharedFlow<Unit>(extraBufferCapacity = FLOW_BUFFER_CAPACITY)
+    actual val onUnmute: Flow<Unit> = _onUnmute.asSharedFlow()
 
     private val endedFlag = AtomicInt(0)
 
     actual open fun stop() {
         if (!endedFlag.compareAndSet(0, 1)) return
         enabled = false
-        scope.launch {
-            onEndedInternal.emit(Unit)
-            scope.cancel()
-        }
+        _onEnded.tryEmit(Unit)
     }
 
     companion object {
