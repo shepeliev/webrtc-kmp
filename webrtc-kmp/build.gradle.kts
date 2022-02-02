@@ -1,8 +1,8 @@
-import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+import org.jetbrains.kotlin.konan.properties.loadProperties
 
 plugins {
-    kotlin("multiplatform") version "1.6.0"
     id("com.android.library")
+    kotlin("multiplatform") version "1.6.0"
     id("org.jmailen.kotlinter") version "3.4.4"
     id("maven-publish")
     id("signing")
@@ -14,8 +14,7 @@ kotlin {
     }
 
     ios {
-        val webRtcFrameworkPath =
-            rootDir.resolve("libs/ios/WebRTC.xcframework/ios-x86_64-simulator/")
+        val webRtcFrameworkPath = rootDir.resolve("libs/ios/WebRTC.xcframework/ios-x86_64-simulator/")
         binaries {
             getTest("DEBUG").apply {
                 linkerOpts(
@@ -116,7 +115,7 @@ publishing {
         maven {
             url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2")
             credentials {
-                val localProperties = gradleLocalProperties(rootDir)
+                val localProperties = loadProperties(rootDir.resolve("local.properties").absolutePath)
                 username = localProperties.getProperty("ossrhUsername") ?: System.getenv("OSSRH_USERNAME")
                 password = localProperties.getProperty("ossrhPassword") ?: System.getenv("OSSRH_PASSWORD")
             }
@@ -163,7 +162,7 @@ publishing {
 }
 
 signing {
-    val localProperties = gradleLocalProperties(rootDir)
+    val localProperties = loadProperties(rootDir.resolve("local.properties").absolutePath)
     val signingKey = localProperties.getProperty("signing.key") ?: System.getenv("SIGNING_KEY")
     val signingPassword = localProperties.getProperty("signing.password") ?: System.getenv("SIGNING_PASSWORD")
     useInMemoryPgpKeys(signingKey, signingPassword)
