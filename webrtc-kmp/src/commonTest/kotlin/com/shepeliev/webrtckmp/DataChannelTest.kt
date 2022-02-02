@@ -1,6 +1,7 @@
 package com.shepeliev.webrtckmp
 
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -25,6 +26,10 @@ class DataChannelTest {
         val pc2 = PeerConnection()
 
         val dataChannel = pc1.createDataChannel("dataChannel")!!
+        val message = async {
+            withTimeout(5000) { dataChannel.onMessage.map { it.decodeToString() }.first() }
+        }
+
         val pc1Candidates = mutableListOf<IceCandidate>()
         val pc2Candidates = mutableListOf<IceCandidate>()
 
@@ -66,10 +71,7 @@ class DataChannelTest {
         pc2.setLocalDescription(answer)
         pc1.setRemoteDescription(answer)
 
-        val message = withTimeout(5000) {
-            dataChannel.onMessage.map { it.decodeToString() }.first()
-        }
-        assertEquals("Hello WebRTC KMP!", message)
+        assertEquals("Hello WebRTC KMP!", message.await())
 
         pc1.close()
         pc2.close()
