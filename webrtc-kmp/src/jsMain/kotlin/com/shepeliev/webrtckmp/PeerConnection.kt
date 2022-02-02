@@ -1,9 +1,17 @@
 package com.shepeliev.webrtckmp
 
-import kotlinx.coroutines.MainScope
+import com.shepeliev.webrtckmp.PeerConnectionEvent.ConnectionStateChange
+import com.shepeliev.webrtckmp.PeerConnectionEvent.IceConnectionStateChange
+import com.shepeliev.webrtckmp.PeerConnectionEvent.IceGatheringStateChange
+import com.shepeliev.webrtckmp.PeerConnectionEvent.NegotiationNeeded
+import com.shepeliev.webrtckmp.PeerConnectionEvent.NewDataChannel
+import com.shepeliev.webrtckmp.PeerConnectionEvent.NewIceCandidate
+import com.shepeliev.webrtckmp.PeerConnectionEvent.SignalingStateChange
+import com.shepeliev.webrtckmp.PeerConnectionEvent.Track
 import kotlinx.coroutines.await
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlin.js.Json
 import kotlin.js.json
 
@@ -27,63 +35,42 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
     actual val iceGatheringState: IceGatheringState
         get() = js.iceGatheringState.toIceGatheringState()
 
-    internal actual val events: PeerConnectionEvents = PeerConnectionEvents()
+    private val _peerConnectionEvent =
+        MutableSharedFlow<PeerConnectionEvent>(extraBufferCapacity = FLOW_BUFFER_CAPACITY)
+    internal actual val peerConnectionEvent: Flow<PeerConnectionEvent> = _peerConnectionEvent.asSharedFlow()
 
     init {
         js = RTCPeerConnection(rtcConfiguration.js).apply {
             onsignalingstatechange = {
-                scope.launch {
-                    events.onSignalingStateChange.emit(this@PeerConnection.signalingState)
-                }
+                _peerConnectionEvent.tryEmit(SignalingStateChange(this@PeerConnection.signalingState))
             }
             oniceconnectionstatechange = {
-                scope.launch {
-                    events.onIceConnectionStateChange.emit(this@PeerConnection.iceConnectionState)
-                }
+                _peerConnectionEvent.tryEmit(IceConnectionStateChange(this@PeerConnection.iceConnectionState))
             }
             onconnectionstatechange = {
-                scope.launch {
-                    events.onConnectionStateChange.emit(this@PeerConnection.connectionState)
-                    if (this@PeerConnection.connectionState == PeerConnectionState.Closed) {
-                        scope.cancel()
-                    }
-                }
+                _peerConnectionEvent.tryEmit(ConnectionStateChange(this@PeerConnection.connectionState))
             }
             onicegatheringstatechange = {
-                scope.launch {
-                    events.onIceGatheringStateChange.emit(this@PeerConnection.iceGatheringState)
-                }
+                _peerConnectionEvent.tryEmit(IceGatheringStateChange(this@PeerConnection.iceGatheringState))
             }
             onicecandidate = { iceEvent ->
-                if (iceEvent.candidate != null) {
-                    scope.launch {
-                        events.onIceCandidate.emit(IceCandidate(iceEvent.candidate))
-                    }
-                }
+                iceEvent.candidate?.let { _peerConnectionEvent.tryEmit(NewIceCandidate(IceCandidate(it))) }
             }
             ondatachannel = { dataChannelEvent ->
-                scope.launch {
-                    events.onDataChannel.emit(DataChannel(dataChannelEvent.channel))
-                }
+                _peerConnectionEvent.tryEmit(NewDataChannel(DataChannel(dataChannelEvent.channel)))
             }
-            onnegotiationneeded = {
-                scope.launch { events.onNegotiationNeeded.emit(Unit) }
-            }
+            onnegotiationneeded = { _peerConnectionEvent.tryEmit(NegotiationNeeded) }
             ontrack = { rtcTrackEvent ->
-                scope.launch {
-                    val trackEvent = TrackEvent(
-                        receiver = RtpReceiver(rtcTrackEvent.receiver),
-                        streams = rtcTrackEvent.streams.map { MediaStream(it) },
-                        track = rtcTrackEvent.track.asCommon(),
-                        transceiver = RtpTransceiver(rtcTrackEvent.transceiver)
-                    )
-                    events.onTrack.emit(trackEvent)
-                }
+                val trackEvent = TrackEvent(
+                    receiver = RtpReceiver(rtcTrackEvent.receiver),
+                    streams = rtcTrackEvent.streams.map { MediaStream(it) },
+                    track = rtcTrackEvent.track.asCommon(),
+                    transceiver = RtpTransceiver(rtcTrackEvent.transceiver)
+                )
+                _peerConnectionEvent.tryEmit(Track(trackEvent))
             }
         }
     }
-
-    private val scope = MainScope()
 
     actual fun createDataChannel(
         label: String,

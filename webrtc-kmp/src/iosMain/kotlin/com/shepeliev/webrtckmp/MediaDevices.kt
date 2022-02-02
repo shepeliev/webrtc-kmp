@@ -27,8 +27,16 @@ private object MediaDevicesImpl : MediaDevices {
         val videoTrack = constraints.video?.let { videoConstraints ->
             CameraVideoCaptureController(videoConstraints).let { videoCaptureController ->
                 val videoSource = factory.videoSource()
-                val track = factory.videoTrackWithSource(videoSource, NSUUID.UUID().UUIDString())
-                VideoStreamTrack(track, videoCaptureController)
+                val iosVideoTrack = factory.videoTrackWithSource(videoSource, NSUUID.UUID().UUIDString())
+                val videoTrack = VideoStreamTrack(
+                    ios = iosVideoTrack,
+                    onSwitchCamera = { deviceId: String? ->
+                        deviceId?.let { videoCaptureController.switchCamera(it) } ?: videoCaptureController.switchCamera()
+                    }
+                ) { videoCaptureController.stopCapture() }
+                videoCaptureController.initialize(videoSource)
+                videoCaptureController.startCapture()
+                videoTrack
             }
         }
 

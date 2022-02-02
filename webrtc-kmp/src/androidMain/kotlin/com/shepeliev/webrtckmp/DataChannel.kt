@@ -1,56 +1,75 @@
 package com.shepeliev.webrtckmp
 
-import com.shepeliev.webrtckmp.utils.toByteArray
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
 import java.nio.ByteBuffer
 import org.webrtc.DataChannel as AndroidDataChannel
 
-actual class DataChannel(val native: AndroidDataChannel) : AndroidDataChannel.Observer {
+actual class DataChannel(val android: AndroidDataChannel) {
 
     actual val label: String
-        get() = native.label()
+        get() = android.label()
 
     actual val id: Int
-        get() = native.id()
+        get() = android.id()
 
     actual val readyState: DataChannelState
-        get() = native.state().toCommon()
+        get() = android.state().toCommon()
 
     actual val bufferedAmount: Long
-        get() = native.bufferedAmount()
+        get() = android.bufferedAmount()
 
-    private val onOpenInternal = MutableSharedFlow<Unit>()
-    actual val onOpen: Flow<Unit> = onOpenInternal.asSharedFlow()
+    private val dataChannelEvent = callbackFlow {
+        val observer = object : AndroidDataChannel.Observer {
+            override fun onBufferedAmountChange(p0: Long) {
+                // not implemented
+            }
 
-    private val onClosingInternal = MutableSharedFlow<Unit>()
-    actual val onClosing: Flow<Unit> = onClosingInternal.asSharedFlow()
+            override fun onStateChange() {
+                trySendBlocking(DataChannelEvent.StateChanged)
+            }
 
-    private val onCloseInternal = MutableSharedFlow<Unit>()
-    actual val onClose: Flow<Unit> = onCloseInternal.asSharedFlow()
+            override fun onMessage(buffer: org.webrtc.DataChannel.Buffer) {
+                trySendBlocking(DataChannelEvent.MessageReceived(buffer))
+            }
+        }
 
-    private val onErrorInternal = MutableSharedFlow<String>()
-    actual val onError: Flow<String> = onErrorInternal.asSharedFlow()
+        android.registerObserver(observer)
 
-    private val onMessageInternal = MutableSharedFlow<ByteArray>()
-    actual val onMessage: Flow<ByteArray> = onMessageInternal.asSharedFlow()
-
-    private val scope = MainScope()
-
-    init {
-        native.registerObserver(this)
+        awaitClose { android.unregisterObserver() }
     }
+
+    actual val onOpen: Flow<Unit> = dataChannelEvent
+        .filter { it is DataChannelEvent.StateChanged && android.state() == AndroidDataChannel.State.OPEN }
+        .map { }
+
+    actual val onClosing: Flow<Unit> = dataChannelEvent
+        .filter { it is DataChannelEvent.StateChanged && android.state() == AndroidDataChannel.State.CLOSING }
+        .map { }
+
+    actual val onClose: Flow<Unit> = dataChannelEvent
+        .filter { it is DataChannelEvent.StateChanged && android.state() == AndroidDataChannel.State.CLOSED }
+        .map { }
+
+    actual val onError: Flow<String> = emptyFlow()
+
+    actual val onMessage: Flow<ByteArray> = dataChannelEvent
+        .map { it as? DataChannelEvent.MessageReceived }
+        .filterNotNull()
+        .map { it.buffer.data.toByteArray() }
 
     actual fun send(data: ByteArray): Boolean {
         val buffer = AndroidDataChannel.Buffer(ByteBuffer.wrap(data), true)
-        return native.send(buffer)
+        return android.send(buffer)
     }
 
-    actual fun close() = native.dispose()
+    actual fun close() = android.dispose()
 
     private fun AndroidDataChannel.State.toCommon(): DataChannelState {
         return when (this) {
@@ -61,28 +80,8 @@ actual class DataChannel(val native: AndroidDataChannel) : AndroidDataChannel.Ob
         }
     }
 
-    override fun onBufferedAmountChange(reviousAmount: Long) {
-        // not implemented
-    }
-
-    override fun onStateChange() {
-        scope.launch {
-            when (native.state()) {
-                AndroidDataChannel.State.OPEN -> onOpenInternal.emit(Unit)
-                AndroidDataChannel.State.CLOSING -> onClosingInternal.emit(Unit)
-                AndroidDataChannel.State.CLOSED -> {
-                    onCloseInternal.emit(Unit)
-                    scope.cancel()
-                }
-                else -> {
-                    // ignore
-                }
-            }
-        }
-    }
-
-    override fun onMessage(buffer: AndroidDataChannel.Buffer) {
-        val data = buffer.data.toByteArray()
-        scope.launch { onMessageInternal.emit(data) }
+    private sealed interface DataChannelEvent {
+        object StateChanged : DataChannelEvent
+        data class MessageReceived(val buffer: AndroidDataChannel.Buffer) : DataChannelEvent
     }
 }

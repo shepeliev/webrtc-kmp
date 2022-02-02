@@ -2,27 +2,12 @@ package com.shepeliev.webrtckmp
 
 import WebRTC.RTCVideoRendererProtocol
 import WebRTC.RTCVideoTrack
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 
 actual class VideoStreamTrack internal constructor(
     ios: RTCVideoTrack,
-    private val videoCaptureController: CameraVideoCaptureController? = null
+    private val onSwitchCamera: (String?) -> Unit = { },
+    private val onStop: () -> Unit = { },
 ) : MediaStreamTrack(ios) {
-
-    init {
-        onMute.onEach {
-            videoCaptureController?.stopCapture()
-        }.launchIn(scope)
-
-        onUnmute.onEach {
-            videoCaptureController?.initialize(ios.source)
-            videoCaptureController?.startCapture()
-        }.launchIn(scope)
-
-        videoCaptureController?.initialize(ios.source)
-        videoCaptureController?.startCapture()
-    }
 
     fun addRenderer(renderer: RTCVideoRendererProtocol) {
         (ios as RTCVideoTrack).addRenderer(renderer)
@@ -33,15 +18,11 @@ actual class VideoStreamTrack internal constructor(
     }
 
     actual suspend fun switchCamera(deviceId: String?) {
-        if (deviceId == null) {
-            videoCaptureController?.switchCamera()
-        } else {
-            videoCaptureController?.switchCamera(deviceId)
-        }
+        onSwitchCamera(deviceId)
     }
 
     override fun stop() {
-        videoCaptureController?.stopCapture()
+        onStop()
         super.stop()
     }
 }

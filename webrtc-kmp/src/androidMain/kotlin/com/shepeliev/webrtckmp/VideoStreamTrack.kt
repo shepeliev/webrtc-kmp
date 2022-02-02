@@ -1,34 +1,16 @@
 package com.shepeliev.webrtckmp
 
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import org.webrtc.VideoSink
-import org.webrtc.VideoSource
 import org.webrtc.VideoTrack
 
 actual class VideoStreamTrack internal constructor(
     android: VideoTrack,
-    videoSource: VideoSource? = null,
-    private val videoCaptureController: AbstractVideoCaptureController? = null
-) : MediaStreamTrack(android, videoSource) {
-
-    init {
-        onMute.onEach { videoCaptureController?.stopCapture() }.launchIn(scope)
-
-        onUnmute.onEach {
-            videoSource?.also {
-                videoCaptureController?.initialize(it.capturerObserver)
-                videoCaptureController?.startCapture()
-            }
-        }.launchIn(scope)
-    }
+    private val onSwitchCamera: suspend (String?) -> Unit = { },
+    private val onStop: () -> Unit = { },
+) : MediaStreamTrack(android) {
 
     actual suspend fun switchCamera(deviceId: String?) {
-        if (deviceId == null) {
-            (videoCaptureController as? CameraVideoCaptureController)?.switchCamera()
-        } else {
-            (videoCaptureController as? CameraVideoCaptureController)?.switchCamera(deviceId)
-        }
+        onSwitchCamera(deviceId)
     }
 
     fun addSink(sink: VideoSink) {
@@ -40,7 +22,7 @@ actual class VideoStreamTrack internal constructor(
     }
 
     override fun stop() {
-        videoCaptureController?.stopCapture()
+        onStop()
         super.stop()
     }
 }

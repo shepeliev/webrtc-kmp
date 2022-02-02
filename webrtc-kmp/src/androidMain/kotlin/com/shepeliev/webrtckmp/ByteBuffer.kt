@@ -1,4 +1,4 @@
-package com.shepeliev.webrtckmp.utils
+package com.shepeliev.webrtckmp
 
 import java.nio.ByteBuffer
 

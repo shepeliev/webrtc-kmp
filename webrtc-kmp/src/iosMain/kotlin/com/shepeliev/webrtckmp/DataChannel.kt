@@ -4,91 +4,80 @@ import WebRTC.RTCDataBuffer
 import WebRTC.RTCDataChannel
 import WebRTC.RTCDataChannelDelegateProtocol
 import WebRTC.RTCDataChannelState
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
 import platform.darwin.NSObject
 import platform.posix.uint64_t
 import kotlin.native.concurrent.freeze
 
-actual class DataChannel(val native: RTCDataChannel) {
+actual class DataChannel(val ios: RTCDataChannel) {
 
     actual val label: String
-        get() = native.label()
+        get() = ios.label()
 
     actual val id: Int
-        get() = native.channelId
+        get() = ios.channelId
 
     actual val readyState: DataChannelState
-        get() = rtcDataChannelStateAsCommon(native.readyState())
+        get() = rtcDataChannelStateAsCommon(ios.readyState())
 
     actual val bufferedAmount: Long
-        get() = native.bufferedAmount.toLong()
+        get() = ios.bufferedAmount.toLong()
 
-    private val onOpenInternal = MutableSharedFlow<Unit>()
-    actual val onOpen: Flow<Unit> = onOpenInternal.asSharedFlow()
-
-    private val onClosingInternal = MutableSharedFlow<Unit>()
-    actual val onClosing: Flow<Unit> = onClosingInternal.asSharedFlow()
-
-    private val onCloseInternal = MutableSharedFlow<Unit>()
-    actual val onClose: Flow<Unit> = onCloseInternal.asSharedFlow()
-
-    private val onErrorInternal = MutableSharedFlow<String>()
-    actual val onError: Flow<String> = onErrorInternal.asSharedFlow()
-
-    private val onMessageInternal = MutableSharedFlow<ByteArray>()
-    actual val onMessage: Flow<ByteArray> = onMessageInternal.asSharedFlow()
-
-    private val scope = MainScope()
-
-    init {
-        val delegate = object : NSObject(), RTCDataChannelDelegateProtocol {
-            override fun dataChannel(
-                dataChannel: RTCDataChannel,
-                didChangeBufferedAmount: uint64_t
-            ) {
+    private val dataChannelEvent = callbackFlow {
+        ios.delegate = object : NSObject(), RTCDataChannelDelegateProtocol {
+            override fun dataChannel(dataChannel: RTCDataChannel, didChangeBufferedAmount: uint64_t) {
                 // not implemented
             }
 
-            override fun dataChannel(
-                dataChannel: RTCDataChannel,
-                didReceiveMessageWithBuffer: RTCDataBuffer
-            ) {
-                val data = didReceiveMessageWithBuffer.data.toByteArray().freeze()
-                scope.launch { onMessageInternal.emit(data) }
+            override fun dataChannel(dataChannel: RTCDataChannel, didReceiveMessageWithBuffer: RTCDataBuffer) {
+                trySendBlocking(DataChannelEvent.MessageReceived(didReceiveMessageWithBuffer))
             }
 
             override fun dataChannelDidChangeState(dataChannel: RTCDataChannel) {
-                scope.launch {
-                    when (native.readyState) {
-                        RTCDataChannelState.RTCDataChannelStateOpen -> onOpenInternal.emit(Unit)
-                        RTCDataChannelState.RTCDataChannelStateClosing -> onClosingInternal.emit(
-                            Unit
-                        )
-                        RTCDataChannelState.RTCDataChannelStateClosed -> {
-                            onCloseInternal.emit(Unit)
-                            scope.cancel()
-                        }
-                        else -> {
-                            // ignore
-                        }
-                    }
-                }
+                trySendBlocking(DataChannelEvent.StateChanged)
             }
         }
-        native.delegate = delegate.freeze()
+
+        awaitClose { ios.delegate = null }
     }
+
+    actual val onOpen: Flow<Unit> = dataChannelEvent
+        .filter { it is DataChannelEvent.StateChanged && ios.readyState == RTCDataChannelState.RTCDataChannelStateOpen }
+        .map { }
+
+    actual val onClosing: Flow<Unit> = dataChannelEvent
+        .filter { it is DataChannelEvent.StateChanged && ios.readyState == RTCDataChannelState.RTCDataChannelStateClosing }
+        .map { }
+
+    actual val onClose: Flow<Unit> = dataChannelEvent
+        .filter { it is DataChannelEvent.StateChanged && ios.readyState == RTCDataChannelState.RTCDataChannelStateClosed }
+        .map { }
+
+    actual val onError: Flow<String> = emptyFlow()
+
+    actual val onMessage: Flow<ByteArray> = dataChannelEvent
+        .map { it as? DataChannelEvent.MessageReceived }
+        .filterNotNull()
+        .map { it.buffer.data.toByteArray() }
 
     actual fun send(data: ByteArray): Boolean {
         val buffer = RTCDataBuffer(data.toNSData(), true).freeze()
-        return native.sendData(buffer)
+        return ios.sendData(buffer)
     }
 
-    actual fun close() = native.close()
+    actual fun close() = ios.close()
+
+    private sealed interface DataChannelEvent {
+        object StateChanged : DataChannelEvent
+        data class MessageReceived(val buffer: RTCDataBuffer) : DataChannelEvent
+    }
 }
 
 private fun rtcDataChannelStateAsCommon(state: RTCDataChannelState): DataChannelState {

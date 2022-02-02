@@ -1,22 +1,14 @@
 package com.shepeliev.webrtckmp
 
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.launch
-import org.webrtc.MediaSource
+import kotlinx.coroutines.flow.emptyFlow
 import org.webrtc.AudioTrack as AndroidAudioTrack
 import org.webrtc.MediaStreamTrack as AndroidMediaStreamTrack
 import org.webrtc.VideoTrack as AndroidVideoTrack
 
-actual open class MediaStreamTrack internal constructor(
-    val android: AndroidMediaStreamTrack,
-    private val mediaSource: MediaSource?,
-) {
-
-    protected val scope = MainScope()
+actual open class MediaStreamTrack internal constructor(val android: AndroidMediaStreamTrack) {
 
     actual val id: String
         get() = android.id()
@@ -35,39 +27,30 @@ actual open class MediaStreamTrack internal constructor(
             MediaStreamTrackKind.Video -> "camera"
         }
 
-    actual val muted: Boolean
-        get() = !enabled
+    actual val readyState: MediaStreamTrackState
+        get() = android.state().asCommon()
+
+    // not implemented for Android
+    actual val muted: Boolean = false
 
     actual var enabled: Boolean
         get() = android.enabled()
         set(value) {
             android.setEnabled(value)
-            if (value) {
-                scope.launch { onUnmuteInternal.emit(Unit) }
-            } else {
-                scope.launch { onMuteInternal.emit(Unit) }
-            }
         }
 
-    actual val readyState: MediaStreamTrackState
-        get() = android.state().asCommon()
+    private val _onEnded = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    actual val onEnded: Flow<Unit> = _onEnded.asSharedFlow()
 
-    private val onEndedInternal = MutableSharedFlow<Unit>()
-    actual val onEnded: Flow<Unit> = onEndedInternal.asSharedFlow()
+    // not implemented for Android
+    actual val onMute: Flow<Unit> = emptyFlow()
 
-    private val onMuteInternal = MutableSharedFlow<Unit>()
-    actual val onMute: Flow<Unit> = onMuteInternal.asSharedFlow()
-
-    private val onUnmuteInternal = MutableSharedFlow<Unit>()
-    actual val onUnmute: Flow<Unit> = onUnmuteInternal.asSharedFlow()
+    // not implemented for Android
+    actual val onUnmute: Flow<Unit> = emptyFlow()
 
     actual open fun stop() {
         if (readyState == MediaStreamTrackState.Ended) return
-        scope.launch {
-            onEndedInternal.emit(Unit)
-            scope.cancel()
-        }
-        mediaSource?.dispose()
+        _onEnded.tryEmit(Unit)
     }
 }
 

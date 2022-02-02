@@ -1,12 +1,8 @@
 package com.shepeliev.webrtckmp
 
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.launch
-import org.khronos.webgl.Uint8Array
 
 actual class DataChannel internal constructor(val js: RTCDataChannel) {
     actual val id: Int
@@ -27,38 +23,30 @@ actual class DataChannel internal constructor(val js: RTCDataChannel) {
     actual val bufferedAmount: Long
         get() = js.bufferedAmount
 
-    private val onOpenInternal = MutableSharedFlow<Unit>()
-    actual val onOpen: Flow<Unit> = onOpenInternal.asSharedFlow()
+    private val _onOpen = MutableSharedFlow<Unit>(extraBufferCapacity = FLOW_BUFFER_CAPACITY)
+    actual val onOpen: Flow<Unit> = _onOpen.asSharedFlow()
 
-    private val onClosingInternal = MutableSharedFlow<Unit>()
-    actual val onClosing: Flow<Unit> = onClosingInternal.asSharedFlow()
+    private val _onClosing = MutableSharedFlow<Unit>(extraBufferCapacity = FLOW_BUFFER_CAPACITY)
+    actual val onClosing: Flow<Unit> = _onClosing.asSharedFlow()
 
-    private val onCloseInternal = MutableSharedFlow<Unit>()
-    actual val onClose: Flow<Unit> = onCloseInternal.asSharedFlow()
+    private val _onClose = MutableSharedFlow<Unit>(extraBufferCapacity = FLOW_BUFFER_CAPACITY)
+    actual val onClose: Flow<Unit> = _onClose.asSharedFlow()
 
-    private val onErrorInternal = MutableSharedFlow<String>()
-    actual val onError: Flow<String> = onErrorInternal.asSharedFlow()
+    private val _onError = MutableSharedFlow<String>(extraBufferCapacity = FLOW_BUFFER_CAPACITY)
+    actual val onError: Flow<String> = _onError.asSharedFlow()
 
-    private val onMessageInternal = MutableSharedFlow<ByteArray>()
-    actual val onMessage: Flow<ByteArray> = onMessageInternal.asSharedFlow()
-
-    private val scope = MainScope()
+    private val _onMessage = MutableSharedFlow<ByteArray>(extraBufferCapacity = FLOW_BUFFER_CAPACITY)
+    actual val onMessage: Flow<ByteArray> = _onMessage.asSharedFlow()
 
     init {
-        js.onopen = { scope.launch { onOpenInternal.emit(Unit) } }
-        js.onclosing = { scope.launch { onClosingInternal.emit(Unit) } }
-        js.onclose = {
-            scope.launch {
-                onCloseInternal.emit(Unit)
-                scope.cancel()
-            }
-        }
-        js.onerror = { scope.launch { onErrorInternal.emit(it.message) } }
-        js.onmessage = { scope.launch { onMessageInternal.emit(it.data.encodeToByteArray()) } }
+        js.onopen = { _onOpen.tryEmit(Unit) }
+        js.onclosing = { _onClosing.tryEmit(Unit) }
+        js.onclose = { _onClose.tryEmit(Unit) }
+        js.onerror = { _onError.tryEmit(it.message) }
+        js.onmessage = { _onMessage.tryEmit(it.data.encodeToByteArray()) }
     }
 
     actual fun send(data: ByteArray): Boolean {
-        val bytes = Uint8Array(data.toTypedArray())
         js.send(data.decodeToString())
         return true
     }

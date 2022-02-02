@@ -10,7 +10,7 @@ actual class RtcConfiguration actual constructor(
     iceTransportPolicy: IceTransportPolicy,
     rtcpMuxPolicy: RtcpMuxPolicy,
 ) {
-    val native = PeerConnection.RTCConfiguration(iceServers.map { it.native }).also {
+    val android = PeerConnection.RTCConfiguration(iceServers.map { it.native }).also {
         it.bundlePolicy = bundlePolicy.asNative()
         it.certificate = certificates?.firstOrNull()?.native
         it.iceCandidatePoolSize = iceCandidatePoolSize
