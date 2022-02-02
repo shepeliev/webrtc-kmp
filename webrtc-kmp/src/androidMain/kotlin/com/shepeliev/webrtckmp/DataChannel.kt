@@ -53,7 +53,6 @@ actual class DataChannel(val android: AndroidDataChannel) {
         .filter { it is DataChannelEvent.StateChanged && android.state() == AndroidDataChannel.State.CLOSING }
         .map { }
 
-
     actual val onClose: Flow<Unit> = dataChannelEvent
         .filter { it is DataChannelEvent.StateChanged && android.state() == AndroidDataChannel.State.CLOSED }
         .map { }

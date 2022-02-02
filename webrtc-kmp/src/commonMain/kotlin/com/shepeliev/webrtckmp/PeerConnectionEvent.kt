@@ -11,5 +11,5 @@ internal sealed interface PeerConnectionEvent {
     data class NewDataChannel(val dataChannel: DataChannel) : PeerConnectionEvent
     data class RemoveTrack(val rtpReceiver: RtpReceiver) : PeerConnectionEvent
     object NegotiationNeeded : PeerConnectionEvent
-    data class Track(val trackEvent: TrackEvent): PeerConnectionEvent
+    data class Track(val trackEvent: TrackEvent) : PeerConnectionEvent
 }

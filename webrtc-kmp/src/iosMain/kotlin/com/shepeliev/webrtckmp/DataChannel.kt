@@ -56,7 +56,6 @@ actual class DataChannel(val ios: RTCDataChannel) {
         .filter { it is DataChannelEvent.StateChanged && ios.readyState == RTCDataChannelState.RTCDataChannelStateClosing }
         .map { }
 
-
     actual val onClose: Flow<Unit> = dataChannelEvent
         .filter { it is DataChannelEvent.StateChanged && ios.readyState == RTCDataChannelState.RTCDataChannelStateClosed }
         .map { }

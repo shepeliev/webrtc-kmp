@@ -1,6 +1,6 @@
 package com.shepeliev.webrtckmp
 
-internal class PeerConnectionObserverProxy: PeerConnectionObserver {
+internal class PeerConnectionObserverProxy : PeerConnectionObserver {
     private val observers = mutableSetOf<PeerConnectionObserver>()
 
     fun addObserver(observer: PeerConnectionObserver) {

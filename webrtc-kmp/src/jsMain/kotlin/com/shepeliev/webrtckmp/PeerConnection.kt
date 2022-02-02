@@ -1,6 +1,13 @@
 package com.shepeliev.webrtckmp
 
-import com.shepeliev.webrtckmp.PeerConnectionEvent.*
+import com.shepeliev.webrtckmp.PeerConnectionEvent.ConnectionStateChange
+import com.shepeliev.webrtckmp.PeerConnectionEvent.IceConnectionStateChange
+import com.shepeliev.webrtckmp.PeerConnectionEvent.IceGatheringStateChange
+import com.shepeliev.webrtckmp.PeerConnectionEvent.NegotiationNeeded
+import com.shepeliev.webrtckmp.PeerConnectionEvent.NewDataChannel
+import com.shepeliev.webrtckmp.PeerConnectionEvent.NewIceCandidate
+import com.shepeliev.webrtckmp.PeerConnectionEvent.SignalingStateChange
+import com.shepeliev.webrtckmp.PeerConnectionEvent.Track
 import kotlinx.coroutines.await
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow

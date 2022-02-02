@@ -3,7 +3,6 @@
 package com.shepeliev.webrtckmp
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
@@ -123,7 +122,6 @@ val PeerConnection.onDataChannel: Flow<DataChannel>
         .filterNotNull()
         .map { it.dataChannel }
 
-
 /**
  * Emits [IceCandidate] events. This happens whenever the local ICE agent needs to deliver a message
  * to the other peer through the signaling server.
@@ -134,7 +132,6 @@ val PeerConnection.onIceCandidate: Flow<IceCandidate>
         .filterNotNull()
         .map { it.candidate }
 
-
 /**
  * Emits [IceConnectionState] events. This happens when the state of the connection's ICE agent,
  * as represented by the [PeerConnection.iceConnectionState] property, changes.
@@ -144,7 +141,6 @@ val PeerConnection.onIceConnectionStateChange: Flow<IceConnectionState>
         .map { it as? PeerConnectionEvent.IceConnectionStateChange }
         .filterNotNull()
         .map { it.state }
-
 
 /**
  * Emits [IceGatheringState] events. This happens when the ICE gathering state—that is, whether or
@@ -164,7 +160,7 @@ val PeerConnection.onIceGatheringState: Flow<IceGatheringState>
 val PeerConnection.onNegotiationNeeded: Flow<Unit>
     get() = peerConnectionEvent
         .filter { it is PeerConnectionEvent.NegotiationNeeded }
-        .map {  }
+        .map { }
 
 /**
  * Emits [SignalingState] events..
@@ -183,7 +179,6 @@ val PeerConnection.onTrack: Flow<TrackEvent>
         .map { it as? PeerConnectionEvent.Track }
         .filterNotNull()
         .map { it.trackEvent }
-
 
 val PeerConnection.onStandardizedIceConnection: Flow<IceConnectionState>
     get() = peerConnectionEvent
