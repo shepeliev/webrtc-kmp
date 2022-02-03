@@ -4,11 +4,14 @@ import org.webrtc.AudioTrack
 
 actual class AudioStreamTrack internal constructor(
     android: AudioTrack,
-    private val onStop: () -> Unit = { },
+    private val onTrackStopped: () -> Unit = { },
 ) : MediaStreamTrack(android) {
 
-    override fun stop() {
-        onStop()
-        super.stop()
+    override fun onSetEnabled(enabled: Boolean) {
+        // ignore
+    }
+
+    override fun onStop() {
+        onTrackStopped()
     }
 }

@@ -31,9 +31,19 @@ private object MediaDevicesImpl : MediaDevices {
                 val videoTrack = VideoStreamTrack(
                     ios = iosVideoTrack,
                     onSwitchCamera = { deviceId: String? ->
-                        deviceId?.let { videoCaptureController.switchCamera(it) } ?: videoCaptureController.switchCamera()
-                    }
-                ) { videoCaptureController.stopCapture() }
+                        deviceId?.let { videoCaptureController.switchCamera(it) }
+                            ?: videoCaptureController.switchCamera()
+                    },
+                    onTrackSetEnabled = { enabled ->
+                        if (enabled) {
+                            videoCaptureController.initialize(videoSource)
+                            videoCaptureController.startCapture()
+                        } else {
+                            videoCaptureController.stopCapture()
+                        }
+                    },
+                    onTrackStopped = { videoCaptureController.stopCapture() }
+                )
                 videoCaptureController.initialize(videoSource)
                 videoCaptureController.startCapture()
                 videoTrack

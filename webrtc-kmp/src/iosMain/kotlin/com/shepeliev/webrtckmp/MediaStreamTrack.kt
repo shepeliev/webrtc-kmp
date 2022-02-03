@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlin.native.concurrent.AtomicInt
 
-actual open class MediaStreamTrack internal constructor(val ios: RTCMediaStreamTrack) {
+actual abstract class MediaStreamTrack internal constructor(val ios: RTCMediaStreamTrack) {
 
     actual val id: String
         get() = ios.trackId
@@ -44,6 +44,7 @@ actual open class MediaStreamTrack internal constructor(val ios: RTCMediaStreamT
         get() = ios.isEnabled
         set(value) {
             ios.isEnabled = value
+            onSetEnabled(value)
         }
 
     private val _onEnded = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
@@ -55,11 +56,16 @@ actual open class MediaStreamTrack internal constructor(val ios: RTCMediaStreamT
 
     private val endedFlag = AtomicInt(0)
 
-    actual open fun stop() {
+    actual fun stop() {
         if (!endedFlag.compareAndSet(0, 1)) return
         enabled = false
         _onEnded.tryEmit(Unit)
+        onStop()
     }
+
+    protected abstract fun onSetEnabled(enabled: Boolean)
+
+    protected abstract fun onStop()
 
     companion object {
         fun createCommon(ios: RTCMediaStreamTrack): MediaStreamTrack {

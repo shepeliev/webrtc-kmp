@@ -8,7 +8,7 @@ import org.webrtc.AudioTrack as AndroidAudioTrack
 import org.webrtc.MediaStreamTrack as AndroidMediaStreamTrack
 import org.webrtc.VideoTrack as AndroidVideoTrack
 
-actual open class MediaStreamTrack internal constructor(val android: AndroidMediaStreamTrack) {
+actual abstract class MediaStreamTrack internal constructor(val android: AndroidMediaStreamTrack) {
 
     actual val id: String
         get() = android.id()
@@ -37,6 +37,7 @@ actual open class MediaStreamTrack internal constructor(val android: AndroidMedi
         get() = android.enabled()
         set(value) {
             android.setEnabled(value)
+            onSetEnabled(value)
         }
 
     private val _onEnded = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
@@ -48,10 +49,15 @@ actual open class MediaStreamTrack internal constructor(val android: AndroidMedi
     // not implemented for Android
     actual val onUnmute: Flow<Unit> = emptyFlow()
 
-    actual open fun stop() {
+    actual fun stop() {
         if (readyState == MediaStreamTrackState.Ended) return
         _onEnded.tryEmit(Unit)
+        onStop()
     }
+
+    protected abstract fun onSetEnabled(enabled: Boolean)
+
+    protected abstract fun onStop()
 }
 
 internal fun AndroidMediaStreamTrack.asCommon(): MediaStreamTrack {
