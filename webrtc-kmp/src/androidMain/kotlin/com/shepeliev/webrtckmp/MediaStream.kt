@@ -7,39 +7,43 @@ import java.util.UUID
 
 actual class MediaStream internal constructor(
     val android: MediaStream?,
-    actual val id: String = android?.id ?: UUID.randomUUID().toString()
+    actual val id: String = android?.id ?: UUID.randomUUID().toString(),
+    tracks: List<MediaStreamTrack> = emptyList(),
 ) {
-    actual val tracks: List<MediaStreamTrack>
-        get() = audioTracks + videoTracks
 
-    private var audioTracksInternal = mutableListOf<AudioStreamTrack>()
-    actual val audioTracks: List<AudioStreamTrack> = audioTracksInternal
+    actual constructor(tracks: List<MediaStreamTrack>) : this(android = null, tracks = tracks)
 
-    private var videoTracksInternal = mutableListOf<VideoStreamTrack>()
-    actual val videoTracks: List<VideoStreamTrack> = videoTracksInternal
+    private val _tracks = mutableListOf<MediaStreamTrack>()
+    actual val tracks: List<MediaStreamTrack> = _tracks
 
-    actual fun addTrack(track: AudioStreamTrack) {
-        android?.addTrack(track.android as AudioTrack)
-        audioTracksInternal += track
+    init {
+        _tracks += tracks
     }
 
-    actual fun addTrack(track: VideoStreamTrack) {
-        android?.addTrack(track.android as VideoTrack)
-        videoTracksInternal += track
+    actual fun addTrack(track: MediaStreamTrack) {
+        android?.let {
+            when (track.android) {
+                is AudioTrack -> it.addTrack(track.android)
+                is VideoTrack -> it.addTrack(track.android)
+                else -> error("Unknown MediaStreamTrack kind: ${track.kind}")
+            }
+        }
+        _tracks += track
     }
 
     actual fun getTrackById(id: String): MediaStreamTrack? {
         return tracks.firstOrNull { it.id == id }
     }
 
-    actual fun removeTrack(track: AudioStreamTrack) {
-        android?.removeTrack(track.android as AudioTrack)
-        audioTracksInternal -= track
-    }
-
-    actual fun removeTrack(track: VideoStreamTrack) {
-        android?.removeTrack(track.android as VideoTrack)
-        videoTracksInternal -= track
+    actual fun removeTrack(track: MediaStreamTrack) {
+        android?.let {
+            when (track.android) {
+                is AudioTrack -> it.removeTrack(track.android)
+                is VideoTrack -> it.removeTrack(track.android)
+                else -> error("Unknown MediaStreamTrack kind: ${track.kind}")
+            }
+        }
+        _tracks -= track
     }
 
     actual fun release() {

@@ -8,7 +8,7 @@ import org.w3c.dom.mediacapture.LIVE
 import org.w3c.dom.mediacapture.MediaStreamTrack as JsMediaStreamTrack
 import org.w3c.dom.mediacapture.MediaStreamTrackState as JsMediaStreamTrackState
 
-actual open class MediaStreamTrack internal constructor(val js: JsMediaStreamTrack) {
+actual abstract class MediaStreamTrack internal constructor(val js: JsMediaStreamTrack) {
     actual val id: String
         get() = js.id
 
