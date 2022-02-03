@@ -282,29 +282,20 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         ) {
             val sender = didStartReceivingOnTransceiver.sender
             val receiver = didStartReceivingOnTransceiver.receiver
+
             val track = when (didStartReceivingOnTransceiver.mediaType) {
-                RTCRtpMediaType.RTCRtpMediaTypeAudio -> {
-                    AudioStreamTrack(receiver.track as RTCAudioTrack)
-                }
-
-                RTCRtpMediaType.RTCRtpMediaTypeVideo -> {
-                    VideoStreamTrack(receiver.track as RTCVideoTrack)
-                }
-
-                RTCRtpMediaType.RTCRtpMediaTypeData,
-
-                RTCRtpMediaType.RTCRtpMediaTypeUnsupported -> null
-
+                RTCRtpMediaType.RTCRtpMediaTypeAudio -> AudioStreamTrack(receiver.track as RTCAudioTrack)
+                RTCRtpMediaType.RTCRtpMediaTypeVideo -> VideoStreamTrack(receiver.track as RTCVideoTrack)
+                RTCRtpMediaType.RTCRtpMediaTypeData, RTCRtpMediaType.RTCRtpMediaTypeUnsupported -> null
                 else -> error("Unknown RTCRtpMediaType: ${didStartReceivingOnTransceiver.mediaType}")
             }
-            val streams = sender.streamIds.map { id ->
-                MediaStream(ios = null, "$id").apply {
-                    track?.also { safeTrack ->
-                        if (safeTrack is AudioStreamTrack) addTrack(safeTrack)
-                        if (safeTrack is VideoStreamTrack) addTrack(safeTrack)
-                    }
-                }
-            }
+
+            val tracks = track?.let { listOf(it) } ?: emptyList()
+
+            val streams = sender.streamIds.takeIf { it.isNotEmpty() }
+                ?.map { id -> MediaStream(ios = null, "$id", tracks) }
+                ?: listOf(MediaStream(tracks))
+
             val trackEvent = TrackEvent(
                 receiver = RtpReceiver(didStartReceivingOnTransceiver.receiver),
                 streams = streams,
