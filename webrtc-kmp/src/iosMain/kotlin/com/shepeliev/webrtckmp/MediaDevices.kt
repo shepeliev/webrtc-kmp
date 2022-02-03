@@ -32,8 +32,17 @@ private object MediaDevicesImpl : MediaDevices {
                     ios = iosVideoTrack,
                     onSwitchCamera = { deviceId: String? ->
                         deviceId?.let { videoCaptureController.switchCamera(it) } ?: videoCaptureController.switchCamera()
-                    }
-                ) { videoCaptureController.stopCapture() }
+                    },
+                    onTrackSetEnabled = { enabled ->
+                        if (enabled) {
+                            videoCaptureController.initialize(videoSource)
+                            videoCaptureController.startCapture()
+                        } else {
+                            videoCaptureController.stopCapture()
+                        }
+                    } ,
+                    onTrackStopped = { videoCaptureController.stopCapture() }
+                )
                 videoCaptureController.initialize(videoSource)
                 videoCaptureController.startCapture()
                 videoTrack

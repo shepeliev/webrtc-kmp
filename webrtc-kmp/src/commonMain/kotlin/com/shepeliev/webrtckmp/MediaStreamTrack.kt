@@ -2,7 +2,7 @@ package com.shepeliev.webrtckmp
 
 import kotlinx.coroutines.flow.Flow
 
-expect open class MediaStreamTrack {
+expect abstract class MediaStreamTrack {
     val id: String
     val kind: MediaStreamTrackKind
     val label: String

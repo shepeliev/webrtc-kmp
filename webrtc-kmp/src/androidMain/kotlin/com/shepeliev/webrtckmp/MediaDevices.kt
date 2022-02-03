@@ -36,7 +36,8 @@ private object MediaDevicesImpl : MediaDevices {
             val androidTrack = peerConnectionFactory.createAudioTrack(UUID.randomUUID().toString(), audioSource)
             audioTrack = AudioStreamTrack(
                 android = androidTrack,
-            ) { audioSource.dispose() }
+                onTrackStopped = { audioSource.dispose() }
+            )
         }
 
         var videoTrack: VideoStreamTrack? = null
@@ -51,10 +52,19 @@ private object MediaDevicesImpl : MediaDevices {
                 onSwitchCamera = { deviceId ->
                     deviceId?.let { videoCaptureController.switchCamera(it) } ?: videoCaptureController.switchCamera()
                 },
-            ) {
-                videoCaptureController.stopCapture()
-                videoSource.dispose()
-            }
+                onTrackSetEnabled = { enabled ->
+                    if (enabled) {
+                        videoCaptureController.initialize(videoSource.capturerObserver)
+                        videoCaptureController.startCapture()
+                    } else {
+                        videoCaptureController.stopCapture()
+                    }
+                },
+                onTrackStopped = {
+                    videoCaptureController.stopCapture()
+                    videoSource.dispose()
+                }
+            )
             videoCaptureController.startCapture()
         }
 
