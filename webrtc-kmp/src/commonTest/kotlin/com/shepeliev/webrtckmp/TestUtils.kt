@@ -4,6 +4,8 @@ import kotlinx.coroutines.CoroutineScope
 
 expect fun runTest(timeout: Long = 30000, block: suspend CoroutineScope.() -> Unit)
 
-expect fun initialize()
+expect fun initializeTestWebRtc()
 
-expect fun disposeWebRtc()
+expect val currentPlatform: Platform
+
+enum class Platform { Android, IOS, Js }

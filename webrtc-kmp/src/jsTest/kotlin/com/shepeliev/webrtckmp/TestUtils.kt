@@ -26,9 +26,8 @@ fun Throwable.log() {
     }
 }
 
-actual fun initialize() {
-}
-
-actual fun disposeWebRtc() {
+actual fun initializeTestWebRtc() {
     // no implementation for JS
 }
+
+actual val currentPlatform: Platform = Platform.Js

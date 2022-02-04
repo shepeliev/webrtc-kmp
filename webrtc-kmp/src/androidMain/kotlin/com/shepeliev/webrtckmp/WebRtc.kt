@@ -21,16 +21,17 @@ actual object WebRtc {
 
 fun initializeWebRtc(
     context: Context,
-    eglBaseInstance: EglBase = EglBase.create(),
+    eglBase: EglBase = EglBase.create(),
     build: WebRtcBuilder.() -> Unit = {}
 ) {
-    applicationContext = context
-    eglBase = eglBaseInstance
+    _applicationContext = context
     build(webRtcBuilder)
 }
 
-internal lateinit var applicationContext: Context
-    private set
+internal var _applicationContext: Context? = null
+internal val applicationContext: Context
+    get() = _applicationContext
+        ?: error("initializeWebRtc(applicationContext) must be called before invoking any WebRTC KMP API. ")
 
 val peerConnectionFactory: PeerConnectionFactory by lazy {
     initializePeerConnectionFactory()
@@ -38,9 +39,18 @@ val peerConnectionFactory: PeerConnectionFactory by lazy {
     builder.createPeerConnectionFactory()
 }
 
-lateinit var eglBase: EglBase
-    private set
+private var _rootEglBase: EglBase? = null
+val rootEglBase: EglBase
+    get() {
+        _rootEglBase = _rootEglBase ?: EglBase.create()
+        return _rootEglBase!!
+    }
 
+@Deprecated("Use rootEglBase", replaceWith = ReplaceWith("rootEglBase"))
+val eglBase: EglBase
+    get() = rootEglBase
+
+@Deprecated("Use rootEglBase.eglBaseContext.", replaceWith = ReplaceWith("rootEglBase.eglBaseContext"))
 val eglBaseContext: EglBase.Context
     get() = eglBase.eglBaseContext
 
@@ -70,9 +80,9 @@ private fun initializePeerConnectionFactory() {
 }
 
 private fun getDefaultPeerConnectionBuilder(): PeerConnectionFactory.Builder {
-    val videoEncoderFactory = DefaultVideoEncoderFactory(eglBaseContext, true, false)
+    val videoEncoderFactory = DefaultVideoEncoderFactory(rootEglBase.eglBaseContext, true, false)
 
-    val videoDecoderFactory = DefaultVideoDecoderFactory(eglBaseContext)
+    val videoDecoderFactory = DefaultVideoDecoderFactory(rootEglBase.eglBaseContext)
     return PeerConnectionFactory.builder()
         .setVideoEncoderFactory(videoEncoderFactory)
         .setVideoDecoderFactory(videoDecoderFactory)
