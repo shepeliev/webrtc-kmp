@@ -37,7 +37,7 @@ enum class AudioCodec { AAC }
 
 enum class VideoCodec { AVC }
 
-enum class MediaRecorderState { Inactive, Recording,  Paused }
+enum class MediaRecorderState { Inactive, Recording, Paused }
 
 private const val DEFAULT_AUDIO_BITS_PER_SECOND = 128_000
 private const val DEFAULT_VIDEO_BITS_PER_SECOND = 2_500_000
