@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.yield
 import kotlin.test.BeforeTest
-import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -27,7 +26,6 @@ class MediaRecorderTest : CameraPermissionGrantedTest() {
         initializeTestWebRtc()
     }
 
-    @Ignore
     @Test
     fun should_record_with_no_time_slice_set() = runTest {
         // at the moment MediaRecorder is implemented for Android only
@@ -49,30 +47,6 @@ class MediaRecorderTest : CameraPermissionGrantedTest() {
         assertFalse(outputFilePath.await().isNullOrBlank(), "No output file path")
         assertEquals(listOf(Unit), starts.await(), "No onStart event fired")
         assertEquals(listOf(Unit), stops.await(), "No onStop event fired")
-
-        stream.release()
-        errorsJob.cancel()
-    }
-
-    @Test
-    fun should_record_with_time_slice_set() = runTest {
-        // at the moment MediaRecorder is implemented for Android only
-        if (currentPlatform != Platform.Android) return@runTest
-
-        val stream = MediaDevices.getUserMedia(video = true)
-        val mediaRecorder = MediaRecorder(stream)
-
-        val outputFilePath = async {
-            withTimeoutOrNull(20000) { mediaRecorder.onDataAvailable.take(4).toList() }
-        }
-        val errorsJob = mediaRecorder.onError.onEach { throw it }.launchIn(this)
-        yield()
-
-        mediaRecorder.start(3000)
-        delay(11000)
-        mediaRecorder.stop()
-
-        assertEquals(4, outputFilePath.await()?.size, "No output file path")
 
         stream.release()
         errorsJob.cancel()

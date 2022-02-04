@@ -52,7 +52,6 @@ actual class MediaRecorder actual constructor(
     private var recorderThread: HandlerThread? = null
     private var recorderHandler: Handler? = null
     private var videoEncoder: VideoEncoder? = null
-    private var encodersStarted = true
 
     private val videoSink = VideoSink { frame ->
         videoEncoder?.let { encoder ->
@@ -62,27 +61,22 @@ actual class MediaRecorder actual constructor(
     }
 
     actual fun pause() {
-        check(state != MediaRecorderState.Inactive) { "MediaRecorder can't be paused in $state state." }
-        if (state == MediaRecorderState.Paused) return
-        _state = MediaRecorderState.Paused
-        removeSinks()
-        _onPause.tryEmit(Unit)
+        Logging.e(tag, "MediaRecorder.pause() is not supported on Android yet.")
     }
 
     actual fun requestData() {
-        videoEncoder?.stop()
+        Logging.e(tag, "MediaRecorder.requestData() is not supported on Android yet.")
     }
 
     actual fun resume() {
-        check(state != MediaRecorderState.Inactive) { "MediaRecorder can't be resumed in $state state." }
-        if (state == MediaRecorderState.Recording) return
-        _state = MediaRecorderState.Recording
-        addSinks()
-        _onResume.tryEmit(Unit)
+        Logging.e(tag, "MediaRecorder.pause() is not supported on Android.")
     }
 
     actual fun start(timeSliceMillis: Long) {
         check(state == MediaRecorderState.Inactive) { "MediaRecorder must be in $state state in order to start." }
+        if (timeSliceMillis > -1) {
+            Logging.w(tag, "timeSlice param is not supported on Android yet.")
+        }
         _state = MediaRecorderState.Recording
 
         recorderThread = HandlerThread("MediaRecorder-${UUID.randomUUID()}").also { thread ->
@@ -90,14 +84,13 @@ actual class MediaRecorder actual constructor(
             recorderHandler = Handler(thread.looper)
         }
 
-        recorderHandler?.post { startRecording(timeSliceMillis) }
+        recorderHandler?.post { startRecording() }
     }
 
-    private fun startRecording(timeSliceMillis: Long) {
-        Logging.d(tag, "Start recording [timeSliceMillis = $timeSliceMillis]")
+    private fun startRecording() {
         val muxer = MediaMuxerController(
             mimeType = options.mediaFormat.mimeType,
-            onDataAvailable = { handleDataFromMuxer(it, timeSliceMillis) }
+            onDataAvailable = ::handleDataFromMuxer
         ).also { muxerController = it }
 
         runCatching {
@@ -108,14 +101,9 @@ actual class MediaRecorder actual constructor(
                 onStreamEnded = muxer::onVideoTrackFinished,
                 onError = ::handleErrorFromEncoder
             )
-            encodersStarted = true
         }.onFailure(::disposeAndThrow)
 
         addSinks()
-
-        if (timeSliceMillis > -1) {
-            recorderHandler?.postDelayed(::stopEncoders, timeSliceMillis)
-        }
 
         _onStart.tryEmit(Unit)
     }
@@ -137,24 +125,17 @@ actual class MediaRecorder actual constructor(
     }
 
     private fun stopEncoders() {
-        if (!encodersStarted) return
-        encodersStarted = false
         Logging.d(tag, "Stop encoders")
         removeSinks()
         videoEncoder?.stop()
     }
 
-    private fun handleDataFromMuxer(filePath: String, timeSliceMillis: Long) {
+    private fun handleDataFromMuxer(filePath: String) {
         Logging.d(tag, "handleDataFromMuxer [state: $state]")
-        _onDataAvailable.tryEmit(filePath)
         disposeEncoders()
-
-        if (state == MediaRecorderState.Inactive) {
-            disposeThread()
-            _onStop.tryEmit(Unit)
-        } else {
-            recorderHandler?.post { startRecording(timeSliceMillis) }
-        }
+        disposeThread()
+        _onDataAvailable.tryEmit(filePath)
+        _onStop.tryEmit(Unit)
     }
 
     private fun handleErrorFromEncoder(error: Throwable) {
