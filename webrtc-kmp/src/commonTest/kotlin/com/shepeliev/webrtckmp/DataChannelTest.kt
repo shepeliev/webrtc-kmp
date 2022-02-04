@@ -15,7 +15,7 @@ class DataChannelTest {
 
     @BeforeTest
     fun setUp() {
-        initialize()
+        initializeTestWebRtc()
     }
 
     @Test

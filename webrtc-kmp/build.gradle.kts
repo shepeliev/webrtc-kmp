@@ -7,6 +7,9 @@ plugins {
 
 kotlin {
     android {
+        compilations.all {
+            kotlinOptions.jvmTarget = JavaVersion.VERSION_1_8.toString()
+        }
         publishAllLibraryVariants()
     }
 
@@ -68,8 +71,9 @@ kotlin {
                 implementation(kotlin("test-junit"))
                 implementation("junit:junit:4.13.2")
                 implementation("androidx.test:core:1.4.0")
-                implementation("androidx.test.ext:junit:1.1.3")
                 implementation("androidx.test:runner:1.4.0")
+                implementation("androidx.test:rules:1.4.0")
+                implementation("androidx.test.ext:junit:1.1.3")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
             }
         }
@@ -104,5 +108,10 @@ android {
         getByName("androidTest") {
             java.srcDir(file("src/androidTest/kotlin"))
         }
+    }
+
+    compileOptions {
+        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_1_8
     }
 }
