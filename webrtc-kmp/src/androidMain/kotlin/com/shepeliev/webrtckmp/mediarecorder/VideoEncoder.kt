@@ -89,6 +89,7 @@ internal class VideoEncoder(
         }
         codec = null
 
+        recordableEglBase?.releaseSurface()
         inputSurface?.release()
         inputSurface = null
 
