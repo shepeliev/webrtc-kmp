@@ -66,10 +66,13 @@ class CameraVideoCaptureController(private val constraints: VideoTrackConstraint
         val framerates = formats?.map { it.framerate } ?: emptyList()
         if (framerates.isEmpty()) throw CameraVideoCapturerException.notFound(constraints)
 
-        return CameraEnumerationAndroid.getClosestSupportedFramerateRange(
+        val requestedFpsInt = requestedFps.toInt()
+        val range = CameraEnumerationAndroid.getClosestSupportedFramerateRange(
             framerates,
-            requestedFps.toInt()
-        ).max
+            requestedFpsInt
+        )
+
+        return requestedFpsInt.coerceIn(range.min / 1000, range.max / 1000)
     }
 
     suspend fun switchCamera() {
