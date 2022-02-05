@@ -5,6 +5,9 @@ plugins {
     id("publish-setup")
 }
 
+group = "com.shepeliev"
+version = "0.89.6"
+
 kotlin {
     android {
         publishAllLibraryVariants()
