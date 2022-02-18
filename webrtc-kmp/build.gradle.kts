@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "com.shepeliev"
-version = "0.89.6"
+version = "0.89.7"
 
 kotlin {
     android {
