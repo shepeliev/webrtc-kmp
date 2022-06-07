@@ -1,6 +1,6 @@
 plugins {
     id("com.android.library")
-    kotlin("multiplatform") version "1.6.0"
+    kotlin("multiplatform")
     id("org.jmailen.kotlinter") version "3.4.4"
     id("publish-setup")
 }

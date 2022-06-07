@@ -1,5 +1,3 @@
-import org.gradle.api.publish.maven.MavenPublication
-
 plugins {
     id("maven-publish")
     id("signing")
@@ -10,9 +8,8 @@ publishing {
         maven {
             url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2")
             credentials {
-                val localProperties = loadProperties(rootDir.resolve("local.properties"))
-                username = localProperties.getProperty("ossrhUsername") ?: System.getenv("OSSRH_USERNAME")
-                password = localProperties.getProperty("ossrhPassword") ?: System.getenv("OSSRH_PASSWORD")
+                username = System.getenv("OSSRH_USERNAME")
+                password = System.getenv("OSSRH_PASSWORD")
             }
         }
     }
@@ -57,9 +54,8 @@ publishing {
 }
 
 signing {
-    val localProperties = loadProperties(rootDir.resolve("local.properties"))
-    val signingKey = localProperties.getProperty("signing.key") ?: System.getenv("SIGNING_KEY")
-    val signingPassword = localProperties.getProperty("signing.password") ?: System.getenv("SIGNING_PASSWORD")
+    val signingKey = System.getenv("SIGNING_KEY")
+    val signingPassword = System.getenv("SIGNING_PASSWORD")
     useInMemoryPgpKeys(signingKey, signingPassword)
     sign(publishing.publications)
 }
