@@ -1,10 +1,27 @@
 [versions]
 
 kotlin = "1.6.10"
+
 androidGradlePlugin = "7.2.1"
+androidTargetSdk = "31"
+androidCore = "1.8.0"
+androidAppCompat = "1.4.2"
+androidCompose = "1.1.1"
+androidComposeActivity = "1.4.0"
+
+decompose = "0.6.0"
+firebase = "1.6.1"
 
 [libraries]
 
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
-
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
+
+android-core = { module = "androidx.core:core-ktx", version.ref = "androidCore" }
+android-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "androidAppCompat" }
+android-compose-activity = { module = "androidx.activity:activity-compose", version.ref = "androidComposeActivity" }
+android-compose-material = { module = "androidx.compose.material:material", version.ref = "androidCompose" }
+android-compose-animation = { module = "androidx.compose.animation:animation", version.ref = "androidCompose" }
+
+decompose = { module = "com.arkivanov.decompose:decompose", version.ref = "decompose" }
+firebase-firestore = { module = "dev.gitlive:firebase-firestore", version.ref = "firebase" }

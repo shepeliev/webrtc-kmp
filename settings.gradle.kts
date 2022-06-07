@@ -8,3 +8,6 @@ dependencyResolutionManagement {
         }
     }
 }
+
+include(":sample:shared")
+include(":sample:app-android")
