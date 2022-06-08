@@ -1,10 +1,14 @@
 plugins {
-    kotlin("multiplatform")
     id("com.android.library")
+    kotlin("multiplatform")
 }
 
 kotlin {
-    android()
+    android {
+        compilations.all {
+            kotlinOptions.jvmTarget = "1.8"
+        }
+    }
 
     js(BOTH)
 
@@ -12,6 +16,7 @@ kotlin {
         getByName("commonTest") {
             dependencies {
                 implementation(kotlin("test"))
+                implementation(kotlin("test-annotations-common"))
             }
         }
     }
@@ -20,6 +25,7 @@ kotlin {
 android {
     compileSdk = AndroidConfig.compileSdkVersion
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
+    sourceSets["main"].res.srcDir("src/androidMain/res")
     defaultConfig {
         minSdk = AndroidConfig.minSdkVersion
         targetSdk = AndroidConfig.targetSdkVersion

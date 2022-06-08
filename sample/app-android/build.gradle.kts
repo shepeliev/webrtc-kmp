@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("kotlin-android")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -11,6 +12,7 @@ android {
         targetSdk = AndroidConfig.targetSdkVersion
         versionCode = 1
         versionName = "1.0.0"
+        applicationId = "com.shepeliev.webrtckmp.sample"
     }
 
     buildFeatures {
@@ -18,6 +20,7 @@ android {
     }
 
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
@@ -27,14 +30,20 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = deps.versions.androidCompose.get()
+        kotlinCompilerExtensionVersion = deps.versions.androidxCompose.get()
     }
 }
 
 dependencies {
-    implementation(deps.android.core)
-    implementation(deps.android.appcompat)
-    implementation(deps.android.compose.activity)
-    implementation(deps.android.compose.material)
-    implementation(deps.android.compose.animation)
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.5")
+    implementation(project(":sample:shared"))
+    implementation(deps.androidx.coreKtx)
+    implementation(deps.androidx.appcompat)
+    implementation(deps.androidx.activity.activityKtx)
+    implementation(deps.androidx.compose.activity)
+    implementation(deps.androidx.compose.material)
+    implementation(deps.androidx.compose.animation)
+    implementation(deps.androidx.lifecycle.lifecycleCommonJava8)
+    implementation(deps.decompose.compose)
+    implementation(deps.accompanist.permissions)
 }

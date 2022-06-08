@@ -9,5 +9,6 @@ dependencyResolutionManagement {
     }
 }
 
+include(":webrtc-kmp")
 include(":sample:shared")
 include(":sample:app-android")
