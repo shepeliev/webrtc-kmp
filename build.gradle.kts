@@ -5,20 +5,13 @@ buildscript {
     }
 
     dependencies {
-        classpath(deps.kotlin.gradlePlugin)
-        classpath(deps.kotlin.serializationPlugin)
-        classpath(deps.android.gradlePlugin)
-        classpath(deps.google.servicesGradlePlugin)
+        classpath(":build-plugins")
+        classpath("org.jetbrains.kotlin:kotlin-serialization:1.6.10")
+        classpath("com.google.gms:google-services:4.3.10")
     }
 }
 
 allprojects {
-    repositories {
-        mavenLocal()
-        google()
-        mavenCentral()
-    }
-
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
         kotlinOptions {
             freeCompilerArgs = freeCompilerArgs + "-opt-in=kotlin.RequiresOptIn"

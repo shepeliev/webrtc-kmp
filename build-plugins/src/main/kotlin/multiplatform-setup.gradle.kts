@@ -4,13 +4,11 @@ plugins {
 }
 
 kotlin {
-    android {
-        compilations.all {
-            kotlinOptions.jvmTarget = "1.8"
-        }
-    }
+    android()
 
-    js(BOTH)
+    js(BOTH) {
+        browser()
+    }
 
     sourceSets {
         getByName("commonTest") {
@@ -22,10 +20,15 @@ kotlin {
     }
 }
 
+@Suppress("UnstableApiUsage")
 android {
     compileSdk = AndroidConfig.compileSdkVersion
-    sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
-    sourceSets["main"].res.srcDir("src/androidMain/res")
+
+    sourceSets.named("main") {
+        manifest.srcFile("src/androidMain/AndroidManifest.xml")
+        res.srcDir("src/androidMain/res")
+    }
+
     defaultConfig {
         minSdk = AndroidConfig.minSdkVersion
         targetSdk = AndroidConfig.targetSdkVersion

@@ -1,6 +1,5 @@
 [versions]
 
-kotlin = "1.6.10"
 kotlinCoroutines = "1.6.1-native-mt"
 kotlinserializationJson = "1.3.3"
 
@@ -13,18 +12,12 @@ androidxComposeActivity = "1.4.0"
 androidxActivityKtx = "1.3.1"
 androidxLifecycle = "2.4.1"
 
-googleServicesGradlePlugin = "4.3.10"
-
 accompanist = "0.23.1"
 decompose = "0.6.0"
 firebase = "1.6.1"
 kermit = "1.1.2"
 
 [libraries]
-
-kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
-kotlin-serializationPlugin = { group = "org.jetbrains.kotlin", name = "kotlin-serialization", version.ref = "kotlin" }
-android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
 
 kotlin-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinCoroutines" }
 kotlin-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinserializationJson" }
@@ -36,8 +29,6 @@ androidx-compose-activity = { module = "androidx.activity:activity-compose", ver
 androidx-compose-material = { module = "androidx.compose.material:material", version.ref = "androidxCompose" }
 androidx-compose-animation = { module = "androidx.compose.animation:animation", version.ref = "androidxCompose" }
 androidx-lifecycle-lifecycleCommonJava8 = { module = "androidx.lifecycle:lifecycle-common-java8", version.ref = "androidxLifecycle" }
-
-google-servicesGradlePlugin = { module = "com.google.gms:google-services", version.ref = "googleServicesGradlePlugin"}
 
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist" }
 
