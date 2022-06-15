@@ -2,6 +2,7 @@
 
 kotlinCoroutines = "1.6.1-native-mt"
 kotlinserializationJson = "1.3.3"
+kotlinWrappers = "1.0.0-pre.343"
 
 androidGradlePlugin = "7.2.1"
 androidTargetSdk = "31"
@@ -14,13 +15,19 @@ androidxLifecycle = "2.4.1"
 
 accompanist = "0.23.1"
 decompose = "0.6.0"
-firebase = "1.6.1"
+#firebase = "1.6.1"
+firebase = "PR319-SNAPSHOT"
 kermit = "1.1.2"
 
 [libraries]
 
 kotlin-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinCoroutines" }
 kotlin-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinserializationJson" }
+kotlin-wrappers-bom = { module = "org.jetbrains.kotlin-wrappers:kotlin-wrappers-bom", version.ref = "kotlinWrappers" }
+kotlin-wrappers-emotion = { module = "org.jetbrains.kotlin-wrappers:kotlin-emotion", version.ref = "kotlinWrappers" }
+kotlin-wrappers-react = { module = "org.jetbrains.kotlin-wrappers:kotlin-react", version.ref = "kotlinWrappers" }
+kotlin-wrappers-reactDom = { module = "org.jetbrains.kotlin-wrappers:kotlin-react-dom", version.ref = "kotlinWrappers" }
+kotlin-wrappers-mui = { module = "org.jetbrains.kotlin-wrappers:kotlin-mui", version.ref = "kotlinWrappers" }
 
 androidx-coreKtx = { module = "androidx.core:core-ktx", version.ref = "androidxCoreKtx" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "androidxAppCompat" }
@@ -35,6 +42,7 @@ accompanist-permissions = { module = "com.google.accompanist:accompanist-permiss
 decompose = { module = "com.arkivanov.decompose:decompose", version.ref = "decompose" }
 decompose-compose = { module = "com.arkivanov.decompose:extensions-compose-jetpack", version.ref = "decompose" }
 
-firebase-firestore = { module = "dev.gitlive:firebase-firestore", version.ref = "firebase" }
+#firebase-firestore = { module = "dev.gitlive:firebase-firestore", version.ref = "firebase" }
+firebase-firestore = { module = "com.github.GitLiveApp.firebase-kotlin-sdk:firebase-firestore", version.ref = "firebase" }
 
 kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }

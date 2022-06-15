@@ -17,7 +17,7 @@ actual class IceServer actual constructor(
 
     init {
         js = json(
-            "urls" to urls,
+            "urls" to urls.toTypedArray(),
             "username" to username,
             "credential" to password
         )

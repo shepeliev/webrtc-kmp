@@ -6,7 +6,8 @@ plugins {
 kotlin {
     android()
 
-    js(BOTH) {
+    js {
+        useCommonJs()
         browser()
     }
 

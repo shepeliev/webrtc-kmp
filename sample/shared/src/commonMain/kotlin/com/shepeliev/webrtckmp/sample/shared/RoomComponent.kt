@@ -13,13 +13,11 @@ import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.firestore.ChangeType
 import dev.gitlive.firebase.firestore.DocumentReference
 import dev.gitlive.firebase.firestore.firestore
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
 class RoomComponent(
@@ -40,6 +38,7 @@ class RoomComponent(
         private val firestore by lazy { Firebase.firestore }
 
         private var peerConnection: PeerConnection? = null
+        private var roomSessionJob: Job? = null
 
         override fun openUserMedia() {
             scope.launch {
@@ -50,6 +49,7 @@ class RoomComponent(
 
         override fun createRoom() {
             _model.reduce { it.copy(isJoining = true, isCaller = true) }
+            roomSessionJob = SupervisorJob()
             val peerConnection = createPeerConnection()
             this@ViewModel.peerConnection = peerConnection
 
@@ -77,19 +77,18 @@ class RoomComponent(
                         )
                     }
                     .onEach { peerConnection.setRemoteDescription(it) }
-                    .launchIn(scope)
+                    .launchIn(scope + roomSessionJob!!)
             }
         }
 
         override fun joinRoom(roomId: String) {
             _model.reduce { it.copy(isJoining = true, roomId = roomId, isCaller = false) }
+            roomSessionJob = SupervisorJob()
 
             val peerConnection = createPeerConnection()
             this@ViewModel.peerConnection = peerConnection
 
             val roomRef = firestore.document("rooms/$roomId")
-
-            collectIceCandidates(roomRef, peerConnection, "callee", "caller")
 
             scope.launch {
                 val roomDoc = roomRef.get()
@@ -99,6 +98,8 @@ class RoomComponent(
                     _model.reduce { it.copy(isJoining = false, isCaller = null) }
                     return@launch
                 }
+
+                collectIceCandidates(roomRef, peerConnection, "callee", "caller")
 
                 val offer = SessionDescription(
                     type = SessionDescriptionType.Offer,
@@ -128,19 +129,19 @@ class RoomComponent(
         private fun registerListeners(peerConnection: PeerConnection) {
             peerConnection.onIceGatheringState
                 .onEach { Logger.i { "ICE gathering state changed: $it" } }
-                .launchIn(scope)
+                .launchIn(scope + roomSessionJob!!)
 
             peerConnection.onConnectionStateChange
                 .onEach { Logger.i { "Connection state changed: $it" } }
-                .launchIn(scope)
+                .launchIn(scope + roomSessionJob!!)
 
             peerConnection.onSignalingStateChange
                 .onEach { Logger.i { "Signaling state changed: $it" } }
-                .launchIn(scope)
+                .launchIn(scope + roomSessionJob!!)
 
             peerConnection.onIceConnectionStateChange
                 .onEach { Logger.i { "ICE connection state changed: $it" } }
-                .launchIn(scope)
+                .launchIn(scope + roomSessionJob!!)
         }
 
         private fun listenRemoteTracks(peerConnection: PeerConnection) {
@@ -148,7 +149,7 @@ class RoomComponent(
                 .onEach { Logger.i { "Remote track received: [id = ${it.track?.id}, kind: ${it.track?.kind} ]" } }
                 .filter { it.track?.kind == MediaStreamTrackKind.Video }
                 .onEach { event -> _model.reduce { it.copy(remoteStream = event.streams.first()) } }
-                .launchIn(scope)
+                .launchIn(scope + roomSessionJob!!)
         }
 
         private fun collectIceCandidates(
@@ -169,7 +170,7 @@ class RoomComponent(
                 }
                 .onEach { Logger.i { "New local ICE candidate: $it" } }
                 .onEach { candidatesCollection.add(IceCandidateMessage.serializer(), it) }
-                .launchIn(scope)
+                .launchIn(scope + roomSessionJob!!)
 
             roomRef.collection(remoteName).snapshots
                 .onEach { snapshot ->
@@ -188,10 +189,11 @@ class RoomComponent(
                         }
                     }
                 }
-                .launchIn(scope)
+                .launchIn(scope + roomSessionJob!!)
         }
 
         override fun hangup() {
+            roomSessionJob?.cancel()
             _model.value.localStream?.release()
             peerConnection?.close()
             _model.reduce { Room.Model() }
