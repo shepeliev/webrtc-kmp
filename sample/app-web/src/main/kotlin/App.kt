@@ -44,7 +44,12 @@ val App = FC<AppProps> { props ->
 
         Button {
             variant = ButtonVariant.contained
-            onClick = { window.alert("Yohohoh") }
+            onClick = {
+                val roomNumber = window.prompt("Enter room number")
+                if (roomNumber != null && roomNumber.length == 20) {
+                    room.joinRoom(roomNumber)
+                }
+            }
             +"Join room"
         }
 
