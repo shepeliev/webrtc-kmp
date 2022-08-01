@@ -44,13 +44,18 @@ val App = FC<AppProps> { props ->
 
         Button {
             variant = ButtonVariant.contained
-            onClick = { window.alert("Yohohoh") }
+            onClick = {
+                // TODO replace by Material UI dialog
+                window.prompt("Room ID:")?.let { room.joinRoom(it) }
+            }
+            disabled = roomModel.isJoining || roomModel.localStream == null || roomModel.roomId != null
             +"Join room"
         }
 
         Button {
             variant = ButtonVariant.contained
             onClick = { room.hangup() }
+            disabled = roomModel.localStream == null
             +"Hangup"
         }
     }

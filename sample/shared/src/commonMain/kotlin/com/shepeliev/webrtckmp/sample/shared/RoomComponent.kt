@@ -60,7 +60,9 @@ class RoomComponent(
                 roomDataSource.insertOffer(roomId, offer)
                 _model.reduce { it.copy(roomId = roomId, isJoining = false) }
 
+                logger.d { "Waiting answer" }
                 val answer = roomDataSource.getAnswer(roomId)
+                logger.d { "Answer received: $answer" }
                 peerConnection.setRemoteDescription(answer)
             }
         }

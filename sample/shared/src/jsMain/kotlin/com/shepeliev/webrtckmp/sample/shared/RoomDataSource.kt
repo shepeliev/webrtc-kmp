@@ -49,7 +49,7 @@ actual class RoomDataSource actual constructor() {
         updateDoc(
             docRef,
             json(
-                "offer" to description.sdp,
+                "answer" to description.sdp,
                 "expireAt" to getExpireAtTime()
             )
         ).await()
@@ -80,8 +80,8 @@ actual class RoomDataSource actual constructor() {
 
     actual suspend fun getAnswer(roomId: String): SessionDescription = suspendCancellableCoroutine { cont ->
         val observer = DocumentSnapshotObserver(
-            next = {
-                val answer = it.data()["answer"] as? String
+            next = { snapshot ->
+                val answer = snapshot.data()["answer"] as? String
                 answer?.let { cont.resume(SessionDescription(SessionDescriptionType.Answer, it)) }
             },
 
