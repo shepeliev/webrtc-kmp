@@ -41,7 +41,7 @@ dependencies {
     implementation(deps.androidx.compose.activity)
     implementation(deps.androidx.compose.material)
     implementation(deps.androidx.compose.animation)
-    implementation(deps.androidx.lifecycle.lifecycleCommonJava8)
+    implementation(deps.androidx.lifecycle.runtime)
     implementation(deps.decompose.compose)
     implementation(deps.accompanist.permissions)
 }

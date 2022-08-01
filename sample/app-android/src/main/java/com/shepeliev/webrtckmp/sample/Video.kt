@@ -21,7 +21,7 @@ fun Video(
 ) {
     var renderer by remember { mutableStateOf<SurfaceViewRenderer?>(null) }
 
-    val lifecycleEventObserver = remember {
+    val lifecycleEventObserver = remember(renderer, track) {
         LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_RESUME -> {
@@ -54,12 +54,6 @@ fun Video(
         }
     }
 
-    DisposableEffect(track) {
-        renderer?.let { track.addSinkCatching(it) }
-
-        onDispose { renderer?.let { track.removeSinkCatching(it) } }
-    }
-
     AndroidView(
         modifier = modifier,
         factory = { context ->
@@ -67,7 +61,7 @@ fun Video(
                 setScalingType(scalingTypeMatchOrientation, scalingTypeMismatchOrientation)
                 renderer = this
             }
-        }
+        },
     )
 }
 
