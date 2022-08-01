@@ -57,8 +57,12 @@ val App = FC<AppProps> { props ->
 
     val localVideoRef = useRef<HTMLVideoElement>(null)
     useEffect(roomModel, localVideoRef) {
-        console.log("Room model: $roomModel")
         localVideoRef.current?.srcObject = roomModel.localStream?.js
+    }
+
+    val remoteVideoRef = useRef<HTMLVideoElement>(null)
+    useEffect {
+        remoteVideoRef.current?.srcObject = roomModel.remoteStream?.js
     }
 
     div {
@@ -69,6 +73,17 @@ val App = FC<AppProps> { props ->
             }
             ref = localVideoRef
             autoPlay = true
+        }
+
+        if (roomModel.remoteStream != null) {
+            video {
+                css {
+                    width = 640.px
+                    height = 480.px
+                }
+                ref = remoteVideoRef
+                autoPlay = true
+            }
         }
     }
 }

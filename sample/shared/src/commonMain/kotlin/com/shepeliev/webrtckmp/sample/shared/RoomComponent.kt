@@ -9,16 +9,11 @@ import com.arkivanov.decompose.value.reduce
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.shepeliev.webrtckmp.*
-import dev.gitlive.firebase.Firebase
-import dev.gitlive.firebase.firestore.ChangeType
-import dev.gitlive.firebase.firestore.DocumentReference
-import dev.gitlive.firebase.firestore.firestore
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.serialization.Serializable
 
 class RoomComponent(
     componentContext: ComponentContext,
@@ -31,12 +26,13 @@ class RoomComponent(
 
     private class ViewModel : InstanceKeeper.Instance, Room {
 
+        private val logger = Logger.withTag("RoomComponent")
         private val _model = MutableValue(Room.Model())
         override val model: Value<Room.Model> get() = _model
 
         private val scope = MainScope()
-        private val firestore by lazy { Firebase.firestore }
 
+        private val roomDataSource = RoomDataSource()
         private var peerConnection: PeerConnection? = null
         private var roomSessionJob: Job? = null
 
@@ -53,31 +49,19 @@ class RoomComponent(
             val peerConnection = createPeerConnection()
             this@ViewModel.peerConnection = peerConnection
 
-            val roomId = firestore.collection("rooms").document.id
-            val roomRef = firestore.document("rooms/$roomId")
-            collectIceCandidates(roomRef, peerConnection, "caller", "callee")
+            val roomId = roomDataSource.createRoom()
+            collectIceCandidates(peerConnection, roomId, "caller", "callee")
 
             scope.launch {
                 val offer = peerConnection.createOffer(DefaultOfferAnswerOptions).also {
                     peerConnection.setLocalDescription(it)
                 }
 
-                roomRef.set(OfferMessage.serializer(), OfferMessage(offer.sdp))
+                roomDataSource.insertOffer(roomId, offer)
+                _model.reduce { it.copy(roomId = roomId, isJoining = false) }
 
-                _model.reduce { it.copy(roomId = roomRef.id, isJoining = false) }
-
-                roomRef.snapshots
-                    .map { it.data(AnswerMessage.serializer()) }
-                    .onEach { Logger.i { "Answer received: $it" } }
-                    .filter { peerConnection.remoteDescription == null && it.answer != null }
-                    .map {
-                        SessionDescription(
-                            type = SessionDescriptionType.Answer,
-                            sdp = it.answer!!
-                        )
-                    }
-                    .onEach { peerConnection.setRemoteDescription(it) }
-                    .launchIn(scope + roomSessionJob!!)
+                val answer = roomDataSource.getAnswer(roomId)
+                peerConnection.setRemoteDescription(answer)
             }
         }
 
@@ -88,27 +72,20 @@ class RoomComponent(
             val peerConnection = createPeerConnection()
             this@ViewModel.peerConnection = peerConnection
 
-            val roomRef = firestore.document("rooms/$roomId")
-
             scope.launch {
-                val roomDoc = roomRef.get()
-                val offerMessage = roomDoc.data(OfferMessage.serializer())
-                if (offerMessage.offer == null) {
-                    Logger.e { "No offer SDP in the room [id = $roomId]" }
+                val offer = roomDataSource.getOffer(roomId)
+                if (offer == null) {
+                    logger.e { "No offer SDP in the room [id = $roomId]" }
                     _model.reduce { it.copy(isJoining = false, isCaller = null) }
                     return@launch
                 }
 
-                collectIceCandidates(roomRef, peerConnection, "callee", "caller")
+                collectIceCandidates(peerConnection, roomId, "callee", "caller")
 
-                val offer = SessionDescription(
-                    type = SessionDescriptionType.Offer,
-                    sdp = offerMessage.offer
-                )
                 peerConnection.setRemoteDescription(offer)
                 peerConnection.createAnswer(DefaultOfferAnswerOptions).also {
                     peerConnection.setLocalDescription(it)
-                    roomRef.update("answer" to it.sdp)
+                    roomDataSource.insertAnswer(roomId, it)
                 }
 
                 _model.reduce { it.copy(isJoining = false) }
@@ -116,7 +93,7 @@ class RoomComponent(
         }
 
         private fun createPeerConnection(): PeerConnection {
-            Logger.i { "Create PeerConnection." }
+            logger.i { "Create PeerConnection." }
             val localStream = checkNotNull(model.value.localStream)
             val peerConnection = PeerConnection(DefaultRtcConfig)
             peerConnection.addTrack(localStream.audioTracks.first(), localStream)
@@ -128,67 +105,44 @@ class RoomComponent(
 
         private fun registerListeners(peerConnection: PeerConnection) {
             peerConnection.onIceGatheringState
-                .onEach { Logger.i { "ICE gathering state changed: $it" } }
+                .onEach { logger.i { "ICE gathering state changed: $it" } }
                 .launchIn(scope + roomSessionJob!!)
 
             peerConnection.onConnectionStateChange
-                .onEach { Logger.i { "Connection state changed: $it" } }
+                .onEach { logger.i { "Connection state changed: $it" } }
                 .launchIn(scope + roomSessionJob!!)
 
             peerConnection.onSignalingStateChange
-                .onEach { Logger.i { "Signaling state changed: $it" } }
+                .onEach { logger.i { "Signaling state changed: $it" } }
                 .launchIn(scope + roomSessionJob!!)
 
             peerConnection.onIceConnectionStateChange
-                .onEach { Logger.i { "ICE connection state changed: $it" } }
+                .onEach { logger.i { "ICE connection state changed: $it" } }
                 .launchIn(scope + roomSessionJob!!)
         }
 
         private fun listenRemoteTracks(peerConnection: PeerConnection) {
             peerConnection.onTrack
-                .onEach { Logger.i { "Remote track received: [id = ${it.track?.id}, kind: ${it.track?.kind} ]" } }
+                .onEach { logger.i { "Remote track received: [id = ${it.track?.id}, kind: ${it.track?.kind} ]" } }
                 .filter { it.track?.kind == MediaStreamTrackKind.Video }
                 .onEach { event -> _model.reduce { it.copy(remoteStream = event.streams.first()) } }
                 .launchIn(scope + roomSessionJob!!)
         }
 
         private fun collectIceCandidates(
-            roomRef: DocumentReference,
             peerConnection: PeerConnection,
+            roomId: String,
             localName: String,
             remoteName: String
         ) {
-            val candidatesCollection = roomRef.collection(localName)
-
             peerConnection.onIceCandidate
-                .map {
-                    IceCandidateMessage(
-                        candidate = it.candidate,
-                        sdpMLineIndex = it.sdpMLineIndex,
-                        sdpMid = it.sdpMid
-                    )
-                }
-                .onEach { Logger.i { "New local ICE candidate: $it" } }
-                .onEach { candidatesCollection.add(IceCandidateMessage.serializer(), it) }
+                .onEach { logger.i { "New local ICE candidate: $it" } }
+                .onEach { roomDataSource.insertIceCandidate(roomId, localName, it) }
                 .launchIn(scope + roomSessionJob!!)
 
-            roomRef.collection(remoteName).snapshots
-                .onEach { snapshot ->
-                    snapshot.documentChanges.forEach { change ->
-                        if (change.type == ChangeType.ADDED) {
-                            val message = change.document.data(IceCandidateMessage.serializer())
-                            peerConnection.addIceCandidate(
-                                IceCandidate(
-                                    sdpMid = message.sdpMid,
-                                    sdpMLineIndex = message.sdpMLineIndex,
-                                    candidate = message.candidate,
-                                )
-                            )
-
-                            Logger.i { "New remote ICE candidate: $message" }
-                        }
-                    }
-                }
+            roomDataSource.observeIceCandidates(roomId, remoteName)
+                .catch { logger.e(it) { "Observing ice candidate failed [roomId = $roomId, peerName = ${remoteName}]" } }
+                .onEach(peerConnection::addIceCandidate)
                 .launchIn(scope + roomSessionJob!!)
         }
 
@@ -214,17 +168,4 @@ private val DefaultRtcConfig = RtcConfiguration(
 private val DefaultOfferAnswerOptions = OfferAnswerOptions(
     offerToReceiveVideo = true,
     offerToReceiveAudio = true,
-)
-
-@Serializable
-private data class OfferMessage(val offer: String? = null)
-
-@Serializable
-private data class AnswerMessage(val answer: String? = null)
-
-@Serializable
-private data class IceCandidateMessage(
-    val candidate: String,
-    val sdpMLineIndex: Int,
-    val sdpMid: String
 )

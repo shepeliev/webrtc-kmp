@@ -8,6 +8,9 @@ dependencies {
     commonMainApi(deps.decompose)
     commonMainImplementation(deps.kotlin.coroutines)
     commonMainImplementation(deps.kotlin.serialization.json)
-    commonMainImplementation(deps.firebase.firestore)
     commonMainImplementation(deps.kermit)
+    androidMainImplementation(platform(deps.firebase.bom))
+    androidMainImplementation(deps.firebase.firestore)
+    androidMainImplementation(deps.kotlin.coroutinesPlayServices)
+    jsMainImplementation(npm("firebase", version = "9.9.1"))
 }
