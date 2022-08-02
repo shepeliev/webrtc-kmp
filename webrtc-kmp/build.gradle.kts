@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.konan.target.KonanTarget
+
 plugins {
     id("multiplatform-setup")
     id("publish-setup")
@@ -6,9 +8,32 @@ plugins {
 group = "com.shepeliev"
 version = "0.89.7"
 
+val KonanTarget.xcFrameworkArch get() = when (this) {
+    is KonanTarget.IOS_X64,
+    is KonanTarget.IOS_SIMULATOR_ARM64 -> "ios-x86_64-simulator"
+    is KonanTarget.MACOS_X64 -> "macos-x86_64"
+    is KonanTarget.IOS_ARM64 -> "ios-arm64"
+    else -> throw IllegalArgumentException("Can't map target '$this' to xCode framework architecture")
+}
+
 kotlin {
     android {
         publishAllLibraryVariants()
+    }
+
+    ios {
+        val webRtcFrameworkPath = rootDir.resolve("vendor/apple/WebRTC.xcframework")
+        compilations.getByName("main") {
+            cinterops.create("WebRTC") {
+                val arch = konanTarget.xcFrameworkArch
+                compilerOpts("-framework", "WebRTC", "-F${webRtcFrameworkPath.resolve(arch)}")
+            }
+        }
+
+        binaries.all {
+            val arch = konanTarget.xcFrameworkArch
+            linkerOpts("-framework", "WebRTC", "-F${webRtcFrameworkPath.resolve(arch)}")
+        }
     }
 
 //    ios {
