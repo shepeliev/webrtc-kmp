@@ -71,5 +71,5 @@ kotlin {
 dependencies {
     commonMainImplementation(deps.kotlin.coroutines)
     androidMainImplementation(deps.androidx.coreKtx)
-    androidMainApi(fileTree("../libs/android") { include("*.jar") })
+    androidMainApi(fileTree("../vendor/android") { include("*.jar") })
 }

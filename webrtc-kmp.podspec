@@ -9,13 +9,9 @@ Pod::Spec.new do |s|
   s.author              = 'https://github.com/shepeliev/webrtc-kmp/graphs/contributors'
   s.source              = { :git => 'git@github.com:shepeliev/webrtc-kmp.git', :tag => "v#{s.version}" }
   s.requires_arc        = true
-
   s.platforms           = { :ios => '11.0', :osx => '10.13' }
-
-  s.preserve_paths      = 'ios/**/*'
-  s.source_files        = 'ios/**/*.{h,m}'
   s.libraries           = 'c', 'sqlite3', 'stdc++'
   s.framework           = 'AudioToolbox','AVFoundation', 'CoreAudio', 'CoreGraphics', 'CoreVideo', 'GLKit', 'VideoToolbox'
-  s.ios.vendored_frameworks   = 'libs/ios/WebRTC.xcframework'
-  s.macos.vendored_frameworks = 'libs/ios/WebRTC.xcframework'
+  s.ios.vendored_frameworks   = 'vendor/apple/WebRTC.xcframework'
+  s.macos.vendored_frameworks = 'vendor/apple/WebRTC.xcframework'
 end
