@@ -12,7 +12,12 @@ import shared
 class RoomViewController: UIViewController {
 
     private let room: Room! = (UIApplication.shared.delegate as! AppDelegate).room
+    
+#if arch(x86_64)
+    private var localVideo = RTCEAGLVideoView()
+#else
     private var localVideo = RTCMTLVideoView()
+#endif
     
     override func viewDidLoad() {
         super.viewDidLoad()
