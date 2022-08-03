@@ -50,13 +50,21 @@ class RoomComponent(
         private var roomSessionJob: Job? = null
 
         override fun openUserMedia() {
+            logger.i { "Open user media" }
+
             scope.launch {
-                val stream = MediaDevices.getUserMedia(audio = true, video = true)
-                _model.reduce { it.copy(localStream = stream) }
+                try {
+                    val stream = MediaDevices.getUserMedia(audio = true, video = true)
+                    _model.reduce { it.copy(localStream = stream) }
+                } catch (e: Throwable) {
+                    logger.e(e) { "Getting user media failed" }
+                }
             }
         }
 
         override fun createRoom() {
+            logger.i { "Create room" }
+
             _model.reduce { it.copy(isJoining = true, isCaller = true) }
             roomSessionJob = SupervisorJob()
             val peerConnection = createPeerConnection()
@@ -81,6 +89,8 @@ class RoomComponent(
         }
 
         override fun joinRoom(roomId: String) {
+            logger.i { "Join room: $roomId" }
+
             _model.reduce { it.copy(isJoining = true, roomId = roomId, isCaller = false) }
             roomSessionJob = SupervisorJob()
 
@@ -162,6 +172,8 @@ class RoomComponent(
         }
 
         override fun hangup() {
+            logger.i { "Hangup" }
+
             roomSessionJob?.cancel()
             _model.value.localStream?.release()
             peerConnection?.close()
@@ -169,6 +181,7 @@ class RoomComponent(
         }
 
         override fun onDestroy() {
+            logger.i { "Destroy" }
             scope.cancel()
         }
     }
