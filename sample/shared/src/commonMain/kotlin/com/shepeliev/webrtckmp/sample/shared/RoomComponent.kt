@@ -8,6 +8,7 @@ import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.reduce
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
+import com.arkivanov.essenty.lifecycle.*
 import com.shepeliev.webrtckmp.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.catch
@@ -17,16 +18,28 @@ import kotlinx.coroutines.flow.onEach
 
 class RoomComponent(
     componentContext: ComponentContext,
-    viewModel: Room = componentContext.instanceKeeper.getOrCreate { ViewModel() }
+    viewModel: Room,
 ) : Room by viewModel, ComponentContext by componentContext {
+
+    constructor(componentContext: ComponentContext) :
+            this(componentContext, componentContext.instanceKeeper.getOrCreate { ViewModel() })
+
+    private val logger = Logger.withTag("RoomComponent")
 
     init {
         Logger.setLogWriters(platformLogWriter())
+
+        lifecycle.doOnCreate { logger.d { "onCreate" } }
+        lifecycle.doOnStart { logger.d { "onStart" } }
+        lifecycle.doOnResume { logger.d { "onResume" } }
+        lifecycle.doOnPause { logger.d { "onPause" } }
+        lifecycle.doOnStop { logger.d { "onStop" } }
+        lifecycle.doOnDestroy { logger.d { "onDestroy" } }
     }
 
     private class ViewModel : InstanceKeeper.Instance, Room {
 
-        private val logger = Logger.withTag("RoomComponent")
+        private val logger = Logger.withTag("RoomComponent => ViewModel")
         private val _model = MutableValue(Room.Model())
         override val model: Value<Room.Model> get() = _model
 

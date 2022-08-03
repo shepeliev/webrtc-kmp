@@ -6,15 +6,32 @@
 //
 
 import UIKit
+import shared
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-
-
+    var lifecycle: LifecycleRegistry!
+    var room: Room!
+    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        
+        lifecycle = LifecycleRegistryKt.LifecycleRegistry()
+        let context = DefaultComponentContext(lifecycle: self.lifecycle)
+        room = RoomComponent(componentContext: context)
+
+        lifecycle.onCreate()
+        lifecycle.onStart()
+        lifecycle.onResume()
+
         return true
+    }
+    
+    func applicationWillTerminate(_ application: UIApplication) {
+        lifecycle.onPause()
+        lifecycle.onStop()
+        lifecycle.onDestroy()
     }
 
     // MARK: UISceneSession Lifecycle

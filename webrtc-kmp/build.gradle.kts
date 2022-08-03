@@ -29,11 +29,6 @@ kotlin {
                 compilerOpts("-framework", "WebRTC", "-F${webRtcFrameworkPath.resolve(arch)}")
             }
         }
-
-        binaries.all {
-            val arch = konanTarget.xcFrameworkArch
-            linkerOpts("-framework", "WebRTC", "-F${webRtcFrameworkPath.resolve(arch)}")
-        }
     }
 
 //    ios {
