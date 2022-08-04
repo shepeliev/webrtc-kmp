@@ -52,6 +52,7 @@ kotlin {
             export(project(":webrtc-kmp"))
             export(deps.decompose)
             transitiveExport = true
+            isStatic = true
 
             val linkerOpts = (firebaseCoreFrameworks + firestoreFrameworks + "WebRTC")
                 .flatMap { listOf("-framework", it, "-F${resolveFrameworkPath(it)}") }

@@ -117,7 +117,7 @@ actual class RoomDataSource actual constructor() {
                 ?.map {
                     IceCandidate(
                         sdpMid = it.document.data()["sdpMid"] as String,
-                        sdpMLineIndex = it.document.data()["sdpMLineIndex"] as Int,
+                        sdpMLineIndex = (it.document.data()["sdpMLineIndex"] as Long).toInt(),
                         candidate = it.document.data()["candidate"] as String,
                     )
                 }

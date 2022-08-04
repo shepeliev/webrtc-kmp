@@ -8,8 +8,6 @@
 import UIKit
 import WebRTC
 import shared
-import FirebaseCore
-import FirebaseFirestore
 
 class RoomViewController: UIViewController {
 

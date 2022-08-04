@@ -122,10 +122,13 @@ class RoomComponent(
         private fun createPeerConnection(): PeerConnection {
             logger.i { "Create PeerConnection." }
             val peerConnection = PeerConnection(DefaultRtcConfig)
+
             model.value.localStream?.let {
                 peerConnection.addTrack(it.audioTracks.first(), it)
                 peerConnection.addTrack(it.videoTracks.first(), it)
             }
+                ?: peerConnection.createDataChannel("dummy")
+
             listenRemoteTracks(peerConnection)
             registerListeners(peerConnection)
             return peerConnection
