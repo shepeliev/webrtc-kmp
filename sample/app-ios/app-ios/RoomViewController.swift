@@ -8,6 +8,8 @@
 import UIKit
 import WebRTC
 import shared
+import FirebaseCore
+import FirebaseFirestore
 
 class RoomViewController: UIViewController {
 
@@ -18,6 +20,10 @@ class RoomViewController: UIViewController {
 #else
     private var localVideo = RTCMTLVideoView()
 #endif
+    
+    @IBOutlet weak var createRoomButton: UIButton!
+    
+    @IBOutlet weak var joinRoomButton: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -33,11 +39,25 @@ class RoomViewController: UIViewController {
         if let localStream = model.localStream {
             localStream.videoTracks.first?.addRenderer(renderer: localVideo)
         }
+        
+        if model.roomId != nil {
+            createRoomButton.isUserInteractionEnabled = false
+            joinRoomButton.isUserInteractionEnabled = false
+        }
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         room.hangup()
         room.model.unsubscribe(observer: roomModelObserver)
+    }
+    
+    // MARK: Actions
+    
+    @IBAction func createRoomButtonDidClick(_ sender: Any) {
+        room.createRoom()
+    }
+    
+    @IBAction func joinRoomButtonDidClick(_ sender: Any) {
     }
     
     // MARK: - UI setup

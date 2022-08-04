@@ -47,17 +47,23 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleToFill" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="ve3-6U-luS">
-                                <rect key="frame" x="0.0" y="1841" width="398" height="31"/>
+                                <rect key="frame" x="8" y="815" width="398" height="31"/>
                                 <subviews>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="j0l-3k-ilI">
                                         <rect key="frame" x="0.0" y="0.0" width="127.5" height="31"/>
                                         <state key="normal" title="Button"/>
                                         <buttonConfiguration key="configuration" style="filled" title="Create room"/>
+                                        <connections>
+                                            <action selector="createRoomButtonDidClick:" destination="CJR-e9-mu8" eventType="touchUpInside" id="vMk-Vm-985"/>
+                                        </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="u6S-S8-3TJ">
                                         <rect key="frame" x="135.5" y="0.0" width="127" height="31"/>
                                         <state key="normal" title="Button"/>
                                         <buttonConfiguration key="configuration" style="filled" title="Join room"/>
+                                        <connections>
+                                            <action selector="joinRoomButtonDidClick:" destination="CJR-e9-mu8" eventType="touchUpInside" id="GAv-PU-ENH"/>
+                                        </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="K0n-fx-zHT">
                                         <rect key="frame" x="270.5" y="0.0" width="127.5" height="31"/>
@@ -78,6 +84,10 @@
                             <constraint firstItem="zir-Xb-IEU" firstAttribute="bottom" secondItem="ve3-6U-luS" secondAttribute="bottom" constant="16" id="gw0-LM-IoC"/>
                         </constraints>
                     </view>
+                    <connections>
+                        <outlet property="createRoomButton" destination="j0l-3k-ilI" id="D9e-7i-GJa"/>
+                        <outlet property="joinRoomButton" destination="u6S-S8-3TJ" id="bHm-hl-t14"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="VzQ-pc-IVu" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
                 <exit id="L0G-RH-hM6" userLabel="Exit" sceneMemberID="exit"/>

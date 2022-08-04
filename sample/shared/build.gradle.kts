@@ -1,23 +1,50 @@
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
-import org.jetbrains.kotlin.konan.target.KonanTarget
 
 plugins {
     id("multiplatform-setup")
 }
 
-val KonanTarget.xcFrameworkArch get() = when (this) {
-    is KonanTarget.IOS_X64,
-    is KonanTarget.IOS_SIMULATOR_ARM64 -> "ios-x86_64-simulator"
-    is KonanTarget.MACOS_X64 -> "macos-x86_64"
-    is KonanTarget.IOS_ARM64 -> "ios-arm64"
-    else -> throw IllegalArgumentException("Can't map target '$this' to xCode framework architecture")
-}
-
 kotlin {
     val xcf = XCFramework()
-    val webRtcFrameworkPath = rootDir.resolve("vendor/apple/WebRTC.xcframework")
+
+    val firebaseCoreFrameworks = listOf(
+        "FirebaseAnalytics",
+        "FirebaseCore",
+        "FirebaseCoreDiagnostics",
+        "FirebaseInstallations",
+        "GoogleAppMeasurement",
+        "GoogleAppMeasurementIdentitySupport",
+        "GoogleDataTransport",
+        "GoogleUtilities",
+        "nanopb",
+        "PromisesObjC",
+    )
+
+    val firestoreFrameworks = listOf(
+        "abseil",
+        "BoringSSL-GRPC",
+        "FirebaseFirestore",
+        "gRPC-C++",
+        "gRPC-Core",
+        "leveldb-library",
+        "Libuv-gRPC"
+    )
 
     ios {
+        compilations.getByName("main") {
+            cinterops.create("FirebaseCore") {
+                firebaseCoreFrameworks.forEach { framework ->
+                    compilerOpts("-framework", framework, "-F${resolveFrameworkPath(framework)}")
+                }
+            }
+
+            cinterops.create("FirebaseFirestore") {
+                firestoreFrameworks.forEach { framework ->
+                    compilerOpts("-framework", framework, "-F${resolveFrameworkPath(framework)}")
+                }
+            }
+        }
+
         binaries.framework {
             baseName = "shared"
             xcf.add(this)
@@ -26,8 +53,11 @@ kotlin {
             export(deps.decompose)
             transitiveExport = true
 
-            val arch = konanTarget.xcFrameworkArch
-            linkerOpts("-framework", "WebRTC", "-F${webRtcFrameworkPath.resolve(arch)}")
+            val linkerOpts = (firebaseCoreFrameworks + firestoreFrameworks + "WebRTC")
+                .flatMap { listOf("-framework", it, "-F${resolveFrameworkPath(it)}") }
+            linkerOpts(linkerOpts)
+            linkerOpts("-ObjC")
+
             embedBitcode("disable")
         }
     }

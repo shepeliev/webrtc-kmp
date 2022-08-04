@@ -70,10 +70,12 @@ class RoomComponent(
             val peerConnection = createPeerConnection()
             this@ViewModel.peerConnection = peerConnection
 
-            val roomId = roomDataSource.createRoom()
-            collectIceCandidates(peerConnection, roomId, "caller", "callee")
-
             scope.launch {
+                val roomId = roomDataSource.createRoom()
+                logger.d { "Room ID: $roomId" }
+
+                collectIceCandidates(peerConnection, roomId, "caller", "callee")
+
                 val offer = peerConnection.createOffer(DefaultOfferAnswerOptions).also {
                     peerConnection.setLocalDescription(it)
                 }
@@ -119,10 +121,11 @@ class RoomComponent(
 
         private fun createPeerConnection(): PeerConnection {
             logger.i { "Create PeerConnection." }
-            val localStream = checkNotNull(model.value.localStream)
             val peerConnection = PeerConnection(DefaultRtcConfig)
-            peerConnection.addTrack(localStream.audioTracks.first(), localStream)
-            peerConnection.addTrack(localStream.videoTracks.first(), localStream)
+            model.value.localStream?.let {
+                peerConnection.addTrack(it.audioTracks.first(), it)
+                peerConnection.addTrack(it.videoTracks.first(), it)
+            }
             listenRemoteTracks(peerConnection)
             registerListeners(peerConnection)
             return peerConnection
