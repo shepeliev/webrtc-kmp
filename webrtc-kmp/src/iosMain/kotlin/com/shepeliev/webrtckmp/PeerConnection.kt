@@ -1,28 +1,11 @@
 package com.shepeliev.webrtckmp
 
-import WebRTC.RTCAudioTrack
-import WebRTC.RTCDataChannel
-import WebRTC.RTCDataChannelConfiguration
-import WebRTC.RTCIceCandidate
-import WebRTC.RTCIceConnectionState
-import WebRTC.RTCIceGatheringState
-import WebRTC.RTCMediaConstraints
-import WebRTC.RTCMediaStream
-import WebRTC.RTCPeerConnection
-import WebRTC.RTCPeerConnectionDelegateProtocol
-import WebRTC.RTCPeerConnectionState
-import WebRTC.RTCRtpMediaType
-import WebRTC.RTCRtpReceiver
-import WebRTC.RTCRtpSender
-import WebRTC.RTCRtpTransceiver
-import WebRTC.RTCSessionDescription
-import WebRTC.RTCSignalingState
-import WebRTC.RTCVideoTrack
-import WebRTC.dataChannelForLabel
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.channels.trySendBlocking
+import WebRTC.*
+import com.shepeliev.webrtckmp.PeerConnectionEvent.*
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import platform.Foundation.NSLog
 import platform.darwin.NSObject
 import kotlin.native.concurrent.freeze
 
@@ -50,59 +33,9 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
     actual val iceGatheringState: IceGatheringState
         get() = rtcIceGatheringStateAsCommon(ios.iceGatheringState())
 
-    private val peerConnectionObserverProxy = PeerConnectionObserverProxy()
-
-    internal actual val peerConnectionEvent: Flow<PeerConnectionEvent> = callbackFlow {
-        val observer = object : PeerConnectionObserver {
-            override fun onSignalingStateChange(state: SignalingState) {
-                trySendBlocking(PeerConnectionEvent.SignalingStateChange(state))
-            }
-
-            override fun onIceConnectionStateChange(state: IceConnectionState) {
-                trySendBlocking(PeerConnectionEvent.IceConnectionStateChange(state))
-            }
-
-            override fun onStandardizedIceConnectionChange(state: IceConnectionState) {
-                trySendBlocking(PeerConnectionEvent.StandardizedIceConnectionChange(state))
-            }
-
-            override fun onConnectionStateChange(state: PeerConnectionState) {
-                trySendBlocking(PeerConnectionEvent.ConnectionStateChange(state))
-            }
-
-            override fun onIceGatheringStateChange(state: IceGatheringState) {
-                trySendBlocking(PeerConnectionEvent.IceGatheringStateChange(state))
-            }
-
-            override fun onIceCandidate(candidate: IceCandidate) {
-                trySendBlocking(PeerConnectionEvent.NewIceCandidate(candidate))
-            }
-
-            override fun onRemovedIceCandidates(candidates: List<IceCandidate>) {
-                trySendBlocking(PeerConnectionEvent.RemovedIceCandidates(candidates))
-            }
-
-            override fun onDataChannel(dataChannel: DataChannel) {
-                trySendBlocking(PeerConnectionEvent.NewDataChannel(dataChannel))
-            }
-
-            override fun onRemoveTrack(rtpReceiver: RtpReceiver) {
-                trySendBlocking(PeerConnectionEvent.RemoveTrack(rtpReceiver))
-            }
-
-            override fun onNegotiationNeeded() {
-                trySendBlocking(PeerConnectionEvent.NegotiationNeeded)
-            }
-
-            override fun onTrack(trackEvent: TrackEvent) {
-                trySendBlocking(PeerConnectionEvent.Track(trackEvent))
-            }
-        }
-
-        peerConnectionObserverProxy.addObserver(observer)
-
-        awaitClose { peerConnectionObserverProxy.removeObserver(observer) }
-    }
+    private val _peerConnectionEvent =
+        MutableSharedFlow<PeerConnectionEvent>(extraBufferCapacity = FLOW_BUFFER_CAPACITY)
+    internal actual val peerConnectionEvent: Flow<PeerConnectionEvent> = _peerConnectionEvent.asSharedFlow()
 
     actual fun createDataChannel(
         label: String,
@@ -197,13 +130,15 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
     }
 
     @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE", "CONFLICTING_OVERLOADS")
-    private inner class IosPeerConnectionObserver() : NSObject(), RTCPeerConnectionDelegateProtocol {
+    private inner class IosPeerConnectionObserver : NSObject(), RTCPeerConnectionDelegateProtocol {
 
         override fun peerConnection(peerConnection: RTCPeerConnection, didChangeSignalingState: RTCSignalingState) {
-            peerConnectionObserverProxy.onSignalingStateChange(rtcSignalingStateAsCommon(didChangeSignalingState))
+            val event = SignalingStateChange(rtcSignalingStateAsCommon(didChangeSignalingState))
+            _peerConnectionEvent.tryEmit(event)
         }
 
         override fun peerConnection(peerConnection: RTCPeerConnection, didAddStream: RTCMediaStream) {
+            NSLog("WEBRTC => didAddStream")
             // this deprecated API should not longer be used
             // https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/onaddstream
         }
@@ -225,31 +160,32 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
             peerConnection: RTCPeerConnection,
             didChangeIceConnectionState: RTCIceConnectionState
         ) {
-            peerConnectionObserverProxy.onIceConnectionStateChange(
-                rtcIceConnectionStateAsCommon(didChangeIceConnectionState)
-            )
+            val event = IceConnectionStateChange(rtcIceConnectionStateAsCommon(didChangeIceConnectionState))
+            _peerConnectionEvent.tryEmit(event)
         }
 
         override fun peerConnection(
             peerConnection: RTCPeerConnection,
             didChangeIceGatheringState: RTCIceGatheringState
         ) {
-            peerConnectionObserverProxy.onIceGatheringStateChange(
-                rtcIceGatheringStateAsCommon(didChangeIceGatheringState)
-            )
+            val event = IceGatheringStateChange(rtcIceGatheringStateAsCommon(didChangeIceGatheringState))
+            _peerConnectionEvent.tryEmit(event)
         }
 
         override fun peerConnection(peerConnection: RTCPeerConnection, didGenerateIceCandidate: RTCIceCandidate) {
-            peerConnectionObserverProxy.onIceCandidate(IceCandidate(didGenerateIceCandidate))
+            val event = NewIceCandidate(IceCandidate(didGenerateIceCandidate))
+            _peerConnectionEvent.tryEmit(event)
         }
 
         override fun peerConnection(peerConnection: RTCPeerConnection, didRemoveIceCandidates: List<*>) {
             val candidates = didRemoveIceCandidates.map { IceCandidate(it as RTCIceCandidate) }
-            peerConnectionObserverProxy.onRemovedIceCandidates(candidates)
+            val event = RemovedIceCandidates(candidates)
+            _peerConnectionEvent.tryEmit(event)
         }
 
         override fun peerConnection(peerConnection: RTCPeerConnection, didOpenDataChannel: RTCDataChannel) {
-            peerConnectionObserverProxy.onDataChannel(DataChannel(didOpenDataChannel))
+            val event = NewDataChannel(DataChannel(didOpenDataChannel))
+            _peerConnectionEvent.tryEmit(event)
         }
 
         @Suppress("CONFLICTING_OVERLOADS")
@@ -257,22 +193,23 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
             peerConnection: RTCPeerConnection,
             didChangeStandardizedIceConnectionState: RTCIceConnectionState
         ) {
-            peerConnectionObserverProxy.onStandardizedIceConnectionChange(
+            val event = StandardizedIceConnectionChange(
                 rtcIceConnectionStateAsCommon(didChangeStandardizedIceConnectionState)
             )
+            _peerConnectionEvent.tryEmit(event)
         }
 
         override fun peerConnection(
             peerConnection: RTCPeerConnection,
             didChangeConnectionState: RTCPeerConnectionState
         ) {
-            peerConnectionObserverProxy.onConnectionStateChange(
-                rtcPeerConnectionStateAsCommon(didChangeConnectionState)
-            )
+            val event = ConnectionStateChange(rtcPeerConnectionStateAsCommon(didChangeConnectionState))
+            _peerConnectionEvent.tryEmit(event)
         }
 
         override fun peerConnection(peerConnection: RTCPeerConnection, didRemoveReceiver: RTCRtpReceiver) {
-            peerConnectionObserverProxy.onRemoveTrack(RtpReceiver(didRemoveReceiver))
+            val event = RemoveTrack(RtpReceiver(didRemoveReceiver))
+            _peerConnectionEvent.tryEmit(event)
         }
 
         override fun peerConnection(
@@ -302,11 +239,12 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
                 transceiver = RtpTransceiver(didStartReceivingOnTransceiver)
             )
 
-            peerConnectionObserverProxy.onTrack(trackEvent)
+            val event = Track(trackEvent)
+            _peerConnectionEvent.tryEmit(event)
         }
 
         override fun peerConnectionShouldNegotiate(peerConnection: RTCPeerConnection) {
-            peerConnectionObserverProxy.onNegotiationNeeded()
+            _peerConnectionEvent.tryEmit(NegotiationNeeded)
         }
     }
 }
