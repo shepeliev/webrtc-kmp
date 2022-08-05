@@ -142,10 +142,10 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
 
     private fun OfferAnswerOptions.toRTCMediaConstraints(): RTCMediaConstraints {
         val mandatory = mutableMapOf<Any?, String?>().apply {
-            iceRestart?.let { this += "iceRestart" to "$it" }
-            offerToReceiveAudio?.let { this += "offerToReceiveAudio" to "$it" }
-            offerToReceiveVideo?.let { this += "offerToReceiveVideo" to "$it" }
-            voiceActivityDetection?.let { this += "voiceActivityDetection" to "$it" }
+            iceRestart?.let { this += "IceRestart" to "$it" }
+            offerToReceiveAudio?.let { this += "OfferToReceiveAudio" to "$it" }
+            offerToReceiveVideo?.let { this += "OfferToReceiveVideo" to "$it" }
+            voiceActivityDetection?.let { this += "VoiceActivityDetection" to "$it" }
         }
         return RTCMediaConstraints(mandatory, null)
     }
@@ -196,19 +196,18 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         ios.close()
     }
 
+    @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE", "CONFLICTING_OVERLOADS")
     private inner class IosPeerConnectionObserver() : NSObject(), RTCPeerConnectionDelegateProtocol {
 
         override fun peerConnection(peerConnection: RTCPeerConnection, didChangeSignalingState: RTCSignalingState) {
             peerConnectionObserverProxy.onSignalingStateChange(rtcSignalingStateAsCommon(didChangeSignalingState))
         }
 
-        @Suppress("CONFLICTING_OVERLOADS")
         override fun peerConnection(peerConnection: RTCPeerConnection, didAddStream: RTCMediaStream) {
             // this deprecated API should not longer be used
             // https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/onaddstream
         }
 
-        @Suppress("CONFLICTING_OVERLOADS")
         override fun peerConnection(
             peerConnection: RTCPeerConnection,
             didRemoveStream: RTCMediaStream
