@@ -17,6 +17,19 @@ kotlin {
                 compilerOpts("-framework", "WebRTC", "-F${resolveFrameworkPath("WebRTC")}")
             }
         }
+
+        binaries {
+            getTest("DEBUG").apply {
+                linkerOpts(
+                    "-framework",
+                    "WebRTC",
+                    "-F${resolveFrameworkPath("WebRTC")}",
+                    "-rpath",
+                    "${resolveFrameworkPath("WebRTC")}",
+                    "-ObjC"
+                )
+            }
+        }
     }
 }
 
