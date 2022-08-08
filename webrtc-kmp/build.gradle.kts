@@ -20,8 +20,16 @@ kotlin {
     }
 }
 
+android {
+    defaultConfig {
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+}
+
 dependencies {
     commonMainImplementation(deps.kotlin.coroutines)
     androidMainImplementation(deps.androidx.coreKtx)
     androidMainApi(fileTree("../vendor/android") { include("*.jar") })
+    androidTestImplementation(deps.androidx.test.core)
+    androidTestImplementation(deps.androidx.test.runner)
 }

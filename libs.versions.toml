@@ -12,6 +12,8 @@ androidxCompose = "1.1.1"
 androidxComposeActivity = "1.4.0"
 androidxActivityKtx = "1.3.1"
 androidxLifecycle = "2.5.1"
+androidxTestCore = "1.4.0"
+androidxTestRunner = "1.4.0"
 
 accompanist = "0.23.1"
 decompose = "0.6.0"
@@ -36,6 +38,8 @@ androidx-compose-activity = { module = "androidx.activity:activity-compose", ver
 androidx-compose-material = { module = "androidx.compose.material:material", version.ref = "androidxCompose" }
 androidx-compose-animation = { module = "androidx.compose.animation:animation", version.ref = "androidxCompose" }
 androidx-lifecycle-runtime = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "androidxLifecycle" }
+androidx-test-core = { module = "androidx.test:core", version.ref = "androidxTestCore" }
+androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidxTestRunner" }
 
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist" }
 
