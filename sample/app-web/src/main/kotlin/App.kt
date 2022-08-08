@@ -1,5 +1,4 @@
 import com.arkivanov.decompose.value.Value
-import com.arkivanov.decompose.value.ValueObserver
 import com.shepeliev.webrtckmp.sample.shared.Room
 import csstype.px
 import emotion.react.css
@@ -97,7 +96,7 @@ fun <T : Any> useValue(value: Value<T>): T {
     var result by useState(value.value)
 
     useEffect(value, result) {
-        val valueObserver: ValueObserver<T> = { result = it }
+        val valueObserver: (T) -> Unit = { result = it }
         value.subscribe(valueObserver)
         cleanup { value.unsubscribe(valueObserver) }
     }

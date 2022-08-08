@@ -193,7 +193,6 @@
 				FA11F3302899C22A00676143 /* Sources */,
 				FA11F3312899C22A00676143 /* Frameworks */,
 				FA11F3322899C22A00676143 /* Resources */,
-				FA11F356289A578200676143 /* ShellScript */,
 				FAA7FDE028A1440E00AC5647 /* Embed Frameworks */,
 			);
 			buildRules = (
@@ -252,27 +251,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		FA11F356289A578200676143 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "$PROJECT_DIR/../../gradlew -p $PROJECT_DIR/../../ assembleDebugXCFramework\n";
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		FA11F3302899C22A00676143 /* Sources */ = {

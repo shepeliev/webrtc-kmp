@@ -15,8 +15,6 @@ dependencyResolutionManagement {
     }
 }
 
-includeBuild("build-plugins")
-
 include(":webrtc-kmp")
 include(":sample:shared")
 include(":sample:app-android")
