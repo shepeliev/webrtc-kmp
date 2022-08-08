@@ -45,7 +45,7 @@ jobs:
           name: "iOS Tests Report HTML"
           path: "build/reports/tests/iosTest"
       - name: Run JS tests
-        run: ./gradlew jsTest
+        run: ./gradlew jsIrTest
       - name: Upload JS test artifact
         uses: actions/upload-artifact@v2
         if: failure()
