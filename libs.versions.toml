@@ -1,6 +1,6 @@
 [versions]
 
-kotlinCoroutines = "1.6.1-native-mt"
+kotlinCoroutines = "1.6.4"
 kotlinserializationJson = "1.3.3"
 kotlinWrappers = "1.0.0-pre.343"
 
