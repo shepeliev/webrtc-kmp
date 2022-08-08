@@ -36,6 +36,7 @@ private fun OpenCameraAndMicrophoneButton(onClick: () -> Unit) {
 
     if (isRationaleVisible) {
         AlertDialog(
+            text = { Text("Please grant camera and microphone permissions") },
             onDismissRequest = { isRationaleVisible = false },
             confirmButton = {
                 val context = LocalContext.current
@@ -56,10 +57,6 @@ private fun OpenCameraAndMicrophoneButton(onClick: () -> Unit) {
     Button(onClick = {
         when {
             permissions.allPermissionsGranted -> onClick()
-
-            !permissions.permissionRequested || !permissions.shouldShowRationale -> {
-                permissions.launchMultiplePermissionRequest()
-            }
 
             else -> isRationaleVisible = true
         }
