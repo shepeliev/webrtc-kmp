@@ -8,13 +8,36 @@ import com.arkivanov.decompose.value.Value
 import com.arkivanov.decompose.value.reduce
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
-import com.arkivanov.essenty.lifecycle.*
-import com.shepeliev.webrtckmp.*
-import kotlinx.coroutines.*
+import com.arkivanov.essenty.lifecycle.doOnCreate
+import com.arkivanov.essenty.lifecycle.doOnDestroy
+import com.arkivanov.essenty.lifecycle.doOnPause
+import com.arkivanov.essenty.lifecycle.doOnResume
+import com.arkivanov.essenty.lifecycle.doOnStart
+import com.arkivanov.essenty.lifecycle.doOnStop
+import com.shepeliev.webrtckmp.IceServer
+import com.shepeliev.webrtckmp.MediaDevices
+import com.shepeliev.webrtckmp.MediaStreamTrackKind
+import com.shepeliev.webrtckmp.OfferAnswerOptions
+import com.shepeliev.webrtckmp.PeerConnection
+import com.shepeliev.webrtckmp.RtcConfiguration
+import com.shepeliev.webrtckmp.audioTracks
+import com.shepeliev.webrtckmp.onConnectionStateChange
+import com.shepeliev.webrtckmp.onIceCandidate
+import com.shepeliev.webrtckmp.onIceConnectionStateChange
+import com.shepeliev.webrtckmp.onIceGatheringState
+import com.shepeliev.webrtckmp.onSignalingStateChange
+import com.shepeliev.webrtckmp.onTrack
+import com.shepeliev.webrtckmp.videoTracks
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 
 class RoomComponent(
     componentContext: ComponentContext,
@@ -22,7 +45,7 @@ class RoomComponent(
 ) : Room by viewModel, ComponentContext by componentContext {
 
     constructor(componentContext: ComponentContext) :
-            this(componentContext, componentContext.instanceKeeper.getOrCreate { ViewModel() })
+        this(componentContext, componentContext.instanceKeeper.getOrCreate { ViewModel() })
 
     private val logger = Logger.withTag("RoomComponent")
 
@@ -171,7 +194,7 @@ class RoomComponent(
                 .launchIn(scope + roomSessionJob!!)
 
             roomDataSource.observeIceCandidates(roomId, remoteName)
-                .catch { logger.e(it) { "Observing ice candidate failed [roomId = $roomId, peerName = ${remoteName}]" } }
+                .catch { logger.e(it) { "Observing ice candidate failed [roomId = $roomId, peerName = $remoteName]" } }
                 .onEach { logger.d { "New remote ICE candidate: $it" } }
                 .onEach(peerConnection::addIceCandidate)
                 .launchIn(scope + roomSessionJob!!)

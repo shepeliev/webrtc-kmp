@@ -1,7 +1,11 @@
 package com.shepeliev.webrtckmp.sample.shared
 
 import FirebaseCore.FIRApp
-import FirebaseFirestore.*
+import FirebaseFirestore.FIRDocumentChange
+import FirebaseFirestore.FIRDocumentChangeType
+import FirebaseFirestore.FIRDocumentSnapshot
+import FirebaseFirestore.FIRFirestore
+import FirebaseFirestore.FIRQuerySnapshot
 import com.shepeliev.webrtckmp.SessionDescription
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow

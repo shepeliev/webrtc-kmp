@@ -10,11 +10,13 @@ fun main() {
     val container = document.getElementById("root") ?: error("No root element.")
     val root = createRoot(container)
 
-    root.render(Fragment.create {
-        App {
-            val lifecycle = LifecycleRegistry().apply { attachToDocument() }
-            val context = DefaultComponentContext(lifecycle)
-            room = RoomComponent(context)
+    root.render(
+        Fragment.create {
+            App {
+                val lifecycle = LifecycleRegistry().apply { attachToDocument() }
+                val context = DefaultComponentContext(lifecycle)
+                room = RoomComponent(context)
+            }
         }
-    })
+    )
 }

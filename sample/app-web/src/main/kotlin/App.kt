@@ -6,11 +6,15 @@ import kotlinx.browser.window
 import mui.material.Button
 import mui.material.ButtonVariant
 import org.w3c.dom.HTMLVideoElement
-import react.*
+import react.FC
+import react.Props
 import react.dom.html.ReactHTML.div
 import react.dom.html.ReactHTML.h1
 import react.dom.html.ReactHTML.p
 import react.dom.html.ReactHTML.video
+import react.useEffect
+import react.useRef
+import react.useState
 
 external interface AppProps : Props {
     var room: Room

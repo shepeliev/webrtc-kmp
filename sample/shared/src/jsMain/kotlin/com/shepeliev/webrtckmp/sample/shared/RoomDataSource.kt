@@ -56,7 +56,8 @@ actual class RoomDataSource actual constructor() {
     actual suspend fun insertIceCandidate(roomId: String, peerName: String, candidate: IceCandidate) {
         val colRef = collection(roomsRef, "$roomId/$peerName")
         addDoc(
-            colRef, json(
+            colRef,
+            json(
                 "candidate" to candidate.candidate,
                 "sdpMLineIndex" to candidate.sdpMLineIndex,
                 "sdpMid" to candidate.sdpMid,

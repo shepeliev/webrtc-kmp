@@ -1,5 +1,6 @@
 plugins {
     kotlin("js")
+    id("org.jlleitschuh.gradle.ktlint")
 }
 
 kotlin {
@@ -9,7 +10,7 @@ kotlin {
     }
 }
 
-dependencies{
+dependencies {
     implementation(project(":sample:shared"))
     implementation(project.dependencies.enforcedPlatform(deps.kotlin.wrappers.bom))
     implementation(deps.kotlin.wrappers.emotion)

@@ -1,7 +1,15 @@
 package com.shepeliev.webrtckmp.sample
 
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.Button
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Text
+import androidx.compose.material.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 
 @Composable
 fun JoinRoomButton(onJoin: (String) -> Unit, enabled: Boolean) {
@@ -44,6 +52,6 @@ fun JoinRoomButton(onJoin: (String) -> Unit, enabled: Boolean) {
     }
 
     Button(onClick = { isJoinDialogVisible = true }, enabled = enabled) {
-        Text("Join")
-    }
+    Text("Join")
+}
 }

@@ -3,8 +3,18 @@ package com.shepeliev.webrtckmp.sample
 import android.widget.Toast
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.Button
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -27,8 +37,9 @@ fun VideoScreen(room: Room) {
         Column(modifier = Modifier.fillMaxSize()) {
             val remoteStream = roomModel.remoteStream
 
-            val animatedWeight by animateFloatAsState(targetValue = remoteStream?.let { 1f }
-                ?: 0.01f)
+            val animatedWeight by animateFloatAsState(
+                targetValue = remoteStream?.let { 1f } ?: 0.01f
+            )
 
             remoteStream?.let {
                 Video(
