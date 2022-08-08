@@ -6,15 +6,9 @@ import WebRTC.RTCDataChannelDelegateProtocol
 import WebRTC.RTCDataChannelState
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.trySendBlocking
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 import platform.darwin.NSObject
 import platform.posix.uint64_t
-import kotlin.native.concurrent.freeze
 
 actual class DataChannel(val ios: RTCDataChannel) {
 
@@ -68,7 +62,7 @@ actual class DataChannel(val ios: RTCDataChannel) {
         .map { it.buffer.data.toByteArray() }
 
     actual fun send(data: ByteArray): Boolean {
-        val buffer = RTCDataBuffer(data.toNSData(), true).freeze()
+        val buffer = RTCDataBuffer(data.toNSData(), true)
         return ios.sendData(buffer)
     }
 

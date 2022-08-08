@@ -1,15 +1,6 @@
 package com.shepeliev.webrtckmp
 
-import WebRTC.RTCDefaultVideoDecoderFactory
-import WebRTC.RTCDefaultVideoEncoderFactory
-import WebRTC.RTCInitFieldTrialDictionary
-import WebRTC.RTCInitializeSSL
-import WebRTC.RTCLoggingSeverity
-import WebRTC.RTCPeerConnectionFactory
-import WebRTC.RTCPeerConnectionFactoryOptions
-import WebRTC.RTCSetMinDebugLogLevel
-import WebRTC.RTCSetupInternalTracer
-import kotlin.native.concurrent.freeze
+import WebRTC.*
 
 @Deprecated("It will be removed in one of the future releases.")
 actual object WebRtc {
@@ -25,7 +16,7 @@ fun initializeWebRtc(build: WebRtcBuilder.() -> Unit = {}) {
     build(webRtcBuilder)
 }
 
-internal val factory: RTCPeerConnectionFactory by lazy {
+val factory: RTCPeerConnectionFactory by lazy {
     initializePeerConnectionFactory()
     buildPeerConnectionFactory(webRtcBuilder.peerConnectionFactoryOptions)
 }
@@ -53,9 +44,9 @@ private fun initializePeerConnectionFactory() {
 
 private fun buildPeerConnectionFactory(options: RTCPeerConnectionFactoryOptions?): RTCPeerConnectionFactory {
     val factory = RTCPeerConnectionFactory(
-        RTCDefaultVideoEncoderFactory().freeze(),
-        RTCDefaultVideoDecoderFactory().freeze()
+        RTCDefaultVideoEncoderFactory(),
+        RTCDefaultVideoDecoderFactory()
     )
-    options?.also { factory.setOptions(options.freeze()) }
+    options?.also { factory.setOptions(options) }
     return factory
 }

@@ -2,7 +2,6 @@ package com.shepeliev.webrtckmp
 
 import kotlinx.coroutines.CompletableDeferred
 import platform.Foundation.NSError
-import kotlin.native.concurrent.freeze
 
 internal suspend inline fun <T> T.await(function: T.(callback: (NSError?) -> Unit) -> Unit) {
     val deferred = CompletableDeferred<Unit>()
@@ -13,7 +12,7 @@ internal suspend inline fun <T> T.await(function: T.(callback: (NSError?) -> Uni
         } else {
             deferred.completeExceptionally(RuntimeException(error.localizedDescription))
         }
-    }.freeze()
+    }
 
     function(handler)
     deferred.await()
@@ -28,7 +27,7 @@ internal suspend inline fun <T, reified R> T.awaitResult(function: T.(callback: 
         } else {
             deferred.completeExceptionally(RuntimeException(error.localizedDescription))
         }
-    }.freeze()
+    }
 
     function(handler)
     return deferred.await() as R
