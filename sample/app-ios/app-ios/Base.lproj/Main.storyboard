@@ -75,18 +75,44 @@
                                     </button>
                                 </subviews>
                             </stackView>
+                            <stackView hidden="YES" opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="WMG-QQ-goq">
+                                <rect key="frame" x="165" y="756" width="84" height="51"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="L2W-ss-JkC">
+                                        <rect key="frame" x="0.0" y="0.0" width="41.5" height="51"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Jf4-2a-62R">
+                                        <rect key="frame" x="41.5" y="0.0" width="42.5" height="51"/>
+                                        <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <state key="normal" title="Button"/>
+                                        <buttonConfiguration key="configuration" style="plain" title="⎘">
+                                            <fontDescription key="titleFontDescription" style="UICTFontTextStyleTitle0"/>
+                                        </buttonConfiguration>
+                                        <connections>
+                                            <action selector="copyRoomIdDidClick:" destination="CJR-e9-mu8" eventType="touchUpInside" id="FHG-1I-VfC"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                            </stackView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="zir-Xb-IEU"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="ve3-6U-luS" firstAttribute="leading" secondItem="zir-Xb-IEU" secondAttribute="leading" constant="8" id="Ee9-fS-quo"/>
                             <constraint firstAttribute="trailing" secondItem="ve3-6U-luS" secondAttribute="trailing" constant="8" id="RmG-qn-amF"/>
+                            <constraint firstItem="ve3-6U-luS" firstAttribute="top" secondItem="WMG-QQ-goq" secondAttribute="bottom" constant="8" id="d99-Ze-TKk"/>
                             <constraint firstItem="zir-Xb-IEU" firstAttribute="bottom" secondItem="ve3-6U-luS" secondAttribute="bottom" constant="16" id="gw0-LM-IoC"/>
+                            <constraint firstItem="WMG-QQ-goq" firstAttribute="centerX" secondItem="2NS-7V-ViU" secondAttribute="centerX" id="uBd-2A-7HQ"/>
                         </constraints>
                     </view>
                     <connections>
                         <outlet property="createRoomButton" destination="j0l-3k-ilI" id="D9e-7i-GJa"/>
                         <outlet property="joinRoomButton" destination="u6S-S8-3TJ" id="bHm-hl-t14"/>
+                        <outlet property="roomIdContainer" destination="WMG-QQ-goq" id="ulb-Fl-Lz8"/>
+                        <outlet property="roomIdLabel" destination="L2W-ss-JkC" id="8wH-aD-eoV"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="VzQ-pc-IVu" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>

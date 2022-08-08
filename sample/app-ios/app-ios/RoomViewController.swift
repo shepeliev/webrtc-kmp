@@ -11,6 +11,14 @@ import shared
 
 class RoomViewController: UIViewController {
     
+    @IBOutlet weak var createRoomButton: UIButton!
+    
+    @IBOutlet weak var joinRoomButton: UIButton!
+
+    @IBOutlet weak var roomIdContainer: UIStackView!
+    
+    @IBOutlet weak var roomIdLabel: UILabel!
+
 #if arch(x86_64)
     private var localVideo = RTCEAGLVideoView()
     private var remoteVideo = RTCEAGLVideoView()
@@ -19,10 +27,6 @@ class RoomViewController: UIViewController {
     private var remoteVideo = RTCMTLVideoView()
 #endif
     
-    @IBOutlet weak var createRoomButton: UIButton!
-    
-    @IBOutlet weak var joinRoomButton: UIButton!
-
     private var room: Room! = (UIApplication.shared.delegate as! AppDelegate).room
     private var isLocalVideoAttached = false
     private var isRemoteVideoAttached = false
@@ -47,9 +51,13 @@ class RoomViewController: UIViewController {
         if let remoteStream = model.remoteStream {
             remoteStreamReady(remoteStream)
         }
-
-        createRoomButton.isEnabled = model.roomId == nil
-        joinRoomButton.isEnabled = model.roomId == nil
+        
+        if let roomId = model.roomId {
+            createRoomButton.isHidden = true
+            joinRoomButton.isHidden = true
+            roomIdContainer.isHidden = false
+            roomIdLabel.text = roomId
+        }
     }
 
     private func localStreamReady(_ localStream: MediaStream) {
@@ -82,8 +90,26 @@ class RoomViewController: UIViewController {
     }
     
     @IBAction func joinRoomButtonDidClick(_ sender: Any) {
+        let joinDialog = UIAlertController(title: "Join room", message: "Enter room ID", preferredStyle: .alert)
+        let okAction = UIAlertAction(title: "OK", style: .default) { [weak self] _ in
+            if let roomId = joinDialog.textFields?.first?.text {
+                self?.room?.joinRoom(roomId: roomId)
+            }
+        }
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
+        joinDialog.addTextField()
+        joinDialog.addAction(okAction)
+        joinDialog.addAction(cancelAction)
+        present(joinDialog, animated: true)
     }
     
+    @IBAction func copyRoomIdDidClick(_ sender: Any) {
+        if let roomId = roomIdLabel.text {
+            UIPasteboard.general.string = roomId
+            NSLog("Room ID \(roomId) copied.")
+        }
+    }
+        
     // MARK: - UI
     private func setupLocalVideo() {
         localVideo.contentMode = .scaleAspectFill
