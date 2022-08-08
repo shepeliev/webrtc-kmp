@@ -15,3 +15,5 @@ expect class RoomDataSource() {
     suspend fun getAnswer(roomId: String): SessionDescription
     fun observeIceCandidates(roomId: String, peerName: String): Flow<IceCandidate>
 }
+
+internal const val FIRESTORE_DOCUMENT_TTL_SECONDS = 60 * 60 * 5 // 5 hours

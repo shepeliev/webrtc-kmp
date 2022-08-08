@@ -1,8 +1,7 @@
 package com.shepeliev.webrtckmp.sample.shared
 
+import FirebaseCore.FIRApp
 import FirebaseFirestore.*
-import co.touchlab.kermit.Logger
-import com.shepeliev.webrtckmp.IceCandidate
 import com.shepeliev.webrtckmp.SessionDescription
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -14,14 +13,12 @@ import platform.Foundation.dateByAddingTimeInterval
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-private const val FIRESTORE_DOCUMENT_TTL_SECONDS = 18000.0 // 5 hours
-
 actual class RoomDataSource actual constructor() {
 
-    private val logger = Logger.withTag("RoomDataSource")
-
-    private val firestore by lazy { FIRFirestore.firestore() }
-    private val roomsRef by lazy { firestore.collectionWithPath("rooms") }
+    private val roomsRef by lazy {
+        FIRApp.configure()
+        FIRFirestore.firestore().collectionWithPath("rooms")
+    }
 
     actual fun createRoom(): String {
         return roomsRef.documentWithAutoID().documentID
@@ -94,9 +91,11 @@ actual class RoomDataSource actual constructor() {
 
     actual suspend fun getAnswer(roomId: String): SessionDescription = suspendCancellableCoroutine { cont ->
         val snapshotListener = { snapshot: FIRDocumentSnapshot?, error: NSError? ->
-            error?.let { cont.resumeWithException(Exception(it.description)) }
-            val answer = snapshot?.data()?.get("answer") as? String
-            answer?.let { cont.resume(SessionDescription(SessionDescriptionType.Answer, it)) }
+            if (cont.isActive) {
+                error?.let { cont.resumeWithException(Exception(it.description)) }
+                val answer = snapshot?.data()?.get("answer") as? String
+                answer?.let { cont.resume(SessionDescription(SessionDescriptionType.Answer, it)) }
+            }
             Unit
         }
 
@@ -135,6 +134,6 @@ actual class RoomDataSource actual constructor() {
     }
 
     private fun getExpireAtTime(): NSDate {
-        return NSDate().dateByAddingTimeInterval(FIRESTORE_DOCUMENT_TTL_SECONDS)
+        return NSDate().dateByAddingTimeInterval(FIRESTORE_DOCUMENT_TTL_SECONDS.toDouble())
     }
 }

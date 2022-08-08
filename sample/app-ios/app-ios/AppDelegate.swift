@@ -7,7 +7,6 @@
 
 import UIKit
 import shared
-import FirebaseCore
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -16,9 +15,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var room: Room!
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
-        FirebaseApp.configure()
-        
         lifecycle = LifecycleRegistryKt.LifecycleRegistry()
         let context = DefaultComponentContext(lifecycle: self.lifecycle)
         room = RoomComponent(componentContext: context)

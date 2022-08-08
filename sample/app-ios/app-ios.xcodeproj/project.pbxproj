@@ -13,9 +13,6 @@
 		FA11F33F2899C22B00676143 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FA11F33D2899C22B00676143 /* Main.storyboard */; };
 		FA11F3412899C22C00676143 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FA11F3402899C22C00676143 /* Assets.xcassets */; };
 		FA11F3442899C22C00676143 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FA11F3422899C22C00676143 /* LaunchScreen.storyboard */; };
-		FA11F34D2899C70F00676143 /* WebRTC.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA11F34C2899C70F00676143 /* WebRTC.xcframework */; };
-		FA11F34E2899C70F00676143 /* WebRTC.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FA11F34C2899C70F00676143 /* WebRTC.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		FA11F3542899D36600676143 /* shared.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA11F3532899D36600676143 /* shared.xcframework */; };
 		FA13359D289C663E00ABBCDF /* FirebaseInstallations.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA13358C289C663D00ABBCDF /* FirebaseInstallations.xcframework */; };
 		FA13359E289C663E00ABBCDF /* FirebaseAnalytics.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA13358D289C663D00ABBCDF /* FirebaseAnalytics.xcframework */; };
 		FA13359F289C663E00ABBCDF /* GoogleUtilities.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA13358E289C663D00ABBCDF /* GoogleUtilities.xcframework */; };
@@ -33,19 +30,22 @@
 		FA1335AB289C663E00ABBCDF /* PromisesObjC.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA13359A289C663E00ABBCDF /* PromisesObjC.xcframework */; };
 		FA1335AC289C663E00ABBCDF /* nanopb.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA13359B289C663E00ABBCDF /* nanopb.xcframework */; };
 		FA1335AD289C663E00ABBCDF /* gRPC-C++.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA13359C289C663E00ABBCDF /* gRPC-C++.xcframework */; };
+		FAA7FDDE28A1440E00AC5647 /* WebRTC.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA11F34C2899C70F00676143 /* WebRTC.xcframework */; };
+		FAA7FDDF28A1440E00AC5647 /* WebRTC.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FA11F34C2899C70F00676143 /* WebRTC.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		FAA7FDE128A1441000AC5647 /* shared.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA11F3532899D36600676143 /* shared.xcframework */; };
 		FAAF8FF7289A988C004FB1B1 /* RoomViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAAF8FF6289A988C004FB1B1 /* RoomViewController.swift */; };
 		FAB57F61289C4D8000292F13 /* gRPCCertificates-Cpp.bundle in Resources */ = {isa = PBXBuildFile; fileRef = FAB57F60289C4D8000292F13 /* gRPCCertificates-Cpp.bundle */; };
 		FAFB7A41289BF42C002B18FD /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = FAFB7A40289BF42C002B18FD /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		FA11F34F2899C70F00676143 /* Embed Frameworks */ = {
+		FAA7FDE028A1440E00AC5647 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				FA11F34E2899C70F00676143 /* WebRTC.xcframework in Embed Frameworks */,
+				FAA7FDDF28A1440E00AC5647 /* WebRTC.xcframework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -90,6 +90,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FAA7FDDE28A1440E00AC5647 /* WebRTC.xcframework in Frameworks */,
 				FA13359F289C663E00ABBCDF /* GoogleUtilities.xcframework in Frameworks */,
 				FA1335AA289C663E00ABBCDF /* GoogleAppMeasurementIdentitySupport.xcframework in Frameworks */,
 				FA1335A5289C663E00ABBCDF /* FirebaseCore.xcframework in Frameworks */,
@@ -99,11 +100,10 @@
 				FA1335A2289C663E00ABBCDF /* GoogleDataTransport.xcframework in Frameworks */,
 				FA1335A8289C663E00ABBCDF /* abseil.xcframework in Frameworks */,
 				FA1335A0289C663E00ABBCDF /* BoringSSL-GRPC.xcframework in Frameworks */,
-				FA11F3542899D36600676143 /* shared.xcframework in Frameworks */,
 				FA13359E289C663E00ABBCDF /* FirebaseAnalytics.xcframework in Frameworks */,
 				FA1335A4289C663E00ABBCDF /* GoogleAppMeasurement.xcframework in Frameworks */,
 				FA1335AD289C663E00ABBCDF /* gRPC-C++.xcframework in Frameworks */,
-				FA11F34D2899C70F00676143 /* WebRTC.xcframework in Frameworks */,
+				FAA7FDE128A1441000AC5647 /* shared.xcframework in Frameworks */,
 				FA1335A3289C663E00ABBCDF /* Libuv-gRPC.xcframework in Frameworks */,
 				FA1335A7289C663E00ABBCDF /* FirebaseCoreDiagnostics.xcframework in Frameworks */,
 				FA1335AC289C663E00ABBCDF /* nanopb.xcframework in Frameworks */,
@@ -193,8 +193,8 @@
 				FA11F3302899C22A00676143 /* Sources */,
 				FA11F3312899C22A00676143 /* Frameworks */,
 				FA11F3322899C22A00676143 /* Resources */,
-				FA11F34F2899C70F00676143 /* Embed Frameworks */,
 				FA11F356289A578200676143 /* ShellScript */,
+				FAA7FDE028A1440E00AC5647 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -435,11 +435,14 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "app-ios/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "WebRTC KMP Sample";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Access to the camera is required.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Access to the microphone is required.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -455,7 +458,7 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -472,11 +475,14 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "app-ios/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "WebRTC KMP Sample";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Access to the camera is required.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Access to the microphone is required.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -492,7 +498,7 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};

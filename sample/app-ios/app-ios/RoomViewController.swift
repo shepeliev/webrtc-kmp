@@ -10,8 +10,6 @@ import WebRTC
 import shared
 
 class RoomViewController: UIViewController {
-
-    private let room: Room! = (UIApplication.shared.delegate as! AppDelegate).room
     
 #if arch(x86_64)
     private var localVideo = RTCEAGLVideoView()
@@ -24,16 +22,16 @@ class RoomViewController: UIViewController {
     @IBOutlet weak var createRoomButton: UIButton!
     
     @IBOutlet weak var joinRoomButton: UIButton!
-    
-    var isLocalVideoAttached = false
-    var isRemoteVideoAttached = false
-    var localVideoTopConstraint: NSLayoutConstraint!
+
+    private var room: Room! = (UIApplication.shared.delegate as! AppDelegate).room
+    private var isLocalVideoAttached = false
+    private var isRemoteVideoAttached = false
+    private var localVideoTopConstraint: NSLayoutConstraint!
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
         setupLocalVideo()
-        setupLocalVideoConstraints()
 
         room.model.subscribe(observer: roomModelObserver)
         room.openUserMedia()
@@ -41,32 +39,34 @@ class RoomViewController: UIViewController {
         
     private func roomModelObserver(_ model: RoomModel) {
         NSLog("Room model updated: \(model)")
-        
+
         if let localStream = model.localStream {
             localStreamReady(localStream)
         }
-                
+
         if let remoteStream = model.remoteStream {
             remoteStreamReady(remoteStream)
         }
-        
+
         createRoomButton.isEnabled = model.roomId == nil
         joinRoomButton.isEnabled = model.roomId == nil
     }
-    
+
     private func localStreamReady(_ localStream: MediaStream) {
         if !isLocalVideoAttached {
             isLocalVideoAttached = true
             localStream.videoTracks.first?.addRenderer(renderer: localVideo)
         }
     }
-    
+
     private func remoteStreamReady(_ remoteStream: MediaStream) {
         if !isRemoteVideoAttached {
             isRemoteVideoAttached = true
             setupRemoteVideo()
-            setupRemoteVideoConstraints()
-            remoteStream.videoTracks.first?.addRenderer(renderer: remoteVideo)
+            
+            if let track = remoteStream.videoTracks.first {
+                track.addRenderer(renderer: remoteVideo)
+            }
         }
     }
     
@@ -86,27 +86,30 @@ class RoomViewController: UIViewController {
     
     // MARK: - UI
     private func setupLocalVideo() {
+        localVideo.contentMode = .scaleAspectFill
         view.insertSubview(localVideo, at: 0)
         localVideo.translatesAutoresizingMaskIntoConstraints = false
+        setupLocalVideoConstraints()
     }
-    
+
     private func setupLocalVideoConstraints() {
         localVideo.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
         localVideo.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
         localVideo.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
-        
+
         localVideoTopConstraint = localVideo.topAnchor.constraint(equalTo: view.topAnchor)
         localVideoTopConstraint.isActive = true
     }
-    
+
     private func setupRemoteVideo() {
         view.insertSubview(remoteVideo, at: 0)
         remoteVideo.translatesAutoresizingMaskIntoConstraints = false
+        setupRemoteVideoConstraints()
     }
-    
+
     private func setupRemoteVideoConstraints() {
         localVideoTopConstraint.isActive = false
-        
+
         remoteVideo.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
         remoteVideo.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
         remoteVideo.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
@@ -114,7 +117,7 @@ class RoomViewController: UIViewController {
 
         localVideoTopConstraint = localVideo.topAnchor.constraint(equalTo: remoteVideo.bottomAnchor)
         localVideoTopConstraint.isActive = true
-        
+
         localVideo.layoutIfNeeded()
     }
     

@@ -85,7 +85,7 @@ class RoomComponent(
 
                 logger.d { "Waiting answer" }
                 val answer = roomDataSource.getAnswer(roomId)
-                logger.d { "Answer received: $answer" }
+                logger.d { "Answer received." }
                 peerConnection.setRemoteDescription(answer)
             }
         }
@@ -127,7 +127,6 @@ class RoomComponent(
                 peerConnection.addTrack(it.audioTracks.first(), it)
                 peerConnection.addTrack(it.videoTracks.first(), it)
             }
-                ?: peerConnection.createDataChannel("dummy")
 
             listenRemoteTracks(peerConnection)
             registerListeners(peerConnection)
@@ -173,6 +172,7 @@ class RoomComponent(
 
             roomDataSource.observeIceCandidates(roomId, remoteName)
                 .catch { logger.e(it) { "Observing ice candidate failed [roomId = $roomId, peerName = ${remoteName}]" } }
+                .onEach { logger.d { "New remote ICE candidate: $it" } }
                 .onEach(peerConnection::addIceCandidate)
                 .launchIn(scope + roomSessionJob!!)
         }
