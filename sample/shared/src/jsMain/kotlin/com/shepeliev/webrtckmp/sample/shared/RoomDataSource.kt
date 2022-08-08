@@ -10,8 +10,6 @@ import kotlin.coroutines.resumeWithException
 import kotlin.js.Date
 import kotlin.js.json
 
-private const val FIRESTORE_DOCUMENT_TTL_MILLIS = 18000000 // 5 hours
-
 actual class RoomDataSource actual constructor() {
 
     private val firestore by lazy {
@@ -68,7 +66,7 @@ actual class RoomDataSource actual constructor() {
     }
 
     private fun getExpireAtTime(): Date {
-        val expireAt = Date().getTime() + FIRESTORE_DOCUMENT_TTL_MILLIS
+        val expireAt = Date().getTime() + FIRESTORE_DOCUMENT_TTL_SECONDS * 1000
         return Date(expireAt)
     }
 
