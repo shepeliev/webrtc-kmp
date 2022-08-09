@@ -20,8 +20,6 @@ jobs:
         run: chmod +x gradlew
       - name: Install Carthage
         run: brew list carthage || brew install carthage
-      - name: Assemble
-        run: ./gradlew assemble
       - name: Run Kotlin linter
         run: ./gradlew ktlintCheck
       - name: Run Android instrumented tests
