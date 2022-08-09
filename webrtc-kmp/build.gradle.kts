@@ -50,10 +50,12 @@ dependencies {
 }
 
 tasks.register<Download>("downloadAndroidWebRtc") {
-    src(listOf(
-        "https://github.com/react-native-webrtc/react-native-webrtc/raw/1.89.3/android/libs/libjingle_peerconnection.so.jar",
-        "https://github.com/react-native-webrtc/react-native-webrtc/raw/1.89.3/android/libs/libwebrtc.jar",
-    ))
+    src(
+        listOf(
+            "https://github.com/react-native-webrtc/react-native-webrtc/raw/1.89.3/android/libs/libjingle_peerconnection.so.jar",
+            "https://github.com/react-native-webrtc/react-native-webrtc/raw/1.89.3/android/libs/libwebrtc.jar",
+        )
+    )
 
     dest(buildDir.resolve("libs/android"))
     overwrite(false)
