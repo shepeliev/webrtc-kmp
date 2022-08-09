@@ -1,6 +1,7 @@
 package com.shepeliev.webrtckmp.sample
 
 import android.Manifest
+import android.preference.PreferenceManager
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.AlertDialog
@@ -15,6 +16,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.edit
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.shepeliev.webrtckmp.sample.shared.Room
@@ -38,17 +40,20 @@ private fun OpenCameraAndMicrophoneButton(onClick: () -> Unit) {
 
     var isRationaleVisible by remember { mutableStateOf(false) }
 
+    val context = LocalContext.current
+    val preferences = PreferenceManager.getDefaultSharedPreferences(context)
+
     if (isRationaleVisible) {
         AlertDialog(
             text = { Text("Please grant camera and microphone permissions") },
             onDismissRequest = { isRationaleVisible = false },
             confirmButton = {
-                val context = LocalContext.current
                 TextButton(onClick = {
-                    if (!permissions.shouldShowRationale) {
+                    if (!permissions.shouldShowRationale && preferences.getBoolean("should_open_app_settings", false)) {
                         context.navigateToAppSettings()
                     } else {
                         permissions.launchMultiplePermissionRequest()
+                        preferences.edit { putBoolean("should_open_app_settings", true) }
                     }
                     isRationaleVisible = false
                 }) {
@@ -60,7 +65,10 @@ private fun OpenCameraAndMicrophoneButton(onClick: () -> Unit) {
 
     Button(onClick = {
         when {
-            permissions.allPermissionsGranted -> onClick()
+            permissions.allPermissionsGranted -> {
+                preferences.edit { putBoolean("should_open_app_settings", false) }
+                onClick()
+            }
 
             else -> isRationaleVisible = true
         }
