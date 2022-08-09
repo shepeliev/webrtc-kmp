@@ -1,16 +1,7 @@
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
-import org.jetbrains.kotlin.konan.target.KonanTarget
 
 plugins {
     id("multiplatform-setup")
-}
-
-fun firebaseArchVariant(target: KonanTarget): String {
-    return if (target is KonanTarget.IOS_X64 || target is KonanTarget.IOS_SIMULATOR_ARM64) {
-        "ios-arm64_i386_x86_64-simulator"
-    } else {
-        "ios-arm64_armv7"
-    }
 }
 
 kotlin {
@@ -44,13 +35,21 @@ kotlin {
         compilations.getByName("main") {
             cinterops.create("FirebaseCore") {
                 firebaseCoreFrameworks.forEach { framework ->
-                    compilerOpts("-framework", framework, "-F${resolveFrameworkPathCart(framework, ::firebaseArchVariant)}")
+                    compilerOpts(
+                        "-framework",
+                        framework,
+                        "-F${resolveFrameworkPath(framework, ::firebaseArchVariant)}"
+                    )
                 }
             }
 
             cinterops.create("FirebaseFirestore") {
                 firestoreFrameworks.forEach { framework ->
-                    compilerOpts("-framework", framework, "-F${resolveFrameworkPathCart(framework, ::firebaseArchVariant)}")
+                    compilerOpts(
+                        "-framework",
+                        framework,
+                        "-F${resolveFrameworkPath(framework, ::firebaseArchVariant)}"
+                    )
                 }
             }
         }
@@ -65,9 +64,10 @@ kotlin {
             isStatic = true
 
             (firebaseCoreFrameworks + firestoreFrameworks).forEach {
-                linkerOpts("-framework", it, "-F${resolveFrameworkPathCart(it, ::firebaseArchVariant)}")
+                linkerOpts("-framework", it, "-F${resolveFrameworkPath(it, ::firebaseArchVariant)}")
             }
-            linkerOpts("-framework", "WebRTC", "-F${resolveFrameworkPath("WebRTC")}", "-ObjC")
+            linkerOpts("-framework", "WebRTC", "-F${resolveFrameworkPath("WebRTC", ::webrtcArchVariant)}")
+            linkerOpts("-ObjC")
 
             embedBitcode("disable")
         }

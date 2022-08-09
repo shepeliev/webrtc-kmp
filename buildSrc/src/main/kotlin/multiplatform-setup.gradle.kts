@@ -40,15 +40,21 @@ android {
 }
 
 if (projectDir.resolve("src/nativeInterop/cinterop/Cartfile").exists()) {
-    tasks.register<Exec>("carthageBootstrap") {
+    tasks.register<Exec>("carthageUpdate") {
         group = "Carthage"
-        description = "Bootstrap Carthage dependencies"
+        description = "Update Carthage dependencies"
         executable = "carthage"
-        args("bootstrap", "--project-directory", projectDir.resolve("src/nativeInterop/cinterop"), "--use-xcframeworks")
+        args(
+            "update",
+            "--project-directory",
+            projectDir.resolve("src/nativeInterop/cinterop"),
+            "--use-xcframeworks",
+            "--cache-builds"
+        )
     }
 
     tasks.withType<CInteropProcess>() {
-        dependsOn("carthageBootstrap")
+        dependsOn("carthageUpdate")
     }
 }
 
@@ -59,4 +65,10 @@ tasks.register<Delete>("carthageClean") {
         projectDir.resolve("src/nativeInterop/cinterop/Carthage"),
         projectDir.resolve("src/nativeInterop/cinterop/Cartfile.resolved")
     )
+}
+
+afterEvaluate {
+    tasks.named<Delete>("clean") {
+        dependsOn("carthageClean")
+    }
 }

@@ -30,10 +30,10 @@
 		FA6E2D4928A23DDC00900FD5 /* nanopb.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA6E2D4528A23DDB00900FD5 /* nanopb.xcframework */; };
 		FA6E2D4A28A23DDC00900FD5 /* leveldb-library.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA6E2D4628A23DDB00900FD5 /* leveldb-library.xcframework */; };
 		FA6E2D4B28A23DDC00900FD5 /* PromisesObjC.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA6E2D4728A23DDB00900FD5 /* PromisesObjC.xcframework */; };
-		FAA7FDDE28A1440E00AC5647 /* WebRTC.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA11F34C2899C70F00676143 /* WebRTC.xcframework */; };
-		FAA7FDDF28A1440E00AC5647 /* WebRTC.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FA11F34C2899C70F00676143 /* WebRTC.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		FAA7FDE128A1441000AC5647 /* shared.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA11F3532899D36600676143 /* shared.xcframework */; };
 		FAAF8FF7289A988C004FB1B1 /* RoomViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAAF8FF6289A988C004FB1B1 /* RoomViewController.swift */; };
+		FAC271A028A25CB500055EFF /* WebRTC.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAC2719E28A25CAB00055EFF /* WebRTC.xcframework */; };
+		FAC271A128A25CB500055EFF /* WebRTC.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FAC2719E28A25CAB00055EFF /* WebRTC.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		FAFB7A41289BF42C002B18FD /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = FAFB7A40289BF42C002B18FD /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
 
@@ -44,7 +44,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				FAA7FDDF28A1440E00AC5647 /* WebRTC.xcframework in Embed Frameworks */,
+				FAC271A128A25CB500055EFF /* WebRTC.xcframework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -60,7 +60,6 @@
 		FA11F3402899C22C00676143 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FA11F3432899C22C00676143 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		FA11F3452899C22C00676143 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		FA11F34C2899C70F00676143 /* WebRTC.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = WebRTC.xcframework; path = ../../vendor/apple/WebRTC.xcframework; sourceTree = "<group>"; };
 		FA11F3532899D36600676143 /* shared.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = shared.xcframework; path = ../shared/build/XCFrameworks/debug/shared.xcframework; sourceTree = "<group>"; };
 		FA6E2D2A28A23DA500900FD5 /* FirebaseFirestore.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = FirebaseFirestore.xcframework; path = ../shared/src/nativeInterop/cinterop/Carthage/Build/FirebaseFirestore.xcframework; sourceTree = "<group>"; };
 		FA6E2D2B28A23DA500900FD5 /* gRPC-C++.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = "gRPC-C++.xcframework"; path = "../shared/src/nativeInterop/cinterop/Carthage/Build/gRPC-C++.xcframework"; sourceTree = "<group>"; };
@@ -80,6 +79,7 @@
 		FA6E2D4628A23DDB00900FD5 /* leveldb-library.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = "leveldb-library.xcframework"; path = "../shared/src/nativeInterop/cinterop/Carthage/Build/leveldb-library.xcframework"; sourceTree = "<group>"; };
 		FA6E2D4728A23DDB00900FD5 /* PromisesObjC.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = PromisesObjC.xcframework; path = ../shared/src/nativeInterop/cinterop/Carthage/Build/PromisesObjC.xcframework; sourceTree = "<group>"; };
 		FAAF8FF6289A988C004FB1B1 /* RoomViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomViewController.swift; sourceTree = "<group>"; };
+		FAC2719E28A25CAB00055EFF /* WebRTC.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = WebRTC.xcframework; path = ../shared/src/nativeInterop/cinterop/Carthage/Build/WebRTC.xcframework; sourceTree = "<group>"; };
 		FAFB7A40289BF42C002B18FD /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -88,7 +88,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FAA7FDDE28A1440E00AC5647 /* WebRTC.xcframework in Frameworks */,
+				FAC271A028A25CB500055EFF /* WebRTC.xcframework in Frameworks */,
 				FA6E2D3F28A23DA500900FD5 /* FirebaseCore.xcframework in Frameworks */,
 				FA6E2D3B28A23DA500900FD5 /* GoogleAppMeasurementIdentitySupport.xcframework in Frameworks */,
 				FA6E2D4028A23DA500900FD5 /* GoogleAppMeasurement.xcframework in Frameworks */,
@@ -167,7 +167,7 @@
 				FA6E2D4528A23DDB00900FD5 /* nanopb.xcframework */,
 				FA6E2D4728A23DDB00900FD5 /* PromisesObjC.xcframework */,
 				FA11F3532899D36600676143 /* shared.xcframework */,
-				FA11F34C2899C70F00676143 /* WebRTC.xcframework */,
+				FAC2719E28A25CAB00055EFF /* WebRTC.xcframework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
