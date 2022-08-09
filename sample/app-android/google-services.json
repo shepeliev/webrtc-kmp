@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "216132728347",
+    "project_id": "app-rtc-kmp",
+    "storage_bucket": "app-rtc-kmp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:216132728347:android:811fd8165c6b3b9f872abe",
+        "android_client_info": {
+          "package_name": "com.shepeliev.webrtckmp.sample"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "216132728347-mv1pltdn889q4vqnmuqs3tn02lcmqbbl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCWRlpT3OPlT2C8H5rk0S-Xg7rsIRmSxdU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "216132728347-mv1pltdn889q4vqnmuqs3tn02lcmqbbl.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

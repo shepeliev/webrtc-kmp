@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import platform.darwin.NSObject
 import platform.posix.uint64_t
-import kotlin.native.concurrent.freeze
 
 actual class DataChannel(val ios: RTCDataChannel) {
 
@@ -68,7 +67,7 @@ actual class DataChannel(val ios: RTCDataChannel) {
         .map { it.buffer.data.toByteArray() }
 
     actual fun send(data: ByteArray): Boolean {
-        val buffer = RTCDataBuffer(data.toNSData(), true).freeze()
+        val buffer = RTCDataBuffer(data.toNSData(), true)
         return ios.sendData(buffer)
     }
 

@@ -40,18 +40,13 @@ kotlin {
       val commonMain by getting {
           dependencies {
               api("com.shepeliev:webrtc-kmp:$webRtcKmmVersion")
-              implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2-native-mt")
+              implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
           }
       }
   }
 }
 ```
 
-On iOS, in addition to the Kotlin library add in Podfile
-```
-pod 'webrtc-kmp', :git => 'git@github.com:shepeliev/webrtc-kmp.git'
-```
-
 ## Usage
 
-Please reffer to [sample project](https://github.com/shepeliev/webrtc-kmp-demo).
+Please reffer to [sample](sample/README.md).

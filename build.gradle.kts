@@ -5,14 +5,14 @@ buildscript {
     }
 
     dependencies {
-        classpath("com.android.tools.build:gradle:7.1.0")
+        classpath("com.google.gms:google-services:4.3.10")
     }
 }
 
 allprojects {
-    repositories {
-        mavenLocal()
-        google()
-        mavenCentral()
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
+        kotlinOptions {
+            freeCompilerArgs = freeCompilerArgs + "-opt-in=kotlin.RequiresOptIn"
+        }
     }
 }

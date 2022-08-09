@@ -18,10 +18,10 @@ jobs:
           java-version: 11
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-      - name: Assemble
-        run: ./gradlew assemble
+      - name: Install Carthage
+        run: brew list carthage || brew install carthage
       - name: Run Kotlin linter
-        run: ./gradlew lintKotlin
+        run: ./gradlew ktlintCheck
       - name: Run Android instrumented tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -45,7 +45,7 @@ jobs:
           name: "iOS Tests Report HTML"
           path: "build/reports/tests/iosTest"
       - name: Run JS tests
-        run: ./gradlew jsTest
+        run: ./gradlew jsIrTest
       - name: Upload JS test artifact
         uses: actions/upload-artifact@v2
         if: failure()
