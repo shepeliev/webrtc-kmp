@@ -166,12 +166,18 @@ actual class PeerConnection actual constructor(
 
     @Suppress("CONFLICTING_OVERLOADS", "PARAMETER_NAME_CHANGED_ON_OVERRIDE")
     override fun peerConnection(peerConnection: RTCPeerConnection, didAddStream: RTCMediaStream) {
-        // TODO add emitting event
+        // this deprecated API should not longer be used
+        // https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/onaddstream
     }
 
     @Suppress("CONFLICTING_OVERLOADS", "PARAMETER_NAME_CHANGED_ON_OVERRIDE")
     override fun peerConnection(peerConnection: RTCPeerConnection, didRemoveStream: RTCMediaStream) {
-        // TODO add emitting event
+        // The removestream event has been removed from the WebRTC specification in favor of
+        // the existing removetrack event on the remote MediaStream and the corresponding
+        // MediaStream.onremovetrack event handler property of the remote MediaStream.
+        // The RTCPeerConnection API is now track-based, so having zero tracks in the remote
+        // stream is equivalent to the remote stream being removed and the old removestream event.
+        // https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/onremovestream
     }
 
     override fun peerConnectionShouldNegotiate(peerConnection: RTCPeerConnection) {
