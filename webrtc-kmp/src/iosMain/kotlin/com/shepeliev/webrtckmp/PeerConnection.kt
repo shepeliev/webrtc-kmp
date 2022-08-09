@@ -1,7 +1,35 @@
 package com.shepeliev.webrtckmp
 
-import WebRTC.*
-import com.shepeliev.webrtckmp.PeerConnectionEvent.*
+import WebRTC.RTCAudioTrack
+import WebRTC.RTCDataChannel
+import WebRTC.RTCDataChannelConfiguration
+import WebRTC.RTCIceCandidate
+import WebRTC.RTCIceConnectionState
+import WebRTC.RTCIceGatheringState
+import WebRTC.RTCMediaConstraints
+import WebRTC.RTCMediaStream
+import WebRTC.RTCPeerConnection
+import WebRTC.RTCPeerConnectionDelegateProtocol
+import WebRTC.RTCPeerConnectionState
+import WebRTC.RTCRtpMediaType
+import WebRTC.RTCRtpReceiver
+import WebRTC.RTCRtpSender
+import WebRTC.RTCRtpTransceiver
+import WebRTC.RTCSessionDescription
+import WebRTC.RTCSignalingState
+import WebRTC.RTCVideoTrack
+import WebRTC.dataChannelForLabel
+import com.shepeliev.webrtckmp.PeerConnectionEvent.ConnectionStateChange
+import com.shepeliev.webrtckmp.PeerConnectionEvent.IceConnectionStateChange
+import com.shepeliev.webrtckmp.PeerConnectionEvent.IceGatheringStateChange
+import com.shepeliev.webrtckmp.PeerConnectionEvent.NegotiationNeeded
+import com.shepeliev.webrtckmp.PeerConnectionEvent.NewDataChannel
+import com.shepeliev.webrtckmp.PeerConnectionEvent.NewIceCandidate
+import com.shepeliev.webrtckmp.PeerConnectionEvent.RemoveTrack
+import com.shepeliev.webrtckmp.PeerConnectionEvent.RemovedIceCandidates
+import com.shepeliev.webrtckmp.PeerConnectionEvent.SignalingStateChange
+import com.shepeliev.webrtckmp.PeerConnectionEvent.StandardizedIceConnectionChange
+import com.shepeliev.webrtckmp.PeerConnectionEvent.Track
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -117,7 +145,7 @@ actual class PeerConnection actual constructor(
 
     actual fun addTrack(track: MediaStreamTrack, vararg streams: MediaStream): RtpSender {
         val streamIds = streams.map { it.id }
-        return RtpSender(ios.addTrack(track.ios, streamIds)!!)
+        return RtpSender(ios.addTrack(track.ios, streamIds))
     }
 
     actual fun removeTrack(sender: RtpSender): Boolean = ios.removeTrack(sender.native)

@@ -1,6 +1,14 @@
 package com.shepeliev.webrtckmp
 
-import WebRTC.*
+import WebRTC.RTCDefaultVideoDecoderFactory
+import WebRTC.RTCDefaultVideoEncoderFactory
+import WebRTC.RTCInitFieldTrialDictionary
+import WebRTC.RTCInitializeSSL
+import WebRTC.RTCLoggingSeverity
+import WebRTC.RTCPeerConnectionFactory
+import WebRTC.RTCPeerConnectionFactoryOptions
+import WebRTC.RTCSetMinDebugLogLevel
+import WebRTC.RTCSetupInternalTracer
 
 @Deprecated("It will be removed in one of the future releases.")
 actual object WebRtc {
