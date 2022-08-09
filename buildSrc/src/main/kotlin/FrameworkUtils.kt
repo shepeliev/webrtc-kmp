@@ -16,3 +16,8 @@ fun KotlinNativeTarget.resolveFrameworkPath(frameworkName: String): File {
     val archs = konanTarget.xcFrameworkArchs
     return archs.map { frameworksPath.resolve("$frameworkName.xcframework/$it") }.first { it.exists() }
 }
+
+fun KotlinNativeTarget.resolveFrameworkPathCart(frameworkName: String, resolveArch: (KonanTarget) -> String): File {
+    val frameworksPath = project.projectDir.resolve("src/nativeInterop/cinterop/Carthage/Build")
+    return frameworksPath.resolve("$frameworkName.xcframework/${resolveArch(konanTarget)}")
+}

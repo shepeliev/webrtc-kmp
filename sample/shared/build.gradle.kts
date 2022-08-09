@@ -1,7 +1,16 @@
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
+import org.jetbrains.kotlin.konan.target.KonanTarget
 
 plugins {
     id("multiplatform-setup")
+}
+
+fun firebaseArchVariant(target: KonanTarget): String {
+    return if (target is KonanTarget.IOS_X64 || target is KonanTarget.IOS_SIMULATOR_ARM64) {
+        "ios-arm64_i386_x86_64-simulator"
+    } else {
+        "ios-arm64_armv7"
+    }
 }
 
 kotlin {
@@ -31,16 +40,17 @@ kotlin {
     )
 
     ios {
+
         compilations.getByName("main") {
             cinterops.create("FirebaseCore") {
                 firebaseCoreFrameworks.forEach { framework ->
-                    compilerOpts("-framework", framework, "-F${resolveFrameworkPath(framework)}")
+                    compilerOpts("-framework", framework, "-F${resolveFrameworkPathCart(framework, ::firebaseArchVariant)}")
                 }
             }
 
             cinterops.create("FirebaseFirestore") {
                 firestoreFrameworks.forEach { framework ->
-                    compilerOpts("-framework", framework, "-F${resolveFrameworkPath(framework)}")
+                    compilerOpts("-framework", framework, "-F${resolveFrameworkPathCart(framework, ::firebaseArchVariant)}")
                 }
             }
         }
@@ -54,10 +64,10 @@ kotlin {
             transitiveExport = true
             isStatic = true
 
-            val linkerOpts = (firebaseCoreFrameworks + firestoreFrameworks + "WebRTC")
-                .flatMap { listOf("-framework", it, "-F${resolveFrameworkPath(it)}") }
-            linkerOpts(linkerOpts)
-            linkerOpts("-ObjC")
+            (firebaseCoreFrameworks + firestoreFrameworks).forEach {
+                linkerOpts("-framework", it, "-F${resolveFrameworkPathCart(it, ::firebaseArchVariant)}")
+            }
+            linkerOpts("-framework", "WebRTC", "-F${resolveFrameworkPath("WebRTC")}", "-ObjC")
 
             embedBitcode("disable")
         }
