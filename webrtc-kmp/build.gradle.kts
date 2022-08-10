@@ -58,7 +58,8 @@ tasks.register<Download>("downloadAndroidWebRtc") {
 }
 
 tasks.register<Copy>("unzipAndroidWebRtc") {
-    from(tarTree(resources.gzip(tasks.findByName("downloadAndroidWebRtc")!!.outputs.files.first())))
+    inputs.files(tasks.findByName("downloadAndroidWebRtc")!!.outputs.files)
+    from(tarTree(resources.gzip(inputs.files.first())))
     into(buildDir.resolve("libs/android"))
 }
 
