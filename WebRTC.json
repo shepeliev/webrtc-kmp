@@ -1,3 +1,4 @@
 {
-  "0.89": "https://github.com/react-native-webrtc/react-native-webrtc/releases/download/1.89.3/WebRTC.tar.xz"
+  "0.89": "https://github.com/react-native-webrtc/react-native-webrtc/releases/download/1.89.3/WebRTC.tar.xz",
+  "100.0.1": "https://github.com/jitsi/webrtc/releases/download/v100.0.1/WebRTC.xcframework.tgz"
 }
