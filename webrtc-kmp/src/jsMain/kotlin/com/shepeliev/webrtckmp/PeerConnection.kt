@@ -40,6 +40,8 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
     internal actual val peerConnectionEvent: Flow<PeerConnectionEvent> = _peerConnectionEvent.asSharedFlow()
 
     init {
+        WebRtcAdapter
+
         js = RTCPeerConnection(rtcConfiguration.js).apply {
             onsignalingstatechange = {
                 _peerConnectionEvent.tryEmit(SignalingStateChange(this@PeerConnection.signalingState))
