@@ -10,7 +10,7 @@ WebRTC Kotlin Multiplatform SDK
  Screen Capture | | | :white_check_mark:
 
 ## WebRTC revision
-Current revision: M89
+Current revision: M100
 
 ## Installation
 Root build.gradle.kts
