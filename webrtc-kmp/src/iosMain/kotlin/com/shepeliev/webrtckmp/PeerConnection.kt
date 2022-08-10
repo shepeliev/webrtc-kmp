@@ -242,8 +242,8 @@ actual class PeerConnection actual constructor(
                 MediaStream(
                     ios = it,
                     id = it.streamId,
-                    tracks = it.audioTracks.map { track -> AudioStreamTrack(track as RTCAudioTrack) }
-                            + it.videoTracks.map { track -> VideoStreamTrack(track as RTCVideoTrack) }
+                    tracks = it.audioTracks.map { track -> AudioStreamTrack(track as RTCAudioTrack) } +
+                        it.videoTracks.map { track -> VideoStreamTrack(track as RTCVideoTrack) }
                 )
             }
 
