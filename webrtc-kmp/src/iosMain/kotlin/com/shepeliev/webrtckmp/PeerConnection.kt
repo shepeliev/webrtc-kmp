@@ -11,7 +11,6 @@ import WebRTC.RTCMediaStream
 import WebRTC.RTCPeerConnection
 import WebRTC.RTCPeerConnectionDelegateProtocol
 import WebRTC.RTCPeerConnectionState
-import WebRTC.RTCRtpMediaType
 import WebRTC.RTCRtpReceiver
 import WebRTC.RTCRtpSender
 import WebRTC.RTCRtpTransceiver
@@ -19,6 +18,8 @@ import WebRTC.RTCSessionDescription
 import WebRTC.RTCSignalingState
 import WebRTC.RTCVideoTrack
 import WebRTC.dataChannelForLabel
+import WebRTC.kRTCMediaStreamTrackKindAudio
+import WebRTC.kRTCMediaStreamTrackKindVideo
 import com.shepeliev.webrtckmp.PeerConnectionEvent.ConnectionStateChange
 import com.shepeliev.webrtckmp.PeerConnectionEvent.IceConnectionStateChange
 import com.shepeliev.webrtckmp.PeerConnectionEvent.IceGatheringStateChange
@@ -145,7 +146,8 @@ actual class PeerConnection actual constructor(
 
     actual fun addTrack(track: MediaStreamTrack, vararg streams: MediaStream): RtpSender {
         val streamIds = streams.map { it.id }
-        return RtpSender(ios.addTrack(track.ios, streamIds))
+        val iosSender = checkNotNull(ios.addTrack(track.ios, streamIds)) { "Failed to add track" }
+        return RtpSender(iosSender)
     }
 
     actual fun removeTrack(sender: RtpSender): Boolean = ios.removeTrack(sender.native)
@@ -229,28 +231,31 @@ actual class PeerConnection actual constructor(
 
     override fun peerConnection(
         peerConnection: RTCPeerConnection,
-        didStartReceivingOnTransceiver: RTCRtpTransceiver
+        didStartReceivingOnTransceiver: RTCRtpTransceiver,
+        streams: List<*>,
     ) {
+        val iosTrack = didStartReceivingOnTransceiver.receiver.track
 
-        val sender = didStartReceivingOnTransceiver.sender
-        val receiver = didStartReceivingOnTransceiver.receiver
-
-        val track = when (didStartReceivingOnTransceiver.mediaType) {
-            RTCRtpMediaType.RTCRtpMediaTypeAudio -> AudioStreamTrack(receiver.track as RTCAudioTrack)
-            RTCRtpMediaType.RTCRtpMediaTypeVideo -> VideoStreamTrack(receiver.track as RTCVideoTrack)
-            RTCRtpMediaType.RTCRtpMediaTypeData, RTCRtpMediaType.RTCRtpMediaTypeUnsupported -> null
-            else -> error("Unknown RTCRtpMediaType: ${didStartReceivingOnTransceiver.mediaType}")
+        val track = when (iosTrack?.kind) {
+            kRTCMediaStreamTrackKindAudio -> AudioStreamTrack(iosTrack as RTCAudioTrack)
+            kRTCMediaStreamTrackKindVideo -> VideoStreamTrack(iosTrack as RTCVideoTrack)
+            else -> null
         }
 
-        val tracks = track?.let { listOf(it) } ?: emptyList()
-
-        val streams = sender.streamIds.takeIf { it.isNotEmpty() }
-            ?.map { id -> MediaStream(ios = null, "$id", tracks) }
-            ?: listOf(MediaStream(tracks))
+        val commonStreams = streams
+            .map { it as RTCMediaStream }
+            .map {
+                MediaStream(
+                    ios = it,
+                    id = it.streamId,
+                    tracks = it.audioTracks.map { track -> AudioStreamTrack(track as RTCAudioTrack) } +
+                        it.videoTracks.map { track -> VideoStreamTrack(track as RTCVideoTrack) }
+                )
+            }
 
         val trackEvent = TrackEvent(
             receiver = RtpReceiver(didStartReceivingOnTransceiver.receiver),
-            streams = streams,
+            streams = commonStreams,
             track = track,
             transceiver = RtpTransceiver(didStartReceivingOnTransceiver)
         )

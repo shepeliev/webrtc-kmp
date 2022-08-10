@@ -66,10 +66,11 @@ kotlin {
             (firebaseCoreFrameworks + firestoreFrameworks).forEach {
                 linkerOpts("-framework", it, "-F${resolveFrameworkPath(it, ::firebaseArchVariant)}")
             }
-            linkerOpts("-framework", "WebRTC", "-F${resolveFrameworkPath("WebRTC", ::webrtcArchVariant)}")
-            linkerOpts("-ObjC")
 
-            embedBitcode("disable")
+            val webRtcFrameworkPath = project(":webrtc-kmp").resolveFrameworkPath("WebRTC", ::webrtcArchVariant)
+            linkerOpts("-framework", "WebRTC", "-F$webRtcFrameworkPath")
+
+            linkerOpts("-ObjC")
         }
     }
 }

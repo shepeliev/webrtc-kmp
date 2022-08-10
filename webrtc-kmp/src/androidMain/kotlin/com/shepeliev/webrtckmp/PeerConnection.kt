@@ -257,9 +257,7 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
             // replaced by onTrack
         }
 
-        override fun onTrack(transceiver: AndroidRtpTransceiver) {
-            val sender = transceiver.sender
-
+        override fun onTrack(transceiver: AndroidRtpTransceiver, androidStreams: Array<out AndroidMediaStream>) {
             val track = when (transceiver.mediaType) {
                 AndroidMediaStreamTrack.MediaType.MEDIA_TYPE_AUDIO -> {
                     AudioStreamTrack(transceiver.receiver.track() as AndroidAudioTrack)
@@ -272,12 +270,13 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
                 else -> null
             }
 
-            val tracks = track?.let { listOf(it) } ?: emptyList()
-
-            val streams = sender.streams
-                .takeIf { it.isNotEmpty() }
-                ?.map { id -> MediaStream(android = null, id, tracks) }
-                ?: listOf(MediaStream(tracks))
+            val streams = androidStreams.map {
+                MediaStream(
+                    android = it,
+                    id = it.id,
+                    tracks = it.audioTracks.map(::AudioStreamTrack) + it.videoTracks.map(::VideoStreamTrack)
+                )
+            }
 
             val trackEvent = TrackEvent(
                 receiver = RtpReceiver(transceiver.receiver),

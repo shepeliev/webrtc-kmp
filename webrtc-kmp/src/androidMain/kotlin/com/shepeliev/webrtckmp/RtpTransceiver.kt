@@ -44,6 +44,10 @@ private fun AndroidRtpTransceiver.RtpTransceiverDirection.asCommon(): RtpTransce
         AndroidRtpTransceiver.RtpTransceiverDirection.INACTIVE -> {
             RtpTransceiverDirection.Inactive
         }
+
+        AndroidRtpTransceiver.RtpTransceiverDirection.STOPPED -> {
+            RtpTransceiverDirection.Stopped
+        }
     }
 }
 
