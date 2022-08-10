@@ -8,6 +8,8 @@ plugins {
 group = "com.shepeliev"
 version = "0.89.7"
 
+val jitsiWebRtcVersion = "100.0.2"
+
 kotlin {
     android {
         publishAllLibraryVariants()
@@ -50,19 +52,18 @@ dependencies {
 }
 
 tasks.register<Download>("downloadAndroidWebRtc") {
-    src(
-        listOf(
-            "https://github.com/react-native-webrtc/react-native-webrtc/raw/1.89.3/android/libs/libjingle_peerconnection.so.jar",
-            "https://github.com/react-native-webrtc/react-native-webrtc/raw/1.89.3/android/libs/libwebrtc.jar",
-        )
-    )
-
-    dest(buildDir.resolve("libs/android"))
+    src("https://github.com/jitsi/webrtc/releases/download/v$jitsiWebRtcVersion/android-webrtc.tgz")
+    dest(buildDir.resolve("tmp/android-webrtc-$jitsiWebRtcVersion.tgz"))
     overwrite(false)
 }
 
+tasks.register<Copy>("unzipAndroidWebRtc") {
+    from(tarTree(resources.gzip(tasks.findByName("downloadAndroidWebRtc")!!.outputs.files.first())))
+    into(buildDir.resolve("libs/android"))
+}
+
 afterEvaluate {
-    tasks.named("preBuild") {
-        dependsOn("downloadAndroidWebRtc")
+    tasks.named("commonize") {
+        dependsOn("unzipAndroidWebRtc")
     }
 }
