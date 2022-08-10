@@ -63,6 +63,11 @@ tasks.register<Copy>("unzipAndroidWebRtc") {
 }
 
 afterEvaluate {
+    tasks.named("preBuild") {
+        dependsOn("unzipAndroidWebRtc")
+    }
+
+    // downloads Android WebRTC lib on gradle sync in Android Studio
     tasks.named("commonize") {
         dependsOn("unzipAndroidWebRtc")
     }
