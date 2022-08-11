@@ -5,10 +5,12 @@ import WebRTC.RTCVideoTrack
 
 actual class VideoStreamTrack internal constructor(
     ios: RTCVideoTrack,
-    private val onSwitchCamera: (String?) -> Unit = { },
-    private val onTrackSetEnabled: (Boolean) -> Unit = { },
-    private val onTrackStopped: () -> Unit = { },
+    private val videoCaptureController: VideoCaptureController? = null,
 ) : MediaStreamTrack(ios) {
+
+    init {
+        videoCaptureController?.startCapture()
+    }
 
     fun addRenderer(renderer: RTCVideoRendererProtocol) {
         (ios as RTCVideoTrack).addRenderer(renderer)
@@ -19,14 +21,20 @@ actual class VideoStreamTrack internal constructor(
     }
 
     actual suspend fun switchCamera(deviceId: String?) {
-        onSwitchCamera(deviceId)
+        (videoCaptureController as? CameraVideoCaptureController)?.let { controller ->
+            deviceId?.let { controller.switchCamera(deviceId) } ?: controller.switchCamera()
+        }
     }
 
     override fun onSetEnabled(enabled: Boolean) {
-        onTrackSetEnabled(enabled)
+        if (enabled) {
+            videoCaptureController?.startCapture()
+        } else {
+            videoCaptureController?.stopCapture()
+        }
     }
 
     override fun onStop() {
-        onTrackStopped()
+        videoCaptureController?.stopCapture()
     }
 }

@@ -34,38 +34,16 @@ private object MediaDevicesImpl : MediaDevices {
             }
             val audioSource = peerConnectionFactory.createAudioSource(mediaConstraints)
             val androidTrack = peerConnectionFactory.createAudioTrack(UUID.randomUUID().toString(), audioSource)
-            audioTrack = AudioStreamTrack(
-                android = androidTrack,
-                onTrackStopped = { audioSource.dispose() }
-            )
+            audioTrack = AudioStreamTrack(androidTrack, audioSource)
         }
 
         var videoTrack: VideoStreamTrack? = null
         if (constraints.video != null) {
             checkCameraPermission()
-            val videoCaptureController = CameraVideoCaptureController(constraints.video)
-            val videoSource = peerConnectionFactory.createVideoSource(videoCaptureController.isScreencast)
-            videoCaptureController.initialize(videoSource.capturerObserver)
+            val videoSource = peerConnectionFactory.createVideoSource(false)
+            val videoCaptureController = CameraVideoCaptureController(constraints.video, videoSource)
             val androidTrack = peerConnectionFactory.createVideoTrack(UUID.randomUUID().toString(), videoSource)
-            videoTrack = VideoStreamTrack(
-                android = androidTrack,
-                onSwitchCamera = { deviceId ->
-                    deviceId?.let { videoCaptureController.switchCamera(it) } ?: videoCaptureController.switchCamera()
-                },
-                onTrackSetEnabled = { enabled ->
-                    if (enabled) {
-                        videoCaptureController.initialize(videoSource.capturerObserver)
-                        videoCaptureController.startCapture()
-                    } else {
-                        videoCaptureController.stopCapture()
-                    }
-                },
-                onTrackStopped = {
-                    videoCaptureController.stopCapture()
-                    videoSource.dispose()
-                }
-            )
-            videoCaptureController.startCapture()
+            videoTrack = VideoStreamTrack(androidTrack, videoCaptureController)
         }
 
         val localMediaStream = peerConnectionFactory.createLocalMediaStream(UUID.randomUUID().toString())

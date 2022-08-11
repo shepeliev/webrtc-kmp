@@ -1,10 +1,11 @@
 package com.shepeliev.webrtckmp
 
+import org.webrtc.AudioSource
 import org.webrtc.AudioTrack
 
 actual class AudioStreamTrack internal constructor(
     android: AudioTrack,
-    private val onTrackStopped: () -> Unit = { },
+    private val audioSource: AudioSource? = null,
 ) : MediaStreamTrack(android) {
 
     override fun onSetEnabled(enabled: Boolean) {
@@ -12,6 +13,6 @@ actual class AudioStreamTrack internal constructor(
     }
 
     override fun onStop() {
-        onTrackStopped()
+        audioSource?.dispose()
     }
 }

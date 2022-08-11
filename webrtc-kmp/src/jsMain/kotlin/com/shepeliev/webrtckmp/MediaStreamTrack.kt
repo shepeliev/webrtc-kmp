@@ -1,8 +1,9 @@
 package com.shepeliev.webrtckmp
 
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import org.w3c.dom.mediacapture.ENDED
 import org.w3c.dom.mediacapture.LIVE
 import org.w3c.dom.mediacapture.MediaStreamTrack as JsMediaStreamTrack
@@ -18,31 +19,19 @@ actual abstract class MediaStreamTrack internal constructor(val js: JsMediaStrea
     actual val label: String
         get() = js.label
 
-    actual val muted: Boolean
-        get() = js.muted
-
-    actual val readyState: MediaStreamTrackState
-        get() = js.readyState.toMediaStreamTrackState()
-
     actual var enabled: Boolean
         get() = js.enabled
         set(value) {
             js.enabled = value
         }
 
-    private val _onEnded = MutableSharedFlow<Unit>(extraBufferCapacity = FLOW_BUFFER_CAPACITY)
-    actual val onEnded: Flow<Unit> = _onEnded.asSharedFlow()
-
-    private val _onMute = MutableSharedFlow<Unit>(extraBufferCapacity = FLOW_BUFFER_CAPACITY)
-    actual val onMute: Flow<Unit> = _onEnded.asSharedFlow()
-
-    private val _onUnmute = MutableSharedFlow<Unit>(extraBufferCapacity = FLOW_BUFFER_CAPACITY)
-    actual val onUnmute: Flow<Unit> = _onEnded.asSharedFlow()
+    private val _state = MutableStateFlow(getInitialState())
+    actual val state: StateFlow<MediaStreamTrackState> = _state.asStateFlow()
 
     init {
-        js.onended = { _onEnded.tryEmit(Unit) }
-        js.onmute = { _onMute.tryEmit(Unit) }
-        js.onunmute = { _onUnmute.tryEmit(Unit) }
+        js.onended = { _state.update { MediaStreamTrackState.Ended(js.muted) } }
+        js.onmute = { _state.update { it.mute() } }
+        js.onunmute = { _state.update { it.unmute() } }
     }
 
     actual fun stop() {
@@ -57,11 +46,11 @@ actual abstract class MediaStreamTrack internal constructor(val js: JsMediaStrea
         }
     }
 
-    private fun JsMediaStreamTrackState.toMediaStreamTrackState(): MediaStreamTrackState {
-        return when (this) {
-            JsMediaStreamTrackState.LIVE -> MediaStreamTrackState.Live
-            JsMediaStreamTrackState.ENDED -> MediaStreamTrackState.Ended
-            else -> error("Unknown media stream track state: $this")
+    private fun getInitialState(): MediaStreamTrackState {
+        return when (js.readyState) {
+            JsMediaStreamTrackState.LIVE -> MediaStreamTrackState.Live(js.muted)
+            JsMediaStreamTrackState.ENDED -> MediaStreamTrackState.Ended(js.muted)
+            else -> error("Unknown media stream track state: ${js.readyState}")
         }
     }
 }

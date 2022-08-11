@@ -6,13 +6,16 @@ import org.webrtc.CameraEnumerationAndroid
 import org.webrtc.CameraVideoCapturer
 import org.webrtc.Size
 import org.webrtc.VideoCapturer
+import org.webrtc.VideoSource
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-class CameraVideoCaptureController(private val constraints: VideoTrackConstraints) :
-    AbstractVideoCaptureController() {
+internal class CameraVideoCaptureController(
+    private val constraints: VideoTrackConstraints,
+    videoSource: VideoSource,
+) : VideoCaptureController(videoSource) {
 
     private val tag = "CameraCaptureController"
     private val enumerator = Camera2Enumerator(applicationContext)
@@ -102,27 +105,27 @@ class CameraVideoCaptureController(private val constraints: VideoTrackConstraint
 
     private inner class CameraEventsHandler : CameraVideoCapturer.CameraEventsHandler {
         override fun onCameraError(errorDescription: String) {
-            Log.e(tag, "Camera error: $errorDescription")
+            videoCapturerErrorListener.onError("Error: $errorDescription")
         }
 
         override fun onCameraDisconnected() {
-            Log.w(tag, "Camera disconnected")
+            videoCapturerErrorListener.onError("Camera disconnected")
         }
 
         override fun onCameraFreezed(errorDescription: String) {
-            Log.e(tag, "Camera freezed: $errorDescription")
+            videoCapturerErrorListener.onError("Camera freezed: $errorDescription")
         }
 
         override fun onCameraOpening(cameraId: String) {
-            Log.d(tag, "Opening camera $cameraId")
+            // Do nothing
         }
 
         override fun onFirstFrameAvailable() {
-            Log.d(tag, "First frame available")
+            // Do nothing
         }
 
         override fun onCameraClosed() {
-            Log.d(tag, "Camera closed")
+            videoCapturerErrorListener.onError("Camera closed")
         }
     }
 }

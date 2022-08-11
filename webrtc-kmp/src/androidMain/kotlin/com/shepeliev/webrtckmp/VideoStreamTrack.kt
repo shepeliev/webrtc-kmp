@@ -5,13 +5,18 @@ import org.webrtc.VideoTrack
 
 actual class VideoStreamTrack internal constructor(
     android: VideoTrack,
-    private val onSwitchCamera: suspend (String?) -> Unit = { },
-    private val onTrackSetEnabled: (Boolean) -> Unit = { },
-    private val onTrackStopped: () -> Unit = { },
+    private val videoCaptureController: VideoCaptureController? = null,
 ) : MediaStreamTrack(android) {
 
+    init {
+        videoCaptureController?.videoCapturerErrorListener = VideoCapturerErrorListener { stop() }
+        videoCaptureController?.startCapture()
+    }
+
     actual suspend fun switchCamera(deviceId: String?) {
-        onSwitchCamera(deviceId)
+        (videoCaptureController as? CameraVideoCaptureController)?.let { controller ->
+            deviceId?.let { controller.switchCamera(it) } ?: controller.switchCamera()
+        }
     }
 
     fun addSink(sink: VideoSink) {
@@ -23,10 +28,15 @@ actual class VideoStreamTrack internal constructor(
     }
 
     override fun onSetEnabled(enabled: Boolean) {
-        onTrackSetEnabled(enabled)
+        if (enabled) {
+            videoCaptureController?.startCapture()
+        } else {
+            videoCaptureController?.stopCapture()
+        }
     }
 
     override fun onStop() {
-        onTrackStopped()
+        videoCaptureController?.stopCapture()
+        videoCaptureController?.dispose()
     }
 }
