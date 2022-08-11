@@ -1,6 +1,6 @@
 package com.shepeliev.webrtckmp
 
-expect class MediaStream(tracks: List<MediaStreamTrack>) {
+expect class MediaStream {
     val id: String
     val tracks: List<MediaStreamTrack>
 

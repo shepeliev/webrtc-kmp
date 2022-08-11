@@ -11,8 +11,6 @@ actual class MediaStream internal constructor(
     tracks: List<MediaStreamTrack> = emptyList(),
 ) {
 
-    actual constructor(tracks: List<MediaStreamTrack>) : this(ios = null, tracks = tracks)
-
     private val _tracks = mutableListOf<MediaStreamTrack>()
     actual val tracks: List<MediaStreamTrack> = _tracks
 
