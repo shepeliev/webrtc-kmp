@@ -33,6 +33,7 @@ actual abstract class MediaStreamTrack internal constructor(val ios: RTCMediaStr
     actual var enabled: Boolean
         get() = ios.isEnabled
         set(value) {
+            if (ios.isEnabled == value) return
             ios.isEnabled = value
             onSetEnabled(value)
         }
@@ -44,6 +45,14 @@ actual abstract class MediaStreamTrack internal constructor(val ios: RTCMediaStr
         if (_state.value is MediaStreamTrackState.Ended) return
         _state.update { MediaStreamTrackState.Ended(it.muted) }
         onStop()
+    }
+
+    protected fun setMute(muted: Boolean) {
+        if (muted) {
+            _state.update { it.mute() }
+        } else {
+            _state.update { it.unmute() }
+        }
     }
 
     protected abstract fun onSetEnabled(enabled: Boolean)

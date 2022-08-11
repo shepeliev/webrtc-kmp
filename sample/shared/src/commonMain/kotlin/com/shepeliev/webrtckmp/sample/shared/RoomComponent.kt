@@ -16,6 +16,7 @@ import com.arkivanov.essenty.lifecycle.doOnStart
 import com.arkivanov.essenty.lifecycle.doOnStop
 import com.shepeliev.webrtckmp.IceServer
 import com.shepeliev.webrtckmp.MediaDevices
+import com.shepeliev.webrtckmp.MediaStreamTrack
 import com.shepeliev.webrtckmp.MediaStreamTrackKind
 import com.shepeliev.webrtckmp.OfferAnswerOptions
 import com.shepeliev.webrtckmp.PeerConnection
@@ -179,6 +180,13 @@ class RoomComponent(
                 .onEach { logger.i { "Remote track received: [id = ${it.track?.id}, kind: ${it.track?.kind} ]" } }
                 .filter { it.track?.kind == MediaStreamTrackKind.Video }
                 .onEach { event -> _model.reduce { it.copy(remoteStream = event.streams.first()) } }
+                .onEach { listenTrackState(it.track!!) }
+                .launchIn(scope + roomSessionJob!!)
+        }
+
+        private fun listenTrackState(track: MediaStreamTrack) {
+            track.state
+                .onEach { logger.i { "Track [id = ${track.id}] state changed: $it" } }
                 .launchIn(scope + roomSessionJob!!)
         }
 

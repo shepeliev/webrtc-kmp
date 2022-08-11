@@ -32,6 +32,7 @@ actual abstract class MediaStreamTrack internal constructor(val android: Android
     actual var enabled: Boolean
         get() = android.enabled()
         set(value) {
+            if (value == android.enabled()) return
             android.setEnabled(value)
             onSetEnabled(value)
         }
@@ -43,6 +44,14 @@ actual abstract class MediaStreamTrack internal constructor(val android: Android
         if (_state.value is MediaStreamTrackState.Ended) return
         _state.update { MediaStreamTrackState.Ended(it.muted) }
         onStop()
+    }
+
+    protected fun setMuted(muted: Boolean) {
+        if (muted) {
+            _state.update { it.mute() }
+        } else {
+            _state.update { it.unmute() }
+        }
     }
 
     protected abstract fun onSetEnabled(enabled: Boolean)
