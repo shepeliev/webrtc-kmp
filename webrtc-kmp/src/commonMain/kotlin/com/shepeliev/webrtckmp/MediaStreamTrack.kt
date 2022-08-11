@@ -38,8 +38,8 @@ val MediaStreamTrack.muted: Boolean get() = state.value.muted
 
 val MediaStreamTrack.readyState: MediaStreamTrackState get() = state.value
 
-val MediaStreamTrack.onEnded: Flow<Unit> get() = state.filter { it is MediaStreamTrackState.Ended }.map {  }
+val MediaStreamTrack.onEnded: Flow<Unit> get() = state.filter { it is MediaStreamTrackState.Ended }.map { }
 
-val MediaStreamTrack.onMute: Flow<Unit> get() = state.filter { it.muted }.map {  }
+val MediaStreamTrack.onMute: Flow<Unit> get() = state.filter { it.muted }.map { }
 
-val MediaStreamTrack.onUnmute: Flow<Unit> get() = state.filterNot { it.muted }.map {  }
+val MediaStreamTrack.onUnmute: Flow<Unit> get() = state.filterNot { it.muted }.map { }
