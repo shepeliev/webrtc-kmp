@@ -1,17 +1,34 @@
 package com.shepeliev.webrtckmp
 
+import org.webrtc.VideoFrame
 import org.webrtc.VideoSink
 import org.webrtc.VideoTrack
+import java.util.Timer
+import java.util.TimerTask
+import java.util.concurrent.atomic.AtomicInteger
 
 actual class VideoStreamTrack internal constructor(
     android: VideoTrack,
-    private val onSwitchCamera: suspend (String?) -> Unit = { },
-    private val onTrackSetEnabled: (Boolean) -> Unit = { },
-    private val onTrackStopped: () -> Unit = { },
+    private val videoCaptureController: VideoCaptureController? = null,
 ) : MediaStreamTrack(android) {
 
+    // Setup track mute detector for remote tracks only.
+    private val trackMuteDetector: TrackMuteDetector? =
+        if (videoCaptureController == null) TrackMuteDetector() else null
+
+    init {
+        videoCaptureController?.videoCapturerErrorListener = VideoCapturerErrorListener { stop() }
+        videoCaptureController?.startCapture()
+        trackMuteDetector?.let {
+            addSink(it)
+            it.start()
+        }
+    }
+
     actual suspend fun switchCamera(deviceId: String?) {
-        onSwitchCamera(deviceId)
+        (videoCaptureController as? CameraVideoCaptureController)?.let { controller ->
+            deviceId?.let { controller.switchCamera(it) } ?: controller.switchCamera()
+        }
     }
 
     fun addSink(sink: VideoSink) {
@@ -23,10 +40,82 @@ actual class VideoStreamTrack internal constructor(
     }
 
     override fun onSetEnabled(enabled: Boolean) {
-        onTrackSetEnabled(enabled)
+        if (enabled) {
+            videoCaptureController?.startCapture()
+            trackMuteDetector?.start()
+        } else {
+            videoCaptureController?.stopCapture()
+            trackMuteDetector?.stop()
+        }
     }
 
     override fun onStop() {
-        onTrackStopped()
+        videoCaptureController?.stopCapture()
+        videoCaptureController?.dispose()
+        trackMuteDetector?.let {
+            removeSink(it)
+            it.dispose()
+        }
+    }
+
+    /**
+     * Implements 'mute'/'unmute' events for remote video tracks through the [VideoSink] interface.
+     *
+     * The original idea is from React Native WebRTC
+     * https://github.com/react-native-webrtc/react-native-webrtc/blob/95cf638dfa/android/src/main/java/com/oney/WebRTCModule/VideoTrackAdapter.java#L69
+     */
+    private inner class TrackMuteDetector : VideoSink {
+        private val timer: Timer = Timer("VideoTrackMutedTimer")
+        private var setMuteTask: TimerTask? = null
+
+        @Volatile
+        private var disposed = false
+        private val frameCounter: AtomicInteger = AtomicInteger()
+        private var mutedState = false
+
+        override fun onFrame(frame: VideoFrame) {
+            frameCounter.addAndGet(1)
+        }
+
+        fun start() {
+            if (disposed) return
+
+            synchronized(this) {
+                setMuteTask?.cancel()
+                setMuteTask = object : TimerTask() {
+                    private var lastFrameNumber: Int = frameCounter.get()
+
+                    override fun run() {
+                        if (disposed) return
+
+                        val frameCount = frameCounter.get()
+                        val isMuted = lastFrameNumber == frameCount
+                        if (isMuted != mutedState) {
+                            mutedState = isMuted
+                            setMuted(isMuted)
+                        }
+                        lastFrameNumber = frameCounter.get()
+                    }
+                }
+                timer.schedule(setMuteTask, INITIAL_MUTE_DELAY, MUTE_DELAY)
+            }
+        }
+
+        fun stop() {
+            if (disposed) return
+
+            synchronized(this) {
+                setMuteTask?.cancel()
+                setMuteTask = null
+            }
+        }
+
+        fun dispose() {
+            stop()
+            disposed = true
+        }
     }
 }
+
+private const val INITIAL_MUTE_DELAY: Long = 3000
+private const val MUTE_DELAY: Long = 1500

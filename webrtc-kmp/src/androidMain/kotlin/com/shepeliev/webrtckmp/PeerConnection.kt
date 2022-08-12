@@ -6,6 +6,7 @@ import com.shepeliev.webrtckmp.PeerConnectionEvent.IceGatheringStateChange
 import com.shepeliev.webrtckmp.PeerConnectionEvent.NegotiationNeeded
 import com.shepeliev.webrtckmp.PeerConnectionEvent.NewDataChannel
 import com.shepeliev.webrtckmp.PeerConnectionEvent.NewIceCandidate
+import com.shepeliev.webrtckmp.PeerConnectionEvent.RemoveTrack
 import com.shepeliev.webrtckmp.PeerConnectionEvent.RemovedIceCandidates
 import com.shepeliev.webrtckmp.PeerConnectionEvent.SignalingStateChange
 import com.shepeliev.webrtckmp.PeerConnectionEvent.StandardizedIceConnectionChange
@@ -20,16 +21,13 @@ import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
-import org.webrtc.AudioTrack as AndroidAudioTrack
 import org.webrtc.DataChannel as AndroidDataChannel
 import org.webrtc.IceCandidate as AndroidIceCandidate
 import org.webrtc.MediaStream as AndroidMediaStream
-import org.webrtc.MediaStreamTrack as AndroidMediaStreamTrack
 import org.webrtc.PeerConnection as AndroidPeerConnection
 import org.webrtc.RtpReceiver as AndroidRtpReceiver
 import org.webrtc.RtpTransceiver as AndroidRtpTransceiver
 import org.webrtc.SessionDescription as AndroidSessionDescription
-import org.webrtc.VideoTrack as AndroidVideoTrack
 
 actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguration) {
 
@@ -59,6 +57,9 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
     private val _peerConnectionEvent =
         MutableSharedFlow<PeerConnectionEvent>(extraBufferCapacity = FLOW_BUFFER_CAPACITY)
     internal actual val peerConnectionEvent: Flow<PeerConnectionEvent> = _peerConnectionEvent.asSharedFlow()
+
+    private val localTracks = mutableMapOf<String, MediaStreamTrack>()
+    private val remoteTracks = mutableMapOf<String, MediaStreamTrack>()
 
     actual fun createDataChannel(
         label: String,
@@ -171,19 +172,29 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         return android.removeIceCandidates(candidates.map { it.native }.toTypedArray())
     }
 
-    actual fun getSenders(): List<RtpSender> = android.senders.map { RtpSender(it) }
+    actual fun getSenders(): List<RtpSender> = android.senders.map {
+        RtpSender(it, localTracks[it.track()?.id()])
+    }
 
-    actual fun getReceivers(): List<RtpReceiver> = android.receivers.map { RtpReceiver(it) }
+    actual fun getReceivers(): List<RtpReceiver> = android.receivers.map {
+        RtpReceiver(it, remoteTracks[it.track()?.id()])
+    }
 
     actual fun getTransceivers(): List<RtpTransceiver> =
-        android.transceivers.map { RtpTransceiver(it) }
+        android.transceivers.map {
+            val senderTrack = localTracks[it.sender.track()?.id()]
+            val receiverTrack = remoteTracks[it.receiver.track()?.id()]
+            RtpTransceiver(it, senderTrack, receiverTrack)
+        }
 
     actual fun addTrack(track: MediaStreamTrack, vararg streams: MediaStream): RtpSender {
         val streamIds = streams.map { it.id }
-        return RtpSender(android.addTrack(track.android, streamIds))
+        localTracks[track.id] = track
+        return RtpSender(android.addTrack(track.android, streamIds), track)
     }
 
     actual fun removeTrack(sender: RtpSender): Boolean {
+        localTracks.remove(sender.track?.id)
         return android.removeTrack(sender.native)
     }
 
@@ -194,6 +205,8 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
     }
 
     actual fun close() {
+        remoteTracks.values.forEach(MediaStreamTrack::stop)
+        remoteTracks.clear()
         android.dispose()
     }
 
@@ -258,34 +271,41 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         }
 
         override fun onTrack(transceiver: AndroidRtpTransceiver, androidStreams: Array<out AndroidMediaStream>) {
-            val track = when (transceiver.mediaType) {
-                AndroidMediaStreamTrack.MediaType.MEDIA_TYPE_AUDIO -> {
-                    AudioStreamTrack(transceiver.receiver.track() as AndroidAudioTrack)
-                }
+            val audioTracks = androidStreams
+                .flatMap { it.audioTracks }
+                .map { remoteTracks.getOrPut(it.id()) { AudioStreamTrack(it) } }
 
-                AndroidMediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO -> {
-                    VideoStreamTrack(transceiver.receiver.track() as AndroidVideoTrack)
-                }
+            val videoTracks = androidStreams
+                .flatMap { it.videoTracks }
+                .map { remoteTracks.getOrPut(it.id()) { VideoStreamTrack(it) } }
 
-                else -> null
-            }
-
-            val streams = androidStreams.map {
+            val streams = androidStreams.map { androidStream ->
                 MediaStream(
-                    android = it,
-                    id = it.id,
-                    tracks = it.audioTracks.map(::AudioStreamTrack) + it.videoTracks.map(::VideoStreamTrack)
-                )
+                    android = androidStream,
+                    id = androidStream.id,
+                ).also { stream ->
+                    audioTracks.forEach(stream::addTrack)
+                    videoTracks.forEach(stream::addTrack)
+                }
             }
+
+            val senderTrack = localTracks[transceiver.sender.track()?.id()]
+            val receiverTrack = remoteTracks[transceiver.receiver.track()?.id()]
 
             val trackEvent = TrackEvent(
-                receiver = RtpReceiver(transceiver.receiver),
+                receiver = RtpReceiver(transceiver.receiver, receiverTrack),
                 streams = streams,
-                track = track,
-                transceiver = RtpTransceiver(transceiver)
+                track = receiverTrack,
+                transceiver = RtpTransceiver(transceiver, senderTrack, receiverTrack)
             )
 
             _peerConnectionEvent.tryEmit(Track(trackEvent))
+        }
+
+        override fun onRemoveTrack(receiver: AndroidRtpReceiver) {
+            val track = remoteTracks.remove(receiver.track()?.id())
+            _peerConnectionEvent.tryEmit(RemoveTrack(RtpReceiver(receiver, track)))
+            track?.stop()
         }
 
         override fun onSelectedCandidatePairChanged(event: CandidatePairChangeEvent) {

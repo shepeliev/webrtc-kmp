@@ -4,11 +4,12 @@ import WebRTC.RTCAudioTrack
 import WebRTC.RTCMediaStreamTrack
 import WebRTC.RTCMediaStreamTrackState
 import WebRTC.RTCVideoTrack
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.emptyFlow
-import kotlin.native.concurrent.AtomicInt
+import WebRTC.kRTCMediaStreamTrackKindAudio
+import WebRTC.kRTCMediaStreamTrackKindVideo
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 actual abstract class MediaStreamTrack internal constructor(val ios: RTCMediaStreamTrack) {
 
@@ -17,9 +18,9 @@ actual abstract class MediaStreamTrack internal constructor(val ios: RTCMediaStr
 
     actual val kind: MediaStreamTrackKind
         get() = when (ios.kind()) {
-            "audio" -> MediaStreamTrackKind.Audio
-            "video" -> MediaStreamTrackKind.Video
-            else -> throw IllegalStateException("Unknown track kind: ${ios.kind()}")
+            kRTCMediaStreamTrackKindAudio -> MediaStreamTrackKind.Audio
+            kRTCMediaStreamTrackKindVideo -> MediaStreamTrackKind.Video
+            else -> error("Unknown track kind: ${ios.kind()}")
         }
 
     actual val label: String
@@ -29,43 +30,42 @@ actual abstract class MediaStreamTrack internal constructor(val ios: RTCMediaStr
             MediaStreamTrackKind.Video -> "camera"
         }
 
-    actual val readyState: MediaStreamTrackState
-        get() {
-            if (endedFlag.value == 1) {
-                return MediaStreamTrackState.Ended
-            }
-            return rtcMediaStreamTrackStateAsCommon(ios.readyState)
-        }
-
-    // not implemented for iOS
-    actual val muted: Boolean = false
-
     actual var enabled: Boolean
         get() = ios.isEnabled
         set(value) {
+            if (ios.isEnabled == value) return
             ios.isEnabled = value
             onSetEnabled(value)
         }
 
-    private val _onEnded = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
-    actual val onEnded: Flow<Unit> = _onEnded.asSharedFlow()
-
-    actual val onMute: Flow<Unit> = emptyFlow()
-
-    actual val onUnmute: Flow<Unit> = emptyFlow()
-
-    private val endedFlag = AtomicInt(0)
+    private val _state = MutableStateFlow(getInitialState())
+    actual val state: StateFlow<MediaStreamTrackState> = _state.asStateFlow()
 
     actual fun stop() {
-        if (!endedFlag.compareAndSet(0, 1)) return
-        enabled = false
-        _onEnded.tryEmit(Unit)
+        if (_state.value is MediaStreamTrackState.Ended) return
+        _state.update { MediaStreamTrackState.Ended(it.muted) }
         onStop()
+    }
+
+    protected fun setMute(muted: Boolean) {
+        if (muted) {
+            _state.update { it.mute() }
+        } else {
+            _state.update { it.unmute() }
+        }
     }
 
     protected abstract fun onSetEnabled(enabled: Boolean)
 
     protected abstract fun onStop()
+
+    private fun getInitialState(): MediaStreamTrackState {
+        return when (ios.readyState) {
+            RTCMediaStreamTrackState.RTCMediaStreamTrackStateLive -> MediaStreamTrackState.Live(muted = false)
+            RTCMediaStreamTrackState.RTCMediaStreamTrackStateEnded -> MediaStreamTrackState.Live(muted = false)
+            else -> error("Unknown RTCMediaStreamTrackState: $state")
+        }
+    }
 
     companion object {
         fun createCommon(ios: RTCMediaStreamTrack): MediaStreamTrack {
@@ -75,13 +75,5 @@ actual abstract class MediaStreamTrack internal constructor(val ios: RTCMediaStr
                 else -> error("Unknown native MediaStreamTrack: $this")
             }
         }
-    }
-}
-
-private fun rtcMediaStreamTrackStateAsCommon(state: RTCMediaStreamTrackState): MediaStreamTrackState {
-    return when (state) {
-        RTCMediaStreamTrackState.RTCMediaStreamTrackStateLive -> MediaStreamTrackState.Live
-        RTCMediaStreamTrackState.RTCMediaStreamTrackStateEnded -> MediaStreamTrackState.Ended
-        else -> error("Unknown RTCMediaStreamTrackState: $state")
     }
 }

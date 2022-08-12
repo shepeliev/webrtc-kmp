@@ -16,6 +16,7 @@ import com.arkivanov.essenty.lifecycle.doOnStart
 import com.arkivanov.essenty.lifecycle.doOnStop
 import com.shepeliev.webrtckmp.IceServer
 import com.shepeliev.webrtckmp.MediaDevices
+import com.shepeliev.webrtckmp.MediaStreamTrack
 import com.shepeliev.webrtckmp.MediaStreamTrackKind
 import com.shepeliev.webrtckmp.OfferAnswerOptions
 import com.shepeliev.webrtckmp.PeerConnection
@@ -74,11 +75,13 @@ class RoomComponent(
 
         override fun openUserMedia() {
             logger.i { "Open user media" }
+            roomSessionJob = SupervisorJob()
 
             scope.launch {
                 try {
                     val stream = MediaDevices.getUserMedia(audio = true, video = true)
                     _model.reduce { it.copy(localStream = stream) }
+                    listenTrackState(stream.videoTracks.first(), "Local video")
                 } catch (e: Throwable) {
                     logger.e(e) { "Getting user media failed" }
                 }
@@ -89,7 +92,6 @@ class RoomComponent(
             logger.i { "Create room" }
 
             _model.reduce { it.copy(isJoining = true, isCaller = true) }
-            roomSessionJob = SupervisorJob()
             val peerConnection = createPeerConnection()
             this@ViewModel.peerConnection = peerConnection
 
@@ -179,6 +181,13 @@ class RoomComponent(
                 .onEach { logger.i { "Remote track received: [id = ${it.track?.id}, kind: ${it.track?.kind} ]" } }
                 .filter { it.track?.kind == MediaStreamTrackKind.Video }
                 .onEach { event -> _model.reduce { it.copy(remoteStream = event.streams.first()) } }
+                .onEach { listenTrackState(it.track!!, "Remote video") }
+                .launchIn(scope + roomSessionJob!!)
+        }
+
+        private fun listenTrackState(track: MediaStreamTrack, logPrefix: String) {
+            track.state
+                .onEach { logger.w { "$logPrefix track [id = ${track.id}] state changed: $it" } }
                 .launchIn(scope + roomSessionJob!!)
         }
 

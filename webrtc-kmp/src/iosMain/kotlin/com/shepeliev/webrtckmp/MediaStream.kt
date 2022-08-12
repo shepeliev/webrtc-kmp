@@ -8,17 +8,10 @@ import platform.Foundation.NSUUID
 actual class MediaStream internal constructor(
     val ios: RTCMediaStream?,
     actual val id: String = ios?.streamId ?: NSUUID.UUID().UUIDString,
-    tracks: List<MediaStreamTrack> = emptyList(),
 ) {
-
-    actual constructor(tracks: List<MediaStreamTrack>) : this(ios = null, tracks = tracks)
 
     private val _tracks = mutableListOf<MediaStreamTrack>()
     actual val tracks: List<MediaStreamTrack> = _tracks
-
-    init {
-        _tracks += tracks
-    }
 
     actual fun addTrack(track: MediaStreamTrack) {
         ios?.let {

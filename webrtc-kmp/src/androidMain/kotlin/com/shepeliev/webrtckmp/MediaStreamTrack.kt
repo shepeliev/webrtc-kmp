@@ -1,9 +1,11 @@
+@file:JvmName("AndroidMediaStreamTrack")
+
 package com.shepeliev.webrtckmp
 
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import org.webrtc.AudioTrack as AndroidAudioTrack
 import org.webrtc.MediaStreamTrack as AndroidMediaStreamTrack
 import org.webrtc.VideoTrack as AndroidVideoTrack
@@ -17,7 +19,7 @@ actual abstract class MediaStreamTrack internal constructor(val android: Android
         get() = when (android.kind()) {
             AndroidMediaStreamTrack.AUDIO_TRACK_KIND -> MediaStreamTrackKind.Audio
             AndroidMediaStreamTrack.VIDEO_TRACK_KIND -> MediaStreamTrackKind.Video
-            else -> throw IllegalStateException("Unknown track kind: ${android.kind()}")
+            else -> error("Unknown track kind: ${android.kind()}")
         }
 
     actual val label: String
@@ -27,37 +29,41 @@ actual abstract class MediaStreamTrack internal constructor(val android: Android
             MediaStreamTrackKind.Video -> "camera"
         }
 
-    actual val readyState: MediaStreamTrackState
-        get() = android.state().asCommon()
-
-    // not implemented for Android
-    actual val muted: Boolean = false
-
     actual var enabled: Boolean
         get() = android.enabled()
         set(value) {
+            if (value == android.enabled()) return
             android.setEnabled(value)
             onSetEnabled(value)
         }
 
-    private val _onEnded = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
-    actual val onEnded: Flow<Unit> = _onEnded.asSharedFlow()
-
-    // not implemented for Android
-    actual val onMute: Flow<Unit> = emptyFlow()
-
-    // not implemented for Android
-    actual val onUnmute: Flow<Unit> = emptyFlow()
+    private val _state = MutableStateFlow(getInitialState())
+    actual val state: StateFlow<MediaStreamTrackState> = _state.asStateFlow()
 
     actual fun stop() {
-        if (readyState == MediaStreamTrackState.Ended) return
-        _onEnded.tryEmit(Unit)
+        if (_state.value is MediaStreamTrackState.Ended) return
+        _state.update { MediaStreamTrackState.Ended(it.muted) }
         onStop()
+    }
+
+    protected fun setMuted(muted: Boolean) {
+        if (muted) {
+            _state.update { it.mute() }
+        } else {
+            _state.update { it.unmute() }
+        }
     }
 
     protected abstract fun onSetEnabled(enabled: Boolean)
 
     protected abstract fun onStop()
+
+    private fun getInitialState(): MediaStreamTrackState {
+        return when (checkNotNull(android.state())) {
+            AndroidMediaStreamTrack.State.LIVE -> MediaStreamTrackState.Live(muted = false)
+            AndroidMediaStreamTrack.State.ENDED -> MediaStreamTrackState.Live(muted = false)
+        }
+    }
 }
 
 internal fun AndroidMediaStreamTrack.asCommon(): MediaStreamTrack {
@@ -65,12 +71,5 @@ internal fun AndroidMediaStreamTrack.asCommon(): MediaStreamTrack {
         is AndroidAudioTrack -> AudioStreamTrack(this)
         is AndroidVideoTrack -> VideoStreamTrack(this)
         else -> error("Unknown native MediaStreamTrack: $this")
-    }
-}
-
-private fun AndroidMediaStreamTrack.State.asCommon(): MediaStreamTrackState {
-    return when (this) {
-        AndroidMediaStreamTrack.State.LIVE -> MediaStreamTrackState.Live
-        AndroidMediaStreamTrack.State.ENDED -> MediaStreamTrackState.Ended
     }
 }

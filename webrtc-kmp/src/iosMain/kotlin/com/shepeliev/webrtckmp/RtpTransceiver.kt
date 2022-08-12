@@ -6,7 +6,12 @@ import kotlinx.cinterop.alloc
 import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.ptr
 
-actual class RtpTransceiver(val native: RTCRtpTransceiver) {
+actual class RtpTransceiver(
+    val native: RTCRtpTransceiver,
+    private val senderTrack: MediaStreamTrack?,
+    private val receiverTrack: MediaStreamTrack?,
+) {
+
     actual var direction: RtpTransceiverDirection
         get() = rtcRtpTransceiverDirectionAsCommon(native.direction)
         set(value) {
@@ -24,10 +29,10 @@ actual class RtpTransceiver(val native: RTCRtpTransceiver) {
         get() = native.mid
 
     actual val sender: RtpSender
-        get() = RtpSender(native.sender)
+        get() = RtpSender(native.sender, senderTrack)
 
     actual val receiver: RtpReceiver
-        get() = RtpReceiver(native.receiver)
+        get() = RtpReceiver(native.receiver, receiverTrack)
 
     actual val stopped: Boolean
         get() = native.isStopped

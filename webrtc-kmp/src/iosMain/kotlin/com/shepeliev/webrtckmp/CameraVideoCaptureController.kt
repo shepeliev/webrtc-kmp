@@ -1,7 +1,7 @@
 package com.shepeliev.webrtckmp
 
 import WebRTC.RTCCameraVideoCapturer
-import WebRTC.RTCVideoCapturerDelegateProtocol
+import WebRTC.RTCVideoSource
 import kotlinx.cinterop.useContents
 import platform.AVFoundation.AVCaptureDevice
 import platform.AVFoundation.AVCaptureDeviceFormat
@@ -14,28 +14,27 @@ import platform.CoreMedia.CMFormatDescriptionGetMediaSubType
 import platform.CoreMedia.CMVideoFormatDescriptionGetDimensions
 import kotlin.math.abs
 
-internal class CameraVideoCaptureController(private val constraints: VideoTrackConstraints) {
+internal class CameraVideoCaptureController(
+    private val constraints: VideoTrackConstraints,
+    private val videoSource: RTCVideoSource,
+) : VideoCaptureController {
+
     private var videoCapturer: RTCCameraVideoCapturer? = null
     private var position: AVCaptureDevicePosition = AVCaptureDevicePositionBack
-    private lateinit var delegate: RTCVideoCapturerDelegateProtocol
     private lateinit var device: AVCaptureDevice
     private lateinit var format: AVCaptureDeviceFormat
     private var fps: Long = -1
 
-    fun initialize(delegate: RTCVideoCapturerDelegateProtocol) {
-        this.delegate = delegate
-    }
-
-    fun startCapture() {
+    override fun startCapture() {
         if (videoCapturer != null) return
-        videoCapturer = RTCCameraVideoCapturer(delegate)
+        videoCapturer = RTCCameraVideoCapturer(videoSource)
         if (!this::device.isInitialized) selectDevice()
         selectFormat()
         selectFps()
         videoCapturer?.startCaptureWithDevice(device, format, fps)
     }
 
-    fun stopCapture() {
+    override fun stopCapture() {
         videoCapturer?.stopCapture()
         videoCapturer = null
     }

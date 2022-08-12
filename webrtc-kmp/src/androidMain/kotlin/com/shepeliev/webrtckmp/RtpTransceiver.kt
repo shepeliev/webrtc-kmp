@@ -2,7 +2,12 @@ package com.shepeliev.webrtckmp
 
 import org.webrtc.RtpTransceiver as AndroidRtpTransceiver
 
-actual class RtpTransceiver(val native: AndroidRtpTransceiver) {
+actual class RtpTransceiver(
+    val native: AndroidRtpTransceiver,
+    private val senderTrack: MediaStreamTrack?,
+    private val receiverTrack: MediaStreamTrack?,
+) {
+
     actual var direction: RtpTransceiverDirection
         get() = native.direction.asCommon()
         set(value) {
@@ -16,10 +21,10 @@ actual class RtpTransceiver(val native: AndroidRtpTransceiver) {
         get() = native.mid
 
     actual val sender: RtpSender
-        get() = RtpSender(native.sender)
+        get() = RtpSender(native.sender, senderTrack)
 
     actual val receiver: RtpReceiver
-        get() = RtpReceiver(native.receiver)
+        get() = RtpReceiver(native.receiver, receiverTrack)
 
     actual val stopped: Boolean
         get() = native.isStopped

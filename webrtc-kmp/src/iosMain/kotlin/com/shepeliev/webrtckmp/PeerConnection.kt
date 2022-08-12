@@ -18,8 +18,6 @@ import WebRTC.RTCSessionDescription
 import WebRTC.RTCSignalingState
 import WebRTC.RTCVideoTrack
 import WebRTC.dataChannelForLabel
-import WebRTC.kRTCMediaStreamTrackKindAudio
-import WebRTC.kRTCMediaStreamTrackKindVideo
 import com.shepeliev.webrtckmp.PeerConnectionEvent.ConnectionStateChange
 import com.shepeliev.webrtckmp.PeerConnectionEvent.IceConnectionStateChange
 import com.shepeliev.webrtckmp.PeerConnectionEvent.IceGatheringStateChange
@@ -67,6 +65,9 @@ actual class PeerConnection actual constructor(
     private val _peerConnectionEvent =
         MutableSharedFlow<PeerConnectionEvent>(extraBufferCapacity = FLOW_BUFFER_CAPACITY)
     internal actual val peerConnectionEvent: Flow<PeerConnectionEvent> = _peerConnectionEvent.asSharedFlow()
+
+    private val localTracks = mutableMapOf<String, MediaStreamTrack>()
+    private val remoteTracks = mutableMapOf<String, MediaStreamTrack>()
 
     actual fun createDataChannel(
         label: String,
@@ -136,21 +137,34 @@ actual class PeerConnection actual constructor(
         return true
     }
 
-    actual fun getSenders(): List<RtpSender> = ios.senders.map { RtpSender(it as RTCRtpSender) }
+    actual fun getSenders(): List<RtpSender> = ios.senders.map {
+        val iosSender = it as RTCRtpSender
+        RtpSender(iosSender, localTracks[iosSender.track?.trackId])
+    }
 
-    actual fun getReceivers(): List<RtpReceiver> =
-        ios.receivers.map { RtpReceiver(it as RTCRtpReceiver) }
+    actual fun getReceivers(): List<RtpReceiver> = ios.receivers.map {
+        val iosReceiver = it as RTCRtpReceiver
+        RtpReceiver(iosReceiver, remoteTracks[iosReceiver.track?.trackId])
+    }
 
-    actual fun getTransceivers(): List<RtpTransceiver> =
-        ios.transceivers.map { RtpTransceiver(it as RTCRtpTransceiver) }
+    actual fun getTransceivers(): List<RtpTransceiver> = ios.transceivers.map {
+        val iosTransceiver = it as RTCRtpTransceiver
+        val senderTrack = localTracks[iosTransceiver.sender.track?.trackId]
+        val receiverTrack = remoteTracks[iosTransceiver.receiver.track?.trackId]
+        RtpTransceiver(iosTransceiver, senderTrack, receiverTrack)
+    }
 
     actual fun addTrack(track: MediaStreamTrack, vararg streams: MediaStream): RtpSender {
         val streamIds = streams.map { it.id }
         val iosSender = checkNotNull(ios.addTrack(track.ios, streamIds)) { "Failed to add track" }
-        return RtpSender(iosSender)
+        localTracks[track.id] = track
+        return RtpSender(iosSender, track)
     }
 
-    actual fun removeTrack(sender: RtpSender): Boolean = ios.removeTrack(sender.native)
+    actual fun removeTrack(sender: RtpSender): Boolean {
+        localTracks.remove(sender.track?.id)
+        return ios.removeTrack(sender.native)
+    }
 
     actual suspend fun getStats(): RtcStatsReport? {
         // TODO not implemented yet
@@ -158,6 +172,8 @@ actual class PeerConnection actual constructor(
     }
 
     actual fun close() {
+        remoteTracks.values.forEach(MediaStreamTrack::stop)
+        remoteTracks.clear()
         ios.close()
     }
 
@@ -234,30 +250,33 @@ actual class PeerConnection actual constructor(
         didStartReceivingOnTransceiver: RTCRtpTransceiver,
         streams: List<*>,
     ) {
-        val iosTrack = didStartReceivingOnTransceiver.receiver.track
+        val iosStreams = streams.map { it as RTCMediaStream }
 
-        val track = when (iosTrack?.kind) {
-            kRTCMediaStreamTrackKindAudio -> AudioStreamTrack(iosTrack as RTCAudioTrack)
-            kRTCMediaStreamTrackKindVideo -> VideoStreamTrack(iosTrack as RTCVideoTrack)
-            else -> null
+        val audioTracks = iosStreams
+            .flatMap { it.audioTracks }
+            .map { it as RTCAudioTrack }
+            .map { remoteTracks.getOrPut(it.trackId) { AudioStreamTrack(it) } }
+
+        val videoTracks = iosStreams
+            .flatMap { it.videoTracks }
+            .map { it as RTCVideoTrack }
+            .map { remoteTracks.getOrPut(it.trackId) { VideoStreamTrack(it) } }
+
+        val commonStreams = iosStreams.map { iosStream ->
+            MediaStream(ios = iosStream, id = iosStream.streamId).also { stream ->
+                audioTracks.forEach(stream::addTrack)
+                videoTracks.forEach(stream::addTrack)
+            }
         }
 
-        val commonStreams = streams
-            .map { it as RTCMediaStream }
-            .map {
-                MediaStream(
-                    ios = it,
-                    id = it.streamId,
-                    tracks = it.audioTracks.map { track -> AudioStreamTrack(track as RTCAudioTrack) } +
-                        it.videoTracks.map { track -> VideoStreamTrack(track as RTCVideoTrack) }
-                )
-            }
+        val receiverTrack = remoteTracks[didStartReceivingOnTransceiver.receiver.track?.trackId]
+        val senderTrack = localTracks[didStartReceivingOnTransceiver.sender.track?.trackId]
 
         val trackEvent = TrackEvent(
-            receiver = RtpReceiver(didStartReceivingOnTransceiver.receiver),
+            receiver = RtpReceiver(didStartReceivingOnTransceiver.receiver, receiverTrack),
             streams = commonStreams,
-            track = track,
-            transceiver = RtpTransceiver(didStartReceivingOnTransceiver)
+            track = receiverTrack,
+            transceiver = RtpTransceiver(didStartReceivingOnTransceiver, senderTrack, receiverTrack)
         )
 
         val event = Track(trackEvent)
@@ -265,7 +284,9 @@ actual class PeerConnection actual constructor(
     }
 
     override fun peerConnection(peerConnection: RTCPeerConnection, didRemoveReceiver: RTCRtpReceiver) {
-        val event = RemoveTrack(RtpReceiver(didRemoveReceiver))
+        val track = remoteTracks.remove(didRemoveReceiver.track?.trackId)
+        val event = RemoveTrack(RtpReceiver(didRemoveReceiver, track))
         _peerConnectionEvent.tryEmit(event)
+        track?.stop()
     }
 }

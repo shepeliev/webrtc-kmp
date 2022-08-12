@@ -4,8 +4,6 @@ import org.w3c.dom.mediacapture.MediaStream as JsMediaStream
 
 actual class MediaStream internal constructor(val js: JsMediaStream) {
 
-    actual constructor(tracks: List<MediaStreamTrack>) : this(JsMediaStream(tracks.map { it.js }.toTypedArray()))
-
     actual val id: String
         get() = js.id
 

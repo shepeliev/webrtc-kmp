@@ -8,17 +8,10 @@ import java.util.UUID
 actual class MediaStream internal constructor(
     val android: MediaStream?,
     actual val id: String = android?.id ?: UUID.randomUUID().toString(),
-    tracks: List<MediaStreamTrack> = emptyList(),
 ) {
-
-    actual constructor(tracks: List<MediaStreamTrack>) : this(android = null, tracks = tracks)
 
     private val _tracks = mutableListOf<MediaStreamTrack>()
     actual val tracks: List<MediaStreamTrack> = _tracks
-
-    init {
-        _tracks += tracks
-    }
 
     actual fun addTrack(track: MediaStreamTrack) {
         android?.let {
