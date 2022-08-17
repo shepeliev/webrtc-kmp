@@ -125,7 +125,7 @@ internal class CameraVideoCaptureController(
         }
 
         override fun onCameraClosed() {
-            videoCapturerErrorListener.onError("Camera closed")
+            // Do nothing
         }
     }
 }
