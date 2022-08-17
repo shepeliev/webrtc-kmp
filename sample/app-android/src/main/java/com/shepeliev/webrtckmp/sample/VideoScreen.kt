@@ -95,20 +95,29 @@ fun VideoScreen(room: Room) {
                 }
             }
 
-            Row(
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                if (roomModel.roomId == null) {
-                    Button(onClick = room::createRoom, enabled = !roomModel.isJoining) {
-                        Text("Create")
-                    }
-
-                    JoinRoomButton(onJoin = room::joinRoom, enabled = !roomModel.isJoining)
+                Button(onClick = room::switchCamera) {
+                    Text("Switch camera")
                 }
 
-                Button(onClick = room::hangup) {
-                    Text("Hangup")
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    if (roomModel.roomId == null) {
+                        Button(onClick = room::createRoom, enabled = !roomModel.isJoining) {
+                            Text("Create")
+                        }
+
+                        JoinRoomButton(onJoin = room::joinRoom, enabled = !roomModel.isJoining)
+                    }
+
+                    Button(onClick = room::hangup) {
+                        Text("Hangup")
+                    }
                 }
             }
         }

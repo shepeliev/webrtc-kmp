@@ -88,6 +88,14 @@ class RoomComponent(
             }
         }
 
+        override fun switchCamera() {
+            logger.i { "Switch camera" }
+            scope.launch {
+                model.value.localStream?.videoTracks?.first()?.switchCamera()
+                logger.i { "Camera switched" }
+            }
+        }
+
         override fun createRoom() {
             logger.i { "Create room" }
 
