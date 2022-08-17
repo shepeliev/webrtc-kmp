@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "com.shepeliev"
-version = "0.100.1"
+version = "0.100.2"
 
 val jitsiWebRtcVersion = "100.0.2"
 
