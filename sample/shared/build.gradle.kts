@@ -8,17 +8,15 @@ kotlin {
     val xcf = XCFramework()
 
     ios {
-        val frameworks = getFrameworks(konanTarget).filterKeys { it != "WebRTC" }
-
         compilations.getByName("main") {
             cinterops.create("FirebaseCore") {
-                frameworks.forEach { (framework, path) ->
+                getFrameworks(konanTarget).forEach { (framework, path) ->
                     compilerOpts("-framework", framework, "-F$path")
                 }
             }
 
             cinterops.create("FirebaseFirestore") {
-                frameworks.forEach { (framework, path) ->
+                getFrameworks(konanTarget).forEach { (framework, path) ->
                     compilerOpts("-framework", framework, "-F$path")
                 }
             }
@@ -33,7 +31,7 @@ kotlin {
             transitiveExport = true
             isStatic = true
 
-            frameworks.forEach { (framework, path) ->
+            getFrameworks(konanTarget).forEach  { (framework, path) ->
                 linkerOpts("-framework", framework, "-F$path")
             }
 

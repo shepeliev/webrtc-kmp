@@ -16,21 +16,24 @@ kotlin {
     }
 
     ios {
-        val frameworks = getFrameworks(konanTarget).filterKeys { it == "WebRTC" }
 
         compilations.getByName("main") {
             cinterops.create("WebRTC") {
-                frameworks.forEach { (framework, path) ->
-                    compilerOpts("-framework", framework, "-F$path")
-                }
+                getFrameworks(konanTarget)
+                    .filterKeys { it == "WebRTC" }
+                    .forEach { (framework, path) ->
+                        compilerOpts("-framework", framework, "-F$path")
+                    }
             }
         }
 
         binaries {
             getTest("DEBUG").apply {
-                frameworks.forEach { (framework, path) ->
-                    linkerOpts("-framework", framework, "-F$path", "-rpath", "$path", "-ObjC")
-                }
+                getFrameworks(konanTarget)
+                    .filterKeys { it == "WebRTC" }
+                    .forEach { (framework, path) ->
+                        linkerOpts("-framework", framework, "-F$path", "-rpath", "$path", "-ObjC")
+                    }
             }
         }
     }
