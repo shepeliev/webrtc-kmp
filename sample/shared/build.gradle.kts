@@ -31,7 +31,7 @@ kotlin {
             transitiveExport = true
             isStatic = true
 
-            getFrameworks(konanTarget).forEach  { (framework, path) ->
+            getFrameworks(konanTarget).forEach { (framework, path) ->
                 linkerOpts("-framework", framework, "-F$path")
             }
 
