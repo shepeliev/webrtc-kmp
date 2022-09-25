@@ -9,24 +9,10 @@ buildscript {
     }
 }
 
-plugins {
-    id("carthage-setup")
-}
-
 allprojects {
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
         kotlinOptions {
             freeCompilerArgs = freeCompilerArgs + "-opt-in=kotlin.RequiresOptIn"
         }
-    }
-}
-
-subprojects {
-    afterEvaluate {
-        tasks.withType<org.jetbrains.kotlin.gradle.tasks.CInteropProcess> {
-            dependsOn(":carthageUpdate")
-        }
-
-        tasks.findByName("clean")?.dependsOn(":carthageClean")
     }
 }
