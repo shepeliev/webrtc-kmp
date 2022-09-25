@@ -7,6 +7,7 @@ Demo application for WebRTC KMP.
 ```bash
 git clone https://github.com/shepeliev/webrtc-kmp.git
 cd webrtc-kmp
+carthage update --use--xcframeworks
 ```
 
 ### Android
