@@ -21,16 +21,16 @@ kotlin {
         compilations.getByName("main") {
             cinterops.create("WebRTC") {
                 frameworks.forEach { (framework, path) ->
-                        compilerOpts("-framework", framework, "-F$path")
-                    }
+                    compilerOpts("-framework", framework, "-F$path")
+                }
             }
         }
 
         binaries {
             getTest("DEBUG").apply {
                 frameworks.forEach { (framework, path) ->
-                        linkerOpts("-framework", framework, "-F$path", "-rpath", "$path", "-ObjC")
-                    }
+                    linkerOpts("-framework", framework, "-F$path", "-rpath", "$path", "-ObjC")
+                }
             }
         }
     }
