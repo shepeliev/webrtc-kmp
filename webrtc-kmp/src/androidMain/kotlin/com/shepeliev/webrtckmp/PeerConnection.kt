@@ -31,7 +31,7 @@ import org.webrtc.SessionDescription as AndroidSessionDescription
 
 actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguration) {
 
-    val android: AndroidPeerConnection = peerConnectionFactory.createPeerConnection(
+    val android: AndroidPeerConnection = WebRtc.peerConnectionFactory.createPeerConnection(
         rtcConfiguration.android,
         AndroidPeerConnectionObserver()
     ) ?: error("Creating PeerConnection failed")

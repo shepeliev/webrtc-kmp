@@ -25,10 +25,3 @@ fun Throwable.log() {
         it.log()
     }
 }
-
-actual fun initialize() {
-}
-
-actual fun disposeWebRtc() {
-    // no implementation for JS
-}

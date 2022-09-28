@@ -19,19 +19,19 @@ private object MediaDevicesImpl : MediaDevices {
                 mandatoryConstraints = audioConstraints.toMandatoryMap(),
                 optionalConstraints = audioConstraints.toOptionalMap()
             )
-            val audioSource = factory.audioSourceWithConstraints(mediaConstraints)
-            val track = factory.audioTrackWithSource(audioSource, NSUUID.UUID().UUIDString())
+            val audioSource = WebRtc.peerConnectionFactory.audioSourceWithConstraints(mediaConstraints)
+            val track = WebRtc.peerConnectionFactory.audioTrackWithSource(audioSource, NSUUID.UUID().UUIDString())
             AudioStreamTrack(track)
         }
 
         val videoTrack = constraints.video?.let { videoConstraints ->
-            val videoSource = factory.videoSource()
-            val iosVideoTrack = factory.videoTrackWithSource(videoSource, NSUUID.UUID().UUIDString())
+            val videoSource = WebRtc.peerConnectionFactory.videoSource()
+            val iosVideoTrack = WebRtc.peerConnectionFactory.videoTrackWithSource(videoSource, NSUUID.UUID().UUIDString())
             val videoCaptureController = CameraVideoCaptureController(videoConstraints, videoSource)
             VideoStreamTrack(iosVideoTrack, videoCaptureController)
         }
 
-        val localMediaStream = factory.mediaStreamWithStreamId(NSUUID.UUID().UUIDString())
+        val localMediaStream = WebRtc.peerConnectionFactory.mediaStreamWithStreamId(NSUUID.UUID().UUIDString())
         return MediaStream(localMediaStream).apply {
             if (audioTrack != null) addTrack(audioTrack)
             if (videoTrack != null) addTrack(videoTrack)

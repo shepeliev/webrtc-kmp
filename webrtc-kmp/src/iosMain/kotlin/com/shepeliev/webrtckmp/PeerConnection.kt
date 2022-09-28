@@ -39,7 +39,7 @@ actual class PeerConnection actual constructor(
 ) : NSObject(), RTCPeerConnectionDelegateProtocol {
 
     val ios: RTCPeerConnection = checkNotNull(
-        factory.peerConnectionWithConfiguration(
+        WebRtc.peerConnectionFactory.peerConnectionWithConfiguration(
             configuration = rtcConfiguration.native,
             constraints = RTCMediaConstraints(),
             delegate = this

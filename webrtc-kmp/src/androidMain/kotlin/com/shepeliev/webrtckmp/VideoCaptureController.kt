@@ -24,8 +24,12 @@ internal abstract class VideoCaptureController(private val videoSource: VideoSou
     fun startCapture() {
         check(!disposed) { "Video capturer disposed" }
         check(textureHelper == null) { "Video capturer already started" }
-        textureHelper = SurfaceTextureHelper.create("VideoCapturerTextureHelper", eglBaseContext)
-        videoCapturer.initialize(textureHelper, applicationContext, videoSource.capturerObserver)
+        textureHelper = SurfaceTextureHelper.create("VideoCapturerTextureHelper", WebRtc.rootEglBase.eglBaseContext)
+        videoCapturer.initialize(
+            textureHelper,
+            ApplicationContextHolder.context,
+            videoSource.capturerObserver
+        )
         val size = selectVideoSize()
         val fps = selectFps()
         videoCapturer.startCapture(size.width, size.height, fps)

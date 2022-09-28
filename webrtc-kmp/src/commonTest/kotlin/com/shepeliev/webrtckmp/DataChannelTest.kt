@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withTimeout
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Ignore
 import kotlin.test.Test
@@ -18,7 +19,12 @@ class DataChannelTest {
 
     @BeforeTest
     fun setUp() {
-        initialize()
+        WebRtc.initialize()
+    }
+
+    @AfterTest
+    fun afterTest() {
+        WebRtc.dispose()
     }
 
     @Test
