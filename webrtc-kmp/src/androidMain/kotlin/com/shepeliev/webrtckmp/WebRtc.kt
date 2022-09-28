@@ -14,7 +14,7 @@ actual object WebRtc {
     private var _eglBase: EglBase? = null
     val rootEglBase: EglBase
         get() {
-            if (_eglBase ==null) initialize()
+            if (_eglBase == null) initialize()
             return checkNotNull(_eglBase)
         }
 
