@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.CInteropProcess
-
 plugins {
     id("com.android.library")
     kotlin("multiplatform")
@@ -37,39 +35,5 @@ android {
     defaultConfig {
         minSdk = AndroidConfig.minSdkVersion
         targetSdk = AndroidConfig.targetSdkVersion
-    }
-}
-
-if (projectDir.resolve("src/nativeInterop/cinterop/Cartfile").exists()) {
-    tasks.register<Exec>("carthageUpdate") {
-        group = "Carthage"
-        description = "Update Carthage dependencies"
-        executable = "carthage"
-        args(
-            "update",
-            "--project-directory",
-            projectDir.resolve("src/nativeInterop/cinterop"),
-            "--use-xcframeworks",
-            "--cache-builds"
-        )
-    }
-
-    tasks.withType<CInteropProcess>() {
-        dependsOn("carthageUpdate")
-    }
-}
-
-tasks.register<Delete>("carthageClean") {
-    group = "Carthage"
-    description = "Clean Carthage dependencies"
-    delete(
-        projectDir.resolve("src/nativeInterop/cinterop/Carthage"),
-        projectDir.resolve("src/nativeInterop/cinterop/Cartfile.resolved")
-    )
-}
-
-afterEvaluate {
-    tasks.named<Delete>("clean") {
-        dependsOn("carthageClean")
     }
 }

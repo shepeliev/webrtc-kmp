@@ -7,49 +7,19 @@ plugins {
 kotlin {
     val xcf = XCFramework()
 
-    val firebaseCoreFrameworks = listOf(
-        "FirebaseAnalytics",
-        "FirebaseCore",
-        "FirebaseCoreDiagnostics",
-        "FirebaseInstallations",
-        "GoogleAppMeasurement",
-        "GoogleAppMeasurementIdentitySupport",
-        "GoogleDataTransport",
-        "GoogleUtilities",
-        "nanopb",
-        "PromisesObjC",
-    )
-
-    val firestoreFrameworks = listOf(
-        "abseil",
-        "BoringSSL-GRPC",
-        "FirebaseFirestore",
-        "gRPC-C++",
-        "gRPC-Core",
-        "leveldb-library",
-        "Libuv-gRPC"
-    )
-
     ios {
+        val frameworks = getFrameworks(konanTarget).filterKeys { it != "WebRTC" }
 
         compilations.getByName("main") {
             cinterops.create("FirebaseCore") {
-                firebaseCoreFrameworks.forEach { framework ->
-                    compilerOpts(
-                        "-framework",
-                        framework,
-                        "-F${resolveFrameworkPath(framework, ::firebaseArchVariant)}"
-                    )
+                frameworks.forEach { (framework, path) ->
+                    compilerOpts("-framework", framework, "-F$path")
                 }
             }
 
             cinterops.create("FirebaseFirestore") {
-                firestoreFrameworks.forEach { framework ->
-                    compilerOpts(
-                        "-framework",
-                        framework,
-                        "-F${resolveFrameworkPath(framework, ::firebaseArchVariant)}"
-                    )
+                frameworks.forEach { (framework, path) ->
+                    compilerOpts("-framework", framework, "-F$path")
                 }
             }
         }
@@ -63,12 +33,9 @@ kotlin {
             transitiveExport = true
             isStatic = true
 
-            (firebaseCoreFrameworks + firestoreFrameworks).forEach {
-                linkerOpts("-framework", it, "-F${resolveFrameworkPath(it, ::firebaseArchVariant)}")
+            frameworks.forEach { (framework, path) ->
+                linkerOpts("-framework", framework, "-F$path")
             }
-
-            val webRtcFrameworkPath = project(":webrtc-kmp").resolveFrameworkPath("WebRTC", ::webrtcArchVariant)
-            linkerOpts("-framework", "WebRTC", "-F$webRtcFrameworkPath")
 
             linkerOpts("-ObjC")
         }
