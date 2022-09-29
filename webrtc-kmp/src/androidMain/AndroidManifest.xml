@@ -5,5 +5,10 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
-    <application/>
+    <application>
+        <provider
+            android:authorities="${applicationId}.webrtckmp.provider"
+            android:name=".ApplicationContextHolder"
+            android:exported="false" />
+    </application>
 </manifest>

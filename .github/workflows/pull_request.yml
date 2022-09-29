@@ -38,7 +38,7 @@ jobs:
         if: failure()
         with:
           name: "Android Instrumented Tests Report HTML"
-          path: "build/reports/androidTests/connected"
+          path: "webrtc-kmp/build/reports/androidTests/connected"
 
       - name: Install Carthage
         run: brew list carthage || brew install carthage
@@ -54,7 +54,7 @@ jobs:
         if: failure()
         with:
           name: "iOS Tests Report HTML"
-          path: "build/reports/tests/iosTest"
+          path: "webrtc-kmp/build/reports/tests/iosX64Test"
 
       - name: Run JS tests
         run: ./gradlew jsIrTest
@@ -64,4 +64,4 @@ jobs:
         if: failure()
         with:
           name: "JS Tests Report HTML"
-          path: "build/reports/tests/jsTest"
+          path: "webrtc-kmp/build/reports/tests/jsTest"

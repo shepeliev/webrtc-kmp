@@ -221,9 +221,12 @@ class RoomComponent(
             logger.i { "Hangup" }
 
             roomSessionJob?.cancel()
+            roomSessionJob = null
             _model.value.localStream?.release()
-            peerConnection?.close()
             _model.reduce { Room.Model() }
+
+            peerConnection?.close()
+            peerConnection = null
         }
 
         override fun onDestroy() {

@@ -1,7 +1,5 @@
 package com.shepeliev.webrtckmp
 
-import WebRTC.RTCCleanupSSL
-import WebRTC.RTCShutdownInternalTracer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.async
@@ -38,13 +36,4 @@ actual inline fun runTest(
         it.printStackTrace()
         throw it
     }
-}
-
-actual fun initialize() {
-    initializeWebRtc()
-}
-
-actual fun disposeWebRtc() {
-    RTCShutdownInternalTracer()
-    RTCCleanupSSL()
 }

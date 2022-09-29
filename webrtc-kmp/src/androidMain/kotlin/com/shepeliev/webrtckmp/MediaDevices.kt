@@ -32,21 +32,21 @@ private object MediaDevicesImpl : MediaDevices {
                         .map { (k, v) -> MediaConstraints.KeyValuePair("$k", "$v") }
                 )
             }
-            val audioSource = peerConnectionFactory.createAudioSource(mediaConstraints)
-            val androidTrack = peerConnectionFactory.createAudioTrack(UUID.randomUUID().toString(), audioSource)
+            val audioSource = WebRtc.peerConnectionFactory.createAudioSource(mediaConstraints)
+            val androidTrack = WebRtc.peerConnectionFactory.createAudioTrack(UUID.randomUUID().toString(), audioSource)
             audioTrack = AudioStreamTrack(androidTrack, audioSource)
         }
 
         var videoTrack: VideoStreamTrack? = null
         if (constraints.video != null) {
             checkCameraPermission()
-            val videoSource = peerConnectionFactory.createVideoSource(false)
+            val videoSource = WebRtc.peerConnectionFactory.createVideoSource(false)
             val videoCaptureController = CameraVideoCaptureController(constraints.video, videoSource)
-            val androidTrack = peerConnectionFactory.createVideoTrack(UUID.randomUUID().toString(), videoSource)
+            val androidTrack = WebRtc.peerConnectionFactory.createVideoTrack(UUID.randomUUID().toString(), videoSource)
             videoTrack = VideoStreamTrack(androidTrack, videoCaptureController)
         }
 
-        val localMediaStream = peerConnectionFactory.createLocalMediaStream(UUID.randomUUID().toString())
+        val localMediaStream = WebRtc.peerConnectionFactory.createLocalMediaStream(UUID.randomUUID().toString())
         return MediaStream(localMediaStream).apply {
             if (audioTrack != null) addTrack(audioTrack)
             if (videoTrack != null) addTrack(videoTrack)
@@ -61,7 +61,7 @@ private object MediaDevicesImpl : MediaDevices {
 
     private fun checkRecordAudioPermission() {
         val result = ContextCompat.checkSelfPermission(
-            applicationContext,
+            ApplicationContextHolder.context,
             Manifest.permission.RECORD_AUDIO
         )
         if (result == PackageManager.PERMISSION_DENIED) throw RecordAudioPermissionException()
@@ -69,14 +69,14 @@ private object MediaDevicesImpl : MediaDevices {
 
     private fun checkCameraPermission() {
         val result = ContextCompat.checkSelfPermission(
-            applicationContext,
+            ApplicationContextHolder.context,
             Manifest.permission.CAMERA
         )
         if (result == PackageManager.PERMISSION_DENIED) throw CameraPermissionException()
     }
 
     override suspend fun enumerateDevices(): List<MediaDeviceInfo> {
-        val enumerator = Camera2Enumerator(applicationContext)
+        val enumerator = Camera2Enumerator(ApplicationContextHolder.context)
         return enumerator.deviceNames.map {
             MediaDeviceInfo(
                 deviceId = it,

@@ -12,7 +12,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.shepeliev.webrtckmp.VideoStreamTrack
-import com.shepeliev.webrtckmp.eglBase
+import com.shepeliev.webrtckmp.WebRtc
 import org.webrtc.RendererCommon
 import org.webrtc.SurfaceViewRenderer
 import org.webrtc.VideoSink
@@ -31,7 +31,7 @@ fun Video(
             when (event) {
                 Lifecycle.Event.ON_RESUME -> {
                     renderer?.also {
-                        it.init(eglBase.eglBaseContext, null)
+                        it.init(WebRtc.rootEglBase.eglBaseContext, null)
                         track.addSinkCatching(it)
                     }
                 }

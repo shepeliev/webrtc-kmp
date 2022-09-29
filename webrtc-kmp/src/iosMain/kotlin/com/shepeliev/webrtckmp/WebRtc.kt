@@ -1,5 +1,6 @@
 package com.shepeliev.webrtckmp
 
+import WebRTC.RTCCleanupSSL
 import WebRTC.RTCDefaultVideoDecoderFactory
 import WebRTC.RTCDefaultVideoEncoderFactory
 import WebRTC.RTCInitFieldTrialDictionary
@@ -9,24 +10,63 @@ import WebRTC.RTCPeerConnectionFactory
 import WebRTC.RTCPeerConnectionFactoryOptions
 import WebRTC.RTCSetMinDebugLogLevel
 import WebRTC.RTCSetupInternalTracer
+import WebRTC.RTCShutdownInternalTracer
 
-@Deprecated("It will be removed in one of the future releases.")
+@ThreadLocal
 actual object WebRtc {
 
-    @Deprecated(
-        message = "Use MediaDevices companion object.",
-        replaceWith = ReplaceWith("MediaDevices")
-    )
-    actual val mediaDevices: MediaDevices = MediaDevices
+    private var _peerConnectionFactory: RTCPeerConnectionFactory? = null
+    internal val peerConnectionFactory: RTCPeerConnectionFactory
+        get() {
+            if (_peerConnectionFactory == null) initialize()
+            return checkNotNull(_peerConnectionFactory)
+        }
+
+    private var builder = WebRtcBuilder()
+
+    fun configureBuilder(block: WebRtcBuilder.() -> Unit) {
+        block(builder)
+    }
+
+    actual fun initialize() {
+        initializePeerConnectionFactory()
+        _peerConnectionFactory = buildPeerConnectionFactory(builder.peerConnectionFactoryOptions)
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun initializePeerConnectionFactory() {
+        with(builder) {
+            RTCInitFieldTrialDictionary(fieldTrials as Map<Any?, *>)
+            RTCInitializeSSL()
+            loggingSeverity?.also { RTCSetMinDebugLogLevel(it) }
+            if (enableInternalTracer) {
+                RTCSetupInternalTracer()
+            }
+        }
+    }
+
+    private fun buildPeerConnectionFactory(options: RTCPeerConnectionFactoryOptions?): RTCPeerConnectionFactory {
+        val factory = RTCPeerConnectionFactory(
+            RTCDefaultVideoEncoderFactory(),
+            RTCDefaultVideoDecoderFactory()
+        )
+        options?.also { factory.setOptions(options) }
+        return factory
+    }
+
+    actual fun dispose() {
+        RTCShutdownInternalTracer()
+        RTCCleanupSSL()
+    }
 }
 
+@Deprecated(
+    "Use WebRtc.initialize()",
+    replaceWith = ReplaceWith("WebRtc.initialize()")
+)
 fun initializeWebRtc(build: WebRtcBuilder.() -> Unit = {}) {
-    build(webRtcBuilder)
-}
-
-val factory: RTCPeerConnectionFactory by lazy {
-    initializePeerConnectionFactory()
-    buildPeerConnectionFactory(webRtcBuilder.peerConnectionFactoryOptions)
+    WebRtc.configureBuilder(build)
+    WebRtc.initialize()
 }
 
 class WebRtcBuilder(
@@ -35,26 +75,3 @@ class WebRtcBuilder(
     var enableInternalTracer: Boolean = false,
     var loggingSeverity: RTCLoggingSeverity? = null
 )
-
-private val webRtcBuilder = WebRtcBuilder()
-
-@Suppress("UNCHECKED_CAST")
-private fun initializePeerConnectionFactory() {
-    with(webRtcBuilder) {
-        RTCInitFieldTrialDictionary(fieldTrials as Map<Any?, *>)
-        RTCInitializeSSL()
-        loggingSeverity?.also { RTCSetMinDebugLogLevel(it) }
-        if (enableInternalTracer) {
-            RTCSetupInternalTracer()
-        }
-    }
-}
-
-private fun buildPeerConnectionFactory(options: RTCPeerConnectionFactoryOptions?): RTCPeerConnectionFactory {
-    val factory = RTCPeerConnectionFactory(
-        RTCDefaultVideoEncoderFactory(),
-        RTCDefaultVideoDecoderFactory()
-    )
-    options?.also { factory.setOptions(options) }
-    return factory
-}

@@ -1,5 +1,6 @@
 package com.shepeliev.webrtckmp
 
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -9,8 +10,13 @@ import kotlin.test.assertTrue
 class PeerConnectionTest {
 
     @BeforeTest
-    fun setup() {
-        initialize()
+    fun beforeTest() {
+        WebRtc.initialize()
+    }
+
+    @AfterTest
+    fun afterTest() {
+        WebRtc.dispose()
     }
 
     @Test

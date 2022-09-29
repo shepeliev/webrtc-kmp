@@ -18,7 +18,7 @@ internal class CameraVideoCaptureController(
 ) : VideoCaptureController(videoSource) {
 
     private val tag = "CameraCaptureController"
-    private val enumerator = Camera2Enumerator(applicationContext)
+    private val enumerator = Camera2Enumerator(ApplicationContextHolder.context)
     private var device: String? = null
 
     override fun createVideoCapturer(): VideoCapturer {
