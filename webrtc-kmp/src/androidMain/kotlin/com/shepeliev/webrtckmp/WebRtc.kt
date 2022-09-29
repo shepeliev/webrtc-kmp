@@ -27,8 +27,8 @@ actual object WebRtc {
 
     private var builder = WebRtcBuilder()
 
-    fun configure(build: WebRtcBuilder.() -> Unit = {}) {
-        build(builder)
+    fun configureBuilder(block: WebRtcBuilder.() -> Unit = {}) {
+        block(builder)
     }
 
     actual fun initialize() {
@@ -94,7 +94,7 @@ fun initializeWebRtc(
     eglBaseInstance: EglBase = EglBase.create(),
     build: WebRtcBuilder.() -> Unit = {}
 ) {
-    WebRtc.configure(build)
+    WebRtc.configureBuilder(build)
     WebRtc.initialize()
 }
 

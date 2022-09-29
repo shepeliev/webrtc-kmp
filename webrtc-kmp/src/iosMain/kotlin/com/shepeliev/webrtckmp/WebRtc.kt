@@ -24,13 +24,13 @@ actual object WebRtc {
 
     private var builder = WebRtcBuilder()
 
-    fun configure(build: WebRtcBuilder.() -> Unit) {
-        build(builder)
+    fun configureBuilder(block: WebRtcBuilder.() -> Unit) {
+        block(builder)
     }
 
     actual fun initialize() {
         initializePeerConnectionFactory()
-        buildPeerConnectionFactory(builder.peerConnectionFactoryOptions)
+        _peerConnectionFactory = buildPeerConnectionFactory(builder.peerConnectionFactoryOptions)
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -65,7 +65,7 @@ actual object WebRtc {
     replaceWith = ReplaceWith("WebRtc.initialize()")
 )
 fun initializeWebRtc(build: WebRtcBuilder.() -> Unit = {}) {
-    WebRtc.configure(build)
+    WebRtc.configureBuilder(build)
     WebRtc.initialize()
 }
 
