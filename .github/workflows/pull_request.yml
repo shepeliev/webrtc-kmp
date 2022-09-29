@@ -54,7 +54,7 @@ jobs:
         if: failure()
         with:
           name: "iOS Tests Report HTML"
-          path: "webrtc-kmp/build/reports/tests/iosTest"
+          path: "webrtc-kmp/build/reports/tests/iosX64Test"
 
       - name: Run JS tests
         run: ./gradlew jsIrTest
