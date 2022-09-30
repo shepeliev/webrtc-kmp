@@ -22,7 +22,7 @@ fun Video(
     track: VideoStreamTrack,
     modifier: Modifier = Modifier,
     scalingTypeMatchOrientation: RendererCommon.ScalingType = RendererCommon.ScalingType.SCALE_ASPECT_BALANCED,
-    scalingTypeMismatchOrientation: RendererCommon.ScalingType = RendererCommon.ScalingType.SCALE_ASPECT_FIT,
+    scalingTypeMismatchOrientation: RendererCommon.ScalingType = RendererCommon.ScalingType.SCALE_ASPECT_BALANCED,
 ) {
     var renderer by remember { mutableStateOf<SurfaceViewRenderer?>(null) }
 

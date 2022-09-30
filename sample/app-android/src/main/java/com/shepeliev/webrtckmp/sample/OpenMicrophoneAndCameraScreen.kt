@@ -3,6 +3,7 @@ package com.shepeliev.webrtckmp.sample
 import android.Manifest
 import android.preference.PreferenceManager
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
@@ -24,7 +25,12 @@ import com.shepeliev.webrtckmp.sample.shared.Room
 @Composable
 fun OpenMicrophoneAndCameraScreen(room: Room) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        OpenCameraAndMicrophoneButton(onClick = room::openUserMedia)
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            OpenCameraAndMicrophoneButton(onClick = room::openUserMedia)
+            Button(onClick = { room.openUserMedia(videoDeviceId = "color-bars") }) {
+                Text("Open test media stream")
+            }
+        }
     }
 }
 

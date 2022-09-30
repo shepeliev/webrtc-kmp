@@ -7,7 +7,7 @@ interface Room {
 
     val model: Value<Model>
 
-    fun openUserMedia()
+    fun openUserMedia(videoDeviceId: String? = null)
     fun switchCamera()
     fun createRoom()
     fun joinRoom(roomId: String)

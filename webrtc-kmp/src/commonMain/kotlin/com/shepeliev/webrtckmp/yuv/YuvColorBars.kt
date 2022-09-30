@@ -11,7 +11,7 @@ internal class YuvColorBars(width: Int, height: Int) {
 
     private val minYBarWidth = 2
     private val yBarWidth = maxOf(width / yBars.size, minYBarWidth)
-    private val uvStrideSize = width / 2 + width % 2
+    val uvStrideSize = width / 2 + width % 2
     private val numberOfUvStrides = height / 2 + height % 2
     private val uvBarWidth = yBarWidth / 2 + yBarWidth % 2
 

@@ -73,13 +73,16 @@ class RoomComponent(
         private var peerConnection: PeerConnection? = null
         private var roomSessionJob: Job? = null
 
-        override fun openUserMedia() {
+        override fun openUserMedia(videoDeviceId: String?) {
             logger.i { "Open user media" }
             roomSessionJob = SupervisorJob()
 
             scope.launch {
                 try {
-                    val stream = MediaDevices.getUserMedia(audio = true, video = true)
+                    val stream = MediaDevices.getUserMedia {
+                        audio()
+                        video { videoDeviceId?.let { deviceId(it) } }
+                    }
                     _model.reduce { it.copy(localStream = stream) }
                     listenTrackState(stream.videoTracks.first(), "Local video")
                 } catch (e: Throwable) {
