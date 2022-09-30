@@ -35,6 +35,9 @@ enum class FacingMode { User, Environment }
 enum class ResizeMode { None, CropAndScale }
 
 data class Constrain<T>(var exact: T? = null, var ideal: T? = null) {
+
+    val value: T? get() = exact ?: ideal
+
     fun exact(value: T) {
         exact = value
     }
@@ -42,6 +45,8 @@ data class Constrain<T>(var exact: T? = null, var ideal: T? = null) {
     fun ideal(value: T) {
         ideal = value
     }
+
+    fun matches(value: T): Boolean = exact?.let { it == value } ?: ideal?.let { true } ?: false
 }
 
 class MediaStreamConstraintsBuilder {
