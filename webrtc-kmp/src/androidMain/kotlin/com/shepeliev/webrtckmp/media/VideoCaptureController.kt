@@ -1,5 +1,7 @@
-package com.shepeliev.webrtckmp
+package com.shepeliev.webrtckmp.media
 
+import com.shepeliev.webrtckmp.ApplicationContextHolder
+import com.shepeliev.webrtckmp.WebRtc
 import org.webrtc.Size
 import org.webrtc.SurfaceTextureHelper
 import org.webrtc.VideoCapturer

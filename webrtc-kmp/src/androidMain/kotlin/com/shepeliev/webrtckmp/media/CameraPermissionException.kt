@@ -1,3 +1,3 @@
-package com.shepeliev.webrtckmp
+package com.shepeliev.webrtckmp.media
 
 class CameraPermissionException : Exception()

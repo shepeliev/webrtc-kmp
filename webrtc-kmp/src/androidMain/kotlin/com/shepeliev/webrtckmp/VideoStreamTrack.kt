@@ -1,5 +1,8 @@
 package com.shepeliev.webrtckmp
 
+import com.shepeliev.webrtckmp.media.CameraVideoCaptureController
+import com.shepeliev.webrtckmp.media.VideoCaptureController
+import com.shepeliev.webrtckmp.media.VideoCapturerErrorListener
 import org.webrtc.VideoFrame
 import org.webrtc.VideoSink
 import org.webrtc.VideoTrack
