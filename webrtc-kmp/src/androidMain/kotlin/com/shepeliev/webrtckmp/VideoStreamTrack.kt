@@ -1,8 +1,7 @@
 package com.shepeliev.webrtckmp
 
-import com.shepeliev.webrtckmp.media.CameraVideoCaptureController
-import com.shepeliev.webrtckmp.media.VideoCaptureController
-import com.shepeliev.webrtckmp.media.VideoCapturerErrorListener
+import com.shepeliev.webrtckmp.media.CameraVideoCapturer
+import com.shepeliev.webrtckmp.media.VideoCapturer
 import org.webrtc.VideoFrame
 import org.webrtc.VideoSink
 import org.webrtc.VideoTrack
@@ -12,16 +11,16 @@ import java.util.concurrent.atomic.AtomicInteger
 
 actual class VideoStreamTrack internal constructor(
     android: VideoTrack,
-    private val videoCaptureController: VideoCaptureController? = null,
+    private val videoCapturer: VideoCapturer? = null,
 ) : MediaStreamTrack(android) {
 
     // Setup track mute detector for remote tracks only.
     private val trackMuteDetector: TrackMuteDetector? =
-        if (videoCaptureController == null) TrackMuteDetector() else null
+        if (videoCapturer == null) TrackMuteDetector() else null
 
     init {
-        videoCaptureController?.videoCapturerErrorListener = VideoCapturerErrorListener { stop() }
-        videoCaptureController?.startCapture()
+        videoCapturer?.addErrorListener { stop() }
+        videoCapturer?.startCapture()
         trackMuteDetector?.let {
             addSink(it)
             it.start()
@@ -29,8 +28,8 @@ actual class VideoStreamTrack internal constructor(
     }
 
     actual suspend fun switchCamera(deviceId: String?) {
-        (videoCaptureController as? CameraVideoCaptureController)?.let { controller ->
-            deviceId?.let { controller.switchCamera(it) } ?: controller.switchCamera()
+        (videoCapturer as? CameraVideoCapturer)?.let { capturer ->
+            deviceId?.let { capturer.switchCamera(it) } ?: capturer.switchCamera()
         }
     }
 
@@ -44,17 +43,17 @@ actual class VideoStreamTrack internal constructor(
 
     override fun onSetEnabled(enabled: Boolean) {
         if (enabled) {
-            videoCaptureController?.startCapture()
+            videoCapturer?.startCapture()
             trackMuteDetector?.start()
         } else {
-            videoCaptureController?.stopCapture()
+            videoCapturer?.stopCapture()
             trackMuteDetector?.stop()
         }
     }
 
     override fun onStop() {
-        videoCaptureController?.stopCapture()
-        videoCaptureController?.dispose()
+        videoCapturer?.stopCapture()
+        videoCapturer?.dispose()
         trackMuteDetector?.let {
             removeSink(it)
             it.dispose()

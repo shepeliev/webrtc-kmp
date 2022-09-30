@@ -6,7 +6,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
 import com.shepeliev.webrtckmp.media.CameraPermissionException
-import com.shepeliev.webrtckmp.media.CameraVideoCaptureController
+import com.shepeliev.webrtckmp.media.VideoCapturerFactory
 import org.webrtc.Camera2Enumerator
 import org.webrtc.MediaConstraints
 import java.util.UUID
@@ -14,6 +14,8 @@ import java.util.UUID
 internal actual val mediaDevices: MediaDevices = MediaDevicesImpl
 
 private object MediaDevicesImpl : MediaDevices {
+
+    private val videoCapturerFactory = VideoCapturerFactory()
 
     override suspend fun getUserMedia(streamConstraints: MediaStreamConstraintsBuilder.() -> Unit): MediaStream {
         val constraints = MediaStreamConstraintsBuilder().let {
@@ -43,9 +45,9 @@ private object MediaDevicesImpl : MediaDevices {
         if (constraints.video != null) {
             checkCameraPermission()
             val videoSource = WebRtc.peerConnectionFactory.createVideoSource(false)
-            val videoCaptureController = CameraVideoCaptureController(constraints.video, videoSource)
             val androidTrack = WebRtc.peerConnectionFactory.createVideoTrack(UUID.randomUUID().toString(), videoSource)
-            videoTrack = VideoStreamTrack(androidTrack, videoCaptureController)
+            val videoCapturer = videoCapturerFactory.createVideoCapturer(videoSource, constraints.video)
+            videoTrack = VideoStreamTrack(androidTrack, videoCapturer)
         }
 
         val localMediaStream = WebRtc.peerConnectionFactory.createLocalMediaStream(UUID.randomUUID().toString())
