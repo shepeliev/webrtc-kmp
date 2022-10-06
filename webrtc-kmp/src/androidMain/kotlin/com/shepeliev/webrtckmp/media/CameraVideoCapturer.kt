@@ -1,19 +1,12 @@
 package com.shepeliev.webrtckmp.media
 
+import android.Manifest
 import android.content.Context
-import com.shepeliev.webrtckmp.CameraVideoCapturerException
-import com.shepeliev.webrtckmp.DEFAULT_FRAME_RATE
-import com.shepeliev.webrtckmp.DEFAULT_VIDEO_HEIGHT
-import com.shepeliev.webrtckmp.DEFAULT_VIDEO_WIDTH
-import com.shepeliev.webrtckmp.FacingMode
-import com.shepeliev.webrtckmp.VideoTrackConstraints
-import com.shepeliev.webrtckmp.WebRtc
-import org.webrtc.Camera2Enumerator
-import org.webrtc.CameraEnumerationAndroid
-import org.webrtc.CameraEnumerator
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
+import com.shepeliev.webrtckmp.*
+import org.webrtc.*
 import org.webrtc.Size
-import org.webrtc.SurfaceTextureHelper
-import org.webrtc.VideoSource
 import java.util.UUID
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
@@ -102,12 +95,21 @@ internal class CameraVideoCapturer(
     }
 
     override fun startCapture() {
+        checkCameraPermission()
         checkIsNotDisposed()
         cameraVideoCapturer.startCapture(
             checkNotNull(videoSize.width),
             checkNotNull(videoSize.height),
             videoFps
         )
+    }
+
+    private fun checkCameraPermission() {
+        val result = ContextCompat.checkSelfPermission(
+            ApplicationContextHolder.context,
+            Manifest.permission.CAMERA
+        )
+        if (result == PackageManager.PERMISSION_DENIED) throw CameraPermissionException()
     }
 
     override fun stopCapture() {

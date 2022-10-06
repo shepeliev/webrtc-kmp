@@ -5,7 +5,6 @@ package com.shepeliev.webrtckmp
 import android.Manifest
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
-import com.shepeliev.webrtckmp.media.CameraPermissionException
 import com.shepeliev.webrtckmp.media.VideoCapturerFactory
 import org.webrtc.Camera2Enumerator
 import org.webrtc.MediaConstraints
@@ -43,7 +42,6 @@ private object MediaDevicesImpl : MediaDevices {
 
         var videoTrack: VideoStreamTrack? = null
         if (constraints.video != null) {
-            checkCameraPermission()
             val videoSource = WebRtc.peerConnectionFactory.createVideoSource(false)
             val androidTrack = WebRtc.peerConnectionFactory.createVideoTrack(UUID.randomUUID().toString(), videoSource)
             val videoCapturer = videoCapturerFactory.createVideoCapturer(videoSource, constraints.video)
@@ -69,14 +67,6 @@ private object MediaDevicesImpl : MediaDevices {
             Manifest.permission.RECORD_AUDIO
         )
         if (result == PackageManager.PERMISSION_DENIED) throw RecordAudioPermissionException()
-    }
-
-    private fun checkCameraPermission() {
-        val result = ContextCompat.checkSelfPermission(
-            ApplicationContextHolder.context,
-            Manifest.permission.CAMERA
-        )
-        if (result == PackageManager.PERMISSION_DENIED) throw CameraPermissionException()
     }
 
     override suspend fun enumerateDevices(): List<MediaDeviceInfo> {
