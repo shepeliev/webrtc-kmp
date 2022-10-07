@@ -46,9 +46,12 @@ dependencies {
     commonMainImplementation(deps.kotlin.coroutines)
     androidMainImplementation(deps.androidx.coreKtx)
     androidMainApi(fileTree("build/libs/android") { include("*.jar") })
+    jsMainImplementation(npm("webrtc-adapter", "8.1.1"))
+
+    commonTestImplementation(deps.kotlin.coroutines.test)
     androidTestImplementation(deps.androidx.test.core)
     androidTestImplementation(deps.androidx.test.runner)
-    jsMainImplementation(npm("webrtc-adapter", "8.1.1"))
+    androidAndroidTestImplementation(deps.androidx.test.rules)
 }
 
 tasks.register<Download>("downloadAndroidWebRtc") {

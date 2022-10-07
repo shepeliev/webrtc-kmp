@@ -14,6 +14,7 @@ androidxActivityKtx = "1.3.1"
 androidxLifecycle = "2.5.1"
 androidxTestCore = "1.4.0"
 androidxTestRunner = "1.4.0"
+androidxTestRules = "1.4.0"
 
 accompanist = "0.25.0"
 decompose = "1.0.0-alpha-01"
@@ -23,6 +24,7 @@ firebaseBom = "30.3.1"
 [libraries]
 
 kotlin-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinCoroutines" }
+kotlin-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinCoroutines" }
 kotlin-coroutinesPlayServices = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlinCoroutines" }
 kotlin-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinserializationJson" }
 kotlin-wrappers-bom = { module = "org.jetbrains.kotlin-wrappers:kotlin-wrappers-bom", version.ref = "kotlinWrappers" }
@@ -40,6 +42,7 @@ androidx-compose-animation = { module = "androidx.compose.animation:animation", 
 androidx-lifecycle-runtime = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "androidxLifecycle" }
 androidx-test-core = { module = "androidx.test:core", version.ref = "androidxTestCore" }
 androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidxTestRunner" }
+androidx-test-rules = { module = "androidx.test:rules", version.ref = "androidxTestRules" }
 
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist" }
 
