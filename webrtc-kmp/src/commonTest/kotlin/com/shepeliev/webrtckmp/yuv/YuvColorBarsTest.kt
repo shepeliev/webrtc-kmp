@@ -203,7 +203,6 @@ class YuvColorBarsTest {
                 yBars[4], yBars[4], yBars[5], yBars[5], yBars[6], yBars[6], yBars[7], yBars[7],
                 yBars[7],
 
-
                 yBars[0], yBars[0], yBars[1], yBars[1], yBars[2], yBars[2], yBars[3], yBars[3],
                 yBars[4], yBars[4], yBars[5], yBars[5], yBars[6], yBars[6], yBars[7], yBars[7],
                 yBars[7],

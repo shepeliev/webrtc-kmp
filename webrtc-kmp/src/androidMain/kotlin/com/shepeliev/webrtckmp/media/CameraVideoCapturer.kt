@@ -4,9 +4,20 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
-import com.shepeliev.webrtckmp.*
-import org.webrtc.*
+import com.shepeliev.webrtckmp.ApplicationContextHolder
+import com.shepeliev.webrtckmp.CameraVideoCapturerException
+import com.shepeliev.webrtckmp.DEFAULT_FRAME_RATE
+import com.shepeliev.webrtckmp.DEFAULT_VIDEO_HEIGHT
+import com.shepeliev.webrtckmp.DEFAULT_VIDEO_WIDTH
+import com.shepeliev.webrtckmp.FacingMode
+import com.shepeliev.webrtckmp.VideoTrackConstraints
+import com.shepeliev.webrtckmp.WebRtc
+import org.webrtc.Camera2Enumerator
+import org.webrtc.CameraEnumerationAndroid
+import org.webrtc.CameraEnumerator
 import org.webrtc.Size
+import org.webrtc.SurfaceTextureHelper
+import org.webrtc.VideoSource
 import java.util.UUID
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
@@ -39,7 +50,6 @@ internal class CameraVideoCapturer(
         videoFps = selectFps(enumerator, deviceId)
         cameraVideoCapturer = enumerator.createCapturer(deviceId, CameraEventsHandler())
             .apply { initialize(textureHelper, context, videoSource.capturerObserver) }
-
     }
 
     private fun selectDeviceId(enumerator: CameraEnumerator): String {
