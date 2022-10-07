@@ -6,9 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import org.webrtc.AudioTrack as AndroidAudioTrack
 import org.webrtc.MediaStreamTrack as AndroidMediaStreamTrack
-import org.webrtc.VideoTrack as AndroidVideoTrack
 
 actual abstract class MediaStreamTrack internal constructor(val android: AndroidMediaStreamTrack) {
 
@@ -63,13 +61,5 @@ actual abstract class MediaStreamTrack internal constructor(val android: Android
             AndroidMediaStreamTrack.State.LIVE -> MediaStreamTrackState.Live(muted = false)
             AndroidMediaStreamTrack.State.ENDED -> MediaStreamTrackState.Live(muted = false)
         }
-    }
-}
-
-internal fun AndroidMediaStreamTrack.asCommon(): MediaStreamTrack {
-    return when (this) {
-        is AndroidAudioTrack -> AudioStreamTrack(this)
-        is AndroidVideoTrack -> VideoStreamTrack(this)
-        else -> error("Unknown native MediaStreamTrack: $this")
     }
 }
