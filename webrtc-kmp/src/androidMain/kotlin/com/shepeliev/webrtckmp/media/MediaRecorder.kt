@@ -126,12 +126,15 @@ actual class MediaRecorder actual constructor(
         }
 
         val (trackId, finished) = tracksMetadata.getOrPut(track) {
-            Logging.v(TAG, """
+            Logging.v(
+                TAG,
+                """
                 |Adding $track track to muxer.
                 |   Media format: ${encodedData.mediaFormat}.
                 |   Number of added tracks: ${tracksMetadata.size + 1}. 
                 |   Total tracks: $numberOfTracks
-                |""".trimMargin())
+                |""".trimMargin()
+            )
             val trackId = muxer.addTrack(encodedData.mediaFormat)
             TrackMetadata(trackId).also {
                 if (tracksMetadata.size == numberOfTracks - 1) {
