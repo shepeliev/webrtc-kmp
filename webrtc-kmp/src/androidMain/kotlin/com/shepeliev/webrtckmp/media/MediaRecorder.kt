@@ -129,10 +129,10 @@ actual class MediaRecorder actual constructor(
             Logging.v(
                 TAG,
                 """
-                |Adding $track track to muxer.
-                |   Media format: ${encodedData.mediaFormat}.
-                |   Number of added tracks: ${tracksMetadata.size + 1}. 
-                |   Total tracks: $numberOfTracks
+                |[$track] adding track to muxer.
+                |   media format: ${encodedData.mediaFormat}.
+                |   number of added tracks: ${tracksMetadata.size + 1}. 
+                |   total tracks: $numberOfTracks
                 |""".trimMargin()
             )
             val trackId = muxer.addTrack(encodedData.mediaFormat)
@@ -148,7 +148,7 @@ actual class MediaRecorder actual constructor(
         if (finished) return
 
         if (encodedData.bufferInfo.isEndOfStream) {
-            Logging.v(TAG, "$track track finished")
+            Logging.v(TAG, "[$track] track finished")
             tracksMetadata[track] = TrackMetadata(trackId, finished = true)
         } else if (muxerStarted) {
             muxer.writeSampleData(trackId, encodedData.buffer, encodedData.bufferInfo)
@@ -162,9 +162,12 @@ actual class MediaRecorder actual constructor(
         Logging.w(TAG, "Stop exceptionally", error)
         tracksMetadata.mapValues { (_, v) -> v.copy(finished = true) }
         disposeRecorder()
+        Logging.v(TAG, "outputFilePath = $outputFilePath")
         outputFilePath?.let {
-            runCatching { File(it).delete() }
-                .onFailure { Logging.e(TAG, "Deleting temporary file failed", it) }
+            runCatching {
+                val result = File(it).delete()
+                Logging.v(TAG, "Temporary file is deleted successfully: $result")
+            }.onFailure { Logging.e(TAG, "Deleting temporary file failed", it) }
         }
         _state.value = MediaRecorderState.Failed(error)
     }
@@ -187,7 +190,7 @@ actual class MediaRecorder actual constructor(
         muxer?.release()
         muxer = null
 
-        recorderThread?.quit()
+        recorderThread?.quitSafely()
         recorderThread = null
     }
 }

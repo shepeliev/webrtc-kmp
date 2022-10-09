@@ -29,6 +29,7 @@ internal class AudioEncoder(
     @Volatile
     private var stopped = false
     private var started = false
+    private var timestampUs: Long = -1
     private val lock = Any()
 
     init {
@@ -46,6 +47,7 @@ internal class AudioEncoder(
                 audioRecord = AudioRecord(AUDIO_SOURCE, SAMPLE_RATE, CHANNEL_CONFIG, AUDIO_FORMAT, bufferSize)
                 audioRecord.startRecording()
                 codec.start()
+                timestampUs = System.nanoTime() / 1000
             }
         }
     }
@@ -96,7 +98,8 @@ internal class AudioEncoder(
                 } else {
                     val readSize = inputBuffer.capacity().coerceAtMost(bufferSize)
                     val count = audioRecord.read(inputBuffer, readSize)
-                    codec.queueInputBuffer(index, 0, count.coerceAtLeast(0), System.nanoTime() / 1000, 0)
+                    codec.queueInputBuffer(index, 0, count.coerceAtLeast(0), timestampUs, 0)
+                    timestampUs += (count / 2 * 1000_000) / SAMPLE_RATE
                 }
             }.onFailure { onData(null, it) }
         }
