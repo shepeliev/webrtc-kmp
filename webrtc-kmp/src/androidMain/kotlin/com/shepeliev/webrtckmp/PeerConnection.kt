@@ -26,7 +26,6 @@ import org.webrtc.IceCandidate as AndroidIceCandidate
 import org.webrtc.MediaStream as AndroidMediaStream
 import org.webrtc.PeerConnection as AndroidPeerConnection
 import org.webrtc.RtpReceiver as AndroidRtpReceiver
-import org.webrtc.RtpTransceiver as AndroidRtpTransceiver
 import org.webrtc.SessionDescription as AndroidSessionDescription
 
 actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguration) {
@@ -265,12 +264,10 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
 
         override fun onAddTrack(
             receiver: AndroidRtpReceiver,
-            nativeStreams: Array<out AndroidMediaStream>
+            androidStreams: Array<out AndroidMediaStream>
         ) {
-            // replaced by onTrack
-        }
+            val transceiver = android.transceivers.find { it.receiver.id() == receiver.id() } ?: return
 
-        override fun onTrack(transceiver: AndroidRtpTransceiver, androidStreams: Array<out AndroidMediaStream>) {
             val audioTracks = androidStreams
                 .flatMap { it.audioTracks }
                 .map { remoteTracks.getOrPut(it.id()) { AudioStreamTrack(it) } }
@@ -290,10 +287,10 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
             }
 
             val senderTrack = localTracks[transceiver.sender.track()?.id()]
-            val receiverTrack = remoteTracks[transceiver.receiver.track()?.id()]
+            val receiverTrack = remoteTracks[receiver.track()?.id()]
 
             val trackEvent = TrackEvent(
-                receiver = RtpReceiver(transceiver.receiver, receiverTrack),
+                receiver = RtpReceiver(receiver, receiverTrack),
                 streams = streams,
                 track = receiverTrack,
                 transceiver = RtpTransceiver(transceiver, senderTrack, receiverTrack)
