@@ -8,7 +8,7 @@ plugins {
 group = "com.shepeliev"
 version = "0.100.2"
 
-val jitsiWebRtcVersion = "100.0.2"
+val jitsiWebRtcVersion = "106.0.1"
 
 kotlin {
     android {
@@ -52,14 +52,14 @@ dependencies {
 }
 
 tasks.register<Download>("downloadAndroidWebRtc") {
-    src("https://github.com/jitsi/webrtc/releases/download/v$jitsiWebRtcVersion/android-webrtc.tgz")
-    dest(buildDir.resolve("tmp/android-webrtc-$jitsiWebRtcVersion.tgz"))
+    src("https://github.com/jitsi/webrtc/releases/download/v$jitsiWebRtcVersion/android-webrtc.zip")
+    dest(buildDir.resolve("tmp/android-webrtc-$jitsiWebRtcVersion.zip"))
     overwrite(false)
 }
 
 tasks.register<Copy>("unzipAndroidWebRtc") {
     inputs.files(tasks.findByName("downloadAndroidWebRtc")!!.outputs.files)
-    from(tarTree(resources.gzip(inputs.files.first())))
+    from(zipTree(inputs.files.first()))
     into(buildDir.resolve("libs/android"))
 }
 
