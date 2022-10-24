@@ -287,10 +287,10 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
             }
 
             val senderTrack = localTracks[transceiver.sender.track()?.id()]
-            val receiverTrack = remoteTracks[transceiver.receiver.track()?.id()]
+            val receiverTrack = remoteTracks[receiver.track()?.id()]
 
             val trackEvent = TrackEvent(
-                receiver = RtpReceiver(transceiver.receiver, receiverTrack),
+                receiver = RtpReceiver(receiver, receiverTrack),
                 streams = streams,
                 track = receiverTrack,
                 transceiver = RtpTransceiver(transceiver, senderTrack, receiverTrack)
