@@ -245,11 +245,12 @@ actual class PeerConnection actual constructor(
         _peerConnectionEvent.tryEmit(event)
     }
 
-    override fun peerConnection(
-        peerConnection: RTCPeerConnection,
-        didStartReceivingOnTransceiver: RTCRtpTransceiver,
-        streams: List<*>,
-    ) {
+    override fun peerConnection(peerConnection: RTCPeerConnection, didAddReceiver: RTCRtpReceiver, streams: List<*>) {
+        val transceiver = ios.transceivers
+            .map { it as RTCRtpTransceiver }
+            .find { it.receiver.receiverId == didAddReceiver.receiverId }
+            ?: return
+
         val iosStreams = streams.map { it as RTCMediaStream }
 
         val audioTracks = iosStreams
@@ -269,14 +270,14 @@ actual class PeerConnection actual constructor(
             }
         }
 
-        val receiverTrack = remoteTracks[didStartReceivingOnTransceiver.receiver.track?.trackId]
-        val senderTrack = localTracks[didStartReceivingOnTransceiver.sender.track?.trackId]
+        val receiverTrack = remoteTracks[didAddReceiver.track?.trackId]
+        val senderTrack = localTracks[transceiver.sender.track?.trackId]
 
         val trackEvent = TrackEvent(
-            receiver = RtpReceiver(didStartReceivingOnTransceiver.receiver, receiverTrack),
+            receiver = RtpReceiver(didAddReceiver, receiverTrack),
             streams = commonStreams,
             track = receiverTrack,
-            transceiver = RtpTransceiver(didStartReceivingOnTransceiver, senderTrack, receiverTrack)
+            transceiver = RtpTransceiver(transceiver, senderTrack, receiverTrack)
         )
 
         val event = Track(trackEvent)
