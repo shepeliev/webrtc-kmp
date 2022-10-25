@@ -25,7 +25,7 @@ jobs:
         run: carthage update --use-xcframeworks
 
       - name: Publish to MavenCentral
-        run: ./gradlew publishAllPublicationsToMavenRepository
+        run: ./gradlew publishAllPublicationsToMavenRepository -Dorg.gradle.parallel=false
         env:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
