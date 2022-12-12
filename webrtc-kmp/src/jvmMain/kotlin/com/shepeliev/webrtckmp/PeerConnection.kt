@@ -34,16 +34,16 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         get() = platform.remoteDescription?.asCommon()
 
     actual val signalingState: SignalingState
-        get() = platform.signalingState().asCommon()
+        get() = platform.signalingState.asCommon()
 
     actual val iceConnectionState: IceConnectionState
-        get() = platform.iceConnectionState().asCommon()
+        get() = platform.iceConnectionState.asCommon()
 
     actual val connectionState: PeerConnectionState
-        get() = platform.connectionState().asCommon()
+        get() = platform.connectionState.asCommon()
 
     actual val iceGatheringState: IceGatheringState
-        get() = platform.iceGatheringState().asCommon()
+        get() = platform.iceGatheringState.asCommon()
 
     private val _peerConnectionEvent =
         MutableSharedFlow<PeerConnectionEvent>(extraBufferCapacity = FLOW_BUFFER_CAPACITY)
