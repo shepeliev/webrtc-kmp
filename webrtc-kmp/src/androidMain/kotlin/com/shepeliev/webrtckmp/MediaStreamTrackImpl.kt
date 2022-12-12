@@ -64,7 +64,7 @@ internal abstract class MediaStreamTrackImpl(
     private fun getInitialState(): MediaStreamTrackState {
         return when (checkNotNull(android.state())) {
             AndroidMediaStreamTrack.State.LIVE -> MediaStreamTrackState.Live(muted = false)
-            AndroidMediaStreamTrack.State.ENDED -> MediaStreamTrackState.Live(muted = false)
+            AndroidMediaStreamTrack.State.ENDED -> MediaStreamTrackState.Ended(muted = false)
         }
     }
 }

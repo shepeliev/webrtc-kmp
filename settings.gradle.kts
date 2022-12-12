@@ -21,7 +21,10 @@ pluginManagement {
     }
 }
 
+rootProject.name = "WebRTC"
+
 include(":webrtc-kmp")
 include(":sample:shared")
 include(":sample:app-android")
 include(":sample:app-web")
+include(":sample:app-jvm")

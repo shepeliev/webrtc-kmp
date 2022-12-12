@@ -24,7 +24,7 @@ actual class RoomDataSource actual constructor() {
         FIRFirestore.firestore().collectionWithPath("rooms")
     }
 
-    actual fun createRoom(): String {
+    actual suspend fun createRoom(): String {
         return roomsRef.documentWithAutoID().documentID
     }
 

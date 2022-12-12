@@ -2,12 +2,17 @@ package com.shepeliev.webrtckmp.sample.shared
 
 import com.arkivanov.decompose.value.Value
 import com.shepeliev.webrtckmp.MediaStream
+import com.shepeliev.webrtckmp.MediaStreamConstraintsBuilder
 
 interface Room {
 
     val model: Value<Model>
 
-    fun openUserMedia()
+    fun openUserMedia(streamConstraints: MediaStreamConstraintsBuilder.() -> Unit = {
+        video()
+        audio()
+    })
+    fun openDesktopMedia()
     fun switchCamera()
     fun createRoom()
     fun joinRoom(roomId: String)

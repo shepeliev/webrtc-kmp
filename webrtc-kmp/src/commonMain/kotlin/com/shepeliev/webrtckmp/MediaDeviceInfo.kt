@@ -6,4 +6,4 @@ data class MediaDeviceInfo(
     val kind: MediaDeviceKind,
 )
 
-enum class MediaDeviceKind { VideoInput, AudioInput }
+enum class MediaDeviceKind { VideoInput, AudioInput, AudioOutput }

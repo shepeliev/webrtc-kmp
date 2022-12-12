@@ -3,11 +3,11 @@
 WebRTC Kotlin Multiplatform SDK
 
 ## API implementation map
- API | Android | iOS | JS 
- :-: | :-----: | :-: | :---: 
- Audio/Video |  :white_check_mark: | :white_check_mark: | :white_check_mark:
- Data channel | :white_check_mark: | :white_check_mark: | :white_check_mark:
- Screen Capture | | | :white_check_mark:
+|      API       |      Android       |        iOS         |         JS         |        JVM         |
+|:--------------:|:------------------:|:------------------:|:------------------:|:------------------:|
+|  Audio/Video   | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+|  Data channel  | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| Screen Capture |                    |                    | :white_check_mark: | :white_check_mark: |
 
 ## WebRTC revision
 Current revision: M114

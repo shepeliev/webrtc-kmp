@@ -34,6 +34,7 @@ kotlin {
 
     ios()
     iosSimulatorArm64()
+    jvm()
 
     sourceSets {
         val iosMain by getting
@@ -59,4 +60,5 @@ dependencies {
     androidMainImplementation(deps.firebase.firestore)
     androidMainImplementation(deps.kotlin.coroutinesPlayServices)
     jsMainImplementation(npm("firebase", version = "9.9.1"))
+    jvmMainImplementation(deps.firebase.firestore.jvm)
 }

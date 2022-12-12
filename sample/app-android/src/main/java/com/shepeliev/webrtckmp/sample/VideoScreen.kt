@@ -62,7 +62,7 @@ fun VideoScreen(room: Room) {
 
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
 
-            Crossfade(targetState = roomModel) {
+            Crossfade(targetState = roomModel, label = "") {
                 when {
                     it.isJoining -> CircularProgressIndicator()
 
