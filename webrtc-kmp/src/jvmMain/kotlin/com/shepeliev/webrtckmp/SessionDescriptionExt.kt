@@ -1,17 +1,18 @@
 package com.shepeliev.webrtckmp
 
+import dev.onvoid.webrtc.RTCSdpType
 import org.webrtc.SessionDescription as AndroidSessionDescription
 
-internal fun SessionDescription.asAndroid(): AndroidSessionDescription {
-    return AndroidSessionDescription(type.asAndroid(), sdp)
+internal fun SessionDescription.asPlatform(): AndroidSessionDescription {
+    return AndroidSessionDescription(type.asPlatform(), sdp)
 }
 
-private fun SessionDescriptionType.asAndroid(): AndroidSessionDescription.Type {
+private fun SessionDescriptionType.asPlatform(): RTCSdpType {
     return when (this) {
-        SessionDescriptionType.Offer -> AndroidSessionDescription.Type.OFFER
-        SessionDescriptionType.Pranswer -> AndroidSessionDescription.Type.PRANSWER
-        SessionDescriptionType.Answer -> AndroidSessionDescription.Type.ANSWER
-        SessionDescriptionType.Rollback -> AndroidSessionDescription.Type.ROLLBACK
+        SessionDescriptionType.Offer -> RTCSdpType.OFFER
+        SessionDescriptionType.Pranswer -> RTCSdpType.PR_ANSWER
+        SessionDescriptionType.Answer -> RTCSdpType.ANSWER
+        SessionDescriptionType.Rollback -> RTCSdpType.ROLLBACK
     }
 }
 
