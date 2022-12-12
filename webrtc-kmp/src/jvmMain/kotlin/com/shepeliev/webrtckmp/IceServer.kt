@@ -1,8 +1,8 @@
 package com.shepeliev.webrtckmp
 
-import org.webrtc.PeerConnection
+import dev.onvoid.webrtc.RTCIceServer
 
-actual class IceServer internal constructor(val native: PeerConnection.IceServer) {
+actual class IceServer internal constructor(val native: RTCIceServer) {
     actual constructor(
         urls: List<String>,
         username: String,
@@ -12,25 +12,26 @@ actual class IceServer internal constructor(val native: PeerConnection.IceServer
         tlsAlpnProtocols: List<String>?,
         tlsEllipticCurves: List<String>?
     ) : this(
-        PeerConnection.IceServer.builder(urls)
-            .setUsername(username)
-            .setPassword(password)
-            .setTlsCertPolicy(tlsCertPolicy.asNative())
-            .setHostname(hostname)
-            .setTlsAlpnProtocols(tlsAlpnProtocols)
-            .setTlsEllipticCurves(tlsEllipticCurves)
-            .createIceServer()
+        RTCIceServer().apply {
+            this.urls = urls
+            this.username = username
+            this.password = password
+            this.tlsCertPolicy = tlsCertPolicy.asNative()
+            this.hostname = hostname
+            this.tlsEllipticCurves = tlsEllipticCurves
+            this.tlsAlpnProtocols = tlsAlpnProtocols
+        }
     )
 
     actual override fun toString(): String = native.toString()
 }
 
-private fun TlsCertPolicy.asNative(): PeerConnection.TlsCertPolicy {
+private fun TlsCertPolicy.asNative(): dev.onvoid.webrtc.TlsCertPolicy {
     return when (this) {
-        TlsCertPolicy.TlsCertPolicySecure -> PeerConnection.TlsCertPolicy.TLS_CERT_POLICY_SECURE
+        TlsCertPolicy.TlsCertPolicySecure -> dev.onvoid.webrtc.TlsCertPolicy.SECURE
 
         TlsCertPolicy.TlsCertPolicyInsecureNoCheck -> {
-            PeerConnection.TlsCertPolicy.TLS_CERT_POLICY_INSECURE_NO_CHECK
+            dev.onvoid.webrtc.TlsCertPolicy.INSECURE_NO_CHECK
         }
     }
 }

@@ -1,9 +1,8 @@
 package com.shepeliev.webrtckmp
 
-import org.webrtc.PeerConnection
-import org.webrtc.RtcCertificatePem as NativeRtcCertificatePem
+import dev.onvoid.webrtc.RTCCertificatePEM
 
-actual class RtcCertificatePem internal constructor(val native: NativeRtcCertificatePem) {
+actual class RtcCertificatePem internal constructor(val native: RTCCertificatePEM) {
     actual val privateKey: String
         get() = native.privateKey
 
@@ -12,6 +11,7 @@ actual class RtcCertificatePem internal constructor(val native: NativeRtcCertifi
 
     actual companion object {
         actual suspend fun generateCertificate(keyType: KeyType, expires: Long): RtcCertificatePem {
+            RTCCertificatePEM(keyType.asNative(), certificate, expires)
             return RtcCertificatePem(
                 NativeRtcCertificatePem.generateCertificate(keyType.asNative(), expires)
             )

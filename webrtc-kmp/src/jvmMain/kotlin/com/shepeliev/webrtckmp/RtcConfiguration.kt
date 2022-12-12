@@ -1,7 +1,5 @@
 package com.shepeliev.webrtckmp
 
-import org.webrtc.PeerConnection
-
 actual class RtcConfiguration actual constructor(
     bundlePolicy: BundlePolicy,
     certificates: List<RtcCertificatePem>?,

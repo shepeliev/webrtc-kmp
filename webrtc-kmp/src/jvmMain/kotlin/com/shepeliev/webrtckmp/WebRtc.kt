@@ -3,6 +3,7 @@
 package com.shepeliev.webrtckmp
 
 import dev.onvoid.webrtc.PeerConnectionFactory
+import dev.onvoid.webrtc.logging.Logging
 
 actual object WebRtc {
 

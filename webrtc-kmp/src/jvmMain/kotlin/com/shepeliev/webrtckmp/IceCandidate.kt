@@ -1,10 +1,10 @@
 package com.shepeliev.webrtckmp
 
-import org.webrtc.IceCandidate as NativeIceCandidate
+import dev.onvoid.webrtc.RTCIceCandidate
 
-actual class IceCandidate internal constructor(val native: NativeIceCandidate) {
+actual class IceCandidate internal constructor(val native: RTCIceCandidate) {
     actual constructor(sdpMid: String, sdpMLineIndex: Int, candidate: String) : this(
-        NativeIceCandidate(sdpMid, sdpMLineIndex, candidate)
+        RTCIceCandidate(sdpMid, sdpMLineIndex, candidate)
     )
 
     actual val sdpMid: String = native.sdpMid

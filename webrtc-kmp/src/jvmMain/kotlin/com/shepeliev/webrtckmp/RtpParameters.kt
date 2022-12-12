@@ -1,9 +1,10 @@
 package com.shepeliev.webrtckmp
 
-import android.util.Log
-import org.webrtc.RtpParameters as AndroidRtpParameters
+import dev.onvoid.webrtc.RTCRtcpParameters
+import dev.onvoid.webrtc.RTCRtpHeaderExtensionParameters
+import dev.onvoid.webrtc.RTCRtpParameters
 
-actual class RtpParameters(val native: AndroidRtpParameters) {
+actual class RtpParameters(val native: RTCRtpParameters) {
     actual val codecs: List<RtpCodecParameters>
         get() = native.codecs.map { RtpCodecParameters(it) }
 
@@ -77,7 +78,7 @@ actual class RtpEncodingParameters(val native: AndroidRtpParameters.Encoding) {
         get() = native.ssrc
 }
 
-actual class HeaderExtension(val native: AndroidRtpParameters.HeaderExtension) {
+actual class HeaderExtension(val native: RTCRtpHeaderExtensionParameters) {
     actual val uri: String
         get() = native.uri
 
@@ -88,9 +89,9 @@ actual class HeaderExtension(val native: AndroidRtpParameters.HeaderExtension) {
         get() = native.encrypted
 }
 
-actual class RtcpParameters(val native: AndroidRtpParameters.Rtcp) {
+actual class RtcpParameters(val native: RTCRtcpParameters) {
     actual val cname: String
-        get() = native.cname
+        get() = native.cName
 
     actual val reducedSize: Boolean
         get() = native.reducedSize

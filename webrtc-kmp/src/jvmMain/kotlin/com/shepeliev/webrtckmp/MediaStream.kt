@@ -1,22 +1,22 @@
 package com.shepeliev.webrtckmp
 
-import org.webrtc.AudioTrack
-import org.webrtc.VideoTrack
+import dev.onvoid.webrtc.media.audio.AudioTrack
+import dev.onvoid.webrtc.media.video.VideoTrack
 import java.util.UUID
 
 actual class MediaStream internal constructor(
-    val android: MediaStream?,
-    actual val id: String = android?.id ?: UUID.randomUUID().toString(),
+    val jvm: MediaStream?,
+    actual val id: String = jvm?.id ?: UUID.randomUUID().toString(),
 ) {
 
     private val _tracks = mutableListOf<MediaStreamTrack>()
     actual val tracks: List<MediaStreamTrack> = _tracks
 
     actual fun addTrack(track: MediaStreamTrack) {
-        android?.let {
-            when (track.jvm) {
-                is AudioTrack -> it.addTrack(track.jvm)
-                is VideoTrack -> it.addTrack(track.jvm)
+        jvm?.let {
+            when (track.jvm.kind) {
+                dev.onvoid.webrtc.media.MediaStreamTrack.AUDIO_TRACK_KIND -> it.addTrack(track)
+                dev.onvoid.webrtc.media.MediaStreamTrack.VIDEO_TRACK_KIND -> it.addTrack(track)
                 else -> error("Unknown MediaStreamTrack kind: ${track.kind}")
             }
         }
@@ -28,10 +28,10 @@ actual class MediaStream internal constructor(
     }
 
     actual fun removeTrack(track: MediaStreamTrack) {
-        android?.let {
+        jvm?.let {
             when (track.jvm) {
-                is AudioTrack -> it.removeTrack(track.jvm)
-                is VideoTrack -> it.removeTrack(track.jvm)
+                is AudioTrack -> it.removeTrack(track)
+                is VideoTrack -> it.removeTrack(track)
                 else -> error("Unknown MediaStreamTrack kind: ${track.kind}")
             }
         }
@@ -40,6 +40,6 @@ actual class MediaStream internal constructor(
 
     actual fun release() {
         tracks.forEach(MediaStreamTrack::stop)
-        android?.dispose()
+        jvm?.release() // TODO: Confirm: Equivalent to Dispose ?
     }
 }

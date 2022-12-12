@@ -14,9 +14,6 @@ import com.shepeliev.webrtckmp.PeerConnectionEvent.Track
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import org.webrtc.CandidatePairChangeEvent
-import org.webrtc.MediaConstraints
-import org.webrtc.SdpObserver
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -278,7 +275,7 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
 
             val streams = androidStreams.map { androidStream ->
                 MediaStream(
-                    android = androidStream,
+                    jvm = androidStream,
                     id = androidStream.id,
                 ).also { stream ->
                     audioTracks.forEach(stream::addTrack)

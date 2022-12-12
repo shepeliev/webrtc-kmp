@@ -1,11 +1,11 @@
 package com.shepeliev.webrtckmp
 
-import dev.onvoid.webrtc.media.audio.AudioSource
 import dev.onvoid.webrtc.media.audio.AudioTrack
+import dev.onvoid.webrtc.media.audio.AudioTrackSource
 
 actual class AudioStreamTrack internal constructor(
     jvm: AudioTrack,
-    private val audioSource: AudioSource? = null,
+    private val audioSource: AudioTrackSource? = null,
 ) : MediaStreamTrack(jvm) {
 
     override fun onSetEnabled(enabled: Boolean) {
