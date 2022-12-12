@@ -14,7 +14,7 @@ kotlin {
     android {
         publishAllLibraryVariants()
     }
-
+    jvm()
     ios {
         val frameworks = getFrameworks(konanTarget).filterKeys { it == "WebRTC" }
 
@@ -48,6 +48,27 @@ dependencies {
     androidMainApi(fileTree("build/libs/android") { include("*.jar") })
     androidTestImplementation(deps.androidx.test.core)
     androidTestImplementation(deps.androidx.test.runner)
+
+    jvmMainImplementation("dev.onvoid.webrtc:webrtc-java:0.7.0")
+    jvmMainImplementation(
+        group = "dev.onvoid.webrtc",
+        name = "webrtc-java",
+        version = "0.7.0",
+        classifier = "windows-x86_64"
+    )
+    jvmMainImplementation(
+        group = "dev.onvoid.webrtc",
+        name = "webrtc-java",
+        version = "0.7.0",
+        classifier = "macos-x86_64"
+    )
+    jvmMainImplementation(
+        group = "dev.onvoid.webrtc",
+        name = "webrtc-java",
+        version = "0.7.0",
+        classifier = "linux-x86_64"
+    )
+
     jsMainImplementation(npm("webrtc-adapter", "8.1.1"))
 }
 
