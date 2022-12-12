@@ -61,10 +61,9 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         protocol: String,
         negotiated: Boolean
     ): DataChannel? {
-        val init = AndroidDataChannel.Init().also {
+        val init = RTCDataChannelInit().also {
             it.id = id
             it.ordered = ordered
-            it.maxRetransmitTimeMs = maxRetransmitTimeMs
             it.maxRetransmits = maxRetransmits
             it.protocol = protocol
             it.negotiated = negotiated
@@ -74,13 +73,13 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
 
     actual suspend fun createOffer(options: OfferAnswerOptions): SessionDescription {
         return suspendCoroutine { cont ->
-            platform.createOffer(createSdpObserver(cont), options.toMediaConstraints())
+            platform.createOffer(options.toMediaConstraints(), createSdpObserver(cont))
         }
     }
 
     actual suspend fun createAnswer(options: OfferAnswerOptions): SessionDescription {
         return suspendCoroutine { cont ->
-            platform.createAnswer(createSdpObserver(cont), options.toMediaConstraints())
+            platform.createAnswer(options.toMediaConstraints(), createSdpObserver(cont))
         }
     }
 
@@ -99,82 +98,71 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         }
     }
 
-    private fun createSdpObserver(continuation: Continuation<SessionDescription>): SdpObserver {
-        return object : SdpObserver {
-            override fun onCreateSuccess(description: AndroidSessionDescription) {
-                continuation.resume(description.asCommon())
+    private fun createSdpObserver(continuation: Continuation<SessionDescription>): CreateSessionDescriptionObserver {
+        return object : CreateSessionDescriptionObserver {
+            override fun onSuccess(description: RTCSessionDescription?) {
+                description?.asCommon()?.let {
+                    continuation.resume(it)
+                }
             }
 
-            override fun onSetSuccess() {
-                // not applicable for creating SDP
-            }
-
-            override fun onCreateFailure(error: String?) {
-                continuation.resumeWithException(RuntimeException("Creating SDP failed: $error"))
-            }
-
-            override fun onSetFailure(error: String?) {
-                // not applicable for creating SDP
+            override fun onFailure(error: String?) {
+                continuation.resumeWithException(Throwable("Creating SDP failed: $error"))
             }
         }
     }
 
     actual suspend fun setLocalDescription(description: SessionDescription) {
         return suspendCoroutine {
-            platform.setLocalDescription(setSdpObserver(it), description.asPlatform())
+            platform.setLocalDescription(description.asPlatform(), setSdpObserver(it))
         }
     }
 
     actual suspend fun setRemoteDescription(description: SessionDescription) {
         return suspendCoroutine {
-            platform.setRemoteDescription(setSdpObserver(it), description.asPlatform())
+            platform.setRemoteDescription(description.asPlatform(), setSdpObserver(it))
         }
     }
 
-    private fun setSdpObserver(continuation: Continuation<Unit>): SdpObserver {
-        return object : SdpObserver {
-            override fun onCreateSuccess(description: AndroidSessionDescription) {
+    private fun setSdpObserver(continuation: Continuation<Unit>): SetSessionDescriptionObserver {
+        return object : SetSessionDescriptionObserver {
+            override fun onSuccess() {
                 // not applicable for setting SDP
             }
 
-            override fun onSetSuccess() {
-                continuation.resume(Unit)
-            }
-
-            override fun onCreateFailure(error: String?) {
-                // not applicable for setting SDP
-            }
-
-            override fun onSetFailure(error: String?) {
-                continuation.resumeWithException(RuntimeException("Setting SDP failed: $error"))
+            override fun onFailure(error: String?) {
+                continuation.resumeWithException(Throwable("Setting SDP failed: $error"))
             }
         }
     }
 
     actual fun setConfiguration(configuration: RtcConfiguration): Boolean {
-        return platform.setConfiguration(configuration.android)
+        platform.configuration = configuration.android
+        return true
     }
 
     actual fun addIceCandidate(candidate: IceCandidate): Boolean {
-        return platform.addIceCandidate(candidate.native)
+        platform.addIceCandidate(candidate.native)
+        return true
     }
 
     actual fun removeIceCandidates(candidates: List<IceCandidate>): Boolean {
-        return platform.removeIceCandidates(candidates.map { it.native }.toTypedArray())
+        platform.removeIceCandidates(candidates.map { it.native }.toTypedArray())
+        return true
     }
 
     actual fun getSenders(): List<RtpSender> = platform.senders.map {
-        RtpSender(it, localTracks[it.track()?.id()])
+        RtpSender(it, localTracks[it.track?.id])
     }
 
     actual fun getReceivers(): List<RtpReceiver> = platform.receivers.map {
-        RtpReceiver(it, remoteTracks[it.track()?.id()])
+        RtpReceiver(it, remoteTracks[it.track?.id])
     }
 
     actual fun getTransceivers(): List<RtpTransceiver> =
         platform.transceivers.map {
-            val senderTrack = localTracks[it.sender.track()?.id()]
-            val receiverTrack = remoteTracks[it.receiver.track()?.id()]
+            val senderTrack = localTracks[it.sender.track?.id]
+            val receiverTrack = remoteTracks[it.receiver.track?.id]
             RtpTransceiver(it, senderTrack, receiverTrack)
         }
 
@@ -186,7 +174,8 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
 
     actual fun removeTrack(sender: RtpSender): Boolean {
         localTracks.remove(sender.track?.id)
-        return platform.removeTrack(sender.native)
+        platform.removeTrack(sender.native)
+        return true
     }
 
     actual suspend fun getStats(): RtcStatsReport? {
@@ -198,7 +187,7 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
     actual fun close() {
         remoteTracks.values.forEach(MediaStreamTrack::stop)
         remoteTracks.clear()
-        platform.dispose()
+        platform.close() // TODO check is this is equivalent to dispose from android ?
     }
 
     internal inner class AndroidPeerConnectionObserver : PeerConnectionObserver {
