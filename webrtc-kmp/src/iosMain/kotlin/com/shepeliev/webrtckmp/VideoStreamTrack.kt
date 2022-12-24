@@ -82,8 +82,8 @@ actual class VideoStreamTrack internal constructor(
             frameCount.increment()
         }
 
-        override fun setSize(size: CValue<CGSize>) {
-            // do nothing
+        override fun setSize(size: CValue<WebRTC.CGSize>) {
+            //
         }
 
         fun start() {
