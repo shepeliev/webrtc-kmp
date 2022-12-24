@@ -1,9 +1,10 @@
-@file:JvmName("AndroidMediaDevices")
+@file:JvmName("JVMMediaDevices")
 
 package com.shepeliev.webrtckmp
 
-import org.webrtc.Camera2Enumerator
-import org.webrtc.MediaConstraints
+import dev.onvoid.webrtc.media.audio.AudioOptions
+import dev.onvoid.webrtc.media.video.VideoDesktopSource
+import dev.onvoid.webrtc.media.video.VideoTrackSource
 import java.util.UUID
 
 internal actual val mediaDevices: MediaDevices = MediaDevicesImpl
@@ -19,17 +20,11 @@ private object MediaDevicesImpl : MediaDevices {
         var audioTrack: AudioStreamTrack? = null
         if (constraints.audio != null) {
             checkRecordAudioPermission()
-            val mediaConstraints = MediaConstraints().apply {
-                mandatory.addAll(
-                    constraints.audio.toMandatoryMap()
-                        .map { (k, v) -> MediaConstraints.KeyValuePair("$k", "$v") }
-                )
-                optional.addAll(
-                    constraints.audio.toOptionalMap()
-                        .map { (k, v) -> MediaConstraints.KeyValuePair("$k", "$v") }
-                )
-            }
-            val audioSource = WebRtc.peerConnectionFactory.createAudioSource(mediaConstraints)
+            val audioSource = WebRtc.peerConnectionFactory.createAudioSource(AudioOptions().apply {
+                this.echoCancellation = constraints.audio.echoCancellation?.exact == true
+                this.autoGainControl = constraints.audio.autoGainControl?.exact == true
+                this.noiseSuppression = constraints.audio.noiseSuppression?.exact == true
+            })
             val androidTrack = WebRtc.peerConnectionFactory.createAudioTrack(UUID.randomUUID().toString(), audioSource)
             audioTrack = AudioStreamTrack(androidTrack, audioSource)
         }
@@ -37,9 +32,14 @@ private object MediaDevicesImpl : MediaDevices {
         var videoTrack: VideoStreamTrack? = null
         if (constraints.video != null) {
             checkCameraPermission()
-            val videoSource = WebRtc.peerConnectionFactory.createVideoSource(false)
-            val videoCaptureController = CameraVideoCaptureController(constraints.video, videoSource)
-            val androidTrack = WebRtc.peerConnectionFactory.createVideoTrack(UUID.randomUUID().toString(), videoSource)
+            val videoDesktopSource = VideoDesktopSource().apply {
+                constraints.video.frameRate?.exact?.let {
+                    this.setFrameRate(it.toInt())
+                }
+                this.setMaxFrameSize(constraints.video.width.exact,constraints.video.height.exact)
+            } // TODO ?
+            val videoCaptureController = CameraVideoCaptureController(constraints.video, videoDesktopSource)
+            val androidTrack = WebRtc.peerConnectionFactory.createVideoTrack(UUID.randomUUID().toString(), videoDesktopSource)
             videoTrack = VideoStreamTrack(androidTrack, videoCaptureController)
         }
 
@@ -51,7 +51,7 @@ private object MediaDevicesImpl : MediaDevices {
     }
 
     override suspend fun getDisplayMedia(): MediaStream {
-        TODO("Not yet implemented for Android platform")
+        TODO("Not yet implemented for JVM platform")
     }
 
     override suspend fun supportsDisplayMedia(): Boolean = false

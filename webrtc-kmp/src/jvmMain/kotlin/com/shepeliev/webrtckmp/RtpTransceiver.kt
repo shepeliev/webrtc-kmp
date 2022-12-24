@@ -1,9 +1,9 @@
 package com.shepeliev.webrtckmp
 
-import org.webrtc.RtpTransceiver as AndroidRtpTransceiver
+import dev.onvoid.webrtc.RTCRtpTransceiverDirection
 
 actual class RtpTransceiver(
-    val native: AndroidRtpTransceiver,
+    val native: dev.onvoid.webrtc.RTCRtpTransceiver,
     private val senderTrack: MediaStreamTrack?,
     private val receiverTrack: MediaStreamTrack?,
 ) {
@@ -27,41 +27,41 @@ actual class RtpTransceiver(
         get() = RtpReceiver(native.receiver, receiverTrack)
 
     actual val stopped: Boolean
-        get() = native.isStopped
+        get() = native.stopped()
 
     actual fun stop() = native.stop()
 }
 
-private fun AndroidRtpTransceiver.RtpTransceiverDirection.asCommon(): RtpTransceiverDirection {
+private fun RTCRtpTransceiverDirection.asCommon(): RtpTransceiverDirection {
     return when (this) {
-        AndroidRtpTransceiver.RtpTransceiverDirection.SEND_RECV -> {
+        RTCRtpTransceiverDirection.SEND_RECV -> {
             RtpTransceiverDirection.SendRecv
         }
 
-        AndroidRtpTransceiver.RtpTransceiverDirection.SEND_ONLY -> {
+        RTCRtpTransceiverDirection.SEND_ONLY -> {
             RtpTransceiverDirection.SendOnly
         }
 
-        AndroidRtpTransceiver.RtpTransceiverDirection.RECV_ONLY -> {
+        RTCRtpTransceiverDirection.RECV_ONLY -> {
             RtpTransceiverDirection.RecvOnly
         }
 
-        AndroidRtpTransceiver.RtpTransceiverDirection.INACTIVE -> {
+        RTCRtpTransceiverDirection.INACTIVE -> {
             RtpTransceiverDirection.Inactive
         }
 
-        AndroidRtpTransceiver.RtpTransceiverDirection.STOPPED -> {
+        RTCRtpTransceiverDirection.STOPPED -> {
             RtpTransceiverDirection.Stopped
         }
     }
 }
 
-internal fun RtpTransceiverDirection.asNative(): AndroidRtpTransceiver.RtpTransceiverDirection {
+internal fun RtpTransceiverDirection.asNative(): RTCRtpTransceiverDirection {
     return when (this) {
-        RtpTransceiverDirection.SendRecv -> AndroidRtpTransceiver.RtpTransceiverDirection.SEND_RECV
-        RtpTransceiverDirection.SendOnly -> AndroidRtpTransceiver.RtpTransceiverDirection.SEND_ONLY
-        RtpTransceiverDirection.RecvOnly -> AndroidRtpTransceiver.RtpTransceiverDirection.RECV_ONLY
-        RtpTransceiverDirection.Inactive -> AndroidRtpTransceiver.RtpTransceiverDirection.INACTIVE
-        RtpTransceiverDirection.Stopped -> AndroidRtpTransceiver.RtpTransceiverDirection.INACTIVE
+        RtpTransceiverDirection.SendRecv -> RTCRtpTransceiverDirection.SEND_RECV
+        RtpTransceiverDirection.SendOnly -> RTCRtpTransceiverDirection.SEND_ONLY
+        RtpTransceiverDirection.RecvOnly -> RTCRtpTransceiverDirection.RECV_ONLY
+        RtpTransceiverDirection.Inactive -> RTCRtpTransceiverDirection.INACTIVE
+        RtpTransceiverDirection.Stopped -> RTCRtpTransceiverDirection.INACTIVE
     }
 }
