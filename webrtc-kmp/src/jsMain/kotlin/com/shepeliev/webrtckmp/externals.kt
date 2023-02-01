@@ -1,5 +1,6 @@
 package com.shepeliev.webrtckmp
 
+import org.khronos.webgl.ArrayBuffer
 import org.w3c.dom.mediacapture.MediaStream
 import org.w3c.dom.mediacapture.MediaStreamTrack
 import kotlin.js.Date
@@ -88,7 +89,7 @@ external class RTCDataChannel {
 }
 
 external class MessageEvent {
-    val data: String
+    val data: ArrayBuffer
 }
 
 external class ErrorEvent {

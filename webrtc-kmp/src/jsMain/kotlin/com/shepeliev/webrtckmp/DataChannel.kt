@@ -3,6 +3,7 @@ package com.shepeliev.webrtckmp
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import org.khronos.webgl.Int8Array
 
 actual class DataChannel internal constructor(val js: RTCDataChannel) {
     actual val id: Int
@@ -43,11 +44,14 @@ actual class DataChannel internal constructor(val js: RTCDataChannel) {
         js.onclosing = { _onClosing.tryEmit(Unit) }
         js.onclose = { _onClose.tryEmit(Unit) }
         js.onerror = { _onError.tryEmit(it.message) }
-        js.onmessage = { _onMessage.tryEmit(it.data.encodeToByteArray()) }
+        js.onmessage = {
+            _onMessage.tryEmit(Int8Array(it.data).unsafeCast<ByteArray>())
+        }
     }
 
     actual fun send(data: ByteArray): Boolean {
-        js.send(data.decodeToString())
+        val conversion = data.unsafeCast<Int8Array>()
+        js.send(conversion)
         return true
     }
 
