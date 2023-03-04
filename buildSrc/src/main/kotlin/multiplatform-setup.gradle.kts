@@ -8,6 +8,8 @@ plugins {
 kotlin {
     android()
 
+    jvm()
+
     js {
         useCommonJs()
         browser()

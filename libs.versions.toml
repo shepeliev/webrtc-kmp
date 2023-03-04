@@ -20,6 +20,8 @@ decompose = "1.0.0-alpha-01"
 kermit = "1.1.2"
 firebaseBom = "30.3.1"
 
+webrtcJava = "0.7.0"
+
 [libraries]
 
 kotlin-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinCoroutines" }
@@ -50,3 +52,5 @@ firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "fir
 firebase-firestore = { module = "com.google.firebase:firebase-firestore-ktx" }
 
 kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
+
+webrtc-java = { module = "dev.onvoid.webrtc:webrtc-java", version.ref = "webrtcJava" }
