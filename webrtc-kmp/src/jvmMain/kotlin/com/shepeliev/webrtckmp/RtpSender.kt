@@ -24,12 +24,12 @@ actual class RtpSender internal constructor(val native: RTCRtpSender, track: Med
                         it.payloadType,
                         MediaType.valueOf(
                             it.mimeType?.substringBefore("/")?.uppercase()
-                                ?: throw Exception("Unknown Media Type!")
+                                ?: throw Exception("Unknown Media Type!"),
                         ),
                         it.mimeType?.substringAfterLast("/")?.lowercase(),
                         it.clockRate,
                         it.numChannels,
-                        it.parameters
+                        it.parameters,
                     )
                 }
                 encodings = value.encodings.map { params ->

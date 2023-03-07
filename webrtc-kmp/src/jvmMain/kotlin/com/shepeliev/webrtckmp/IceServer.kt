@@ -10,7 +10,7 @@ actual class IceServer internal constructor(val native: RTCIceServer) {
         tlsCertPolicy: TlsCertPolicy,
         hostname: String,
         tlsAlpnProtocols: List<String>?,
-        tlsEllipticCurves: List<String>?
+        tlsEllipticCurves: List<String>?,
     ) : this(
         RTCIceServer().apply {
             this.urls = urls
@@ -20,7 +20,7 @@ actual class IceServer internal constructor(val native: RTCIceServer) {
             this.hostname = hostname
             this.tlsAlpnProtocols = tlsAlpnProtocols
             this.tlsEllipticCurves = tlsEllipticCurves
-        }
+        },
     )
 
     actual override fun toString(): String = native.toString()

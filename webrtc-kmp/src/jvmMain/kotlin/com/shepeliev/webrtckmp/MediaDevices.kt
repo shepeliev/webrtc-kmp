@@ -27,9 +27,13 @@ class MediaDevicesImpl : MediaDevices {
             MediaDeviceInfo(
                 deviceId = it.name,
                 label = it.descriptor,
-                kind = if (nativeAudioDevices.contains(it)) MediaDeviceKind.AudioInput
-                else if (nativeVideoDevices.contains(it)) MediaDeviceKind.VideoInput
-                else error("Unknown device type!")
+                kind = if (nativeAudioDevices.contains(it)) {
+                    MediaDeviceKind.AudioInput
+                } else if (nativeVideoDevices.contains(it)) {
+                    MediaDeviceKind.VideoInput
+                } else {
+                    error("Unknown device type!")
+                },
             )
         }
     }

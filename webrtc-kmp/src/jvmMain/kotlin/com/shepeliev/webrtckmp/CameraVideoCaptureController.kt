@@ -39,7 +39,7 @@ internal class CameraVideoCaptureController(
 
         return Size(
             width = sizes.map { it.width }.closestValue(requestedWidth),
-            height = sizes.map { it.height }.closestValue(requestedHeight)
+            height = sizes.map { it.height }.closestValue(requestedHeight),
         )
     }
 

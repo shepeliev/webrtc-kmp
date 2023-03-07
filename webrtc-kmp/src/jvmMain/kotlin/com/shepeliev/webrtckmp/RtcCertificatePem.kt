@@ -15,7 +15,7 @@ actual class RtcCertificatePem(val native: RTCCertificatePEM) {
     actual companion object {
         actual suspend fun generateCertificate(
             keyType: KeyType,
-            expires: Long
+            expires: Long,
         ): RtcCertificatePem {
             TODO("Not yet implemented!")
         }

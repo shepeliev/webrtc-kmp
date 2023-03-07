@@ -41,10 +41,10 @@ class WebRtcBuilder(
 
 @Deprecated(
     "Use WebRtc.initialize()",
-    replaceWith = ReplaceWith("WebRtc.initialize()")
+    replaceWith = ReplaceWith("WebRtc.initialize()"),
 )
 fun initializeWebRtc(
-    build: WebRtcBuilder.() -> Unit = {}
+    build: WebRtcBuilder.() -> Unit = {},
 ) {
     WebRtc.configureBuilder(build)
     WebRtc.initialize()

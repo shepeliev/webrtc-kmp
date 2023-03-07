@@ -7,7 +7,7 @@ import dev.onvoid.webrtc.RTCRtpHeaderExtensionParameters
 import dev.onvoid.webrtc.RTCRtpParameters
 
 actual class RtpParameters(
-    val native: RTCRtpParameters
+    val native: RTCRtpParameters,
 ) {
     actual val codecs: List<RtpCodecParameters>
         get() = native.codecs.map { RtpCodecParameters(it) }
@@ -29,7 +29,6 @@ actual class RtpCodecParameters(val native: RTCRtpCodecParameters) {
     actual val payloadType: Int
         get() = native.payloadType
 
-
     actual val mimeType: String?
         get() = "${native.codecName.lowercase()}/${native.mediaType.name.lowercase()}"
 
@@ -41,7 +40,6 @@ actual class RtpCodecParameters(val native: RTCRtpCodecParameters) {
 
     actual val parameters: Map<String, String>
         get() = native.parameters
-
 }
 
 actual class RtpEncodingParameters(val native: RTCRtpEncodingParameters) {
@@ -76,7 +74,6 @@ actual class RtpEncodingParameters(val native: RTCRtpEncodingParameters) {
 
     actual val ssrc: Long?
         get() = native.ssrc
-
 }
 
 actual class HeaderExtension(val native: RTCRtpHeaderExtensionParameters) {
@@ -88,7 +85,6 @@ actual class HeaderExtension(val native: RTCRtpHeaderExtensionParameters) {
 
     actual val encrypted: Boolean
         get() = native.encrypted
-
 }
 
 actual class RtcpParameters(val native: RTCRtcpParameters) {

@@ -7,7 +7,7 @@ import java.util.UUID
 
 actual class MediaStream internal constructor(
     val native: MediaStream?,
-    actual val id: String = native?.id() ?: UUID.randomUUID().toString()
+    actual val id: String = native?.id() ?: UUID.randomUUID().toString(),
 ) {
     private val _tracks = mutableListOf<MediaStreamTrack>()
     actual val tracks: List<MediaStreamTrack> = _tracks

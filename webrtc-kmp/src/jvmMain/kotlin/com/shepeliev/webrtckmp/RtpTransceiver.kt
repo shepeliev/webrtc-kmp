@@ -5,7 +5,7 @@ import dev.onvoid.webrtc.RTCRtpTransceiverDirection
 
 actual class RtpTransceiver(
     val native: RTCRtpTransceiver,
-    private val senderTrack: MediaStreamTrack?
+    private val senderTrack: MediaStreamTrack?,
 ) {
     actual val currentDirection: RtpTransceiverDirection?
         get() = native.currentDirection.asCommon()

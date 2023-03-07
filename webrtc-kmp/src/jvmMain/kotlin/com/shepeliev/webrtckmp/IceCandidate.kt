@@ -6,13 +6,13 @@ actual class IceCandidate internal constructor(val native: RTCIceCandidate) {
     actual constructor(
         sdpMid: String,
         sdpMLineIndex: Int,
-        candidate: String
+        candidate: String,
     ) : this(
         RTCIceCandidate(
             sdpMid,
             sdpMLineIndex,
-            candidate
-        )
+            candidate,
+        ),
     )
 
     actual val sdpMid: String

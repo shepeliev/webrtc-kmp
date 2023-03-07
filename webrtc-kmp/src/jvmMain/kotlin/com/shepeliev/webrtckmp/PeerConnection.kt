@@ -28,7 +28,7 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
 
     val jvm: RTCPeerConnection = WebRtc.peerConnectionFactory.createPeerConnection(
         rtcConfiguration.jvm,
-        JvmPeerConnectionObserver()
+        JvmPeerConnectionObserver(),
     ) ?: error("Creating PeerConnection failed")
 
     actual val localDescription: SessionDescription?
@@ -64,7 +64,7 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         maxRetransmitTimeMs: Int,
         maxRetransmits: Int,
         protocol: String,
-        negotiated: Boolean
+        negotiated: Boolean,
     ): DataChannel? {
         val init = RTCDataChannelInit().also {
             it.id = id
@@ -84,7 +84,7 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
                     options.iceRestart?.let { iceRestart = it }
                     options.voiceActivityDetection?.let { voiceActivityDetection = it }
                 },
-                createSdpObserver(cont)
+                createSdpObserver(cont),
             )
         }
     }
@@ -95,7 +95,7 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
                 RTCAnswerOptions().apply {
                     options.voiceActivityDetection?.let { voiceActivityDetection = it }
                 },
-                createSdpObserver(cont)
+                createSdpObserver(cont),
             )
         }
     }
@@ -116,7 +116,7 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         return suspendCoroutine {
             jvm.setLocalDescription(
                 description.asNative(),
-                setSdpObserver(it)
+                setSdpObserver(it),
             )
         }
     }
@@ -125,7 +125,7 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         return suspendCoroutine {
             jvm.setRemoteDescription(
                 description.asNative(),
-                setSdpObserver(it)
+                setSdpObserver(it),
             )
         }
     }
@@ -226,8 +226,8 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         override fun onStandardizedIceConnectionChange(newState: RTCIceConnectionState) {
             _peerConnectionEvent.tryEmit(
                 PeerConnectionEvent.StandardizedIceConnectionChange(
-                    newState.asCommon()
-                )
+                    newState.asCommon(),
+                ),
             )
         }
 
@@ -246,11 +246,15 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         }
 
         override fun onIceCandidatesRemoved(candidates: Array<out RTCIceCandidate>) {
-            _peerConnectionEvent.tryEmit(PeerConnectionEvent.RemovedIceCandidates(candidates.map {
-                IceCandidate(
-                    it
-                )
-            }))
+            _peerConnectionEvent.tryEmit(
+                PeerConnectionEvent.RemovedIceCandidates(
+                    candidates.map {
+                        IceCandidate(
+                            it,
+                        )
+                    },
+                ),
+            )
         }
 
         override fun onAddStream(nativeStream: dev.onvoid.webrtc.media.MediaStream) {
@@ -277,7 +281,7 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
 
         override fun onAddTrack(
             receiver: RTCRtpReceiver,
-            nativeStreams: Array<out dev.onvoid.webrtc.media.MediaStream>
+            nativeStreams: Array<out dev.onvoid.webrtc.media.MediaStream>,
         ) {
             val transceiver = jvm.transceivers.find { it.receiver == receiver } ?: return
 
@@ -306,7 +310,7 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
                 receiver = RtpReceiver(receiver, receiverTrack),
                 streams = streams,
                 track = receiverTrack,
-                transceiver = RtpTransceiver(transceiver, senderTrack)
+                transceiver = RtpTransceiver(transceiver, senderTrack),
             )
 
             _peerConnectionEvent.tryEmit(PeerConnectionEvent.Track(trackEvent))
@@ -315,7 +319,7 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         override fun onRemoveTrack(receiver: RTCRtpReceiver) {
             val track = remoteTracks.remove(receiver.track?.id)
             _peerConnectionEvent.tryEmit(
-                PeerConnectionEvent.RemoveTrack(RtpReceiver(receiver, track))
+                PeerConnectionEvent.RemoveTrack(RtpReceiver(receiver, track)),
             )
             track?.stop()
         }
