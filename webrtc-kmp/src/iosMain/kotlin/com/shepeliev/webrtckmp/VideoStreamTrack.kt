@@ -1,5 +1,6 @@
 package com.shepeliev.webrtckmp
 
+import WebRTC.CGSize
 import WebRTC.RTCVideoFrame
 import WebRTC.RTCVideoRendererProtocol
 import WebRTC.RTCVideoTrack
@@ -26,7 +27,8 @@ actual class VideoStreamTrack internal constructor(
 ) : MediaStreamTrack(ios) {
 
     // Setup track mute detector for remote tracks only.
-    private val trackMuteDetector = if (videoCaptureController == null) TrackMuteDetector() else null
+    private val trackMuteDetector =
+        if (videoCaptureController == null) TrackMuteDetector() else null
 
     init {
         videoCaptureController?.startCapture()
@@ -93,12 +95,20 @@ actual class VideoStreamTrack internal constructor(
                 dispatch_source_cancel(timer)
             }
 
-            timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_main_queue())
+            timer = dispatch_source_create(
+                type = DISPATCH_SOURCE_TYPE_TIMER,
+                handle = 0,
+                mask = 0,
+                queue = dispatch_get_main_queue(),
+            )
             dispatch_source_set_timer(
-                timer,
-                dispatch_time(DISPATCH_TIME_NOW, (INITIAL_MUTE_DELAY * NSEC_PER_SEC.toDouble()).toLong()),
-                (MUTE_DELAY * NSEC_PER_SEC.toDouble()).toULong(),
-                NSEC_PER_SEC / 10.toULong()
+                source = timer,
+                start = dispatch_time(
+                    DISPATCH_TIME_NOW,
+                    (INITIAL_MUTE_DELAY * NSEC_PER_SEC.toDouble()).toLong(),
+                ),
+                interval = (MUTE_DELAY * NSEC_PER_SEC.toDouble()).toULong(),
+                leeway = NSEC_PER_SEC / 10.toULong(),
             )
 
             var lastFrameCount = frameCount.value
