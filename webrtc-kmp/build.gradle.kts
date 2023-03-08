@@ -34,6 +34,8 @@ kotlin {
             }
         }
     }
+
+    jvm()
 }
 
 android {
@@ -49,6 +51,10 @@ dependencies {
     androidTestImplementation(deps.androidx.test.core)
     androidTestImplementation(deps.androidx.test.runner)
     jsMainImplementation(npm("webrtc-adapter", "8.1.1"))
+    jvmMainImplementation(deps.webrtc.java)
+    jvmMainImplementation(variantOf(deps.webrtc.java) { classifier("windows-x86_64") })
+    jvmMainImplementation(variantOf(deps.webrtc.java) { classifier("macos-x86_64") })
+    jvmMainImplementation(variantOf(deps.webrtc.java) { classifier("linux-x86_64") })
 }
 
 tasks.register<Download>("downloadAndroidWebRtc") {
