@@ -37,6 +37,8 @@ kotlin {
 }
 
 android {
+    namespace = "com.shepeliev.webrtckmp"
+
     defaultConfig {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
