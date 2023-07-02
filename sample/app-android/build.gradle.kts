@@ -6,6 +6,8 @@ plugins {
 }
 
 android {
+    namespace = "com.shepeliev.webrtckmp.sample"
+
     compileSdk = AndroidConfig.compileSdkVersion
 
     defaultConfig {
@@ -21,16 +23,16 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = deps.versions.androidxCompose.get()
+        kotlinCompilerExtensionVersion = "1.4.8"
     }
 }
 

@@ -42,6 +42,10 @@ kotlin {
     }
 }
 
+android {
+    namespace = "com.shepeliev.webrtckmp.sample.shared"
+}
+
 dependencies {
     commonMainApi(project(":webrtc-kmp"))
     commonMainApi(deps.decompose)
