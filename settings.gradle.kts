@@ -13,6 +13,14 @@ dependencyResolutionManagement {
     }
 }
 
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+    }
+}
+
 include(":webrtc-kmp")
 include(":sample:shared")
 include(":sample:app-android")

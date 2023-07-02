@@ -1,12 +1,13 @@
 plugins {
     id("multiplatform-setup")
-    id("publish-setup")
+    id("maven-publish")
+    id("signing")
 }
 
 group = "com.shepeliev"
-version = "0.106.0"
 
-val jitsiWebRtcVersion = "106.0.1"
+val webRtcKmpVersion: String by properties
+version = webRtcKmpVersion
 
 kotlin {
     android {
@@ -49,4 +50,52 @@ dependencies {
     androidTestImplementation(deps.androidx.test.core)
     androidTestImplementation(deps.androidx.test.runner)
     jsMainImplementation(npm("webrtc-adapter", "8.1.1"))
+}
+
+publishing {
+    publications.all {
+        this as MavenPublication
+
+        pom {
+            name.set(project.name)
+            description.set("WebRTC Kotlin Multiplatform SDK")
+            url.set("https://github.com/shepeliev/webrtc-kmp")
+
+            scm {
+                url.set("https://github.com/shepeliev/webrtc-kmp")
+                connection.set("scm:git:https://github.com/shepeliev/webrtc-kmp.git")
+                developerConnection.set("scm:git:https://github.com/shepeliev/webrtc-kmp.git")
+                tag.set("HEAD")
+            }
+
+            issueManagement {
+                system.set("GitHub Issues")
+                url.set("https://github.com/shepeliev/webrtc-kmp/issues")
+            }
+
+            developers {
+                developer {
+                    name.set("Alex Shepeliev")
+                    email.set("a.shepeliev@gmail.com")
+                }
+            }
+
+            licenses {
+                license {
+                    name.set("The Apache Software License, Version 2.0")
+                    url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                    distribution.set("repo")
+                    comments.set("A business-friendly OSS license")
+                }
+            }
+        }
+    }
+}
+
+signing {
+    val signingKey: String by extra
+    val signingPassword: String by extra
+
+    useInMemoryPgpKeys(signingKey, signingPassword)
+    sign(publishing.publications)
 }
