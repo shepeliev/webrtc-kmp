@@ -21,6 +21,7 @@ kermit = "1.1.2"
 firebaseBom = "32.1.1"
 
 [libraries]
+webrtcSdk = "io.github.webrtc-sdk:android:114.5735.01"
 
 kotlin-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinCoroutines" }
 kotlin-coroutinesPlayServices = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlinCoroutines" }
