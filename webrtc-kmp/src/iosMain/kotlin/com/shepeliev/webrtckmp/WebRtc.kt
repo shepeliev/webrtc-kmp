@@ -3,17 +3,52 @@ package com.shepeliev.webrtckmp
 import WebRTC.RTCCleanupSSL
 import WebRTC.RTCDefaultVideoDecoderFactory
 import WebRTC.RTCDefaultVideoEncoderFactory
-import WebRTC.RTCInitFieldTrialDictionary
 import WebRTC.RTCInitializeSSL
+import WebRTC.RTCLogEx
 import WebRTC.RTCLoggingSeverity
 import WebRTC.RTCPeerConnectionFactory
 import WebRTC.RTCPeerConnectionFactoryOptions
-import WebRTC.RTCSetMinDebugLogLevel
-import WebRTC.RTCSetupInternalTracer
 import WebRTC.RTCShutdownInternalTracer
+import WebRTC.RTCVideoDecoderFactoryProtocol
+import WebRTC.RTCVideoEncoderFactoryProtocol
 
 @ThreadLocal
-actual object WebRtc {
+object WebRtc {
+    var videoEncoderFactory: RTCVideoEncoderFactoryProtocol? = null
+        set(value) {
+            field = value
+            if (_peerConnectionFactory != null) {
+                RTCLogEx(
+                    RTCLoggingSeverity.RTCLoggingSeverityError,
+                    "Peer connection factory is already initialized. " +
+                        "Setting video encoder factory after initialization has no effect."
+                )
+            }
+        }
+
+    var videoDecoderFactory: RTCVideoDecoderFactoryProtocol? = null
+        set(value) {
+            field = value
+            if (_peerConnectionFactory != null) {
+                RTCLogEx(
+                    RTCLoggingSeverity.RTCLoggingSeverityError,
+                    "Peer connection factory is already initialized. " +
+                        "Setting video decoder factory after initialization has no effect."
+                )
+            }
+        }
+
+    var peerConnectionFactoryOptions: RTCPeerConnectionFactoryOptions? = null
+        set(value) {
+            field = value
+            if (_peerConnectionFactory != null) {
+                RTCLogEx(
+                    RTCLoggingSeverity.RTCLoggingSeverityError,
+                    "Peer connection factory is already initialized. " +
+                        "Setting peer connection factory options after initialization has no effect."
+                )
+            }
+        }
 
     private var _peerConnectionFactory: RTCPeerConnectionFactory? = null
     internal val peerConnectionFactory: RTCPeerConnectionFactory
@@ -22,56 +57,18 @@ actual object WebRtc {
             return checkNotNull(_peerConnectionFactory)
         }
 
-    private var builder = WebRtcBuilder()
-
-    fun configureBuilder(block: WebRtcBuilder.() -> Unit) {
-        block(builder)
-    }
-
-    actual fun initialize() {
-        initializePeerConnectionFactory()
-        _peerConnectionFactory = buildPeerConnectionFactory(builder.peerConnectionFactoryOptions)
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    private fun initializePeerConnectionFactory() {
-        with(builder) {
-            RTCInitFieldTrialDictionary(fieldTrials as Map<Any?, *>)
-            RTCInitializeSSL()
-            loggingSeverity?.also { RTCSetMinDebugLogLevel(it) }
-            if (enableInternalTracer) {
-                RTCSetupInternalTracer()
-            }
+    private fun initialize() {
+        RTCInitializeSSL()
+        _peerConnectionFactory = RTCPeerConnectionFactory(
+            videoEncoderFactory ?: RTCDefaultVideoEncoderFactory(),
+            videoDecoderFactory ?: RTCDefaultVideoDecoderFactory()
+        ).apply {
+            peerConnectionFactoryOptions?.let { setOptions(it) }
         }
     }
 
-    private fun buildPeerConnectionFactory(options: RTCPeerConnectionFactoryOptions?): RTCPeerConnectionFactory {
-        val factory = RTCPeerConnectionFactory(
-            RTCDefaultVideoEncoderFactory(),
-            RTCDefaultVideoDecoderFactory()
-        )
-        options?.also { factory.setOptions(options) }
-        return factory
-    }
-
-    actual fun dispose() {
+    fun disposePeerConnectionFactory() {
         RTCShutdownInternalTracer()
         RTCCleanupSSL()
     }
 }
-
-@Deprecated(
-    "Use WebRtc.initialize()",
-    replaceWith = ReplaceWith("WebRtc.initialize()")
-)
-fun initializeWebRtc(build: WebRtcBuilder.() -> Unit = {}) {
-    WebRtc.configureBuilder(build)
-    WebRtc.initialize()
-}
-
-class WebRtcBuilder(
-    var peerConnectionFactoryOptions: RTCPeerConnectionFactoryOptions? = null,
-    var fieldTrials: Map<String, String> = emptyMap(),
-    var enableInternalTracer: Boolean = false,
-    var loggingSeverity: RTCLoggingSeverity? = null
-)

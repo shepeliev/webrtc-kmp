@@ -8,7 +8,32 @@ import org.webrtc.EglBase
 import org.webrtc.Logging
 import org.webrtc.PeerConnectionFactory
 
-actual object WebRtc {
+object WebRtc {
+    private const val TAG = "WebRtcKmp"
+
+    var peerConnectionFactoryInitOptions: PeerConnectionFactory.InitializationOptions? = null
+        set(value) {
+            field = value
+            if (_eglBase != null) {
+                Logging.e(
+                    TAG,
+                    "Peer connection factory is already initialized. Setting " +
+                        "peerConnectionFactoryInitOptions after initialization has no effect."
+                )
+            }
+        }
+
+    var peerConnectionFactoryBuilder: PeerConnectionFactory.Builder? = null
+        set(value) {
+            field = value
+            if (_peerConnectionFactory != null) {
+                Logging.e(
+                    TAG,
+                    "Peer connection factory is already initialized. Setting " +
+                        "peerConnectionFactoryBuilder after initialization has no effect."
+                )
+            }
+        }
 
     private var _eglBase: EglBase? = null
     val rootEglBase: EglBase
@@ -24,38 +49,31 @@ actual object WebRtc {
             return checkNotNull(_peerConnectionFactory)
         }
 
-    private var builder = WebRtcBuilder()
-
-    fun configureBuilder(block: WebRtcBuilder.() -> Unit = {}) {
-        block(builder)
-    }
-
-    actual fun initialize() {
-        check(_peerConnectionFactory == null) { "WebRtc already initialized." }
-        _eglBase = builder.eglBase ?: EglBase.create()
+    private fun initialize() {
+        check(_eglBase == null) { "Peer connection factory is already initialized." }
+        _eglBase = EglBase.create()
         initializePeerConnectionFactory()
-        val pcfBuilder = builder.factoryBuilder ?: getDefaultPeerConnectionBuilder()
-        _peerConnectionFactory = pcfBuilder.createPeerConnectionFactory()
+        val builder = peerConnectionFactoryBuilder ?: getDefaultPeerConnectionBuilder()
+        _peerConnectionFactory = builder.createPeerConnectionFactory()
     }
 
     private fun initializePeerConnectionFactory() {
-        with(builder) {
-            val fieldTrialsString = fieldTrials.entries
-                .joinToString(separator = "/") { "${it.key}/${it.value}" }
-
-            val initOptions = PeerConnectionFactory.InitializationOptions
-                .builder(ApplicationContextHolder.context)
-                .setFieldTrials(fieldTrialsString)
-                .setEnableInternalTracer(enableInternalTracer)
-                .createInitializationOptions()
-
-            PeerConnectionFactory.initialize(initOptions)
-            loggingSeverity?.also { Logging.enableLogToDebugOutput(it) }
-        }
+        val initOptions = peerConnectionFactoryInitOptions
+            ?: getDefaultPeerConnectionFactoryInitOptions()
+        PeerConnectionFactory.initialize(initOptions)
     }
 
+    private fun getDefaultPeerConnectionFactoryInitOptions() =
+        PeerConnectionFactory.InitializationOptions
+            .builder(ApplicationContextHolder.context)
+            .createInitializationOptions()
+
     private fun getDefaultPeerConnectionBuilder(): PeerConnectionFactory.Builder {
-        val videoEncoderFactory = DefaultVideoEncoderFactory(rootEglBase.eglBaseContext, true, false)
+        val videoEncoderFactory = DefaultVideoEncoderFactory(
+            rootEglBase.eglBaseContext,
+            true,
+            false
+        )
 
         val videoDecoderFactory = DefaultVideoDecoderFactory(rootEglBase.eglBaseContext)
         return PeerConnectionFactory.builder()
@@ -63,7 +81,7 @@ actual object WebRtc {
             .setVideoDecoderFactory(videoDecoderFactory)
     }
 
-    actual fun dispose() {
+    fun disposePeerConnectionFactory() {
         if (_peerConnectionFactory == null) return
 
         _eglBase?.release()
@@ -75,11 +93,3 @@ actual object WebRtc {
         PeerConnectionFactory.shutdownInternalTracer()
     }
 }
-
-class WebRtcBuilder(
-    var factoryBuilder: PeerConnectionFactory.Builder? = null,
-    var fieldTrials: Map<String, String> = emptyMap(),
-    var enableInternalTracer: Boolean = false,
-    var loggingSeverity: Logging.Severity? = null,
-    var eglBase: EglBase? = null,
-)
