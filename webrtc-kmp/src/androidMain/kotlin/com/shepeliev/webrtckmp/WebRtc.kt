@@ -2,7 +2,6 @@
 
 package com.shepeliev.webrtckmp
 
-import android.content.Context
 import org.webrtc.DefaultVideoDecoderFactory
 import org.webrtc.DefaultVideoEncoderFactory
 import org.webrtc.EglBase
@@ -84,29 +83,3 @@ class WebRtcBuilder(
     var loggingSeverity: Logging.Severity? = null,
     var eglBase: EglBase? = null,
 )
-
-@Deprecated(
-    "Use WebRtc.initialize()",
-    replaceWith = ReplaceWith("WebRtc.initialize()")
-)
-fun initializeWebRtc(
-    context: Context,
-    eglBaseInstance: EglBase = EglBase.create(),
-    build: WebRtcBuilder.() -> Unit = {}
-) {
-    WebRtc.configureBuilder(build)
-    WebRtc.initialize()
-}
-
-@Deprecated(
-    "Use WebRtc.rootEglBase",
-    replaceWith = ReplaceWith("WebRtc.rootEglBase")
-)
-val eglBase: EglBase get() = WebRtc.rootEglBase
-
-@Deprecated(
-    "Use WebRtc.rootEglBase.eglBaseContext",
-    replaceWith = ReplaceWith("WebRtc.rootEglBase.eglBaseContext")
-)
-val eglBaseContext: EglBase.Context
-    get() = WebRtc.rootEglBase.eglBaseContext
