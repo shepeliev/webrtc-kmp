@@ -28,7 +28,6 @@ internal class LocalVideoStreamTrack(
     }
 
     override fun onStop() {
-        videoCaptureController.stopCapture()
         videoCaptureController.dispose()
     }
 }

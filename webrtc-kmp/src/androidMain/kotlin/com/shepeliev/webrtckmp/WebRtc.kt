@@ -2,6 +2,9 @@
 
 package com.shepeliev.webrtckmp
 
+import org.webrtc.Camera1Enumerator
+import org.webrtc.Camera2Enumerator
+import org.webrtc.CameraEnumerator
 import org.webrtc.DefaultVideoDecoderFactory
 import org.webrtc.DefaultVideoEncoderFactory
 import org.webrtc.EglBase
@@ -40,6 +43,13 @@ object WebRtc {
         get() {
             if (_eglBase == null) initialize()
             return checkNotNull(_eglBase)
+        }
+
+    var cameraEnumerator: CameraEnumerator =
+        if (Camera2Enumerator.isSupported(ApplicationContextHolder.context)) {
+            Camera2Enumerator(ApplicationContextHolder.context)
+        } else {
+            Camera1Enumerator()
         }
 
     private var _peerConnectionFactory: PeerConnectionFactory? = null
