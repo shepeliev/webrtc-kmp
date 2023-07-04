@@ -165,7 +165,7 @@ actual class PeerConnection actual constructor(
 
     actual fun removeTrack(sender: RtpSender): Boolean {
         localTracks.remove(sender.track?.id)
-        return ios.removeTrack(sender.android)
+        return ios.removeTrack(sender.ios)
     }
 
     actual suspend fun getStats(): RtcStatsReport? {
