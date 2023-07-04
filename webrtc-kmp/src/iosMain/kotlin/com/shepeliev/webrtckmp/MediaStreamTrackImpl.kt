@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-internal abstract class MediaStreamTrackImpl(val ios: RTCMediaStreamTrack): MediaStreamTrack {
+internal abstract class MediaStreamTrackImpl(val ios: RTCMediaStreamTrack) : MediaStreamTrack {
 
     override val id: String
         get() = ios.trackId
