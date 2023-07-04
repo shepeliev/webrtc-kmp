@@ -2,7 +2,6 @@ plugins {
     id("com.android.library")
     kotlin("multiplatform")
     id("org.jlleitschuh.gradle.ktlint")
-    id("de.undercouch.download")
 }
 
 kotlin {
