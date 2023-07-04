@@ -196,7 +196,7 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
 
     actual fun removeTrack(sender: RtpSender): Boolean {
         localTracks.remove(sender.track?.id)
-        return android.removeTrack(sender.native)
+        return android.removeTrack(sender.android)
     }
 
     actual suspend fun getStats(): RtcStatsReport? {

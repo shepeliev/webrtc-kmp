@@ -2,24 +2,24 @@ package com.shepeliev.webrtckmp
 
 import WebRTC.RTCRtpSender
 
-actual class RtpSender(val native: RTCRtpSender, track: MediaStreamTrack?) {
+actual class RtpSender(val android: RTCRtpSender, track: MediaStreamTrack?) {
     actual val id: String
-        get() = native.senderId()
+        get() = android.senderId()
 
     private var _track: MediaStreamTrack? = track
     actual val track: MediaStreamTrack? get() = _track
 
     actual var parameters: RtpParameters
-        get() = RtpParameters(native.parameters)
+        get() = RtpParameters(android.parameters)
         set(value) {
-            native.parameters = value.native
+            android.parameters = value.native
         }
 
     actual val dtmf: DtmfSender?
-        get() = native.dtmfSender?.let { DtmfSender(it) }
+        get() = android.dtmfSender?.let { DtmfSender(it) }
 
     actual suspend fun replaceTrack(track: MediaStreamTrack?) {
-        native.setTrack((track as? MediaStreamTrackImpl)?.ios)
+        android.setTrack((track as? MediaStreamTrackImpl)?.ios)
         _track = track
     }
 }
