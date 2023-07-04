@@ -57,8 +57,8 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         MutableSharedFlow<PeerConnectionEvent>(extraBufferCapacity = FLOW_BUFFER_CAPACITY)
     internal actual val peerConnectionEvent: Flow<PeerConnectionEvent> = _peerConnectionEvent.asSharedFlow()
 
-    private val localTracks = mutableMapOf<String, MediaStreamTrack>()
-    private val remoteTracks = mutableMapOf<String, MediaStreamTrack>()
+    private val localTracks = mutableMapOf<String, MediaStreamTrackImpl>()
+    private val remoteTracks = mutableMapOf<String, MediaStreamTrackImpl>()
 
     actual fun createDataChannel(
         label: String,
@@ -187,6 +187,8 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         }
 
     actual fun addTrack(track: MediaStreamTrack, vararg streams: MediaStream): RtpSender {
+        require(track is MediaStreamTrackImpl)
+
         val streamIds = streams.map { it.id }
         localTracks[track.id] = track
         return RtpSender(android.addTrack(track.android, streamIds), track)
@@ -270,11 +272,11 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
 
             val audioTracks = androidStreams
                 .flatMap { it.audioTracks }
-                .map { remoteTracks.getOrPut(it.id()) { AudioStreamTrack(it) } }
+                .map { remoteTracks.getOrPut(it.id()) { RemoteAudioStreamTrack(it) } }
 
             val videoTracks = androidStreams
                 .flatMap { it.videoTracks }
-                .map { remoteTracks.getOrPut(it.id()) { VideoStreamTrack(it) } }
+                .map { remoteTracks.getOrPut(it.id()) { RemoteVideoStreamTrack(it) } }
 
             val streams = androidStreams.map { androidStream ->
                 MediaStream(

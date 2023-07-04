@@ -14,6 +14,8 @@ actual class MediaStream internal constructor(
     actual val tracks: List<MediaStreamTrack> = _tracks
 
     actual fun addTrack(track: MediaStreamTrack) {
+        require(track is MediaStreamTrackImpl)
+
         android?.let {
             when (track.android) {
                 is AudioTrack -> it.addTrack(track.android)
@@ -29,6 +31,8 @@ actual class MediaStream internal constructor(
     }
 
     actual fun removeTrack(track: MediaStreamTrack) {
+        require(track is MediaStreamTrackImpl)
+
         android?.let {
             when (track.android) {
                 is AudioTrack -> it.removeTrack(track.android)

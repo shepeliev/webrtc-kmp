@@ -140,6 +140,8 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
     }
 
     actual fun addTrack(track: MediaStreamTrack, vararg streams: MediaStream): RtpSender {
+        require(track is MediaStreamTrackImpl)
+
         val jsStreams = streams.map { it.js }.toTypedArray()
         return RtpSender(js.addTrack(track.js, *jsStreams))
     }

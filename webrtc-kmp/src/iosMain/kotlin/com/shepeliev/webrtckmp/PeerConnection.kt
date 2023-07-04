@@ -66,8 +66,8 @@ actual class PeerConnection actual constructor(
         MutableSharedFlow<PeerConnectionEvent>(extraBufferCapacity = FLOW_BUFFER_CAPACITY)
     internal actual val peerConnectionEvent: Flow<PeerConnectionEvent> = _peerConnectionEvent.asSharedFlow()
 
-    private val localTracks = mutableMapOf<String, MediaStreamTrack>()
-    private val remoteTracks = mutableMapOf<String, MediaStreamTrack>()
+    private val localTracks = mutableMapOf<String, MediaStreamTrackImpl>()
+    private val remoteTracks = mutableMapOf<String, MediaStreamTrackImpl>()
 
     actual fun createDataChannel(
         label: String,
@@ -155,6 +155,8 @@ actual class PeerConnection actual constructor(
     }
 
     actual fun addTrack(track: MediaStreamTrack, vararg streams: MediaStream): RtpSender {
+        require(track is MediaStreamTrackImpl)
+
         val streamIds = streams.map { it.id }
         val iosSender = checkNotNull(ios.addTrack(track.ios, streamIds)) { "Failed to add track" }
         localTracks[track.id] = track
@@ -256,12 +258,12 @@ actual class PeerConnection actual constructor(
         val audioTracks = iosStreams
             .flatMap { it.audioTracks }
             .map { it as RTCAudioTrack }
-            .map { remoteTracks.getOrPut(it.trackId) { AudioStreamTrack(it) } }
+            .map { remoteTracks.getOrPut(it.trackId) { AudioStreamTrackImpl(it) } }
 
         val videoTracks = iosStreams
             .flatMap { it.videoTracks }
             .map { it as RTCVideoTrack }
-            .map { remoteTracks.getOrPut(it.trackId) { VideoStreamTrack(it) } }
+            .map { remoteTracks.getOrPut(it.trackId) { RemoteVideoStreamTrack(it) } }
 
         val commonStreams = iosStreams.map { iosStream ->
             MediaStream(ios = iosStream, id = iosStream.streamId).also { stream ->
