@@ -9,24 +9,24 @@ import org.w3c.dom.mediacapture.LIVE
 import org.w3c.dom.mediacapture.MediaStreamTrack as JsMediaStreamTrack
 import org.w3c.dom.mediacapture.MediaStreamTrackState as JsMediaStreamTrackState
 
-actual abstract class MediaStreamTrack internal constructor(val js: JsMediaStreamTrack) {
-    actual val id: String
+internal abstract class MediaStreamTrackImpl(val js: JsMediaStreamTrack) : MediaStreamTrack {
+    override val id: String
         get() = js.id
 
-    actual val kind: MediaStreamTrackKind
+    override val kind: MediaStreamTrackKind
         get() = js.kind.toMediaStreamTrackKind()
 
-    actual val label: String
+    override val label: String
         get() = js.label
 
-    actual var enabled: Boolean
+    override var enabled: Boolean
         get() = js.enabled
         set(value) {
             js.enabled = value
         }
 
     private val _state = MutableStateFlow(getInitialState())
-    actual val state: StateFlow<MediaStreamTrackState> = _state.asStateFlow()
+    override val state: StateFlow<MediaStreamTrackState> = _state.asStateFlow()
 
     init {
         js.onended = { _state.update { MediaStreamTrackState.Ended(js.muted) } }
@@ -34,7 +34,7 @@ actual abstract class MediaStreamTrack internal constructor(val js: JsMediaStrea
         js.onunmute = { _state.update { it.unmute() } }
     }
 
-    actual fun stop() {
+    override fun stop() {
         js.stop()
     }
 
@@ -55,8 +55,8 @@ actual abstract class MediaStreamTrack internal constructor(val js: JsMediaStrea
     }
 }
 
-internal fun JsMediaStreamTrack.asCommon(): MediaStreamTrack = when (kind) {
-    "audio" -> AudioStreamTrack(this)
-    "video" -> VideoStreamTrack(this)
+internal fun JsMediaStreamTrack.asCommon(): MediaStreamTrackImpl = when (kind) {
+    "audio" -> AudioStreamTrackImpl(this)
+    "video" -> VideoStreamTrackImpl(this)
     else -> error("Unknown kind of media stream track: $kind")
 }

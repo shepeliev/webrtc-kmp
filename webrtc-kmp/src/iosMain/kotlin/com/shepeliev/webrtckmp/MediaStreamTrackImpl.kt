@@ -1,9 +1,7 @@
 package com.shepeliev.webrtckmp
 
-import WebRTC.RTCAudioTrack
 import WebRTC.RTCMediaStreamTrack
 import WebRTC.RTCMediaStreamTrackState
-import WebRTC.RTCVideoTrack
 import WebRTC.kRTCMediaStreamTrackKindAudio
 import WebRTC.kRTCMediaStreamTrackKindVideo
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,26 +9,26 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-actual abstract class MediaStreamTrack internal constructor(val ios: RTCMediaStreamTrack) {
+internal abstract class MediaStreamTrackImpl(val ios: RTCMediaStreamTrack) : MediaStreamTrack {
 
-    actual val id: String
+    override val id: String
         get() = ios.trackId
 
-    actual val kind: MediaStreamTrackKind
+    override val kind: MediaStreamTrackKind
         get() = when (ios.kind()) {
             kRTCMediaStreamTrackKindAudio -> MediaStreamTrackKind.Audio
             kRTCMediaStreamTrackKindVideo -> MediaStreamTrackKind.Video
             else -> error("Unknown track kind: ${ios.kind()}")
         }
 
-    actual val label: String
+    override val label: String
         get() = when (kind) {
             // TODO(shepeliev): get real capturing device (front/back camera, internal microphone, headset)
             MediaStreamTrackKind.Audio -> "microphone"
             MediaStreamTrackKind.Video -> "camera"
         }
 
-    actual var enabled: Boolean
+    override var enabled: Boolean
         get() = ios.isEnabled
         set(value) {
             if (ios.isEnabled == value) return
@@ -39,9 +37,9 @@ actual abstract class MediaStreamTrack internal constructor(val ios: RTCMediaStr
         }
 
     private val _state = MutableStateFlow(getInitialState())
-    actual val state: StateFlow<MediaStreamTrackState> = _state.asStateFlow()
+    override val state: StateFlow<MediaStreamTrackState> = _state.asStateFlow()
 
-    actual fun stop() {
+    override fun stop() {
         if (_state.value is MediaStreamTrackState.Ended) return
         _state.update { MediaStreamTrackState.Ended(it.muted) }
         onStop()
@@ -55,25 +53,21 @@ actual abstract class MediaStreamTrack internal constructor(val ios: RTCMediaStr
         }
     }
 
-    protected abstract fun onSetEnabled(enabled: Boolean)
+    protected open fun onSetEnabled(enabled: Boolean) {}
 
-    protected abstract fun onStop()
+    protected open fun onStop() {}
 
     private fun getInitialState(): MediaStreamTrackState {
         return when (ios.readyState) {
-            RTCMediaStreamTrackState.RTCMediaStreamTrackStateLive -> MediaStreamTrackState.Live(muted = false)
-            RTCMediaStreamTrackState.RTCMediaStreamTrackStateEnded -> MediaStreamTrackState.Live(muted = false)
-            else -> error("Unknown RTCMediaStreamTrackState: $state")
-        }
-    }
+            RTCMediaStreamTrackState.RTCMediaStreamTrackStateLive -> MediaStreamTrackState.Live(
+                muted = false
+            )
 
-    companion object {
-        fun createCommon(ios: RTCMediaStreamTrack): MediaStreamTrack {
-            return when (ios) {
-                is RTCAudioTrack -> AudioStreamTrack(ios)
-                is RTCVideoTrack -> VideoStreamTrack(ios)
-                else -> error("Unknown native MediaStreamTrack: $this")
-            }
+            RTCMediaStreamTrackState.RTCMediaStreamTrackStateEnded -> MediaStreamTrackState.Live(
+                muted = false
+            )
+
+            else -> error("Unknown RTCMediaStreamTrackState: $state")
         }
     }
 }

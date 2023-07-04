@@ -34,16 +34,16 @@ private object MediaDevicesImpl : MediaDevices {
             }
             val audioSource = WebRtc.peerConnectionFactory.createAudioSource(mediaConstraints)
             val androidTrack = WebRtc.peerConnectionFactory.createAudioTrack(UUID.randomUUID().toString(), audioSource)
-            audioTrack = AudioStreamTrack(androidTrack, audioSource)
+            audioTrack = LocalAudioStreamTrack(androidTrack, audioSource)
         }
 
-        var videoTrack: VideoStreamTrack? = null
+        var videoTrack: LocalVideoStreamTrack? = null
         if (constraints.video != null) {
             checkCameraPermission()
             val videoSource = WebRtc.peerConnectionFactory.createVideoSource(false)
             val videoCaptureController = CameraVideoCaptureController(constraints.video, videoSource)
             val androidTrack = WebRtc.peerConnectionFactory.createVideoTrack(UUID.randomUUID().toString(), videoSource)
-            videoTrack = VideoStreamTrack(androidTrack, videoCaptureController)
+            videoTrack = LocalVideoStreamTrack(androidTrack, videoCaptureController)
         }
 
         val localMediaStream = WebRtc.peerConnectionFactory.createLocalMediaStream(UUID.randomUUID().toString())
@@ -64,7 +64,7 @@ private object MediaDevicesImpl : MediaDevices {
             ApplicationContextHolder.context,
             Manifest.permission.RECORD_AUDIO
         )
-        if (result == PackageManager.PERMISSION_DENIED) throw RecordAudioPermissionException()
+        if (result != PackageManager.PERMISSION_GRANTED) throw RecordAudioPermissionException()
     }
 
     private fun checkCameraPermission() {
@@ -72,7 +72,7 @@ private object MediaDevicesImpl : MediaDevices {
             ApplicationContextHolder.context,
             Manifest.permission.CAMERA
         )
-        if (result == PackageManager.PERMISSION_DENIED) throw CameraPermissionException()
+        if (result != PackageManager.PERMISSION_GRANTED) throw CameraPermissionException()
     }
 
     override suspend fun enumerateDevices(): List<MediaDeviceInfo> {

@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.map
 
-expect abstract class MediaStreamTrack {
+interface MediaStreamTrack {
     val id: String
     val kind: MediaStreamTrackKind
     val label: String
@@ -38,7 +38,8 @@ val MediaStreamTrack.muted: Boolean get() = state.value.muted
 
 val MediaStreamTrack.readyState: MediaStreamTrackState get() = state.value
 
-val MediaStreamTrack.onEnded: Flow<Unit> get() = state.filter { it is MediaStreamTrackState.Ended }.map { }
+val MediaStreamTrack.onEnded: Flow<Unit>
+    get() = state.filter { it is MediaStreamTrackState.Ended }.map { }
 
 val MediaStreamTrack.onMute: Flow<Unit> get() = state.filter { it.muted }.map { }
 
