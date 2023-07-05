@@ -8,7 +8,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import org.w3c.dom.mediacapture.MediaTrackConstraints as JsMediaTrackConstraints
 
-class ConstrainExtTest {
+class JsMediaTrackConstraintsExtTest {
     @Test
     fun test_jsMediaTrackConstraints_with_primitive_values_asCommon() {
         val jsMediaTrackConstraints = JsMediaTrackConstraints(
