@@ -40,11 +40,14 @@ internal class CameraVideoCaptureController(
 
         settings = settings.copy(
             deviceId = deviceId,
-            facingMode = (if (isFrontFacing) {
-                FacingMode.User
-            } else {
-                FacingMode.Environment
-            })
+
+            facingMode = (
+                if (isFrontFacing) {
+                    FacingMode.User
+                } else {
+                    FacingMode.Environment
+                }
+                )
         )
     }
 
@@ -102,11 +105,13 @@ internal class CameraVideoCaptureController(
                 settings = settings.copy(
                     deviceId = checkNotNull(pendingDeviceId),
 
-                    facingMode = (if (isFrontFacing) {
-                        FacingMode.User
-                    } else {
-                        FacingMode.Environment
-                    })
+                    facingMode = (
+                        if (isFrontFacing) {
+                            FacingMode.User
+                        } else {
+                            FacingMode.Environment
+                        }
+                        )
                 )
 
                 continuation.resume(Unit)
