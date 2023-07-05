@@ -41,6 +41,7 @@ internal abstract class MediaStreamTrackImpl(
     override val state: StateFlow<MediaStreamTrackState> = _state.asStateFlow()
 
     override val constraints: MediaTrackConstraints = MediaTrackConstraints()
+    override val settings: MediaTrackSettings = MediaTrackSettings()
 
     override fun stop() {
         if (_state.value is MediaStreamTrackState.Ended) return

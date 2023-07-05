@@ -31,6 +31,9 @@ internal abstract class MediaStreamTrackImpl(val js: JsMediaStreamTrack) : Media
     override val constraints: MediaTrackConstraints
         get() = js.getConstraints().asCommon()
 
+    override val settings: MediaTrackSettings
+        get() = js.getSettings().asCommon()
+
     init {
         js.onended = { _state.update { MediaStreamTrackState.Ended(js.muted) } }
         js.onmute = { _state.update { it.mute() } }

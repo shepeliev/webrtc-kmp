@@ -52,11 +52,7 @@ private object MediaDevicesImpl : MediaDevices {
                 UUID.randomUUID().toString(),
                 videoSource
             )
-            videoTrack = LocalVideoStreamTrack(
-                androidTrack,
-                videoCaptureController,
-                constraints.video
-            )
+            videoTrack = LocalVideoStreamTrack(androidTrack, videoCaptureController)
         }
 
         val localMediaStream =

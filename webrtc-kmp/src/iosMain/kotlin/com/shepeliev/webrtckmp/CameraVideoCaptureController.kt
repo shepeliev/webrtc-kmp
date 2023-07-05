@@ -18,12 +18,14 @@ internal class CameraVideoCaptureController(
     private val constraints: MediaTrackConstraints,
     private val videoSource: RTCVideoSource,
 ) : VideoCaptureController {
-
     private var videoCapturer: RTCCameraVideoCapturer? = null
     private var position: AVCaptureDevicePosition = AVCaptureDevicePositionBack
     private lateinit var device: AVCaptureDevice
     private lateinit var format: AVCaptureDeviceFormat
     private var fps: Long = -1
+
+    override var settings: MediaTrackSettings = MediaTrackSettings()
+        private set
 
     override fun startCapture() {
         if (videoCapturer != null) return
@@ -31,6 +33,22 @@ internal class CameraVideoCaptureController(
         if (!this::device.isInitialized) selectDevice()
         selectFormat()
         selectFps()
+
+        var width: Int? = null
+        var height: Int? = null
+        CMVideoFormatDescriptionGetDimensions(format.formatDescription).useContents {
+            width = this.width
+            height = this.height
+        }
+
+        settings = settings.copy(
+            deviceId = device.uniqueID,
+            facingMode = device.position.toFacingMode(),
+            width = width,
+            height = height,
+            frameRate = fps.toDouble()
+        )
+
         videoCapturer?.startCaptureWithDevice(device, format, fps)
     }
 
@@ -40,7 +58,6 @@ internal class CameraVideoCaptureController(
     }
 
     private fun selectDevice() {
-        val deviceId = constraints.deviceId
         position = when (constraints.facingMode?.value) {
             FacingMode.User -> AVCaptureDevicePositionFront
             FacingMode.Environment -> AVCaptureDevicePositionBack
@@ -48,8 +65,8 @@ internal class CameraVideoCaptureController(
         }
 
         val searchCriteria: (Any?) -> Boolean = when {
-            deviceId != null -> {
-                { (it as AVCaptureDevice).uniqueID == deviceId }
+            constraints.deviceId != null -> {
+                { (it as AVCaptureDevice).uniqueID == constraints.deviceId }
             }
 
             else -> {
@@ -60,6 +77,11 @@ internal class CameraVideoCaptureController(
         device = RTCCameraVideoCapturer.captureDevices()
             .firstOrNull(searchCriteria) as? AVCaptureDevice
             ?: throw CameraVideoCapturerException.notFound(constraints)
+
+        settings = settings.copy(
+            deviceId = device.uniqueID,
+            facingMode = device.position.toFacingMode()
+        )
     }
 
     private fun selectFormat() {
@@ -100,31 +122,44 @@ internal class CameraVideoCaptureController(
 
     fun switchCamera() {
         checkNotNull(videoCapturer) { "Video capturing is not started." }
-        stopCapture()
-        position = if (position == AVCaptureDevicePositionFront) {
-            AVCaptureDevicePositionBack
-        } else {
-            AVCaptureDevicePositionFront
+        val captureDevices = RTCCameraVideoCapturer.captureDevices()
+        if (captureDevices.size < 2) {
+            throw CameraVideoCapturerException("No other camera device found.")
         }
-        device = RTCCameraVideoCapturer.captureDevices()
-            .firstOrNull { (it as AVCaptureDevice).position == position } as? AVCaptureDevice
-            ?: run {
-                val facingMode = when (position) {
-                    AVCaptureDevicePositionBack -> FacingMode.Environment
-                    AVCaptureDevicePositionFront -> FacingMode.User
-                    else -> error("Unknown AVCaptureDevicePosition: $position")
-                }
-                throw CameraVideoCapturerException.notFound(facingMode)
-            }
+
+        stopCapture()
+        val deviceIndex = captureDevices.indexOfFirst {
+            (it as AVCaptureDevice).uniqueID == device.uniqueID
+        }
+        device = captureDevices[(deviceIndex + 1) % captureDevices.size] as AVCaptureDevice
         startCapture()
+
+        settings = settings.copy(
+            deviceId = device.uniqueID,
+            facingMode = device.position.toFacingMode()
+        )
     }
 
     fun switchCamera(deviceId: String) {
         checkNotNull(videoCapturer) { "Video capturing is not started." }
+
         stopCapture()
         device = RTCCameraVideoCapturer.captureDevices()
             .firstOrNull { (it as AVCaptureDevice).uniqueID == deviceId } as? AVCaptureDevice
             ?: throw CameraVideoCapturerException.notFound(deviceId)
-        stopCapture()
+        startCapture()
+
+        settings = settings.copy(
+            deviceId = device.uniqueID,
+            facingMode = device.position.toFacingMode()
+        )
+    }
+
+    private fun AVCaptureDevicePosition.toFacingMode(): FacingMode? {
+        return when (this) {
+            AVCaptureDevicePositionFront -> FacingMode.User
+            AVCaptureDevicePositionBack -> FacingMode.Environment
+            else -> null
+        }
     }
 }

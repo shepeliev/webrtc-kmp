@@ -5,8 +5,8 @@ import org.webrtc.VideoTrack
 internal class LocalVideoStreamTrack(
     android: VideoTrack,
     private val videoCaptureController: VideoCaptureController,
-    override val constraints: MediaTrackConstraints,
 ) : RenderedVideoStreamTrack(android), VideoStreamTrack {
+    override val settings: MediaTrackSettings get() = videoCaptureController.settings
 
     init {
         videoCaptureController.videoCapturerErrorListener = VideoCapturerErrorListener { stop() }

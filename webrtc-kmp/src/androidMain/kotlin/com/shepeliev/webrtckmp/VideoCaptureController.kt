@@ -9,6 +9,9 @@ internal abstract class VideoCaptureController(private val videoSource: VideoSou
     val isScreencast: Boolean
         get() = videoCapturer.isScreencast
 
+    var settings: MediaTrackSettings = MediaTrackSettings()
+        protected set
+
     var videoCapturerErrorListener: VideoCapturerErrorListener = VideoCapturerErrorListener { }
 
     protected val videoCapturer: VideoCapturer by lazy { createVideoCapturer() }
@@ -32,6 +35,11 @@ internal abstract class VideoCaptureController(private val videoSource: VideoSou
         )
         val size = selectVideoSize()
         val fps = selectFps()
+        settings = settings.copy(
+            width = size.width,
+            height = size.height,
+            frameRate = fps.toDouble()
+        )
         videoCapturer.startCapture(size.width, size.height, fps)
     }
 
