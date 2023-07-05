@@ -15,7 +15,7 @@ import platform.CoreMedia.CMVideoFormatDescriptionGetDimensions
 import kotlin.math.abs
 
 internal class CameraVideoCaptureController(
-    private val constraints: VideoTrackConstraints,
+    private val constraints: MediaTrackConstraints,
     private val videoSource: RTCVideoSource,
 ) : VideoCaptureController {
 
@@ -41,17 +41,17 @@ internal class CameraVideoCaptureController(
 
     private fun selectDevice() {
         val deviceId = constraints.deviceId
-        val isFrontFacing = constraints.facingMode?.exact == FacingMode.User ||
-            constraints.facingMode?.ideal == FacingMode.User
-        position = when (isFrontFacing) {
-            true -> AVCaptureDevicePositionFront
-            false -> AVCaptureDevicePositionBack
+        position = when (constraints.facingMode?.value) {
+            FacingMode.User -> AVCaptureDevicePositionFront
+            FacingMode.Environment -> AVCaptureDevicePositionBack
+            null -> AVCaptureDevicePositionFront
         }
 
         val searchCriteria: (Any?) -> Boolean = when {
             deviceId != null -> {
                 { (it as AVCaptureDevice).uniqueID == deviceId }
             }
+
             else -> {
                 { (it as AVCaptureDevice).position == position }
             }
@@ -63,12 +63,8 @@ internal class CameraVideoCaptureController(
     }
 
     private fun selectFormat() {
-        val targetWidth = constraints.width?.exact
-            ?: constraints.height?.exact
-            ?: DEFAULT_VIDEO_WIDTH
-        val targetHeight = constraints.height?.exact
-            ?: constraints.height?.ideal
-            ?: DEFAULT_VIDEO_HEIGHT
+        val targetWidth = constraints.width?.value ?: DEFAULT_VIDEO_WIDTH
+        val targetHeight = constraints.height?.value ?: DEFAULT_VIDEO_HEIGHT
         val formats = RTCCameraVideoCapturer.supportedFormatsForDevice(device)
 
         format = formats.fold(Pair(Int.MAX_VALUE, null as AVCaptureDeviceFormat?)) { acc, fmt ->
@@ -92,16 +88,14 @@ internal class CameraVideoCaptureController(
     }
 
     private fun selectFps() {
-        val requestedFps = constraints.frameRate?.exact
-            ?: constraints.frameRate?.ideal
-            ?: DEFAULT_FRAME_RATE
+        val requestedFps = constraints.frameRate?.value ?: DEFAULT_FRAME_RATE
 
-        val maxSupportedFramerate = format.videoSupportedFrameRateRanges.fold(0.0) { acc, range ->
+        val maxSupportedFrameRate = format.videoSupportedFrameRateRanges.fold(0.0) { acc, range ->
             val fpsRange = range as AVFrameRateRange
             maxOf(acc, fpsRange.maxFrameRate)
         }
 
-        fps = minOf(maxSupportedFramerate, requestedFps.toDouble()).toLong()
+        fps = minOf(maxSupportedFrameRate, requestedFps.toDouble()).toLong()
     }
 
     fun switchCamera() {

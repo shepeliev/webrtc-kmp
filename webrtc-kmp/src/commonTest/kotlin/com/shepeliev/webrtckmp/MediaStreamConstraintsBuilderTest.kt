@@ -17,7 +17,6 @@ class MediaStreamConstraintsBuilderTest {
             latency(42.0)
             noiseSuppression(true)
             sampleRate(42)
-            volume(42.0)
         }
 
         builder.video {
@@ -28,32 +27,29 @@ class MediaStreamConstraintsBuilderTest {
             frameRate(42.0)
             height(720)
             width(1280)
-            resizeMode(ResizeMode.CropAndScale)
         }
 
         assertEquals(
             MediaStreamConstraints(
-                audio = AudioTrackConstraints(
+                audio = MediaTrackConstraints(
                     deviceId = "audio_device_id",
                     groupId = "audio_group_id",
-                    autoGainControl = Constrain(exact = true),
-                    channelCount = Constrain(ideal = 42),
-                    echoCancellation = Constrain(exact = true),
-                    latency = Constrain(exact = 42.0),
-                    noiseSuppression = Constrain(exact = true),
-                    sampleRate = Constrain(exact = 42),
-                    volume = Constrain(exact = 42.0)
+                    autoGainControl = true.asValueConstrain(),
+                    channelCount = ValueOrConstrain.Constrain(ideal = 42),
+                    echoCancellation = ValueOrConstrain.Constrain(exact = true),
+                    latency = 42.0.asValueConstrain(),
+                    noiseSuppression = true.asValueConstrain(),
+                    sampleRate = 42.asValueConstrain(),
                 ),
 
-                video = VideoTrackConstraints(
+                video = MediaTrackConstraints(
                     deviceId = "video_device_id",
                     groupId = "video_group_id",
-                    aspectRatio = Constrain(exact = 42.0),
-                    facingMode = Constrain(exact = FacingMode.User),
-                    frameRate = Constrain(exact = 42.0),
-                    height = Constrain(exact = 720),
-                    width = Constrain(exact = 1280),
-                    resizeMode = Constrain(exact = ResizeMode.CropAndScale)
+                    aspectRatio = 42.0.asValueConstrain(),
+                    facingMode = FacingMode.User.asValueConstrain(),
+                    frameRate = 42.0.asValueConstrain(),
+                    height = 720.asValueConstrain(),
+                    width = 1280.asValueConstrain(),
                 )
             ),
 

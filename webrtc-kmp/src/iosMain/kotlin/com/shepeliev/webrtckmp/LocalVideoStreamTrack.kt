@@ -5,6 +5,7 @@ import WebRTC.RTCVideoTrack
 internal class LocalVideoStreamTrack(
     ios: RTCVideoTrack,
     private val videoCaptureController: VideoCaptureController,
+    override val constraints: MediaTrackConstraints,
 ) : RenderedVideoStreamTrack(ios), VideoStreamTrack {
 
     init {

@@ -13,7 +13,7 @@ import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 internal class CameraVideoCaptureController(
-    private val constraints: VideoTrackConstraints,
+    private val constraints: MediaTrackConstraints,
     videoSource: VideoSource,
 ) : VideoCaptureController(videoSource) {
 
@@ -28,8 +28,7 @@ internal class CameraVideoCaptureController(
 
     private fun selectDevice() {
         val deviceId = constraints.deviceId
-        val isFrontFacing = constraints.facingMode?.exact == FacingMode.User ||
-            constraints.facingMode?.ideal == FacingMode.User
+        val isFrontFacing = constraints.facingMode?.value != FacingMode.Environment
 
         val searchCriteria: (String) -> Boolean = if (deviceId != null) {
             { it == deviceId }
@@ -42,13 +41,8 @@ internal class CameraVideoCaptureController(
     }
 
     override fun selectVideoSize(): Size {
-        val requestedWidth = constraints.width?.exact
-            ?: constraints.width?.ideal
-            ?: DEFAULT_VIDEO_WIDTH
-        val requestedHeight = constraints.height?.exact
-            ?: constraints.height?.ideal
-            ?: DEFAULT_VIDEO_HEIGHT
-
+        val requestedWidth = constraints.width?.value ?: DEFAULT_VIDEO_WIDTH
+        val requestedHeight = constraints.height?.value ?: DEFAULT_VIDEO_HEIGHT
         val formats = enumerator.getSupportedFormats(device)
         val sizes = formats?.map { Size(it.width, it.height) } ?: emptyList()
         if (sizes.isEmpty()) throw CameraVideoCapturerException.notFound(constraints)
@@ -61,10 +55,7 @@ internal class CameraVideoCaptureController(
     }
 
     override fun selectFps(): Int {
-        val requestedFps = constraints.frameRate?.exact
-            ?: constraints.frameRate?.ideal
-            ?: DEFAULT_FRAME_RATE
-
+        val requestedFps = constraints.frameRate?.value ?: DEFAULT_FRAME_RATE
         val formats = enumerator.getSupportedFormats(device)
         val framerates = formats?.map { it.framerate } ?: emptyList()
         if (framerates.isEmpty()) throw CameraVideoCapturerException.notFound(constraints)

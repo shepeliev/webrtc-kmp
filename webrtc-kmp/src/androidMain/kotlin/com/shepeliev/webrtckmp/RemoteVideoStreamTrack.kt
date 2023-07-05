@@ -11,7 +11,6 @@ import java.util.concurrent.atomic.AtomicInteger
 internal class RemoteVideoStreamTrack(
     android: VideoTrack,
 ) : RenderedVideoStreamTrack(android), VideoStreamTrack {
-
     private val trackMuteDetector = TrackMuteDetector().apply {
         addSink(this)
         start()

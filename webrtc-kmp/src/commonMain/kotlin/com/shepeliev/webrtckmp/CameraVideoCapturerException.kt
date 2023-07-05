@@ -2,11 +2,7 @@ package com.shepeliev.webrtckmp
 
 class CameraVideoCapturerException(message: String) : Exception(message) {
     companion object {
-        fun notFound(constraints: AudioTrackConstraints): CameraVideoCapturerException {
-            return CameraVideoCapturerException("Camera not found. $constraints")
-        }
-
-        fun notFound(constraints: VideoTrackConstraints): CameraVideoCapturerException {
+        fun notFound(constraints: MediaTrackConstraints): CameraVideoCapturerException {
             return CameraVideoCapturerException("Camera not found. $constraints")
         }
 

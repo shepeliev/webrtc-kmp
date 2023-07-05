@@ -28,6 +28,9 @@ internal abstract class MediaStreamTrackImpl(val js: JsMediaStreamTrack) : Media
     private val _state = MutableStateFlow(getInitialState())
     override val state: StateFlow<MediaStreamTrackState> = _state.asStateFlow()
 
+    override val constraints: MediaTrackConstraints
+        get() = js.getConstraints().asCommon()
+
     init {
         js.onended = { _state.update { MediaStreamTrackState.Ended(js.muted) } }
         js.onmute = { _state.update { it.mute() } }

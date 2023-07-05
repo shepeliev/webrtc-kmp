@@ -57,8 +57,7 @@ private object MediaDevicesImpl : MediaDevices {
                 audio.echoCancellation == null &&
                 audio.latency == null &&
                 audio.noiseSuppression == null &&
-                audio.sampleRate == null &&
-                audio.volume == null
+                audio.sampleRate == null
             ) {
                 return@let true
             }
@@ -72,7 +71,6 @@ private object MediaDevicesImpl : MediaDevices {
                 audio.latency?.also { add(json("latency" to it.toJson())) }
                 audio.noiseSuppression?.also { add(json("noiseSuppression" to it.toJson())) }
                 audio.sampleRate?.also { add(json("sampleRate" to it.toJson())) }
-                audio.volume?.also { add(json("volume" to it.toJson())) }
             }
         }
 
@@ -81,7 +79,6 @@ private object MediaDevicesImpl : MediaDevices {
                 video.groupId == null &&
                 video.facingMode == null &&
                 video.aspectRatio == null &&
-                video.resizeMode == null &&
                 video.width == null &&
                 video.height == null &&
                 video.frameRate == null
@@ -94,7 +91,6 @@ private object MediaDevicesImpl : MediaDevices {
                 video.groupId?.also { add(json("groupId" to it)) }
                 video.facingMode?.also { add(json("facingMode" to it.toJson())) }
                 video.aspectRatio?.also { add(json("aspectRatio" to it.toJson())) }
-                video.resizeMode?.also { add(json("resizeMode" to it.toJson())) }
                 video.width?.also { add(json("width" to it.toJson())) }
                 video.height?.also { add(json("height" to it.toJson())) }
                 video.frameRate?.also { add(json("frameRate" to it.toJson())) }
@@ -104,7 +100,7 @@ private object MediaDevicesImpl : MediaDevices {
         return JsMediaStreamConstraints(v, a)
     }
 
-    private fun <T> Constrain<T>.toJson(): Json {
+    private fun <T> ValueOrConstrain<T>.toJson(): Json {
         val values = mutableListOf<Pair<String, Any>>().apply {
             exact?.also { add(Pair("exact", it)) }
             ideal?.also { add(Pair("ideal", it)) }

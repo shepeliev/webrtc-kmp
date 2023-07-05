@@ -39,6 +39,8 @@ internal abstract class MediaStreamTrackImpl(val ios: RTCMediaStreamTrack) : Med
     private val _state = MutableStateFlow(getInitialState())
     override val state: StateFlow<MediaStreamTrackState> = _state.asStateFlow()
 
+    override val constraints: MediaTrackConstraints = MediaTrackConstraints()
+
     override fun stop() {
         if (_state.value is MediaStreamTrackState.Ended) return
         _state.update { MediaStreamTrackState.Ended(it.muted) }
