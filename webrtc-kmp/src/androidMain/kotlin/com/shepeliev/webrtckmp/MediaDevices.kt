@@ -33,20 +33,30 @@ private object MediaDevicesImpl : MediaDevices {
                 )
             }
             val audioSource = WebRtc.peerConnectionFactory.createAudioSource(mediaConstraints)
-            val androidTrack = WebRtc.peerConnectionFactory.createAudioTrack(UUID.randomUUID().toString(), audioSource)
-            audioTrack = LocalAudioStreamTrack(androidTrack, audioSource)
+            val androidTrack = WebRtc.peerConnectionFactory.createAudioTrack(
+                UUID.randomUUID().toString(),
+                audioSource
+            )
+            audioTrack = LocalAudioStreamTrack(androidTrack, audioSource, constraints.audio)
         }
 
         var videoTrack: LocalVideoStreamTrack? = null
         if (constraints.video != null) {
             checkCameraPermission()
             val videoSource = WebRtc.peerConnectionFactory.createVideoSource(false)
-            val videoCaptureController = CameraVideoCaptureController(constraints.video, videoSource)
-            val androidTrack = WebRtc.peerConnectionFactory.createVideoTrack(UUID.randomUUID().toString(), videoSource)
+            val videoCaptureController = CameraVideoCaptureController(
+                constraints.video,
+                videoSource
+            )
+            val androidTrack = WebRtc.peerConnectionFactory.createVideoTrack(
+                UUID.randomUUID().toString(),
+                videoSource
+            )
             videoTrack = LocalVideoStreamTrack(androidTrack, videoCaptureController)
         }
 
-        val localMediaStream = WebRtc.peerConnectionFactory.createLocalMediaStream(UUID.randomUUID().toString())
+        val localMediaStream =
+            WebRtc.peerConnectionFactory.createLocalMediaStream(UUID.randomUUID().toString())
         return MediaStream(localMediaStream).apply {
             if (audioTrack != null) addTrack(audioTrack)
             if (videoTrack != null) addTrack(videoTrack)

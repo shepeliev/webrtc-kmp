@@ -12,6 +12,8 @@ interface MediaStreamTrack {
     val label: String
     var enabled: Boolean
     val state: StateFlow<MediaStreamTrackState>
+    val constraints: MediaTrackConstraints
+    val settings: MediaTrackSettings
 
     fun stop()
 }

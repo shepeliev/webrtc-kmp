@@ -2,6 +2,6 @@ package com.shepeliev.webrtckmp
 
 import WebRTC.RTCAudioTrack
 
-internal class AudioStreamTrackImpl(
+internal class RemoteAudioStreamTrack(
     ios: RTCAudioTrack
 ) : MediaStreamTrackImpl(ios), AudioStreamTrack

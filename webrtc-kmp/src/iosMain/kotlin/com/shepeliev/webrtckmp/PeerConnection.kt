@@ -258,7 +258,7 @@ actual class PeerConnection actual constructor(
         val audioTracks = iosStreams
             .flatMap { it.audioTracks }
             .map { it as RTCAudioTrack }
-            .map { remoteTracks.getOrPut(it.trackId) { AudioStreamTrackImpl(it) } }
+            .map { remoteTracks.getOrPut(it.trackId) { RemoteAudioStreamTrack(it) } }
 
         val videoTracks = iosStreams
             .flatMap { it.videoTracks }
