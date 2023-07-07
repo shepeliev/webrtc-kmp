@@ -1,6 +1,5 @@
 package com.shepeliev.webrtckmp
 
-import org.webrtc.Camera2Enumerator
 import org.webrtc.CameraEnumerationAndroid
 import org.webrtc.CameraVideoCapturer
 import org.webrtc.Size
@@ -15,7 +14,7 @@ internal class CameraVideoCaptureController(
     private val constraints: MediaTrackConstraints,
     videoSource: VideoSource,
 ) : VideoCaptureController(videoSource) {
-    private val enumerator = Camera2Enumerator(ApplicationContextHolder.context)
+    private val enumerator = WebRtc.cameraEnumerator
     private var pendingDeviceId: String? = null
 
     override fun createVideoCapturer(): VideoCapturer {
