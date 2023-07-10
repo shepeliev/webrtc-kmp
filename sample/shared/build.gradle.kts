@@ -12,10 +12,6 @@ kotlin {
         homepage = "https://github.com/shepeliev/webrtc-kmp/tree/main/sample"
         ios.deploymentTarget = "11.0"
 
-        specRepos {
-            url("https://github.com/webrtc-sdk/Specs.git")
-        }
-
         pod("FirebaseCore")
         pod("FirebaseFirestore")
         pod("WebRTC-SDK") {

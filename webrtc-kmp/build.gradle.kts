@@ -17,10 +17,6 @@ kotlin {
         homepage = "https://github.com/shepeliev/webrtc-kmp"
         ios.deploymentTarget = "10.0"
 
-        specRepos {
-            url("https://github.com/webrtc-sdk/Specs.git")
-        }
-
         pod("WebRTC-SDK") {
             version = "114.5735.01"
             moduleName = "WebRTC"
