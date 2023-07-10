@@ -1,7 +1,7 @@
 Pod::Spec.new do |spec|
     spec.name                     = 'shared'
     spec.version                  = '1.0.0'
-    spec.homepage                 = 'not published'
+    spec.homepage                 = 'https://github.com/shepeliev/webrtc-kmp/tree/main/sample'
     spec.source                   = { :http=> ''}
     spec.authors                  = ''
     spec.license                  = ''

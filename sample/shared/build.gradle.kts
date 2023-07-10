@@ -9,7 +9,7 @@ kotlin {
     cocoapods {
         version = "1.0.0"
         summary = "Shared framework for WebRTC KMP sample"
-        homepage = "not published"
+        homepage = "https://github.com/shepeliev/webrtc-kmp/tree/main/sample"
         ios.deploymentTarget = "11.0"
 
         pod("FirebaseCore")
