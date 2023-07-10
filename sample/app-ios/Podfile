@@ -1,0 +1,9 @@
+source 'https://cdn.cocoapods.org'
+source 'https://github.com/webrtc-sdk/Specs.git'
+
+platform :ios, '11.0'
+
+target 'app-ios' do
+  use_frameworks!
+  pod 'shared', :path => '../shared'
+end

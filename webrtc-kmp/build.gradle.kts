@@ -1,5 +1,6 @@
 plugins {
     id("multiplatform-setup")
+    kotlin("native.cocoapods")
     id("maven-publish")
     id("signing")
 }
@@ -10,11 +11,29 @@ val webRtcKmpVersion: String by properties
 version = webRtcKmpVersion
 
 kotlin {
+    cocoapods {
+        version = webRtcKmpVersion
+        summary = "WebRTC Kotlin Multiplatform SDK"
+        homepage = "https://github.com/shepeliev/webrtc-kmp"
+        ios.deploymentTarget = "10.0"
+
+        specRepos {
+            url("https://github.com/webrtc-sdk/Specs.git")
+        }
+
+        pod("WebRTC-SDK") {
+            version = "114.5735.01"
+            moduleName = "WebRTC"
+            packageName = "WebRTC"
+        }
+    }
+
     android {
         publishAllLibraryVariants()
     }
-    iosSimulatorArm64 { configureIos() }
+
     ios { configureIos() }
+    iosSimulatorArm64 { configureIos() }
 
     sourceSets {
         val iosMain by getting
@@ -93,21 +112,24 @@ signing {
 }
 
 fun org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget.configureIos() {
-    val frameworks = getFrameworks(konanTarget).filterKeys { it == "WebRTC" }
-
+    val webRtcFrameworkPath = file("$buildDir/cocoapods/synthetic/IOS/Pods/WebRTC-SDK")
+        .resolveArchPath(konanTarget, "WebRTC")
     compilations.getByName("main") {
-        cinterops.create("WebRTC") {
-            frameworks.forEach { (framework, path) ->
-                compilerOpts("-framework", framework, "-F$path")
-            }
+        cinterops.getByName("WebRTC") {
+            compilerOpts("-framework", "WebRTC", "-F$webRtcFrameworkPath")
         }
     }
 
     binaries {
         getTest("DEBUG").apply {
-            frameworks.forEach { (framework, path) ->
-                linkerOpts("-framework", framework, "-F$path", "-rpath", "$path", "-ObjC")
-            }
+            linkerOpts(
+                "-framework",
+                "WebRTC",
+                "-F$webRtcFrameworkPath",
+                "-rpath",
+                "$webRtcFrameworkPath",
+                "-ObjC"
+            )
         }
     }
 }
