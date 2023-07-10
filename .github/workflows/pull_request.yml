@@ -43,7 +43,7 @@ jobs:
           target: google_apis
           arch: x86_64
           profile: Nexus 6
-          script: ./gradlew connectedAndroidTest
+          script: ./gradlew webrtc-kmp:connectedAndroidTest
 
       - name: Upload Android test artifact
         uses: actions/upload-artifact@v2
@@ -53,7 +53,7 @@ jobs:
           path: "webrtc-kmp/build/reports/androidTests/connected"
 
       - name: Run iOS tests
-        run: ./gradlew cleanTest iosX64Test
+        run: ./gradlew cleanTest webrtc-kmp:iosX64Test
 
       - name: Upload iOS test artifact
         uses: actions/upload-artifact@v2
@@ -63,7 +63,7 @@ jobs:
           path: "webrtc-kmp/build/reports/tests/iosX64Test"
 
       - name: Run JS tests
-        run: ./gradlew cleanTest jsTest
+        run: ./gradlew cleanTest webrtc-kmp:jsTest
 
       - name: Upload JS test artifact
         uses: actions/upload-artifact@v2
