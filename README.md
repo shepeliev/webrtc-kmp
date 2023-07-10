@@ -13,38 +13,62 @@ WebRTC Kotlin Multiplatform SDK
 Current revision: M114
 
 ## Installation
-Root build.gradle.kts
-
-```Kotlin
-allprojects {
-    repositories {
-        mavenCentral()
-    }
-}
-```
+The library is published to [Maven Central](https://search.maven.org/artifact/com.shepeliev/webrtc-kmp).
 
 Shared module build.gradle.kts
 ```Kotlin
 kotlin {
+  cocoapods {
+    version = "1.0.0"
+    summary = "Shared module"
+    homepage = "not published"
+    ios.deploymentTarget = "10.0"
 
-  ios {
-      binaries
-          .filterIsInstance<Framework>()
-          .forEach {
-              it.transitiveExport = true
-              it.export("com.shepeliev:webrtc-kmp:$webRtcKmmVersion")
-          }
+    specRepos {
+      url("https://github.com/webrtc-sdk/Specs.git")
+    }
+   
+    pod("WebRTC-SDK") {
+      version = "114.5735.01"
+      linkOnly = true
+    }
+  
+    podfile = project.file("../iosApp/Podfile")
+  
+    framework {
+      baseName = "shared"
+      export(project(":webrtc-kmp"))
+      transitiveExport = true
+    }
+  
+    xcodeConfigurationToNativeBuildType["CUSTOM_DEBUG"] = NativeBuildType.DEBUG
+    xcodeConfigurationToNativeBuildType["CUSTOM_RELEASE"] = NativeBuildType.RELEASE
   }
 
+ 
+  android()
+  
+  ios()
+ 
+  js {
+   useCommonJs()
+   browser()
+  }
+  
   sourceSets {
       val commonMain by getting {
           dependencies {
-              api("com.shepeliev:webrtc-kmp:$webRtcKmmVersion")
-              implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+              api("com.shepeliev:webrtc-kmp:$webRtcKmpVersion")
           }
       }
   }
 }
+```
+
+Also add the following to your `Podfile` in the target section:
+```Ruby
+use_frameworks!
+pod 'shared', :path => '../shared'
 ```
 
 ## Usage
