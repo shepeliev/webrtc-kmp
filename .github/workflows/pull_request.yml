@@ -13,10 +13,25 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Cocoapods cache
+        uses: actions/cache@v3
+        id: cocoapods-cache
+        with:
+          path: |
+            ~/.cocoapods
+            ~/Library/Caches/CocoaPods
+            */build/cocoapods
+            */build/classes
+          key: cocoapods-cache
+
       - name: Set up JDK 17
         uses: actions/setup-java@v1
         with:
           java-version: 17
+          cache: gradle
+
+      - name: Gradle cache
+        uses: gradle/gradle-build-action@v2
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -40,14 +55,8 @@ jobs:
           name: "Android Instrumented Tests Report HTML"
           path: "webrtc-kmp/build/reports/androidTests/connected"
 
-      - name: Install Carthage
-        run: brew list carthage || brew install carthage
-
-      - name: Fetch xCode frameworks
-        run: carthage update --use-xcframeworks
-
       - name: Run iOS tests
-        run: ./gradlew iosX64Test
+        run: ./gradlew cleanTest iosX64Test
 
       - name: Upload iOS test artifact
         uses: actions/upload-artifact@v2
@@ -57,7 +66,7 @@ jobs:
           path: "webrtc-kmp/build/reports/tests/iosX64Test"
 
       - name: Run JS tests
-        run: ./gradlew jsTest
+        run: ./gradlew cleanTest jsTest
 
       - name: Upload JS test artifact
         uses: actions/upload-artifact@v2
