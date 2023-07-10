@@ -2,10 +2,10 @@ import org.gradle.api.Project
 import org.jetbrains.kotlin.konan.target.KonanTarget
 import java.io.File
 
-fun File.resolveArchPath(target: KonanTarget, framework: String): File {
+fun File.resolveArchPath(target: KonanTarget, framework: String): File? {
     val archPaths = resolve("$framework.xcframework")
         .listFiles { _, name -> target.matches(name) }
-        ?: error("Can't find framework '$framework' for target '${target.name}'")
+        ?: return null
 
     check(archPaths.size == 1) { "Resolving framework '$framework' arch path failed: $archPaths" }
 
