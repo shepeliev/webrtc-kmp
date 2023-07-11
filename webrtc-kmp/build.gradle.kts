@@ -13,25 +13,17 @@ kotlin {
     android {
         publishAllLibraryVariants()
     }
+    iosSimulatorArm64 { configureIos() }
+    ios { configureIos() }
 
-    ios {
-        val frameworks = getFrameworks(konanTarget).filterKeys { it == "WebRTC" }
+    sourceSets {
+        val iosMain by getting
+        val iosSimulatorArm64Main by getting
+        iosSimulatorArm64Main.dependsOn(iosMain)
 
-        compilations.getByName("main") {
-            cinterops.create("WebRTC") {
-                frameworks.forEach { (framework, path) ->
-                    compilerOpts("-framework", framework, "-F$path")
-                }
-            }
-        }
-
-        binaries {
-            getTest("DEBUG").apply {
-                frameworks.forEach { (framework, path) ->
-                    linkerOpts("-framework", framework, "-F$path", "-rpath", "$path", "-ObjC")
-                }
-            }
-        }
+        val iosTest by getting
+        val iosSimulatorArm64Test by getting
+        iosSimulatorArm64Test.dependsOn(iosTest)
     }
 }
 
@@ -98,4 +90,24 @@ signing {
 
     useInMemoryPgpKeys(signingKey, signingPassword)
     sign(publishing.publications)
+}
+
+fun org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget.configureIos() {
+    val frameworks = getFrameworks(konanTarget).filterKeys { it == "WebRTC" }
+
+    compilations.getByName("main") {
+        cinterops.create("WebRTC") {
+            frameworks.forEach { (framework, path) ->
+                compilerOpts("-framework", framework, "-F$path")
+            }
+        }
+    }
+
+    binaries {
+        getTest("DEBUG").apply {
+            frameworks.forEach { (framework, path) ->
+                linkerOpts("-framework", framework, "-F$path", "-rpath", "$path", "-ObjC")
+            }
+        }
+    }
 }
