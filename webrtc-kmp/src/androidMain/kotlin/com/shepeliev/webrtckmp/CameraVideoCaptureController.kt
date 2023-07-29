@@ -85,7 +85,7 @@ internal class CameraVideoCaptureController(
             throw CameraVideoCapturerException("Can't switch camera. No other camera available.")
         }
 
-        val deviceNameIndex = deviceNames.indexOf(constraints.deviceId)
+        val deviceNameIndex = deviceNames.indexOf(checkNotNull(settings.deviceId))
         val newDeviceName = deviceNames[(deviceNameIndex + 1) % deviceNames.size]
         switchCamera(newDeviceName)
     }
