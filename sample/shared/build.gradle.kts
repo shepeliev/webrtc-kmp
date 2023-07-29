@@ -1,20 +1,48 @@
-import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
-import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFrameworkConfig
+import org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType
 
 plugins {
     id("multiplatform-setup")
+    kotlin("native.cocoapods")
 }
 
 kotlin {
-    val xcf = XCFramework()
+    cocoapods {
+        version = "1.0.0"
+        summary = "Shared framework for WebRTC KMP sample"
+        homepage = "https://github.com/shepeliev/webrtc-kmp/tree/main/sample"
+        ios.deploymentTarget = "11.0"
 
-    ios { configureIos(xcf) }
-    iosSimulatorArm64 { configureIos(xcf) }
+        pod("FirebaseCore")
+        pod("FirebaseFirestore")
+        pod("WebRTC-SDK") {
+            version = "114.5735.01"
+            linkOnly = true
+        }
+
+        podfile = project.file("../app-ios/Podfile")
+
+        framework {
+            baseName = "shared"
+            export(project(":webrtc-kmp"))
+            export(deps.decompose)
+            transitiveExport = true
+        }
+
+        xcodeConfigurationToNativeBuildType["CUSTOM_DEBUG"] = NativeBuildType.DEBUG
+        xcodeConfigurationToNativeBuildType["CUSTOM_RELEASE"] = NativeBuildType.RELEASE
+    }
+
+    ios()
+    iosSimulatorArm64()
 
     sourceSets {
         val iosMain by getting
         val iosSimulatorArm64Main by getting
         iosSimulatorArm64Main.dependsOn(iosMain)
+
+        val iosTest by getting
+        val iosSimulatorArm64Test by getting
+        iosSimulatorArm64Test.dependsOn(iosTest)
     }
 }
 
@@ -31,38 +59,4 @@ dependencies {
     androidMainImplementation(deps.firebase.firestore)
     androidMainImplementation(deps.kotlin.coroutinesPlayServices)
     jsMainImplementation(npm("firebase", version = "9.9.1"))
-}
-
-fun org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget.configureIos(xcf: XCFrameworkConfig) {
-    val frameworks = getFrameworks(konanTarget).filterKeys { it != "WebRTC" }
-
-    compilations.getByName("main") {
-        cinterops.create("FirebaseCore") {
-            frameworks.forEach { (framework, path) ->
-                compilerOpts("-framework", framework, "-F$path")
-            }
-        }
-
-        cinterops.create("FirebaseFirestore") {
-            frameworks.forEach { (framework, path) ->
-                compilerOpts("-framework", framework, "-F$path")
-            }
-        }
-    }
-
-    binaries.framework {
-        baseName = "shared"
-        xcf.add(this)
-
-        export(project(":webrtc-kmp"))
-        export(deps.decompose)
-        transitiveExport = true
-        isStatic = true
-
-        frameworks.forEach { (framework, path) ->
-            linkerOpts("-framework", framework, "-F$path")
-        }
-
-        linkerOpts("-ObjC")
-    }
 }

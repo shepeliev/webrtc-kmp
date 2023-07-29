@@ -7,7 +7,6 @@ Demo application for WebRTC KMP.
 ```bash
 git clone https://github.com/shepeliev/webrtc-kmp.git
 cd webrtc-kmp
-carthage update --use-xcframeworks
 ```
 
 ### Android
@@ -20,11 +19,7 @@ Run Android emulator or connect real device.
 
 ### iOS
 
-```bash
-./gradlew assembleSharedDebugXCFramework
-```
-
-Then open `sample/app-ios/app-ios.xcodeproj` in XCode build and run
+Open `sample/app-ios/app-ios.xcworkspace` in XCode build and run
 
 ### Web
 

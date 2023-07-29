@@ -2,22 +2,10 @@ import org.gradle.api.Project
 import org.jetbrains.kotlin.konan.target.KonanTarget
 import java.io.File
 
-fun Project.getFrameworks(target: KonanTarget): Map<String, File> {
-    val cartBuildPath = rootProject.projectDir.resolve("Carthage/Build")
-
-    val frameworks = cartBuildPath
-        .listFiles { _, name -> name.endsWith(".xcframework") }
-        ?.filter { it.isDirectory }
-        ?.map { it.name.substringBefore(".xcframework") }
-        ?: emptyList()
-
-    return frameworks.associateWith { cartBuildPath.resolveArchPath(target, it) }
-}
-
-private fun File.resolveArchPath(target: KonanTarget, framework: String): File {
+fun File.resolveArchPath(target: KonanTarget, framework: String): File? {
     val archPaths = resolve("$framework.xcframework")
         .listFiles { _, name -> target.matches(name) }
-        ?: error("Can't find framework '$framework' for target '${target.name}'")
+        ?: return null
 
     check(archPaths.size == 1) { "Resolving framework '$framework' arch path failed: $archPaths" }
 
