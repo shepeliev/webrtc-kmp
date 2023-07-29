@@ -11,7 +11,7 @@ Pod::Spec.new do |spec|
     spec.ios.deployment_target = '11.0'
     spec.dependency 'FirebaseCore'
     spec.dependency 'FirebaseFirestore'
-    spec.dependency 'WebRTC-SDK', '114.5735.01'
+    spec.dependency 'WebRTC-SDK', '114.5735.02'
                 
     spec.pod_target_xcconfig = {
         'KOTLIN_PROJECT_PATH' => ':sample:shared',

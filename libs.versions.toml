@@ -1,53 +1,39 @@
 [versions]
 
 kotlinCoroutines = "1.6.4"
-kotlinserializationJson = "1.3.3"
 kotlinWrappers = "1.0.0-pre.343"
-
-androidGradlePlugin = "7.2.1"
-androidTargetSdk = "31"
-androidxCoreKtx = "1.10.1"
-androidxAppCompat = "1.6.1"
 androidxCompose = "1.4.3"
-androidxComposeActivity = "1.7.2"
-androidxActivityKtx = "1.7.2"
-androidxLifecycle = "2.6.1"
-androidxTestCore = "1.5.0"
-androidxTestRunner = "1.5.2"
-
-accompanist = "0.25.0"
 decompose = "1.0.0-alpha-01"
-kermit = "1.1.2"
-firebaseBom = "32.1.1"
 
 [libraries]
-webrtcSdk = "io.github.webrtc-sdk:android:114.5735.01"
+webrtcSdk = "io.github.webrtc-sdk:android:114.5735.02"
 
 kotlin-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinCoroutines" }
 kotlin-coroutinesPlayServices = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlinCoroutines" }
-kotlin-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinserializationJson" }
 kotlin-wrappers-bom = { module = "org.jetbrains.kotlin-wrappers:kotlin-wrappers-bom", version.ref = "kotlinWrappers" }
 kotlin-wrappers-emotion = { module = "org.jetbrains.kotlin-wrappers:kotlin-emotion", version.ref = "kotlinWrappers" }
 kotlin-wrappers-react = { module = "org.jetbrains.kotlin-wrappers:kotlin-react", version.ref = "kotlinWrappers" }
 kotlin-wrappers-reactDom = { module = "org.jetbrains.kotlin-wrappers:kotlin-react-dom", version.ref = "kotlinWrappers" }
 kotlin-wrappers-mui = { module = "org.jetbrains.kotlin-wrappers:kotlin-mui", version.ref = "kotlinWrappers" }
+kotlin-serialization-json = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3"
 
-androidx-coreKtx = { module = "androidx.core:core-ktx", version.ref = "androidxCoreKtx" }
-androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "androidxAppCompat" }
-androidx-activity-activityKtx = { module = "androidx.activity:activity-ktx", version.ref = "androidxActivityKtx" }
-androidx-compose-activity = { module = "androidx.activity:activity-compose", version.ref = "androidxComposeActivity" }
+androidx-coreKtx = "androidx.core:core-ktx:1.10.1"
+androidx-appcompat = "androidx.appcompat:appcompat:1.6.1"
+androidx-activity-activityKtx = "androidx.activity:activity-ktx:1.7.2"
+androidx-compose-activity = "androidx.activity:activity-compose:1.7.2"
 androidx-compose-material = { module = "androidx.compose.material:material", version.ref = "androidxCompose" }
 androidx-compose-animation = { module = "androidx.compose.animation:animation", version.ref = "androidxCompose" }
-androidx-lifecycle-runtime = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "androidxLifecycle" }
-androidx-test-core = { module = "androidx.test:core", version.ref = "androidxTestCore" }
-androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidxTestRunner" }
+androidx-lifecycle-runtime = "androidx.lifecycle:lifecycle-runtime-ktx:2.6.1"
+androidx-test-core = "androidx.test:core:1.5.0"
+androidx-test-runner = "androidx.test:runner:1.5.2"
+androidx-test-rules = "androidx.test:rules:1.5.0"
 
-accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist" }
+accompanist-permissions = "com.google.accompanist:accompanist-permissions:0.25.0"
 
 decompose = { module = "com.arkivanov.decompose:decompose", version.ref = "decompose" }
 decompose-compose = { module = "com.arkivanov.decompose:extensions-compose-jetpack", version.ref = "decompose" }
 
-firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-bom = "com.google.firebase:firebase-bom:32.2.0"
 firebase-firestore = { module = "com.google.firebase:firebase-firestore-ktx" }
 
-kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
+kermit = "co.touchlab:kermit:1.1.2"

@@ -9,7 +9,7 @@ Pod::Spec.new do |spec|
     spec.vendored_frameworks      = 'build/cocoapods/framework/webrtc_kmp.framework'
     spec.libraries                = 'c++'
     spec.ios.deployment_target = '10.0'
-    spec.dependency 'WebRTC-SDK', '114.5735.01'
+    spec.dependency 'WebRTC-SDK', '114.5735.02'
                 
     spec.pod_target_xcconfig = {
         'KOTLIN_PROJECT_PATH' => ':webrtc-kmp',

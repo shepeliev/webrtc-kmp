@@ -15,7 +15,7 @@ kotlin {
         pod("FirebaseCore")
         pod("FirebaseFirestore")
         pod("WebRTC-SDK") {
-            version = "114.5735.01"
+            version = "114.5735.02"
             linkOnly = true
         }
 
