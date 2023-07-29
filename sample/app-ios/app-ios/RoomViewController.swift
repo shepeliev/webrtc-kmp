@@ -109,7 +109,11 @@ class RoomViewController: UIViewController {
             NSLog("Room ID \(roomId) copied.")
         }
     }
-        
+    
+    @IBAction func switchCamera(_ sender: Any) {
+        room.switchCamera()
+    }
+    
     // MARK: - UI
     private func setupLocalVideo() {
         localVideo.contentMode = .scaleAspectFill
