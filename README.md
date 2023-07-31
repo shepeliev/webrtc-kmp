@@ -22,11 +22,7 @@ kotlin {
     version = "1.0.0"
     summary = "Shared module"
     homepage = "not published"
-    ios.deploymentTarget = "10.0"
-
-    specRepos {
-      url("https://github.com/webrtc-sdk/Specs.git")
-    }
+    ios.deploymentTarget = "11.0"
    
     pod("WebRTC-SDK") {
       version = "114.5735.02"
@@ -37,18 +33,18 @@ kotlin {
   
     framework {
       baseName = "shared"
-      export(project(":webrtc-kmp"))
+      export("com.shepeliev:webrtc-kmp:$webRtcKmpVersion")
       transitiveExport = true
     }
   
     xcodeConfigurationToNativeBuildType["CUSTOM_DEBUG"] = NativeBuildType.DEBUG
     xcodeConfigurationToNativeBuildType["CUSTOM_RELEASE"] = NativeBuildType.RELEASE
   }
-
  
   android()
   
   ios()
+  iosSimulatorArm64()
  
   js {
    useCommonJs()
@@ -61,6 +57,10 @@ kotlin {
               api("com.shepeliev:webrtc-kmp:$webRtcKmpVersion")
           }
       }
+
+      val iosMain by getting
+      val iosSimulatorArm64Main by getting
+      iosSimulatorArm64Main.dependsOn(iosMain)
   }
 }
 ```
@@ -73,4 +73,4 @@ pod 'shared', :path => '../shared'
 
 ## Usage
 
-Please reffer to [sample](sample/README.md).
+Please refer to [sample](sample/README.md).
