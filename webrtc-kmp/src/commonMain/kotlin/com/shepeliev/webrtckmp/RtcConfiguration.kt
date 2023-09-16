@@ -49,4 +49,6 @@ expect class RtcConfiguration(
      * [RtcpMuxPolicy.Require].
      */
     rtcpMuxPolicy: RtcpMuxPolicy = RtcpMuxPolicy.Require,
+
+    continualGatheringPolicy: ContinualGatheringPolicy = ContinualGatheringPolicy.GatherOnce,
 )

@@ -10,6 +10,7 @@ actual class RtcConfiguration actual constructor(
     iceServers: List<IceServer>,
     iceTransportPolicy: IceTransportPolicy,
     rtcpMuxPolicy: RtcpMuxPolicy,
+    continualGatheringPolicy: ContinualGatheringPolicy,
 ) {
     val js: Json
 

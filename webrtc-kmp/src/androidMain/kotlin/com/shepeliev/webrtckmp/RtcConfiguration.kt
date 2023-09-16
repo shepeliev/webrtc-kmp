@@ -9,14 +9,16 @@ actual class RtcConfiguration actual constructor(
     iceServers: List<IceServer>,
     iceTransportPolicy: IceTransportPolicy,
     rtcpMuxPolicy: RtcpMuxPolicy,
+    continualGatheringPolicy: ContinualGatheringPolicy,
 ) {
-    val android = PeerConnection.RTCConfiguration(iceServers.map { it.native }).also {
-        it.bundlePolicy = bundlePolicy.asNative()
-        it.certificate = certificates?.firstOrNull()?.native
-        it.iceCandidatePoolSize = iceCandidatePoolSize
-        it.iceTransportsType = iceTransportPolicy.asNative()
-        it.rtcpMuxPolicy = rtcpMuxPolicy.asNative()
-        it.sdpSemantics = PeerConnection.SdpSemantics.UNIFIED_PLAN
+    val android = PeerConnection.RTCConfiguration(iceServers.map { it.native }).apply {
+        this.bundlePolicy = bundlePolicy.asNative()
+        this.certificate = certificates?.firstOrNull()?.native
+        this.iceCandidatePoolSize = iceCandidatePoolSize
+        this.iceTransportsType = iceTransportPolicy.asNative()
+        this.rtcpMuxPolicy = rtcpMuxPolicy.asNative()
+        this.sdpSemantics = PeerConnection.SdpSemantics.UNIFIED_PLAN
+        this.continualGatheringPolicy = continualGatheringPolicy.asNative()
     }
 }
 
@@ -41,5 +43,12 @@ private fun IceTransportPolicy.asNative(): PeerConnection.IceTransportsType {
         IceTransportPolicy.Relay -> PeerConnection.IceTransportsType.RELAY
         IceTransportPolicy.NoHost -> PeerConnection.IceTransportsType.NOHOST
         IceTransportPolicy.All -> PeerConnection.IceTransportsType.ALL
+    }
+}
+
+private fun ContinualGatheringPolicy.asNative(): PeerConnection.ContinualGatheringPolicy {
+    return when (this) {
+        ContinualGatheringPolicy.GatherOnce -> PeerConnection.ContinualGatheringPolicy.GATHER_ONCE
+        ContinualGatheringPolicy.GatherContinually -> PeerConnection.ContinualGatheringPolicy.GATHER_CONTINUALLY
     }
 }

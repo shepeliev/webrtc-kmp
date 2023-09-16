@@ -2,6 +2,7 @@ package com.shepeliev.webrtckmp
 
 import WebRTC.RTCBundlePolicy
 import WebRTC.RTCConfiguration
+import WebRTC.RTCContinualGatheringPolicy
 import WebRTC.RTCIceTransportPolicy
 import WebRTC.RTCRtcpMuxPolicy
 import WebRTC.RTCSdpSemantics
@@ -13,15 +14,17 @@ actual class RtcConfiguration actual constructor(
     iceServers: List<IceServer>,
     iceTransportPolicy: IceTransportPolicy,
     rtcpMuxPolicy: RtcpMuxPolicy,
+    continualGatheringPolicy: ContinualGatheringPolicy,
 ) {
-    val native: RTCConfiguration = RTCConfiguration().also {
-        it.bundlePolicy = bundlePolicy.asNative()
-        it.certificate = certificates?.firstOrNull()?.native
-        it.iceCandidatePoolSize = iceCandidatePoolSize
-        it.iceServers = iceServers.map(IceServer::native)
-        it.rtcpMuxPolicy = rtcpMuxPolicy.asNative()
-        it.iceTransportPolicy = iceTransportPolicy.asNative()
-        it.sdpSemantics = RTCSdpSemantics.RTCSdpSemanticsUnifiedPlan
+    val native: RTCConfiguration = RTCConfiguration().apply {
+        this.bundlePolicy = bundlePolicy.asNative()
+        this.certificate = certificates?.firstOrNull()?.native
+        this.iceCandidatePoolSize = iceCandidatePoolSize
+        this.iceServers = iceServers.map(IceServer::native)
+        this.rtcpMuxPolicy = rtcpMuxPolicy.asNative()
+        this.iceTransportPolicy = iceTransportPolicy.asNative()
+        this.sdpSemantics = RTCSdpSemantics.RTCSdpSemanticsUnifiedPlan
+        this.continualGatheringPolicy = continualGatheringPolicy.asNative()
     }
 }
 
@@ -46,5 +49,12 @@ private fun IceTransportPolicy.asNative(): RTCIceTransportPolicy {
         IceTransportPolicy.Relay -> RTCIceTransportPolicy.RTCIceTransportPolicyRelay
         IceTransportPolicy.NoHost -> RTCIceTransportPolicy.RTCIceTransportPolicyNoHost
         IceTransportPolicy.All -> RTCIceTransportPolicy.RTCIceTransportPolicyAll
+    }
+}
+
+private fun ContinualGatheringPolicy.asNative(): RTCContinualGatheringPolicy {
+    return when (this) {
+        ContinualGatheringPolicy.GatherOnce -> RTCContinualGatheringPolicy.RTCContinualGatheringPolicyGatherOnce
+        ContinualGatheringPolicy.GatherContinually -> RTCContinualGatheringPolicy.RTCContinualGatheringPolicyGatherContinually
     }
 }
