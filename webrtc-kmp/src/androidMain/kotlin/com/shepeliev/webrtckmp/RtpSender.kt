@@ -21,7 +21,7 @@ actual class RtpSender internal constructor(
     actual val dtmf: DtmfSender?
         get() = native.dtmf()?.let { DtmfSender(it) }
 
-    actual suspend fun replaceTrack(track: MediaStreamTrack?) {
+    actual fun replaceTrack(track: MediaStreamTrack?) {
         native.setTrack((track as? MediaStreamTrackImpl)?.native, true)
         _track = track
     }

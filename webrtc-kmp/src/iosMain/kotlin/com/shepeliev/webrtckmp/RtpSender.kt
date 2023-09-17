@@ -18,7 +18,7 @@ actual class RtpSender(val ios: RTCRtpSender, track: MediaStreamTrack?) {
     actual val dtmf: DtmfSender?
         get() = ios.dtmfSender?.let { DtmfSender(it) }
 
-    actual suspend fun replaceTrack(track: MediaStreamTrack?) {
+    actual fun replaceTrack(track: MediaStreamTrack?) {
         ios.setTrack((track as? MediaStreamTrackImpl)?.native)
         _track = track
     }
