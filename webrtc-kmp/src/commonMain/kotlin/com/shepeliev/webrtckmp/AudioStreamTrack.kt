@@ -1,3 +1,3 @@
 package com.shepeliev.webrtckmp
 
-interface AudioStreamTrack : MediaStreamTrack
+expect interface AudioStreamTrack : MediaStreamTrack
