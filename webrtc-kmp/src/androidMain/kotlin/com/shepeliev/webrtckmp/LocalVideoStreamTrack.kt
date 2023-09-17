@@ -8,6 +8,10 @@ internal class LocalVideoStreamTrack(
 ) : RenderedVideoStreamTrack(android), VideoStreamTrack {
     override val settings: MediaTrackSettings get() = videoCaptureController.settings
 
+    override var shouldReceive: Boolean?
+        get() = (android as VideoTrack).shouldReceive()
+        set(value) { (android as VideoTrack).setShouldReceive(checkNotNull(value)) }
+
     init {
         videoCaptureController.videoCapturerErrorListener = VideoCapturerErrorListener { stop() }
         videoCaptureController.startCapture()

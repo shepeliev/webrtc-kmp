@@ -25,6 +25,9 @@ import kotlin.native.concurrent.AtomicInt
 internal class RemoteVideoStreamTrack internal constructor(
     ios: RTCVideoTrack,
 ) : RenderedVideoStreamTrack(ios), VideoStreamTrack {
+    override var shouldReceive: Boolean?
+        get() = (ios as RTCVideoTrack).shouldReceive
+        set(value) { (ios as RTCVideoTrack).shouldReceive = checkNotNull(value) }
 
     private val trackMuteDetector = TrackMuteDetector().apply {
         addRenderer(this)
@@ -79,7 +82,7 @@ internal class RemoteVideoStreamTrack internal constructor(
             }
 
             timer =
-                dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_main_queue())
+                dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0u, 0u, dispatch_get_main_queue())
             dispatch_source_set_timer(
                 timer,
                 dispatch_time(

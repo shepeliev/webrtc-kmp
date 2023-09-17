@@ -7,6 +7,9 @@ internal class LocalVideoStreamTrack(
     private val videoCaptureController: VideoCaptureController,
 ) : RenderedVideoStreamTrack(ios), VideoStreamTrack {
     override val settings: MediaTrackSettings get() = videoCaptureController.settings
+    override var shouldReceive: Boolean?
+        get() = (ios as RTCVideoTrack).shouldReceive
+        set(value) { (ios as RTCVideoTrack).shouldReceive = checkNotNull(value) }
 
     init {
         videoCaptureController.startCapture()
