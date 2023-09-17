@@ -17,9 +17,9 @@ actual class MediaStream internal constructor(
         require(track is MediaStreamTrackImpl)
 
         android?.let {
-            when (track.android) {
-                is AudioTrack -> it.addTrack(track.android)
-                is VideoTrack -> it.addTrack(track.android)
+            when (track.native) {
+                is AudioTrack -> it.addTrack(track.native)
+                is VideoTrack -> it.addTrack(track.native)
                 else -> error("Unknown MediaStreamTrack kind: ${track.kind}")
             }
         }
@@ -34,9 +34,9 @@ actual class MediaStream internal constructor(
         require(track is MediaStreamTrackImpl)
 
         android?.let {
-            when (track.android) {
-                is AudioTrack -> it.removeTrack(track.android)
-                is VideoTrack -> it.removeTrack(track.android)
+            when (track.native) {
+                is AudioTrack -> it.removeTrack(track.native)
+                is VideoTrack -> it.removeTrack(track.native)
                 else -> error("Unknown MediaStreamTrack kind: ${track.kind}")
             }
         }

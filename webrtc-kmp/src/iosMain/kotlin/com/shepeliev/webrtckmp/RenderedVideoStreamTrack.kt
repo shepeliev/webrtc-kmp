@@ -7,12 +7,12 @@ internal abstract class RenderedVideoStreamTrack(
     ios: RTCVideoTrack
 ) : MediaStreamTrackImpl(ios), VideoStreamTrack {
     override fun addRenderer(renderer: RTCVideoRendererProtocol) {
-        ios as RTCVideoTrack
-        ios.addRenderer(renderer)
+        native as RTCVideoTrack
+        native.addRenderer(renderer)
     }
 
     override fun removeRenderer(renderer: RTCVideoRendererProtocol) {
-        ios as RTCVideoTrack
-        ios.removeRenderer(renderer)
+        native as RTCVideoTrack
+        native.removeRenderer(renderer)
     }
 }

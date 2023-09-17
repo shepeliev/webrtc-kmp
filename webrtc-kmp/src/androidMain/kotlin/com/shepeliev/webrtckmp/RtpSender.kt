@@ -22,7 +22,7 @@ actual class RtpSender internal constructor(
         get() = native.dtmf()?.let { DtmfSender(it) }
 
     actual suspend fun replaceTrack(track: MediaStreamTrack?) {
-        native.setTrack((track as? MediaStreamTrackImpl)?.android, true)
+        native.setTrack((track as? MediaStreamTrackImpl)?.native, true)
         _track = track
     }
 }

@@ -8,18 +8,18 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import org.webrtc.MediaStreamTrack as AndroidMediaStreamTrack
 
-internal abstract class MediaStreamTrackImpl(
-    val android: AndroidMediaStreamTrack
+abstract class MediaStreamTrackImpl(
+    val native: AndroidMediaStreamTrack
 ) : MediaStreamTrack {
 
     override val id: String
-        get() = android.id()
+        get() = native.id()
 
     override val kind: MediaStreamTrackKind
-        get() = when (android.kind()) {
+        get() = when (native.kind()) {
             AndroidMediaStreamTrack.AUDIO_TRACK_KIND -> MediaStreamTrackKind.Audio
             AndroidMediaStreamTrack.VIDEO_TRACK_KIND -> MediaStreamTrackKind.Video
-            else -> error("Unknown track kind: ${android.kind()}")
+            else -> error("Unknown track kind: ${native.kind()}")
         }
 
     override val label: String
@@ -30,10 +30,10 @@ internal abstract class MediaStreamTrackImpl(
         }
 
     override var enabled: Boolean
-        get() = android.enabled()
+        get() = native.enabled()
         set(value) {
-            if (value == android.enabled()) return
-            android.setEnabled(value)
+            if (value == native.enabled()) return
+            native.setEnabled(value)
             onSetEnabled(value)
         }
 
@@ -62,7 +62,7 @@ internal abstract class MediaStreamTrackImpl(
     protected open fun onStop() {}
 
     private fun getInitialState(): MediaStreamTrackState {
-        return when (checkNotNull(android.state())) {
+        return when (checkNotNull(native.state())) {
             AndroidMediaStreamTrack.State.LIVE -> MediaStreamTrackState.Live(muted = false)
             AndroidMediaStreamTrack.State.ENDED -> MediaStreamTrackState.Live(muted = false)
         }

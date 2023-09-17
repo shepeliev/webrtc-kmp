@@ -9,8 +9,8 @@ internal class LocalVideoStreamTrack(
     override val settings: MediaTrackSettings get() = videoCaptureController.settings
 
     override var shouldReceive: Boolean?
-        get() = (android as VideoTrack).shouldReceive()
-        set(value) { (android as VideoTrack).setShouldReceive(checkNotNull(value)) }
+        get() = (native as VideoTrack).shouldReceive()
+        set(value) { (native as VideoTrack).setShouldReceive(checkNotNull(value)) }
 
     init {
         videoCaptureController.videoCapturerErrorListener = VideoCapturerErrorListener { stop() }

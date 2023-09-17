@@ -7,12 +7,12 @@ internal abstract class RenderedVideoStreamTrack(
     android: VideoTrack
 ) : MediaStreamTrackImpl(android), VideoStreamTrack {
     override fun addSink(sink: VideoSink) {
-        android as VideoTrack
-        android.addSink(sink)
+        native as VideoTrack
+        native.addSink(sink)
     }
 
     override fun removeSink(sink: VideoSink) {
-        android as VideoTrack
-        android.removeSink(sink)
+        native as VideoTrack
+        native.removeSink(sink)
     }
 }

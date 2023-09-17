@@ -26,8 +26,8 @@ internal class RemoteVideoStreamTrack internal constructor(
     ios: RTCVideoTrack,
 ) : RenderedVideoStreamTrack(ios), VideoStreamTrack {
     override var shouldReceive: Boolean?
-        get() = (ios as RTCVideoTrack).shouldReceive
-        set(value) { (ios as RTCVideoTrack).shouldReceive = checkNotNull(value) }
+        get() = (native as RTCVideoTrack).shouldReceive
+        set(value) { (native as RTCVideoTrack).shouldReceive = checkNotNull(value) }
 
     private val trackMuteDetector = TrackMuteDetector().apply {
         addRenderer(this)

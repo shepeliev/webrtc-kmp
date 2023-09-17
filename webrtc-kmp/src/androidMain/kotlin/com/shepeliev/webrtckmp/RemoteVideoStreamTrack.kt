@@ -12,8 +12,8 @@ internal class RemoteVideoStreamTrack(
     android: VideoTrack,
 ) : RenderedVideoStreamTrack(android), VideoStreamTrack {
     override var shouldReceive: Boolean?
-        get() = (android as VideoTrack).shouldReceive()
-        set(value) { (android as VideoTrack).setShouldReceive(checkNotNull(value)) }
+        get() = (native as VideoTrack).shouldReceive()
+        set(value) { (native as VideoTrack).setShouldReceive(checkNotNull(value)) }
 
     private val trackMuteDetector = TrackMuteDetector().apply {
         addSink(this)

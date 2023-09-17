@@ -12,14 +12,14 @@ actual class MediaStream internal constructor(val js: JsMediaStream) {
 
     actual fun addTrack(track: MediaStreamTrack) {
         require(track is MediaStreamTrackImpl)
-        js.addTrack(track.js)
+        js.addTrack(track.native)
     }
 
     actual fun getTrackById(id: String): MediaStreamTrack? = js.getTrackById(id)?.asCommon()
 
     actual fun removeTrack(track: MediaStreamTrack) {
         require(track is MediaStreamTrackImpl)
-        js.removeTrack(track.js)
+        js.removeTrack(track.native)
     }
 
     actual fun release() {

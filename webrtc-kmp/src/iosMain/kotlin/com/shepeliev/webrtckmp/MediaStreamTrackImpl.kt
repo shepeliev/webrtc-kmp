@@ -9,16 +9,16 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-internal abstract class MediaStreamTrackImpl(val ios: RTCMediaStreamTrack) : MediaStreamTrack {
+abstract class MediaStreamTrackImpl(val native: RTCMediaStreamTrack) : MediaStreamTrack {
 
     override val id: String
-        get() = ios.trackId
+        get() = native.trackId
 
     override val kind: MediaStreamTrackKind
-        get() = when (ios.kind()) {
+        get() = when (native.kind()) {
             kRTCMediaStreamTrackKindAudio -> MediaStreamTrackKind.Audio
             kRTCMediaStreamTrackKindVideo -> MediaStreamTrackKind.Video
-            else -> error("Unknown track kind: ${ios.kind()}")
+            else -> error("Unknown track kind: ${native.kind()}")
         }
 
     override val label: String
@@ -29,10 +29,10 @@ internal abstract class MediaStreamTrackImpl(val ios: RTCMediaStreamTrack) : Med
         }
 
     override var enabled: Boolean
-        get() = ios.isEnabled
+        get() = native.isEnabled
         set(value) {
-            if (ios.isEnabled == value) return
-            ios.isEnabled = value
+            if (native.isEnabled == value) return
+            native.isEnabled = value
             onSetEnabled(value)
         }
 
@@ -61,7 +61,7 @@ internal abstract class MediaStreamTrackImpl(val ios: RTCMediaStreamTrack) : Med
     protected open fun onStop() {}
 
     private fun getInitialState(): MediaStreamTrackState {
-        return when (ios.readyState) {
+        return when (native.readyState) {
             RTCMediaStreamTrackState.RTCMediaStreamTrackStateLive -> MediaStreamTrackState.Live(
                 muted = false
             )

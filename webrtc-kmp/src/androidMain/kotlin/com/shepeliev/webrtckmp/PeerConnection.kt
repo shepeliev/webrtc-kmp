@@ -191,7 +191,7 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
 
         val streamIds = streams.map { it.id }
         localTracks[track.id] = track
-        return RtpSender(native.addTrack(track.android, streamIds), track)
+        return RtpSender(native.addTrack(track.native, streamIds), track)
     }
 
     actual fun removeTrack(sender: RtpSender): Boolean {

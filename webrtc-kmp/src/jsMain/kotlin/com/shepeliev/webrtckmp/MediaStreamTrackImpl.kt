@@ -9,39 +9,39 @@ import org.w3c.dom.mediacapture.LIVE
 import org.w3c.dom.mediacapture.MediaStreamTrack as JsMediaStreamTrack
 import org.w3c.dom.mediacapture.MediaStreamTrackState as JsMediaStreamTrackState
 
-internal abstract class MediaStreamTrackImpl(val js: JsMediaStreamTrack) : MediaStreamTrack {
+abstract class MediaStreamTrackImpl(val native: JsMediaStreamTrack) : MediaStreamTrack {
     override val id: String
-        get() = js.id
+        get() = native.id
 
     override val kind: MediaStreamTrackKind
-        get() = js.kind.toMediaStreamTrackKind()
+        get() = native.kind.toMediaStreamTrackKind()
 
     override val label: String
-        get() = js.label
+        get() = native.label
 
     override var enabled: Boolean
-        get() = js.enabled
+        get() = native.enabled
         set(value) {
-            js.enabled = value
+            native.enabled = value
         }
 
     private val _state = MutableStateFlow(getInitialState())
     override val state: StateFlow<MediaStreamTrackState> = _state.asStateFlow()
 
     override val constraints: MediaTrackConstraints
-        get() = js.getConstraints().asCommon()
+        get() = native.getConstraints().asCommon()
 
     override val settings: MediaTrackSettings
-        get() = js.getSettings().asCommon()
+        get() = native.getSettings().asCommon()
 
     init {
-        js.onended = { _state.update { MediaStreamTrackState.Ended(js.muted) } }
-        js.onmute = { _state.update { it.mute() } }
-        js.onunmute = { _state.update { it.unmute() } }
+        native.onended = { _state.update { MediaStreamTrackState.Ended(native.muted) } }
+        native.onmute = { _state.update { it.mute() } }
+        native.onunmute = { _state.update { it.unmute() } }
     }
 
     override fun stop() {
-        js.stop()
+        native.stop()
     }
 
     private fun String.toMediaStreamTrackKind(): MediaStreamTrackKind {
@@ -53,10 +53,10 @@ internal abstract class MediaStreamTrackImpl(val js: JsMediaStreamTrack) : Media
     }
 
     private fun getInitialState(): MediaStreamTrackState {
-        return when (js.readyState) {
-            JsMediaStreamTrackState.LIVE -> MediaStreamTrackState.Live(js.muted)
-            JsMediaStreamTrackState.ENDED -> MediaStreamTrackState.Ended(js.muted)
-            else -> error("Unknown media stream track state: ${js.readyState}")
+        return when (native.readyState) {
+            JsMediaStreamTrackState.LIVE -> MediaStreamTrackState.Live(native.muted)
+            JsMediaStreamTrackState.ENDED -> MediaStreamTrackState.Ended(native.muted)
+            else -> error("Unknown media stream track state: ${native.readyState}")
         }
     }
 }

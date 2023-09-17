@@ -158,7 +158,7 @@ actual class PeerConnection actual constructor(
         require(track is MediaStreamTrackImpl)
 
         val streamIds = streams.map { it.id }
-        val iosSender = checkNotNull(native.addTrack(track.ios, streamIds)) { "Failed to add track" }
+        val iosSender = checkNotNull(native.addTrack(track.native, streamIds)) { "Failed to add track" }
         localTracks[track.id] = track
         return RtpSender(iosSender, track)
     }
