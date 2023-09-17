@@ -83,6 +83,8 @@ expect class PeerConnection(rtcConfiguration: RtcConfiguration = RtcConfiguratio
      * Gets stats using the new stats collection API, see webrtc/api/stats/.
      */
     suspend fun getStats(): RtcStatsReport?
+    suspend fun getStats(sender: RtpSender): RtcStatsReport?
+    suspend fun getStats(receiver: RtpReceiver): RtcStatsReport?
 
     /**
      * Free native resources associated with this PeerConnection instance.

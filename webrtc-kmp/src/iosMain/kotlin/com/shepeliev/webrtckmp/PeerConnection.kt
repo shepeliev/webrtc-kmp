@@ -38,7 +38,7 @@ actual class PeerConnection actual constructor(
     rtcConfiguration: RtcConfiguration
 ) : NSObject(), RTCPeerConnectionDelegateProtocol {
 
-    val ios: RTCPeerConnection = checkNotNull(
+    val native: RTCPeerConnection = checkNotNull(
         WebRtc.peerConnectionFactory.peerConnectionWithConfiguration(
             configuration = rtcConfiguration.native,
             constraints = RTCMediaConstraints(),
@@ -46,21 +46,21 @@ actual class PeerConnection actual constructor(
         )
     ) { "Failed to create peer connection" }
 
-    actual val localDescription: SessionDescription? get() = ios.localDescription?.asCommon()
+    actual val localDescription: SessionDescription? get() = native.localDescription?.asCommon()
 
-    actual val remoteDescription: SessionDescription? get() = ios.remoteDescription?.asCommon()
+    actual val remoteDescription: SessionDescription? get() = native.remoteDescription?.asCommon()
 
     actual val signalingState: SignalingState
-        get() = rtcSignalingStateAsCommon(ios.signalingState())
+        get() = rtcSignalingStateAsCommon(native.signalingState())
 
     actual val iceConnectionState: IceConnectionState
-        get() = rtcIceConnectionStateAsCommon(ios.iceConnectionState())
+        get() = rtcIceConnectionStateAsCommon(native.iceConnectionState())
 
     actual val connectionState: PeerConnectionState
-        get() = rtcPeerConnectionStateAsCommon(ios.connectionState())
+        get() = rtcPeerConnectionStateAsCommon(native.connectionState())
 
     actual val iceGatheringState: IceGatheringState
-        get() = rtcIceGatheringStateAsCommon(ios.iceGatheringState())
+        get() = rtcIceGatheringStateAsCommon(native.iceGatheringState())
 
     private val _peerConnectionEvent =
         MutableSharedFlow<PeerConnectionEvent>(extraBufferCapacity = FLOW_BUFFER_CAPACITY)
@@ -86,12 +86,12 @@ actual class PeerConnection actual constructor(
             it.protocol = protocol
             it.isNegotiated = negotiated
         }
-        return ios.dataChannelForLabel(label, config)?.let { DataChannel(it) }
+        return native.dataChannelForLabel(label, config)?.let { DataChannel(it) }
     }
 
     actual suspend fun createOffer(options: OfferAnswerOptions): SessionDescription {
         val constraints = options.toRTCMediaConstraints()
-        val sessionDescription: RTCSessionDescription = ios.awaitResult {
+        val sessionDescription: RTCSessionDescription = native.awaitResult {
             offerForConstraints(constraints, it)
         }
         return sessionDescription.asCommon()
@@ -99,7 +99,7 @@ actual class PeerConnection actual constructor(
 
     actual suspend fun createAnswer(options: OfferAnswerOptions): SessionDescription {
         val constraints = options.toRTCMediaConstraints()
-        val sessionDescription: RTCSessionDescription = ios.awaitResult {
+        val sessionDescription: RTCSessionDescription = native.awaitResult {
             answerForConstraints(constraints, it)
         }
         return sessionDescription.asCommon()
@@ -116,38 +116,38 @@ actual class PeerConnection actual constructor(
     }
 
     actual suspend fun setLocalDescription(description: SessionDescription) {
-        ios.await { setLocalDescription(description.asIos(), it) }
+        native.await { setLocalDescription(description.asIos(), it) }
     }
 
     actual suspend fun setRemoteDescription(description: SessionDescription) {
-        ios.await { setRemoteDescription(description.asIos(), it) }
+        native.await { setRemoteDescription(description.asIos(), it) }
     }
 
     actual fun setConfiguration(configuration: RtcConfiguration): Boolean {
-        return ios.setConfiguration(configuration.native)
+        return native.setConfiguration(configuration.native)
     }
 
     actual fun addIceCandidate(candidate: IceCandidate): Boolean {
-        ios.addIceCandidate(candidate.native)
+        native.addIceCandidate(candidate.native)
         return true
     }
 
     actual fun removeIceCandidates(candidates: List<IceCandidate>): Boolean {
-        ios.removeIceCandidates(candidates.map { it.native })
+        native.removeIceCandidates(candidates.map { it.native })
         return true
     }
 
-    actual fun getSenders(): List<RtpSender> = ios.senders.map {
+    actual fun getSenders(): List<RtpSender> = native.senders.map {
         val iosSender = it as RTCRtpSender
         RtpSender(iosSender, localTracks[iosSender.track?.trackId])
     }
 
-    actual fun getReceivers(): List<RtpReceiver> = ios.receivers.map {
+    actual fun getReceivers(): List<RtpReceiver> = native.receivers.map {
         val iosReceiver = it as RTCRtpReceiver
         RtpReceiver(iosReceiver, remoteTracks[iosReceiver.track?.trackId])
     }
 
-    actual fun getTransceivers(): List<RtpTransceiver> = ios.transceivers.map {
+    actual fun getTransceivers(): List<RtpTransceiver> = native.transceivers.map {
         val iosTransceiver = it as RTCRtpTransceiver
         val senderTrack = localTracks[iosTransceiver.sender.track?.trackId]
         val receiverTrack = remoteTracks[iosTransceiver.receiver.track?.trackId]
@@ -158,14 +158,14 @@ actual class PeerConnection actual constructor(
         require(track is MediaStreamTrackImpl)
 
         val streamIds = streams.map { it.id }
-        val iosSender = checkNotNull(ios.addTrack(track.ios, streamIds)) { "Failed to add track" }
+        val iosSender = checkNotNull(native.addTrack(track.ios, streamIds)) { "Failed to add track" }
         localTracks[track.id] = track
         return RtpSender(iosSender, track)
     }
 
     actual fun removeTrack(sender: RtpSender): Boolean {
         localTracks.remove(sender.track?.id)
-        return ios.removeTrack(sender.ios)
+        return native.removeTrack(sender.ios)
     }
 
     actual suspend fun getStats(): RtcStatsReport? {
@@ -173,10 +173,20 @@ actual class PeerConnection actual constructor(
         return null
     }
 
+    actual suspend fun getStats(sender: RtpSender): RtcStatsReport? {
+        // TODO not implemented yet
+        return null
+    }
+
+    actual suspend fun getStats(receiver: RtpReceiver): RtcStatsReport? {
+        // TODO not implemented yet
+        return null
+    }
+
     actual fun close() {
         remoteTracks.values.forEach(MediaStreamTrack::stop)
         remoteTracks.clear()
-        ios.close()
+        native.close()
     }
 
     override fun peerConnection(peerConnection: RTCPeerConnection, didChangeSignalingState: RTCSignalingState) {
@@ -248,7 +258,7 @@ actual class PeerConnection actual constructor(
     }
 
     override fun peerConnection(peerConnection: RTCPeerConnection, didAddReceiver: RTCRtpReceiver, streams: List<*>) {
-        val transceiver = ios.transceivers
+        val transceiver = native.transceivers
             .map { it as RTCRtpTransceiver }
             .find { it.receiver.receiverId == didAddReceiver.receiverId }
             ?: return
