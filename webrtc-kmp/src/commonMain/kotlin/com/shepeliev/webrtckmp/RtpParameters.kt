@@ -46,7 +46,7 @@ expect class RtpEncodingParameters {
      * Set to true to cause this encoding to be sent, and false for it not to
      * be sent.
      */
-    val active: Boolean
+    var active: Boolean
 
     /**
      * The relative bitrate priority of this encoding. Currently this is

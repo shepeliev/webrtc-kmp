@@ -49,8 +49,11 @@ actual class RtpEncodingParameters(val native: AndroidRtpParameters.Encoding) {
     actual val rid: String?
         get() = native.rid
 
-    actual val active: Boolean
+    actual var active: Boolean
         get() = native.active
+        set(value) {
+            native.active = value
+        }
 
     actual val bitratePriority: Double
         get() = native.bitratePriority

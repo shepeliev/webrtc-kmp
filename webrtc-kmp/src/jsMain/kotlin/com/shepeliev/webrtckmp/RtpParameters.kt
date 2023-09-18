@@ -47,7 +47,7 @@ actual class RtcpParameters(val js: RTCRtcpParameters) {
 
 actual class RtpEncodingParameters {
     actual val rid: String? = null
-    actual val active: Boolean = false
+    actual var active: Boolean = false
     actual val bitratePriority: Double = 0.0
     actual val networkPriority: Int = -1
     actual val maxBitrateBps: Int? = null

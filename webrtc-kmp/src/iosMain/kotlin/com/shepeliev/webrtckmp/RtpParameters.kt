@@ -44,8 +44,11 @@ actual class RtpEncodingParameters(val native: RTCRtpEncodingParameters) {
     actual val rid: String?
         get() = native.rid
 
-    actual val active: Boolean
+    actual var active: Boolean
         get() = native.isActive
+        set(value) {
+            native.isActive = value
+        }
 
     actual val bitratePriority: Double
         get() {
