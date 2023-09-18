@@ -14,9 +14,12 @@ import com.shepeliev.webrtckmp.PeerConnectionEvent.Track
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import org.webrtc.AudioTrack
 import org.webrtc.CandidatePairChangeEvent
 import org.webrtc.MediaConstraints
+import org.webrtc.RtpTransceiver.RtpTransceiverInit
 import org.webrtc.SdpObserver
+import org.webrtc.VideoTrack
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -192,6 +195,26 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         val streamIds = streams.map { it.id }
         localTracks[track.id] = track
         return RtpSender(native.addTrack(track.native, streamIds), track)
+    }
+
+    actual fun addTransceiver(
+        track: MediaStreamTrack,
+        direction: RtpTransceiverDirection,
+        streamIds: List<String>,
+        sendEncodings: List<RtpEncodingParameters>,
+    ): RtpTransceiver {
+        require(track is MediaStreamTrackImpl)
+
+        val init = RtpTransceiverInit(direction.asNative(), streamIds, sendEncodings.map { it.native })
+        val nativeTransceiver = native.addTransceiver(track.native, init)
+        val nativeReceiverTrack = nativeTransceiver.receiver.track()
+        val receiverTrack = when (nativeReceiverTrack?.kind()) {
+            org.webrtc.MediaStreamTrack.VIDEO_TRACK_KIND -> RemoteVideoStreamTrack(nativeReceiverTrack as VideoTrack)
+            org.webrtc.MediaStreamTrack.AUDIO_TRACK_KIND -> RemoteAudioStreamTrack(nativeReceiverTrack as AudioTrack)
+            else -> null
+        }
+
+        return RtpTransceiver(nativeTransceiver, track, receiverTrack)
     }
 
     actual fun removeTrack(sender: RtpSender): Boolean {

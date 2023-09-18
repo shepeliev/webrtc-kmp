@@ -14,10 +14,13 @@ import WebRTC.RTCPeerConnectionState
 import WebRTC.RTCRtpReceiver
 import WebRTC.RTCRtpSender
 import WebRTC.RTCRtpTransceiver
+import WebRTC.RTCRtpTransceiverInit
 import WebRTC.RTCSessionDescription
 import WebRTC.RTCSignalingState
 import WebRTC.RTCVideoTrack
 import WebRTC.dataChannelForLabel
+import WebRTC.kRTCMediaStreamTrackKindAudio
+import WebRTC.kRTCMediaStreamTrackKindVideo
 import com.shepeliev.webrtckmp.PeerConnectionEvent.ConnectionStateChange
 import com.shepeliev.webrtckmp.PeerConnectionEvent.IceConnectionStateChange
 import com.shepeliev.webrtckmp.PeerConnectionEvent.IceGatheringStateChange
@@ -161,6 +164,30 @@ actual class PeerConnection actual constructor(
         val iosSender = checkNotNull(native.addTrack(track.native, streamIds)) { "Failed to add track" }
         localTracks[track.id] = track
         return RtpSender(iosSender, track)
+    }
+
+    actual fun addTransceiver(
+        track: MediaStreamTrack,
+        direction: RtpTransceiverDirection,
+        streamIds: List<String>,
+        sendEncodings: List<RtpEncodingParameters>,
+    ): RtpTransceiver {
+        require(track is MediaStreamTrackImpl)
+
+        val init = RTCRtpTransceiverInit().apply {
+            this.direction = direction.asNative()
+            this.streamIds = streamIds
+            this.sendEncodings = sendEncodings.map { it.native }
+        }
+        val nativeTransceiver = native.addTransceiverWithTrack(track.native, init) ?: error("Failed to add transceiver")
+        val nativeReceiverTrack = nativeTransceiver.receiver.track()
+        val receiverTrack = when (nativeReceiverTrack?.kind()) {
+            kRTCMediaStreamTrackKindVideo -> RemoteVideoStreamTrack(nativeReceiverTrack as RTCVideoTrack)
+            kRTCMediaStreamTrackKindAudio -> RemoteAudioStreamTrack(nativeReceiverTrack as RTCAudioTrack)
+            else -> null
+        }
+
+        return RtpTransceiver(nativeTransceiver, track, receiverTrack)
     }
 
     actual fun removeTrack(sender: RtpSender): Boolean {

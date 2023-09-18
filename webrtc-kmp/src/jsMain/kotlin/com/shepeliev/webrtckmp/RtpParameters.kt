@@ -1,5 +1,8 @@
 package com.shepeliev.webrtckmp
 
+import kotlin.js.Json
+import kotlin.js.json
+
 actual class RtpParameters(val js: RTCRtpParameters) {
     actual val codecs: List<RtpCodecParameters>
         get() = js.codes.map { RtpCodecParameters(it) }
@@ -53,6 +56,19 @@ actual class RtpEncodingParameters {
     actual val numTemporalLayers: Int? = null
     actual val scaleResolutionDownBy: Double? = null
     actual val ssrc: Long? = null
+
+    fun toJson(): Json = json(
+        "rid" to rid,
+        "active" to active,
+        "bitratePriority" to bitratePriority,
+        "networkPriority" to networkPriority,
+        "maxBitrateBps" to maxBitrateBps,
+        "minBitrateBps" to minBitrateBps,
+        "maxFramerate" to maxFramerate,
+        "numTemporalLayers" to numTemporalLayers,
+        "scaleResolutionDownBy" to scaleResolutionDownBy,
+        "ssrc" to ssrc,
+    )
 }
 
 actual class HeaderExtension {

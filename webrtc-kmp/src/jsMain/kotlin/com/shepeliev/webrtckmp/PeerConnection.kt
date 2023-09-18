@@ -146,6 +146,28 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         return RtpSender(native.addTrack(track.native, *jsStreams))
     }
 
+    actual fun addTransceiver(
+        track: MediaStreamTrack,
+        direction: RtpTransceiverDirection,
+        streamIds: List<String>,
+        sendEncodings: List<RtpEncodingParameters>,
+    ): RtpTransceiver {
+        require(track is MediaStreamTrackImpl)
+
+        val jsStreamIds = streamIds.toTypedArray()
+        val jsSendEncodings = sendEncodings.map { it.toJson() }.toTypedArray()
+        return RtpTransceiver(
+            native.addTransceiver(
+                track.native,
+                json(
+                    "direction" to direction.toCanonicalForm(),
+                    "streams" to jsStreamIds,
+                    "sendEncodings" to jsSendEncodings
+                )
+            )
+        )
+    }
+
     actual fun removeTrack(sender: RtpSender): Boolean {
         native.removeTrack(sender.js)
         return true

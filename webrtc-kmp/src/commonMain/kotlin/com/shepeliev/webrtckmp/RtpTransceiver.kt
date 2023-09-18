@@ -45,4 +45,8 @@ expect class RtpTransceiver {
     fun stop()
 }
 
-enum class RtpTransceiverDirection { SendRecv, SendOnly, RecvOnly, Inactive, Stopped; }
+enum class RtpTransceiverDirection {
+    SendRecv, SendOnly, RecvOnly, Inactive, Stopped;
+
+    fun toCanonicalForm(): String = name.lowercase()
+}

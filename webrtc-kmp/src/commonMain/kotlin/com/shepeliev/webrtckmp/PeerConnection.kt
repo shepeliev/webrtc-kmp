@@ -72,6 +72,13 @@ expect class PeerConnection(rtcConfiguration: RtcConfiguration = RtcConfiguratio
      */
     fun addTrack(track: MediaStreamTrack, vararg streams: MediaStream): RtpSender
 
+    fun addTransceiver(
+        track: MediaStreamTrack,
+        direction: RtpTransceiverDirection = RtpTransceiverDirection.SendRecv,
+        streamIds: List<String> = emptyList(),
+        sendEncodings: List<RtpEncodingParameters> = emptyList(),
+    ): RtpTransceiver
+
     /**
      * Stops sending media from sender. The sender will still appear in getSenders. Future
      * calls to createOffer will mark the m section for the corresponding transceiver as
