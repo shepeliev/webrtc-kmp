@@ -25,4 +25,13 @@ actual class RtpSender internal constructor(
         native.setTrack((track as? MediaStreamTrackImpl)?.native, true)
         _track = track
     }
+
+    actual fun getCapabilities(kind: MediaStreamTrackKind): RtpCapabilities? {
+        require(kind in listOf(MediaStreamTrackKind.Audio, MediaStreamTrackKind.Video)) {
+            "Unsupported track kind: $kind"
+        }
+
+        return WebRtc.peerConnectionFactory.getRtpSenderCapabilities(kind.asNative())
+            ?.let { RtpCapabilities(it) }
+    }
 }

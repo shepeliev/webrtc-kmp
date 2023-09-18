@@ -2,6 +2,7 @@ package com.shepeliev.webrtckmp
 
 import WebRTC.RTCMediaStreamTrack
 import WebRTC.RTCMediaStreamTrackState
+import WebRTC.RTCRtpMediaType
 import WebRTC.kRTCMediaStreamTrackKindAudio
 import WebRTC.kRTCMediaStreamTrackKindVideo
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,6 +27,7 @@ abstract class MediaStreamTrackImpl(val native: RTCMediaStreamTrack) : MediaStre
             // TODO(shepeliev): get real capturing device (front/back camera, internal microphone, headset)
             MediaStreamTrackKind.Audio -> "microphone"
             MediaStreamTrackKind.Video -> "camera"
+            MediaStreamTrackKind.Data -> "data"
         }
 
     override var enabled: Boolean
@@ -73,4 +75,10 @@ abstract class MediaStreamTrackImpl(val native: RTCMediaStreamTrack) : MediaStre
             else -> error("Unknown RTCMediaStreamTrackState: $state")
         }
     }
+}
+
+internal fun MediaStreamTrackKind.asNative(): RTCRtpMediaType = when (this) {
+    MediaStreamTrackKind.Audio -> RTCRtpMediaType.RTCRtpMediaTypeAudio
+    MediaStreamTrackKind.Video -> RTCRtpMediaType.RTCRtpMediaTypeVideo
+    MediaStreamTrackKind.Data -> RTCRtpMediaType.RTCRtpMediaTypeData
 }

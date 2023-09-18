@@ -111,6 +111,7 @@ external class RTCRtpTransceiver {
     val sender: RTCRtpSender
     val stopped: Boolean
 
+    fun setCodecPreferences(codecs: Array<RTCRtpCodecCapability>)
     fun stop()
 }
 
@@ -121,6 +122,7 @@ external class RTCRtpSender {
     fun getParameters(): RTCRtpParameters
     fun setParameters(parameters: RTCRtpParameters)
     fun replaceTrack(newTrack: MediaStreamTrack?): Promise<MediaStreamTrack>
+    fun getCapabilities(kind: String): RTCRtpCapabilities
 }
 
 external class RTCDTMFSender {
@@ -131,6 +133,7 @@ external class RTCDTMFSender {
 external class RTCRtpReceiver {
     val track: MediaStreamTrack
     fun getParameters(): RTCRtpParameters
+    fun getCapabilities(kind: String): RTCRtpCapabilities
 }
 
 external class RTCRtpParameters {
@@ -150,4 +153,20 @@ external class RTCRtpCodecParameters {
 external class RTCRtcpParameters {
     val cname: String
     val reducedSize: Boolean
+}
+
+external class RTCRtpCapabilities {
+    val codecs: Array<RTCRtpCodecCapability>
+    val headerExtensions: Array<RTCRtpHeaderExtension>
+}
+
+external class RTCRtpCodecCapability {
+    val channels: Int?
+    val clockRate: Int
+    val mimeType: String
+    val sdpFmtpLine: String?
+}
+
+external class RTCRtpHeaderExtension {
+    val uri: String
 }

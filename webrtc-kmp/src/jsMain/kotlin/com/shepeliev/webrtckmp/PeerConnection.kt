@@ -169,7 +169,7 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
     }
 
     actual fun removeTrack(sender: RtpSender): Boolean {
-        native.removeTrack(sender.js)
+        native.removeTrack(sender.native)
         return true
     }
 

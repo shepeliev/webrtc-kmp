@@ -1,28 +1,32 @@
 package com.shepeliev.webrtckmp
 
-actual class RtpTransceiver(val js: RTCRtpTransceiver) {
+actual class RtpTransceiver(val native: RTCRtpTransceiver) {
     actual var direction: RtpTransceiverDirection
-        get() = js.direction.toRtpTransceiverDirection()
+        get() = native.direction.toRtpTransceiverDirection()
         set(value) {
-            js.direction = value.toJs()
+            native.direction = value.toJs()
         }
 
     actual val currentDirection: RtpTransceiverDirection?
-        get() = js.currentDirection?.toRtpTransceiverDirection()
+        get() = native.currentDirection?.toRtpTransceiverDirection()
 
     actual val mid: String
-        get() = js.mid ?: ""
+        get() = native.mid ?: ""
 
     actual val sender: RtpSender
-        get() = RtpSender(js.sender)
+        get() = RtpSender(native.sender)
 
     actual val receiver: RtpReceiver
-        get() = RtpReceiver(js.receiver)
+        get() = RtpReceiver(native.receiver)
 
     actual val stopped: Boolean
-        get() = js.stopped
+        get() = native.stopped
 
-    actual fun stop() = js.stop()
+    actual fun setCodecPreferences(capabilities: List<RtpCapabilities.CodecCapability>) {
+        native.setCodecPreferences(capabilities.map { it.native }.toTypedArray())
+    }
+
+    actual fun stop() = native.stop()
 
     private fun String.toRtpTransceiverDirection(): RtpTransceiverDirection = when (this) {
         "sendrecv" -> RtpTransceiverDirection.SendRecv

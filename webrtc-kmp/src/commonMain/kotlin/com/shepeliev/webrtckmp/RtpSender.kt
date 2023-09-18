@@ -7,4 +7,5 @@ expect class RtpSender {
     val dtmf: DtmfSender?
 
     fun replaceTrack(track: MediaStreamTrack?)
+    fun getCapabilities(kind: MediaStreamTrackKind): RtpCapabilities?
 }

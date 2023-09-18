@@ -44,14 +44,6 @@ abstract class MediaStreamTrackImpl(val native: JsMediaStreamTrack) : MediaStrea
         native.stop()
     }
 
-    private fun String.toMediaStreamTrackKind(): MediaStreamTrackKind {
-        return when (this) {
-            "audio" -> MediaStreamTrackKind.Audio
-            "video" -> MediaStreamTrackKind.Video
-            else -> error("Unknown media stream track kind: $this")
-        }
-    }
-
     private fun getInitialState(): MediaStreamTrackState {
         return when (native.readyState) {
             JsMediaStreamTrackState.LIVE -> MediaStreamTrackState.Live(native.muted)
@@ -65,4 +57,19 @@ internal fun JsMediaStreamTrack.asCommon(): MediaStreamTrackImpl = when (kind) {
     "audio" -> AudioStreamTrackImpl(this)
     "video" -> VideoStreamTrackImpl(this)
     else -> error("Unknown kind of media stream track: $kind")
+}
+
+internal fun String.toMediaStreamTrackKind(): MediaStreamTrackKind {
+    return when (this) {
+        "audio" -> MediaStreamTrackKind.Audio
+        "video" -> MediaStreamTrackKind.Video
+        "data" -> MediaStreamTrackKind.Data
+        else -> error("Unknown media stream track kind: $this")
+    }
+}
+
+internal fun MediaStreamTrackKind.asNative(): String = when (this) {
+    MediaStreamTrackKind.Audio -> "audio"
+    MediaStreamTrackKind.Video -> "video"
+    MediaStreamTrackKind.Data -> "data"
 }

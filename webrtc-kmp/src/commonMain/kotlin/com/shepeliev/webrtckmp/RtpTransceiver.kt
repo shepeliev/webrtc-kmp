@@ -38,6 +38,8 @@ expect class RtpTransceiver {
      */
     val stopped: Boolean
 
+    fun setCodecPreferences(capabilities: List<RtpCapabilities.CodecCapability>)
+
     /**
      * Permanently stops the [RtpTransceiver]. The associated sender stops sending data, and the
      * associated receiver likewise stops receiving and decoding incoming data.

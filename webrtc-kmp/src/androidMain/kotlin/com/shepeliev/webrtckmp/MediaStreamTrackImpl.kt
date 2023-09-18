@@ -16,17 +16,14 @@ abstract class MediaStreamTrackImpl(
         get() = native.id()
 
     override val kind: MediaStreamTrackKind
-        get() = when (native.kind()) {
-            AndroidMediaStreamTrack.AUDIO_TRACK_KIND -> MediaStreamTrackKind.Audio
-            AndroidMediaStreamTrack.VIDEO_TRACK_KIND -> MediaStreamTrackKind.Video
-            else -> error("Unknown track kind: ${native.kind()}")
-        }
+        get() = native.kind().toMediaStreamTrackKind()
 
     override val label: String
         get() = when (kind) {
             // TODO(shepeliev): get real capturing device (front/back camera, internal microphone, headset)
             MediaStreamTrackKind.Audio -> "microphone"
             MediaStreamTrackKind.Video -> "camera"
+            MediaStreamTrackKind.Data -> "data"
         }
 
     override var enabled: Boolean
@@ -67,4 +64,16 @@ abstract class MediaStreamTrackImpl(
             AndroidMediaStreamTrack.State.ENDED -> MediaStreamTrackState.Live(muted = false)
         }
     }
+}
+
+internal fun String.toMediaStreamTrackKind(): MediaStreamTrackKind = when (this) {
+    AndroidMediaStreamTrack.AUDIO_TRACK_KIND -> MediaStreamTrackKind.Audio
+    AndroidMediaStreamTrack.VIDEO_TRACK_KIND -> MediaStreamTrackKind.Video
+    else -> error("Unknown track kind: $this")
+}
+
+internal fun MediaStreamTrackKind.asNative(): org.webrtc.MediaStreamTrack.MediaType = when (this) {
+    MediaStreamTrackKind.Audio -> org.webrtc.MediaStreamTrack.MediaType.MEDIA_TYPE_AUDIO
+    MediaStreamTrackKind.Video -> org.webrtc.MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO
+    MediaStreamTrackKind.Data -> error("Data track is not supported on Android")
 }
