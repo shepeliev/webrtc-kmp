@@ -8,10 +8,10 @@ Pod::Spec.new do |spec|
     spec.summary                  = 'Shared framework for WebRTC KMP sample'
     spec.vendored_frameworks      = 'build/cocoapods/framework/shared.framework'
     spec.libraries                = 'c++'
-    spec.ios.deployment_target = '11.0'
+    spec.ios.deployment_target = '12.0'
     spec.dependency 'FirebaseCore'
     spec.dependency 'FirebaseFirestore'
-    spec.dependency 'WebRTC-SDK', '114.5735.02'
+    spec.dependency 'WebRTC-SDK', '114.5735.08'
                 
     spec.pod_target_xcconfig = {
         'KOTLIN_PROJECT_PATH' => ':sample:shared',

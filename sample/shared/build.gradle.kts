@@ -10,12 +10,12 @@ kotlin {
         version = "1.0.0"
         summary = "Shared framework for WebRTC KMP sample"
         homepage = "https://github.com/shepeliev/webrtc-kmp/tree/main/sample"
-        ios.deploymentTarget = "11.0"
+        ios.deploymentTarget = "12.0"
 
         pod("FirebaseCore")
         pod("FirebaseFirestore")
         pod("WebRTC-SDK") {
-            version = "114.5735.02"
+            version = "114.5735.08"
             linkOnly = true
         }
 
