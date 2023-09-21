@@ -1,6 +1,5 @@
 package com.shepeliev.webrtckmp
 
-import android.media.MediaCodecInfo.CodecCapabilities
 import org.webrtc.RtpTransceiver as AndroidRtpTransceiver
 
 actual class RtpTransceiver(
