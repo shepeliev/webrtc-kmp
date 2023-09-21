@@ -1,7 +1,16 @@
 package com.shepeliev.webrtckmp
 
+import WebRTC.RTCAudioRendererProtocol
 import WebRTC.RTCAudioTrack
 
 internal class RemoteAudioStreamTrack(
-    ios: RTCAudioTrack
-) : MediaStreamTrackImpl(ios), AudioStreamTrack
+    native: RTCAudioTrack
+) : MediaStreamTrackImpl(native), AudioStreamTrack {
+    fun addRenderer(renderer: RTCAudioRendererProtocol) {
+        (native as RTCAudioTrack).addRenderer(renderer)
+    }
+
+    fun removeRenderer(renderer: RTCAudioRendererProtocol) {
+        (native as RTCAudioTrack).removeRenderer(renderer)
+    }
+}
