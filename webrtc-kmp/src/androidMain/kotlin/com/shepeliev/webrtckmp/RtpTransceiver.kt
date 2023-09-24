@@ -66,6 +66,6 @@ internal fun RtpTransceiverDirection.asNative(): AndroidRtpTransceiver.RtpTransc
         RtpTransceiverDirection.SendOnly -> AndroidRtpTransceiver.RtpTransceiverDirection.SEND_ONLY
         RtpTransceiverDirection.RecvOnly -> AndroidRtpTransceiver.RtpTransceiverDirection.RECV_ONLY
         RtpTransceiverDirection.Inactive -> AndroidRtpTransceiver.RtpTransceiverDirection.INACTIVE
-        RtpTransceiverDirection.Stopped -> AndroidRtpTransceiver.RtpTransceiverDirection.INACTIVE
+        RtpTransceiverDirection.Stopped -> AndroidRtpTransceiver.RtpTransceiverDirection.STOPPED
     }
 }
