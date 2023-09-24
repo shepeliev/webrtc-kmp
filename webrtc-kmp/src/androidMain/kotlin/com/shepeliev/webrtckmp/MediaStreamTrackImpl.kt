@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import org.webrtc.Logging
 import org.webrtc.MediaStreamTrack as AndroidMediaStreamTrack
 
 abstract class MediaStreamTrackImpl(
@@ -27,11 +28,16 @@ abstract class MediaStreamTrackImpl(
         }
 
     override var enabled: Boolean
-        get() = native.enabled()
+        get() = runCatching { native.enabled() }
+            .onFailure { Logging.e(TAG, "Getting native MediaStreamTrack state failed", it) }
+            .getOrDefault(false)
         set(value) {
-            if (value == native.enabled()) return
-            native.setEnabled(value)
-            onSetEnabled(value)
+            runCatching {
+                if (value == native.enabled()) return
+                native.setEnabled(value)
+                onSetEnabled(value)
+            }
+                .onFailure { Logging.e(TAG, "Setting native MediaStreamTrack state failed", it) }
         }
 
     private val _state = MutableStateFlow(getInitialState())
@@ -77,3 +83,5 @@ internal fun MediaStreamTrackKind.asNative(): org.webrtc.MediaStreamTrack.MediaT
     MediaStreamTrackKind.Video -> org.webrtc.MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO
     MediaStreamTrackKind.Data -> error("Data track is not supported on Android")
 }
+
+private const val TAG = "MediaStreamTrackImpl"
