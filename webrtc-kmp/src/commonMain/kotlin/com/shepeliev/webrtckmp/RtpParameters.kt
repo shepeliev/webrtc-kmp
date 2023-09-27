@@ -35,12 +35,12 @@ expect class RtpCodecParameters {
     val parameters: Map<String, String>
 }
 
-expect class RtpEncodingParameters {
+expect class RtpEncodingParameters(rid: String? = null, active: Boolean = true, scaleResolutionDownBy: Double? = null) {
     /**
      * If non-null, this represents the RID that identifies this encoding layer.
      * RIDs are used to identify layers in simulcast.
      */
-    val rid: String?
+    var rid: String?
 
     /**
      * Set to true to cause this encoding to be sent, and false for it not to
@@ -57,40 +57,40 @@ expect class RtpEncodingParameters {
      * "medium" = 2.0
      * "high" = 4.0
      */
-    val bitratePriority: Double
+    var bitratePriority: Double
 
     /**
      * The relative DiffServ Code Point priority for this encoding, allowing
      * packets to be marked relatively higher or lower without affecting bandwidth allocations.
      */
-    val networkPriority: Int
+    var networkPriority: Priority
 
     /**
      * If non-null, this represents the Transport Independent Application Specific maximum
      * bandwidth defined in RFC3890. If null, there is no maximum bitrate.
      */
-    val maxBitrateBps: Int?
+    var maxBitrateBps: Int?
 
     /**
      * The minimum bitrate in bps for video.
      */
-    val minBitrateBps: Int?
+    var minBitrateBps: Int?
 
     /**
      * The max framerate in fps for video.
      */
-    val maxFramerate: Int?
+    var maxFramerate: Int?
 
     /**
      * The number of temporal layers for video.
      */
-    val numTemporalLayers: Int?
+    var numTemporalLayers: Int?
 
     /**
      * If non-null, scale the width and height down by this factor for video. If null,
      * implementation default scaling factor will be used.
      */
-    val scaleResolutionDownBy: Double?
+    var scaleResolutionDownBy: Double?
 
     /**
      * SSRC to be used by this encoding.

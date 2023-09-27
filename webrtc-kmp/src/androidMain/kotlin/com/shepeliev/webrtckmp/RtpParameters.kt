@@ -46,8 +46,15 @@ actual class RtpCodecParameters(val native: AndroidRtpParameters.Codec) {
 }
 
 actual class RtpEncodingParameters(val native: AndroidRtpParameters.Encoding) {
-    actual val rid: String?
+    actual constructor(rid: String?, active: Boolean, scaleResolutionDownBy: Double?) : this(
+        AndroidRtpParameters.Encoding(rid, active, scaleResolutionDownBy)
+    )
+
+    actual var rid: String?
         get() = native.rid
+        set(value) {
+            native.rid = value
+        }
 
     actual var active: Boolean
         get() = native.active
@@ -55,26 +62,47 @@ actual class RtpEncodingParameters(val native: AndroidRtpParameters.Encoding) {
             native.active = value
         }
 
-    actual val bitratePriority: Double
+    actual var bitratePriority: Double
         get() = native.bitratePriority
+        set(value) {
+            native.bitratePriority = value
+        }
 
-    actual val networkPriority: Int
-        get() = native.networkPriority
+    actual var networkPriority: Priority
+        get() = native.networkPriority.asCommon()
+        set(value) {
+            native.networkPriority = value.toNative()
+        }
 
-    actual val maxBitrateBps: Int?
+    actual var maxBitrateBps: Int?
         get() = native.maxBitrateBps
+        set(value) {
+            native.maxBitrateBps = value
+        }
 
-    actual val minBitrateBps: Int?
+    actual var minBitrateBps: Int?
         get() = native.minBitrateBps
+        set(value) {
+            native.minBitrateBps = value
+        }
 
-    actual val maxFramerate: Int?
+    actual var maxFramerate: Int?
         get() = native.maxFramerate
+        set(value) {
+            native.maxFramerate = value
+        }
 
-    actual val numTemporalLayers: Int?
+    actual var numTemporalLayers: Int?
         get() = native.numTemporalLayers
+        set(value) {
+            native.numTemporalLayers = value
+        }
 
-    actual val scaleResolutionDownBy: Double?
+    actual var scaleResolutionDownBy: Double?
         get() = native.scaleResolutionDownBy
+        set(value) {
+            native.scaleResolutionDownBy = value
+        }
 
     actual val ssrc: Long?
         get() = native.ssrc
@@ -97,4 +125,21 @@ actual class RtcpParameters(val native: AndroidRtpParameters.Rtcp) {
 
     actual val reducedSize: Boolean
         get() = native.reducedSize
+}
+
+private fun Priority.toNative(): Int = when (this) {
+    Priority.VeryLow -> org.webrtc.Priority.VERY_LOW
+    Priority.Low -> org.webrtc.Priority.LOW
+    Priority.Medium -> org.webrtc.Priority.MEDIUM
+    Priority.High -> org.webrtc.Priority.HIGH
+}
+
+private fun Int.asCommon(): Priority {
+    return when (this) {
+        org.webrtc.Priority.VERY_LOW -> Priority.VeryLow
+        org.webrtc.Priority.LOW -> Priority.Low
+        org.webrtc.Priority.MEDIUM -> Priority.Medium
+        org.webrtc.Priority.HIGH -> Priority.High
+        else -> throw IllegalArgumentException("Unknown priority: $this")
+    }
 }

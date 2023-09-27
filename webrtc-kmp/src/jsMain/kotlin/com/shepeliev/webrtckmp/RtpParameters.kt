@@ -45,34 +45,86 @@ actual class RtcpParameters(val js: RTCRtcpParameters) {
         get() = js.reducedSize
 }
 
-actual class RtpEncodingParameters {
-    actual val rid: String? = null
-    actual var active: Boolean = false
-    actual val bitratePriority: Double = 0.0
-    actual val networkPriority: Int = -1
-    actual val maxBitrateBps: Int? = null
-    actual val minBitrateBps: Int? = null
-    actual val maxFramerate: Int? = null
-    actual val numTemporalLayers: Int? = null
-    actual val scaleResolutionDownBy: Double? = null
-    actual val ssrc: Long? = null
-
-    fun toJson(): Json = json(
-        "rid" to rid,
-        "active" to active,
-        "bitratePriority" to bitratePriority,
-        "networkPriority" to networkPriority,
-        "maxBitrateBps" to maxBitrateBps,
-        "minBitrateBps" to minBitrateBps,
-        "maxFramerate" to maxFramerate,
-        "numTemporalLayers" to numTemporalLayers,
-        "scaleResolutionDownBy" to scaleResolutionDownBy,
-        "ssrc" to ssrc,
+actual class RtpEncodingParameters(val native: Json) {
+    actual constructor(rid: String?, active: Boolean, scaleResolutionDownBy: Double?) : this(
+        json("rid" to rid, "active" to active, "scaleResolutionDownBy" to scaleResolutionDownBy)
     )
+
+    actual var rid: String?
+        get() = native["rid"] as String?
+        set(value) {
+            native["rid"] = value
+        }
+
+    actual var active: Boolean
+        get() = native["active"] as Boolean
+        set(value) {
+            native["active"] = value
+        }
+
+    actual var bitratePriority: Double
+        get() = 0.0
+        set(value) {
+            // not implemented in js
+        }
+
+
+    actual var networkPriority: Priority
+        get() = (native["priority"] as String?)?.toPriority() ?: Priority.Low
+        set(value) {
+            native["priority"] = value.toJsPriority()
+        }
+
+    actual var maxBitrateBps: Int?
+        get() = native["maxBitrateBps"] as Int?
+        set(value) {
+            native["maxBitrateBps"] = value
+        }
+
+    actual var minBitrateBps: Int?
+        get() = null
+        set(value) {
+            // not implemented in js
+        }
+
+    actual var maxFramerate: Int?
+        get() = native["maxFramerate"] as Int?
+        set(value) {
+            native["maxFramerate"] = value
+        }
+
+    actual var numTemporalLayers: Int?
+        get() = null
+        set(value) {
+            // not implemented in js
+        }
+
+    actual var scaleResolutionDownBy: Double?
+        get() = native["scaleResolutionDownBy"] as Double?
+        set(value) {
+            native["scaleResolutionDownBy"] = value
+        }
+
+    actual val ssrc: Long? get() = native["ssrc"] as Long?
 }
 
 actual class HeaderExtension {
     actual val uri: String = ""
     actual val id: Int = -1
     actual val encrypted: Boolean = false
+}
+
+private fun Priority.toJsPriority(): String = when (this) {
+    Priority.VeryLow -> "very-low"
+    Priority.Low -> "low"
+    Priority.Medium -> "medium"
+    Priority.High -> "high"
+}
+
+private fun String.toPriority(): Priority = when (this) {
+    "very-low" -> Priority.VeryLow
+    "low" -> Priority.Low
+    "medium" -> Priority.Medium
+    "high" -> Priority.High
+    else -> throw IllegalArgumentException("Unknown priority: $this")
 }

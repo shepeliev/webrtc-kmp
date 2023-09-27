@@ -155,7 +155,7 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         require(track is MediaStreamTrackImpl)
 
         val jsStreamIds = streamIds.toTypedArray()
-        val jsSendEncodings = sendEncodings.map { it.toJson() }.toTypedArray()
+        val jsSendEncodings = sendEncodings.map { it.native }.toTypedArray()
         return RtpTransceiver(
             native.addTransceiver(
                 track.native,
