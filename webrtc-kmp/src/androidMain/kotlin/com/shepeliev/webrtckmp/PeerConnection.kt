@@ -214,6 +214,9 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
             else -> null
         }
 
+        localTracks[track.id] = track
+        receiverTrack?.let { remoteTracks[it.id] = receiverTrack }
+
         return RtpTransceiver(nativeTransceiver, track, receiverTrack)
     }
 
