@@ -305,22 +305,18 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         ) {
             val transceiver = native.transceivers.find { it.receiver.id() == receiver.id() } ?: return
 
-            val audioTracks = androidStreams
-                .flatMap { it.audioTracks }
-                .map { remoteTracks.getOrPut(it.id()) { RemoteAudioTrack(it) } }
-
-            val videoTracks = androidStreams
-                .flatMap { it.videoTracks }
-                .map { remoteTracks.getOrPut(it.id()) { RemoteVideoTrack(it) } }
+            val tracks = androidStreams.associate { stream ->
+                stream.id to listOf(
+                    stream.audioTracks.map { remoteTracks.getOrPut(it.id()) { RemoteAudioTrack(it) } },
+                    stream.videoTracks.map { remoteTracks.getOrPut(it.id()) { RemoteVideoTrack(it) } }
+                ).flatten()
+            }
 
             val streams = androidStreams.map { androidStream ->
                 MediaStream(
-                    android = androidStream,
+                    tracks = tracks[androidStream.id] ?: emptyList(),
                     id = androidStream.id,
-                ).also { stream ->
-                    audioTracks.forEach(stream::addTrack)
-                    videoTracks.forEach(stream::addTrack)
-                }
+                )
             }
 
             val senderTrack = localTracks[transceiver.sender.track()?.id()]

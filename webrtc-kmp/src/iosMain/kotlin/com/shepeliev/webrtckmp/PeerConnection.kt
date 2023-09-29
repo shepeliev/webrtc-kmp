@@ -292,21 +292,28 @@ actual class PeerConnection actual constructor(
 
         val iosStreams = streams.map { it as RTCMediaStream }
 
-        val audioTracks = iosStreams
-            .flatMap { it.audioTracks }
-            .map { it as RTCAudioTrack }
-            .map { remoteTracks.getOrPut(it.trackId) { RemoteAudioTrack(it) } }
-
-        val videoTracks = iosStreams
-            .flatMap { it.videoTracks }
-            .map { it as RTCVideoTrack }
-            .map { remoteTracks.getOrPut(it.trackId) { RemoteVideoTrack(it) } }
+        val tracks = iosStreams.associate { stream ->
+            stream.streamId to listOf(
+                stream.audioTracks.map { track ->
+                    {
+                        track as RTCAudioTrack
+                        remoteTracks.getOrPut(track.trackId) { RemoteAudioTrack(track) }
+                    }
+                },
+                stream.videoTracks.map { track ->
+                    track as RTCVideoTrack
+                    remoteTracks.getOrPut(track.trackId) { RemoteVideoTrack(track) }
+                }
+            )
+                .flatten()
+                .map { it as MediaStreamTrack }
+        }
 
         val commonStreams = iosStreams.map { iosStream ->
-            MediaStream(ios = iosStream, id = iosStream.streamId).also { stream ->
-                audioTracks.forEach(stream::addTrack)
-                videoTracks.forEach(stream::addTrack)
-            }
+            MediaStream(
+                tracks = tracks[iosStream.streamId] ?: emptyList(),
+                id = iosStream.streamId,
+            )
         }
 
         val receiverTrack = remoteTracks[didAddReceiver.track?.trackId]

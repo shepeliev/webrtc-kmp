@@ -55,12 +55,7 @@ private object MediaDevicesImpl : MediaDevices {
             videoTrack = LocalVideoTrack(androidTrack, videoCaptureController)
         }
 
-        val localMediaStream =
-            WebRtc.peerConnectionFactory.createLocalMediaStream(UUID.randomUUID().toString())
-        return MediaStream(localMediaStream).apply {
-            if (audioTrack != null) addTrack(audioTrack)
-            if (videoTrack != null) addTrack(videoTrack)
-        }
+        return MediaStream(listOfNotNull(audioTrack, videoTrack))
     }
 
     override suspend fun getDisplayMedia(): MediaStream {

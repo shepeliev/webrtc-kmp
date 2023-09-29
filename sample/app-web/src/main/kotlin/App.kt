@@ -1,4 +1,5 @@
 import com.arkivanov.decompose.value.Value
+import com.shepeliev.webrtckmp.native
 import com.shepeliev.webrtckmp.sample.shared.Room
 import csstype.px
 import emotion.react.css
@@ -65,12 +66,12 @@ val App = FC<AppProps> { props ->
 
     val localVideoRef = useRef<HTMLVideoElement>(null)
     useEffect(roomModel, localVideoRef) {
-        localVideoRef.current?.srcObject = roomModel.localStream?.js
+        localVideoRef.current?.srcObject = roomModel.localStream?.native
     }
 
     val remoteVideoRef = useRef<HTMLVideoElement>(null)
     useEffect {
-        remoteVideoRef.current?.srcObject = roomModel.remoteStream?.js
+        remoteVideoRef.current?.srcObject = roomModel.remoteStream?.native
     }
 
     div {
