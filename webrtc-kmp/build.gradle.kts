@@ -57,6 +57,7 @@ dependencies {
     androidTestImplementation(deps.androidx.test.core)
     androidTestImplementation(deps.androidx.test.runner)
     jsMainImplementation(npm("webrtc-adapter", "8.1.1"))
+    jsMainImplementation(npm("uuid", "9.0.0"))
 }
 
 publishing {
