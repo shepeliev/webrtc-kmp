@@ -19,7 +19,7 @@ private object MediaDevicesImpl : MediaDevices {
             it.constraints
         }
 
-        var audioTrack: AudioStreamTrack? = null
+        var audioTrack: AudioTrack? = null
         if (constraints.audio != null) {
             checkRecordAudioPermission()
             val mediaConstraints = MediaConstraints().apply {
@@ -37,10 +37,10 @@ private object MediaDevicesImpl : MediaDevices {
                 UUID.randomUUID().toString(),
                 audioSource
             )
-            audioTrack = LocalAudioStreamTrack(androidTrack, audioSource, constraints.audio)
+            audioTrack = LocalAudioTrack(androidTrack, audioSource, constraints.audio)
         }
 
-        var videoTrack: LocalVideoStreamTrack? = null
+        var videoTrack: LocalVideoTrack? = null
         if (constraints.video != null) {
             checkCameraPermission()
             val videoSource = WebRtc.peerConnectionFactory.createVideoSource(false)
@@ -52,7 +52,7 @@ private object MediaDevicesImpl : MediaDevices {
                 UUID.randomUUID().toString(),
                 videoSource
             )
-            videoTrack = LocalVideoStreamTrack(androidTrack, videoCaptureController)
+            videoTrack = LocalVideoTrack(androidTrack, videoCaptureController)
         }
 
         val localMediaStream =

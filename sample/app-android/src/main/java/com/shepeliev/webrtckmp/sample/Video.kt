@@ -11,7 +11,7 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import com.shepeliev.webrtckmp.VideoStreamTrack
+import com.shepeliev.webrtckmp.VideoTrack
 import com.shepeliev.webrtckmp.WebRtc
 import org.webrtc.RendererCommon
 import org.webrtc.SurfaceViewRenderer
@@ -19,7 +19,7 @@ import org.webrtc.VideoSink
 
 @Composable
 fun Video(
-    track: VideoStreamTrack,
+    track: VideoTrack,
     modifier: Modifier = Modifier,
     scalingTypeMatchOrientation: RendererCommon.ScalingType = RendererCommon.ScalingType.SCALE_ASPECT_BALANCED,
     scalingTypeMismatchOrientation: RendererCommon.ScalingType = RendererCommon.ScalingType.SCALE_ASPECT_FIT,
@@ -70,12 +70,12 @@ fun Video(
     )
 }
 
-private fun VideoStreamTrack.addSinkCatching(sink: VideoSink) {
+private fun VideoTrack.addSinkCatching(sink: VideoSink) {
     // runCatching as track may be disposed while activity was in pause mode
     runCatching { addSink(sink) }
 }
 
-private fun VideoStreamTrack.removeSinkCatching(sink: VideoSink) {
+private fun VideoTrack.removeSinkCatching(sink: VideoSink) {
     // runCatching as track may be disposed while activity was in pause mode
     runCatching { removeSink(sink) }
 }

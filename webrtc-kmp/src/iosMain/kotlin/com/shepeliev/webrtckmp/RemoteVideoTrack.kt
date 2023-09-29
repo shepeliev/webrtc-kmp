@@ -22,9 +22,9 @@ import platform.darwin.dispatch_source_t
 import platform.darwin.dispatch_time
 import kotlin.native.concurrent.AtomicInt
 
-internal class RemoteVideoStreamTrack internal constructor(
+internal class RemoteVideoTrack internal constructor(
     ios: RTCVideoTrack,
-) : RenderedVideoStreamTrack(ios), VideoStreamTrack {
+) : RenderedVideoTrack(ios), VideoTrack {
     override var shouldReceive: Boolean?
         get() = (native as RTCVideoTrack).shouldReceive
         set(value) { (native as RTCVideoTrack).shouldReceive = checkNotNull(value) }

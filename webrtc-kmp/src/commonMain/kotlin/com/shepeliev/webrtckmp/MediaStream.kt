@@ -10,8 +10,8 @@ expect class MediaStream {
     fun release()
 }
 
-val MediaStream.audioTracks: List<AudioStreamTrack>
-    get() = tracks.mapNotNull { it as? AudioStreamTrack }
+val MediaStream.audioTracks: List<AudioTrack>
+    get() = tracks.mapNotNull { it as? AudioTrack }
 
-val MediaStream.videoTracks: List<VideoStreamTrack>
-    get() = tracks.mapNotNull { it as? VideoStreamTrack }
+val MediaStream.videoTracks: List<VideoTrack>
+    get() = tracks.mapNotNull { it as? VideoTrack }

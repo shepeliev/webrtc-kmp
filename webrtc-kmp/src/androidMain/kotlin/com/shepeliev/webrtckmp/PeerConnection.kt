@@ -209,8 +209,8 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         val nativeTransceiver = native.addTransceiver(track.native, init)
         val nativeReceiverTrack = nativeTransceiver.receiver.track()
         val receiverTrack = when (nativeReceiverTrack?.kind()) {
-            org.webrtc.MediaStreamTrack.VIDEO_TRACK_KIND -> RemoteVideoStreamTrack(nativeReceiverTrack as VideoTrack)
-            org.webrtc.MediaStreamTrack.AUDIO_TRACK_KIND -> RemoteAudioStreamTrack(nativeReceiverTrack as AudioTrack)
+            org.webrtc.MediaStreamTrack.VIDEO_TRACK_KIND -> RemoteVideoTrack(nativeReceiverTrack as VideoTrack)
+            org.webrtc.MediaStreamTrack.AUDIO_TRACK_KIND -> RemoteAudioTrack(nativeReceiverTrack as AudioTrack)
             else -> null
         }
 
@@ -307,11 +307,11 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
 
             val audioTracks = androidStreams
                 .flatMap { it.audioTracks }
-                .map { remoteTracks.getOrPut(it.id()) { RemoteAudioStreamTrack(it) } }
+                .map { remoteTracks.getOrPut(it.id()) { RemoteAudioTrack(it) } }
 
             val videoTracks = androidStreams
                 .flatMap { it.videoTracks }
-                .map { remoteTracks.getOrPut(it.id()) { RemoteVideoStreamTrack(it) } }
+                .map { remoteTracks.getOrPut(it.id()) { RemoteVideoTrack(it) } }
 
             val streams = androidStreams.map { androidStream ->
                 MediaStream(

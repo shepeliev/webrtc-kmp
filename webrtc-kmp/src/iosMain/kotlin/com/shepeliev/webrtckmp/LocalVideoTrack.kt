@@ -1,25 +1,23 @@
 package com.shepeliev.webrtckmp
 
-import org.webrtc.VideoTrack
+import WebRTC.RTCVideoTrack
 
-internal class LocalVideoStreamTrack(
-    android: VideoTrack,
+internal class LocalVideoTrack(
+    ios: RTCVideoTrack,
     private val videoCaptureController: VideoCaptureController,
-) : RenderedVideoStreamTrack(android), VideoStreamTrack {
+) : RenderedVideoTrack(ios), VideoTrack {
     override val settings: MediaTrackSettings get() = videoCaptureController.settings
-
     override var shouldReceive: Boolean?
-        get() = (native as VideoTrack).shouldReceive()
-        set(value) { (native as VideoTrack).setShouldReceive(checkNotNull(value)) }
+        get() = (native as RTCVideoTrack).shouldReceive
+        set(value) { (native as RTCVideoTrack).shouldReceive = checkNotNull(value) }
 
     init {
-        videoCaptureController.videoCapturerErrorListener = VideoCapturerErrorListener { stop() }
         videoCaptureController.startCapture()
     }
 
     override suspend fun switchCamera(deviceId: String?) {
         (videoCaptureController as? CameraVideoCaptureController)?.let { controller ->
-            deviceId?.let { controller.switchCamera(it) } ?: controller.switchCamera()
+            deviceId?.let { controller.switchCamera(deviceId) } ?: controller.switchCamera()
         }
     }
 
@@ -32,6 +30,6 @@ internal class LocalVideoStreamTrack(
     }
 
     override fun onStop() {
-        videoCaptureController.dispose()
+        videoCaptureController.stopCapture()
     }
 }

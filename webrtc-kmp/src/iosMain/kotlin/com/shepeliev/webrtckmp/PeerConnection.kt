@@ -182,8 +182,8 @@ actual class PeerConnection actual constructor(
         val nativeTransceiver = native.addTransceiverWithTrack(track.native, init) ?: error("Failed to add transceiver")
         val nativeReceiverTrack = nativeTransceiver.receiver.track()
         val receiverTrack = when (nativeReceiverTrack?.kind()) {
-            kRTCMediaStreamTrackKindVideo -> RemoteVideoStreamTrack(nativeReceiverTrack as RTCVideoTrack)
-            kRTCMediaStreamTrackKindAudio -> RemoteAudioStreamTrack(nativeReceiverTrack as RTCAudioTrack)
+            kRTCMediaStreamTrackKindVideo -> RemoteVideoTrack(nativeReceiverTrack as RTCVideoTrack)
+            kRTCMediaStreamTrackKindAudio -> RemoteAudioTrack(nativeReceiverTrack as RTCAudioTrack)
             else -> null
         }
 
@@ -295,12 +295,12 @@ actual class PeerConnection actual constructor(
         val audioTracks = iosStreams
             .flatMap { it.audioTracks }
             .map { it as RTCAudioTrack }
-            .map { remoteTracks.getOrPut(it.trackId) { RemoteAudioStreamTrack(it) } }
+            .map { remoteTracks.getOrPut(it.trackId) { RemoteAudioTrack(it) } }
 
         val videoTracks = iosStreams
             .flatMap { it.videoTracks }
             .map { it as RTCVideoTrack }
-            .map { remoteTracks.getOrPut(it.trackId) { RemoteVideoStreamTrack(it) } }
+            .map { remoteTracks.getOrPut(it.trackId) { RemoteVideoTrack(it) } }
 
         val commonStreams = iosStreams.map { iosStream ->
             MediaStream(ios = iosStream, id = iosStream.streamId).also { stream ->

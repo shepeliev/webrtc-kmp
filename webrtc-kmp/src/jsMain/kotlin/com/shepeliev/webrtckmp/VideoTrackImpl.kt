@@ -4,9 +4,9 @@ package com.shepeliev.webrtckmp
 
 import org.w3c.dom.mediacapture.MediaStreamTrack as JsMediaStreamTrack
 
-internal class VideoStreamTrackImpl(
+internal class VideoTrackImpl(
     js: JsMediaStreamTrack
-) : MediaStreamTrackImpl(js), VideoStreamTrack {
+) : MediaStreamTrackImpl(js), VideoTrack {
     override var shouldReceive: Boolean?
         get() = null // undefined in JS
         set(value) {

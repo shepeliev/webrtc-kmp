@@ -54,8 +54,8 @@ abstract class MediaStreamTrackImpl(val native: JsMediaStreamTrack) : MediaStrea
 }
 
 internal fun JsMediaStreamTrack.asCommon(): MediaStreamTrackImpl = when (kind) {
-    "audio" -> AudioStreamTrackImpl(this)
-    "video" -> VideoStreamTrackImpl(this)
+    "audio" -> AudioTrackImpl(this)
+    "video" -> VideoTrackImpl(this)
     else -> error("Unknown kind of media stream track: $kind")
 }
 

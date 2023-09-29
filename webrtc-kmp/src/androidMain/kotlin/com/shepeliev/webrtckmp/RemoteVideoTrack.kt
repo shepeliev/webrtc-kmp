@@ -3,17 +3,17 @@ package com.shepeliev.webrtckmp
 import org.webrtc.Logging
 import org.webrtc.VideoFrame
 import org.webrtc.VideoSink
-import org.webrtc.VideoTrack
 import java.util.Timer
 import java.util.TimerTask
 import java.util.concurrent.atomic.AtomicInteger
+import org.webrtc.VideoTrack as AndroidVideoTrack
 
-internal class RemoteVideoStreamTrack(
-    android: VideoTrack,
-) : RenderedVideoStreamTrack(android), VideoStreamTrack {
+internal class RemoteVideoTrack(
+    native: AndroidVideoTrack,
+) : RenderedVideoTrack(native), VideoTrack {
     override var shouldReceive: Boolean?
-        get() = (native as VideoTrack).shouldReceive()
-        set(value) { (native as VideoTrack).setShouldReceive(checkNotNull(value)) }
+        get() = (native as AndroidVideoTrack).shouldReceive()
+        set(value) { (native as AndroidVideoTrack).setShouldReceive(checkNotNull(value)) }
 
     private val trackMuteDetector = TrackMuteDetector().apply {
         addSink(this)

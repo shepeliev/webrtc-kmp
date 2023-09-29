@@ -21,14 +21,14 @@ private object MediaDevicesImpl : MediaDevices {
             )
             val audioSource = WebRtc.peerConnectionFactory.audioSourceWithConstraints(mediaConstraints)
             val track = WebRtc.peerConnectionFactory.audioTrackWithSource(audioSource, NSUUID.UUID().UUIDString())
-            LocalAudioStreamTrack(track, constraints.audio)
+            LocalAudioTrack(track, constraints.audio)
         }
 
         val videoTrack = constraints.video?.let { videoConstraints ->
             val videoSource = WebRtc.peerConnectionFactory.videoSource()
             val iosVideoTrack = WebRtc.peerConnectionFactory.videoTrackWithSource(videoSource, NSUUID.UUID().UUIDString())
             val videoCaptureController = CameraVideoCaptureController(videoConstraints, videoSource)
-            LocalVideoStreamTrack(iosVideoTrack, videoCaptureController)
+            LocalVideoTrack(iosVideoTrack, videoCaptureController)
         }
 
         val localMediaStream = WebRtc.peerConnectionFactory.mediaStreamWithStreamId(NSUUID.UUID().UUIDString())
