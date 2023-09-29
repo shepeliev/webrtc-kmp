@@ -21,12 +21,27 @@ private object MediaDevicesImpl : MediaDevices {
         return MediaStream(jsStream)
     }
 
-    override suspend fun getDisplayMedia(): MediaStream {
+    override suspend fun getDisplayMedia(
+        token: ScreenCaptureToken?,
+        streamConstraints: (MediaStreamConstraintsBuilder.() -> Unit)?,
+    ): MediaStream {
         if (!supportsDisplayMedia()) {
             error("getDisplayMedia is not supported in this environment")
         }
 
-        val jsStream = window.navigator.mediaDevices.getDisplayMedia().await()
+        val constraints = if (streamConstraints != null) {
+            MediaStreamConstraintsBuilder().let {
+                streamConstraints(it)
+                it.constraints
+            }
+        } else {
+            undefined
+        }
+
+        val jsStream = constraints
+            ?.let { window.navigator.mediaDevices.getDisplayMedia(it.toJson()).await() }
+            ?: window.navigator.mediaDevices.getDisplayMedia().await()
+
         return MediaStream(jsStream)
     }
 
@@ -109,3 +124,5 @@ private object MediaDevicesImpl : MediaDevices {
         return json(*values)
     }
 }
+
+actual typealias ScreenCaptureToken = Any

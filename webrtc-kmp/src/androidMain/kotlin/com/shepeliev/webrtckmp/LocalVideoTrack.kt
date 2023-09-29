@@ -13,8 +13,10 @@ internal class LocalVideoTrack(
         set(value) { (native as AndroidVideoTrack).setShouldReceive(checkNotNull(value)) }
 
     init {
-        videoCaptureController.videoCapturerErrorListener = VideoCapturerErrorListener { stop() }
-        videoCaptureController.startCapture()
+        videoCaptureController.videoCapturerStopListener = VideoCapturerStopListener { stop() }
+        if (native.enabled()) {
+            videoCaptureController.startCapture()
+        }
     }
 
     override suspend fun switchCamera(deviceId: String?) {

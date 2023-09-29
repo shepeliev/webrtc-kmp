@@ -14,7 +14,10 @@ interface MediaDevices {
         }
     }
 
-    suspend fun getDisplayMedia(): MediaStream
+    suspend fun getDisplayMedia(
+        token: ScreenCaptureToken? = null,
+        streamConstraints: (MediaStreamConstraintsBuilder.() -> Unit)? = null,
+    ): MediaStream
 
     suspend fun supportsDisplayMedia(): Boolean
 
@@ -22,6 +25,8 @@ interface MediaDevices {
 
     companion object : MediaDevices by mediaDevices
 }
+
+expect class ScreenCaptureToken
 
 internal expect val mediaDevices: MediaDevices
 

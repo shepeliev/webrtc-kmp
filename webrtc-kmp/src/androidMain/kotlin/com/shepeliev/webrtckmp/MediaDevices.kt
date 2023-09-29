@@ -3,6 +3,7 @@
 package com.shepeliev.webrtckmp
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
 import org.webrtc.Camera2Enumerator
@@ -45,8 +46,8 @@ private object MediaDevicesImpl : MediaDevices {
             checkCameraPermission()
             val videoSource = WebRtc.peerConnectionFactory.createVideoSource(false)
             val videoCaptureController = CameraVideoCaptureController(
-                constraints.video,
-                videoSource
+                videoSource,
+                constraints.video
             )
             val androidTrack = WebRtc.peerConnectionFactory.createVideoTrack(
                 UUID.randomUUID().toString(),
@@ -58,11 +59,31 @@ private object MediaDevicesImpl : MediaDevices {
         return MediaStream(listOfNotNull(audioTrack, videoTrack))
     }
 
-    override suspend fun getDisplayMedia(): MediaStream {
-        TODO("Not yet implemented for Android platform")
+    override suspend fun getDisplayMedia(
+        token: ScreenCaptureToken?,
+        streamConstraints: (MediaStreamConstraintsBuilder.() -> Unit)?,
+    ): MediaStream {
+        checkNotNull(token) { "token must not be null" }
+
+        val constraints = if (streamConstraints != null) {
+            MediaStreamConstraintsBuilder().let {
+                streamConstraints(it)
+                it.constraints
+            }
+        } else {
+            MediaStreamConstraints()
+        }
+
+        val videoSource = WebRtc.peerConnectionFactory.createVideoSource(true)
+        val videoCaptureController = ScreencastVideoCaptureController(videoSource, constraints.video, token)
+        val androidTrack = WebRtc.peerConnectionFactory.createVideoTrack(UUID.randomUUID().toString(), videoSource)
+            .apply { setEnabled(false) }
+        val videoTrack = LocalVideoTrack(androidTrack, videoCaptureController)
+
+        return MediaStream(listOf(videoTrack))
     }
 
-    override suspend fun supportsDisplayMedia(): Boolean = false
+    override suspend fun supportsDisplayMedia(): Boolean = true
 
     private fun checkRecordAudioPermission() {
         val result = ContextCompat.checkSelfPermission(
@@ -91,3 +112,5 @@ private object MediaDevicesImpl : MediaDevices {
         }
     }
 }
+
+actual typealias ScreenCaptureToken = Intent
