@@ -16,32 +16,37 @@ object WebRtc {
 
     var peerConnectionFactoryInitOptions: PeerConnectionFactory.InitializationOptions? = null
         set(value) {
-            field = value
-            if (_eglBase != null) {
+            if (_peerConnectionFactory != null) {
                 Logging.e(
                     TAG,
                     "Peer connection factory is already initialized. Setting " +
                         "peerConnectionFactoryInitOptions after initialization has no effect."
                 )
+            } else {
+                field = value
             }
         }
 
-    var peerConnectionFactoryBuilder: PeerConnectionFactory.Builder? = null
+    var peerConnectionFactoryBuilder: () -> PeerConnectionFactory.Builder = ::getDefaultPeerConnectionBuilder
         set(value) {
-            field = value
             if (_peerConnectionFactory != null) {
                 Logging.e(
                     TAG,
                     "Peer connection factory is already initialized. Setting " +
                         "peerConnectionFactoryBuilder after initialization has no effect."
                 )
+            } else {
+                field = value
             }
         }
 
     private var _eglBase: EglBase? = null
     val rootEglBase: EglBase
         get() {
-            if (_eglBase == null) initialize()
+            if (_eglBase == null) {
+                initializePeerConnectionFactory()
+                _eglBase = EglBase.create()
+            }
             return checkNotNull(_eglBase)
         }
 
@@ -55,21 +60,18 @@ object WebRtc {
     private var _peerConnectionFactory: PeerConnectionFactory? = null
     internal val peerConnectionFactory: PeerConnectionFactory
         get() {
-            if (_peerConnectionFactory == null) initialize()
+            if (_peerConnectionFactory == null) createPeerConnectionFactory()
             return checkNotNull(_peerConnectionFactory)
         }
 
-    private fun initialize() {
-        check(_eglBase == null) { "Peer connection factory is already initialized." }
-        _eglBase = EglBase.create()
-        initializePeerConnectionFactory()
-        val builder = peerConnectionFactoryBuilder ?: getDefaultPeerConnectionBuilder()
+    private fun createPeerConnectionFactory() {
+        check(_peerConnectionFactory == null) { "Peer connection factory is already initialized." }
+        val builder = peerConnectionFactoryBuilder()
         _peerConnectionFactory = builder.createPeerConnectionFactory()
     }
 
     private fun initializePeerConnectionFactory() {
-        val initOptions = peerConnectionFactoryInitOptions
-            ?: getDefaultPeerConnectionFactoryInitOptions()
+        val initOptions = peerConnectionFactoryInitOptions ?: getDefaultPeerConnectionFactoryInitOptions()
         PeerConnectionFactory.initialize(initOptions)
     }
 
@@ -91,6 +93,7 @@ object WebRtc {
             .setVideoDecoderFactory(videoDecoderFactory)
     }
 
+    @Suppress("unused")
     fun disposePeerConnectionFactory() {
         if (_peerConnectionFactory == null) return
 
