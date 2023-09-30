@@ -6,18 +6,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import org.webrtc.Logging
 import org.webrtc.MediaStreamTrack as AndroidMediaStreamTrack
 
-abstract class MediaStreamTrackImpl(
-    val native: AndroidMediaStreamTrack
-) : MediaStreamTrack {
-
-    override val id: String
-        get() = native.id()
-
-    override val kind: MediaStreamTrackKind
-        get() = native.kind().toMediaStreamTrackKind()
+abstract class MediaStreamTrackImpl(val native: AndroidMediaStreamTrack) : MediaStreamTrack {
+    override val id: String = native.id()
+    override val kind: MediaStreamTrackKind = native.kind().toMediaStreamTrackKind()
 
     override val label: String
         get() = when (kind) {
@@ -28,16 +21,14 @@ abstract class MediaStreamTrackImpl(
         }
 
     override var enabled: Boolean
-        get() = runCatching { native.enabled() }
-            .onFailure { Logging.e(TAG, "Getting native MediaStreamTrack state failed", it) }
-            .getOrDefault(false)
+        // catch IllegalStateException just in case the native track is already disposed
+        get() = runCatching { native.enabled() }.getOrDefault(false)
         set(value) {
             runCatching {
                 if (value == native.enabled()) return
                 native.setEnabled(value)
                 onSetEnabled(value)
             }
-                .onFailure { Logging.e(TAG, "Setting native MediaStreamTrack state failed", it) }
         }
 
     private val _state = MutableStateFlow(getInitialState())
@@ -65,7 +56,8 @@ abstract class MediaStreamTrackImpl(
     protected open fun onStop() {}
 
     private fun getInitialState(): MediaStreamTrackState {
-        return when (checkNotNull(native.state())) {
+        val nativeState = runCatching { native.state() }.getOrDefault(AndroidMediaStreamTrack.State.ENDED)
+        return when (checkNotNull(nativeState)) {
             AndroidMediaStreamTrack.State.LIVE -> MediaStreamTrackState.Live(muted = false)
             AndroidMediaStreamTrack.State.ENDED -> MediaStreamTrackState.Live(muted = false)
         }

@@ -11,16 +11,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 abstract class MediaStreamTrackImpl(val native: RTCMediaStreamTrack) : MediaStreamTrack {
-
-    override val id: String
-        get() = native.trackId
-
-    override val kind: MediaStreamTrackKind
-        get() = when (native.kind()) {
-            kRTCMediaStreamTrackKindAudio -> MediaStreamTrackKind.Audio
-            kRTCMediaStreamTrackKindVideo -> MediaStreamTrackKind.Video
-            else -> error("Unknown track kind: ${native.kind()}")
-        }
+    override val id: String = native.trackId
+    override val kind: MediaStreamTrackKind = native.kind().toMediaStreamTrackKind()
 
     override val label: String
         get() = when (kind) {
@@ -81,4 +73,10 @@ internal fun MediaStreamTrackKind.asNative(): RTCRtpMediaType = when (this) {
     MediaStreamTrackKind.Audio -> RTCRtpMediaType.RTCRtpMediaTypeAudio
     MediaStreamTrackKind.Video -> RTCRtpMediaType.RTCRtpMediaTypeVideo
     MediaStreamTrackKind.Data -> RTCRtpMediaType.RTCRtpMediaTypeData
+}
+
+internal fun String.toMediaStreamTrackKind(): MediaStreamTrackKind = when (this) {
+    kRTCMediaStreamTrackKindAudio -> MediaStreamTrackKind.Audio
+    kRTCMediaStreamTrackKindVideo -> MediaStreamTrackKind.Video
+    else -> error("Unknown track kind: $this")
 }
