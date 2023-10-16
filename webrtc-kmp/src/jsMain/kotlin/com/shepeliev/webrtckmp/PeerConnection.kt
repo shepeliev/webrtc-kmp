@@ -17,23 +17,23 @@ import kotlin.js.json
 
 actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguration) {
 
-    val js: RTCPeerConnection
+    val native: RTCPeerConnection
 
-    actual val localDescription: SessionDescription? get() = js.localDescription?.asCommon()
+    actual val localDescription: SessionDescription? get() = native.localDescription?.asCommon()
 
-    actual val remoteDescription: SessionDescription? get() = js.remoteDescription?.asCommon()
+    actual val remoteDescription: SessionDescription? get() = native.remoteDescription?.asCommon()
 
     actual val signalingState: SignalingState
-        get() = js.signalingState.toSignalingState()
+        get() = native.signalingState.toSignalingState()
 
     actual val iceConnectionState: IceConnectionState
-        get() = js.iceConnectionState.toIceConnectionState()
+        get() = native.iceConnectionState.toIceConnectionState()
 
     actual val connectionState: PeerConnectionState
-        get() = js.connectionState.toPeerConnectionState()
+        get() = native.connectionState.toPeerConnectionState()
 
     actual val iceGatheringState: IceGatheringState
-        get() = js.iceGatheringState.toIceGatheringState()
+        get() = native.iceGatheringState.toIceGatheringState()
 
     private val _peerConnectionEvent =
         MutableSharedFlow<PeerConnectionEvent>(extraBufferCapacity = FLOW_BUFFER_CAPACITY)
@@ -42,7 +42,7 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
     init {
         WebRtcAdapter
 
-        js = RTCPeerConnection(rtcConfiguration.js).apply {
+        native = RTCPeerConnection(rtcConfiguration.js).apply {
             onsignalingstatechange = {
                 _peerConnectionEvent.tryEmit(SignalingStateChange(this@PeerConnection.signalingState))
             }
@@ -95,34 +95,34 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
                 )
             )
         }
-        return js.createDataChannel(label, options)?.let { DataChannel(it) }
+        return native.createDataChannel(label, options)?.let { DataChannel(it) }
     }
 
     actual suspend fun createOffer(options: OfferAnswerOptions): SessionDescription {
-        val sessionDescription = js.createOffer(options.toJson()).await()
+        val sessionDescription = native.createOffer(options.toJson()).await()
         return sessionDescription.asCommon()
     }
 
     actual suspend fun createAnswer(options: OfferAnswerOptions): SessionDescription {
-        val sessionDescription = js.createAnswer(options.toJson()).await()
+        val sessionDescription = native.createAnswer(options.toJson()).await()
         return sessionDescription.asCommon()
     }
 
     actual suspend fun setLocalDescription(description: SessionDescription) {
-        js.setLocalDescription(description.asJs()).await()
+        native.setLocalDescription(description.asJs()).await()
     }
 
     actual suspend fun setRemoteDescription(description: SessionDescription) {
-        js.setRemoteDescription(description.asJs()).await()
+        native.setRemoteDescription(description.asJs()).await()
     }
 
     actual fun setConfiguration(configuration: RtcConfiguration): Boolean {
-        js.setConfiguration(configuration.js)
+        native.setConfiguration(configuration.js)
         return true
     }
 
     actual fun addIceCandidate(candidate: IceCandidate): Boolean {
-        js.addIceCandidate(candidate.js)
+        native.addIceCandidate(candidate.js)
         return true
     }
 
@@ -131,23 +131,45 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         return true
     }
 
-    actual fun getSenders(): List<RtpSender> = js.getSenders().map { RtpSender(it) }
+    actual fun getSenders(): List<RtpSender> = native.getSenders().map { RtpSender(it) }
 
-    actual fun getReceivers(): List<RtpReceiver> = js.getReceivers().map { RtpReceiver(it) }
+    actual fun getReceivers(): List<RtpReceiver> = native.getReceivers().map { RtpReceiver(it) }
 
     actual fun getTransceivers(): List<RtpTransceiver> {
-        return js.getTransceivers().map { RtpTransceiver(it) }
+        return native.getTransceivers().map { RtpTransceiver(it) }
     }
 
     actual fun addTrack(track: MediaStreamTrack, vararg streams: MediaStream): RtpSender {
         require(track is MediaStreamTrackImpl)
 
-        val jsStreams = streams.map { it.js }.toTypedArray()
-        return RtpSender(js.addTrack(track.js, *jsStreams))
+        val jsStreams = streams.map { (it as MediaStreamImpl).native }.toTypedArray()
+        return RtpSender(native.addTrack(track.native, *jsStreams))
+    }
+
+    actual fun addTransceiver(
+        track: MediaStreamTrack,
+        direction: RtpTransceiverDirection,
+        streamIds: List<String>,
+        sendEncodings: List<RtpEncodingParameters>,
+    ): RtpTransceiver {
+        require(track is MediaStreamTrackImpl)
+
+        val jsStreamIds = streamIds.toTypedArray()
+        val jsSendEncodings = sendEncodings.map { it.native }.toTypedArray()
+        return RtpTransceiver(
+            native.addTransceiver(
+                track.native,
+                json(
+                    "direction" to direction.toCanonicalForm(),
+                    "streams" to jsStreamIds,
+                    "sendEncodings" to jsSendEncodings
+                )
+            )
+        )
     }
 
     actual fun removeTrack(sender: RtpSender): Boolean {
-        js.removeTrack(sender.js)
+        native.removeTrack(sender.native)
         return true
     }
 
@@ -156,8 +178,18 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         return null
     }
 
+    actual suspend fun getStats(sender: RtpSender): RtcStatsReport? {
+        // TODO implement
+        return null
+    }
+
+    actual suspend fun getStats(receiver: RtpReceiver): RtcStatsReport? {
+        // TODO implement
+        return null
+    }
+
     actual fun close() {
-        js.close()
+        native.close()
     }
 
     private fun OfferAnswerOptions.toJson(): Json {

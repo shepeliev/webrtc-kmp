@@ -1,4 +1,5 @@
 @file:JvmName("AndroidPeerConnection")
+@file:Suppress("unused")
 
 package com.shepeliev.webrtckmp
 
@@ -71,6 +72,13 @@ expect class PeerConnection(rtcConfiguration: RtcConfiguration = RtcConfiguratio
      */
     fun addTrack(track: MediaStreamTrack, vararg streams: MediaStream): RtpSender
 
+    fun addTransceiver(
+        track: MediaStreamTrack,
+        direction: RtpTransceiverDirection = RtpTransceiverDirection.SendRecv,
+        streamIds: List<String> = emptyList(),
+        sendEncodings: List<RtpEncodingParameters> = emptyList(),
+    ): RtpTransceiver
+
     /**
      * Stops sending media from sender. The sender will still appear in getSenders. Future
      * calls to createOffer will mark the m section for the corresponding transceiver as
@@ -82,6 +90,8 @@ expect class PeerConnection(rtcConfiguration: RtcConfiguration = RtcConfiguratio
      * Gets stats using the new stats collection API, see webrtc/api/stats/.
      */
     suspend fun getStats(): RtcStatsReport?
+    suspend fun getStats(sender: RtpSender): RtcStatsReport?
+    suspend fun getStats(receiver: RtpReceiver): RtcStatsReport?
 
     /**
      * Free native resources associated with this PeerConnection instance.
@@ -227,3 +237,5 @@ enum class IceConnectionState {
 enum class PeerConnectionState { New, Connecting, Connected, Disconnected, Failed, Closed; }
 
 enum class IceGatheringState { New, Gathering, Complete }
+
+enum class ContinualGatheringPolicy { GatherOnce, GatherContinually }

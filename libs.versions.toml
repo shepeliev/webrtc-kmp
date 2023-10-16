@@ -6,7 +6,7 @@ androidxCompose = "1.4.3"
 decompose = "1.0.0-alpha-01"
 
 [libraries]
-webrtcSdk = "io.github.webrtc-sdk:android:114.5735.02"
+webrtcSdk = "io.github.webrtc-sdk:android:114.5735.05"
 
 kotlin-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinCoroutines" }
 kotlin-coroutinesPlayServices = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlinCoroutines" }

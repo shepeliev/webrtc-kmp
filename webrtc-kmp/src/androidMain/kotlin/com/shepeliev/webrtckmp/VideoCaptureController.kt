@@ -1,18 +1,21 @@
 package com.shepeliev.webrtckmp
 
-import org.webrtc.Size
 import org.webrtc.SurfaceTextureHelper
 import org.webrtc.VideoCapturer
 import org.webrtc.VideoSource
 
-internal abstract class VideoCaptureController(private val videoSource: VideoSource) {
+@Suppress("unused")
+internal abstract class VideoCaptureController(
+    private val videoSource: VideoSource,
+    settings: MediaTrackSettings,
+) {
     val isScreencast: Boolean
         get() = videoCapturer.isScreencast
 
-    var settings: MediaTrackSettings = MediaTrackSettings()
+    var settings: MediaTrackSettings = settings
         protected set
 
-    var videoCapturerErrorListener: VideoCapturerErrorListener = VideoCapturerErrorListener { }
+    var videoCapturerStopListener: VideoCapturerStopListener = VideoCapturerStopListener { }
 
     protected val videoCapturer: VideoCapturer by lazy { createVideoCapturer() }
     private var textureHelper: SurfaceTextureHelper? = null
@@ -20,27 +23,12 @@ internal abstract class VideoCaptureController(private val videoSource: VideoSou
 
     abstract fun createVideoCapturer(): VideoCapturer
 
-    abstract fun selectVideoSize(): Size
-
-    abstract fun selectFps(): Int
-
     fun startCapture() {
         check(!disposed) { "Video capturer disposed" }
         check(textureHelper == null) { "Video capturer already started" }
         textureHelper = SurfaceTextureHelper.create("VideoCapturerTextureHelper", WebRtc.rootEglBase.eglBaseContext)
-        videoCapturer.initialize(
-            textureHelper,
-            ApplicationContextHolder.context,
-            videoSource.capturerObserver
-        )
-        val size = selectVideoSize()
-        val fps = selectFps()
-        settings = settings.copy(
-            width = size.width,
-            height = size.height,
-            frameRate = fps.toDouble()
-        )
-        videoCapturer.startCapture(size.width, size.height, fps)
+        videoCapturer.initialize(textureHelper, ApplicationContextHolder.context, videoSource.capturerObserver)
+        videoCapturer.startCapture(settings.width!!, settings.height!!, settings.frameRate!!.toInt())
     }
 
     fun stopCapture() {
@@ -59,6 +47,6 @@ internal abstract class VideoCaptureController(private val videoSource: VideoSou
     }
 }
 
-fun interface VideoCapturerErrorListener {
-    fun onError(error: String)
+fun interface VideoCapturerStopListener {
+    fun onStop(reason: String)
 }

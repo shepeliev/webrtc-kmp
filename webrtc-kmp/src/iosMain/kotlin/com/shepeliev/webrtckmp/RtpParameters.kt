@@ -1,10 +1,12 @@
 package com.shepeliev.webrtckmp
 
+import WebRTC.RTCPriority
 import WebRTC.RTCRtcpParameters
 import WebRTC.RTCRtpCodecParameters
 import WebRTC.RTCRtpEncodingParameters
 import WebRTC.RTCRtpHeaderExtension
 import WebRTC.RTCRtpParameters
+import platform.Foundation.NSNumber
 
 actual class RtpParameters(val native: RTCRtpParameters) {
     actual val codecs: List<RtpCodecParameters>
@@ -41,38 +43,70 @@ actual class RtpCodecParameters(val native: RTCRtpCodecParameters) {
 }
 
 actual class RtpEncodingParameters(val native: RTCRtpEncodingParameters) {
-    actual val rid: String?
+    actual constructor(rid: String?, active: Boolean, scaleResolutionDownBy: Double?) : this(
+        RTCRtpEncodingParameters().apply {
+            this.rid = rid
+            this.isActive = active
+            this.scaleResolutionDownBy =  scaleResolutionDownBy?.let { NSNumber(it) }
+        }
+    )
+
+    actual var rid: String?
         get() = native.rid
+        set(value) {
+            native.rid = value
+        }
 
-    actual val active: Boolean
+    actual var active: Boolean
         get() = native.isActive
-
-    actual val bitratePriority: Double
-        get() {
-            // not implemented
-            return 0.0
+        set(value) {
+            native.isActive = value
         }
 
-    actual val networkPriority: Int
+    actual var bitratePriority: Double
         get() {
             // not implemented
-            return 0
+            return native.bitratePriority
+        }
+        set(value) {
+            native.bitratePriority = value
         }
 
-    actual val maxBitrateBps: Int?
+    actual var networkPriority: Priority
+        get() = native.networkPriority.toPriority()
+        set(value) {
+            native.networkPriority = value.toRTCPriority()
+        }
+
+    actual var maxBitrateBps: Int?
         get() = native.maxBitrateBps?.intValue
+        set(value) {
+            native.maxBitrateBps = value?.let { NSNumber(it) }
+        }
 
-    actual val minBitrateBps: Int?
+    actual var minBitrateBps: Int?
         get() = native.minBitrateBps?.intValue
+        set(value) {
+            native.minBitrateBps = value?.let { NSNumber(it) }
+        }
 
-    actual val maxFramerate: Int?
+    actual var maxFramerate: Int?
         get() = native.maxFramerate?.intValue
+        set(value) {
+            native.maxFramerate = value?.let { NSNumber(it) }
+        }
 
-    actual val numTemporalLayers: Int?
+    actual var numTemporalLayers: Int?
         get() = native.numTemporalLayers?.intValue
+        set(value) {
+            native.numTemporalLayers = value?.let { NSNumber(it) }
+        }
 
-    actual val scaleResolutionDownBy: Double?
+    actual var scaleResolutionDownBy: Double?
         get() = native.scaleResolutionDownBy?.doubleValue
+        set(value) {
+            native.scaleResolutionDownBy = value?.let { NSNumber(it) }
+        }
 
     actual val ssrc: Long?
         get() = native.ssrc?.longValue
@@ -95,4 +129,19 @@ actual class RtcpParameters(val native: RTCRtcpParameters) {
 
     actual val reducedSize: Boolean
         get() = native.isReducedSize
+}
+
+private fun Priority.toRTCPriority(): RTCPriority = when (this) {
+    Priority.VeryLow -> RTCPriority.RTCPriorityVeryLow
+    Priority.Low -> RTCPriority.RTCPriorityLow
+    Priority.Medium -> RTCPriority.RTCPriorityMedium
+    Priority.High -> RTCPriority.RTCPriorityHigh
+}
+
+private fun RTCPriority.toPriority(): Priority = when (this) {
+    RTCPriority.RTCPriorityVeryLow -> Priority.VeryLow
+    RTCPriority.RTCPriorityLow -> Priority.Low
+    RTCPriority.RTCPriorityMedium -> Priority.Medium
+    RTCPriority.RTCPriorityHigh -> Priority.High
+    else -> throw IllegalArgumentException("Unknown RTCPriority: $this")
 }

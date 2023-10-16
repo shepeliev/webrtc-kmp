@@ -1,22 +1,30 @@
 package com.shepeliev.webrtckmp
 
-import kotlinx.coroutines.await
-
-actual class RtpSender(val js: RTCRtpSender) {
+actual class RtpSender(val native: RTCRtpSender) {
     actual val id: String
         get() = track?.id ?: ""
 
     actual val track: MediaStreamTrack?
-        get() = js.track?.asCommon()
+        get() = native.track?.asCommon()
 
     actual var parameters: RtpParameters
-        get() = RtpParameters(js.getParameters())
-        set(value) = js.setParameters(value.js)
+        get() = RtpParameters(native.getParameters())
+        set(value) = native.setParameters(value.js)
 
     actual val dtmf: DtmfSender?
-        get() = js.dtmf?.let { DtmfSender(it) }
+        get() = native.dtmf?.let { DtmfSender(it) }
 
-    actual suspend fun replaceTrack(track: MediaStreamTrack?) {
-        js.replaceTrack((track as? MediaStreamTrackImpl)?.js).await()
+    actual fun replaceTrack(track: MediaStreamTrack?) {
+        native.replaceTrack((track as? MediaStreamTrackImpl)?.native)
+    }
+
+    actual fun getCapabilities(kind: MediaStreamTrackKind): RtpCapabilities? {
+        require(kind in listOf(MediaStreamTrackKind.Audio, MediaStreamTrackKind.Video)) {
+            "Unsupported track kind: $kind"
+        }
+
+        native.getCapabilities(kind.asNative()).let {
+            return RtpCapabilities(it, kind)
+        }
     }
 }

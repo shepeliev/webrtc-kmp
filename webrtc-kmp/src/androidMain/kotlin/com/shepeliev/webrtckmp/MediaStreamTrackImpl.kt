@@ -8,33 +8,27 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import org.webrtc.MediaStreamTrack as AndroidMediaStreamTrack
 
-internal abstract class MediaStreamTrackImpl(
-    val android: AndroidMediaStreamTrack
-) : MediaStreamTrack {
-
-    override val id: String
-        get() = android.id()
-
-    override val kind: MediaStreamTrackKind
-        get() = when (android.kind()) {
-            AndroidMediaStreamTrack.AUDIO_TRACK_KIND -> MediaStreamTrackKind.Audio
-            AndroidMediaStreamTrack.VIDEO_TRACK_KIND -> MediaStreamTrackKind.Video
-            else -> error("Unknown track kind: ${android.kind()}")
-        }
+abstract class MediaStreamTrackImpl(val native: AndroidMediaStreamTrack) : MediaStreamTrack {
+    override val id: String = native.id()
+    override val kind: MediaStreamTrackKind = native.kind().toMediaStreamTrackKind()
 
     override val label: String
         get() = when (kind) {
             // TODO(shepeliev): get real capturing device (front/back camera, internal microphone, headset)
             MediaStreamTrackKind.Audio -> "microphone"
             MediaStreamTrackKind.Video -> "camera"
+            MediaStreamTrackKind.Data -> "data"
         }
 
     override var enabled: Boolean
-        get() = android.enabled()
+        // catch IllegalStateException just in case the native track is already disposed
+        get() = runCatching { native.enabled() }.getOrDefault(false)
         set(value) {
-            if (value == android.enabled()) return
-            android.setEnabled(value)
-            onSetEnabled(value)
+            runCatching {
+                if (value == native.enabled()) return
+                native.setEnabled(value)
+                onSetEnabled(value)
+            }
         }
 
     private val _state = MutableStateFlow(getInitialState())
@@ -62,9 +56,24 @@ internal abstract class MediaStreamTrackImpl(
     protected open fun onStop() {}
 
     private fun getInitialState(): MediaStreamTrackState {
-        return when (checkNotNull(android.state())) {
+        val nativeState = runCatching { native.state() }.getOrDefault(AndroidMediaStreamTrack.State.ENDED)
+        return when (checkNotNull(nativeState)) {
             AndroidMediaStreamTrack.State.LIVE -> MediaStreamTrackState.Live(muted = false)
             AndroidMediaStreamTrack.State.ENDED -> MediaStreamTrackState.Live(muted = false)
         }
     }
 }
+
+internal fun String.toMediaStreamTrackKind(): MediaStreamTrackKind = when (this) {
+    AndroidMediaStreamTrack.AUDIO_TRACK_KIND -> MediaStreamTrackKind.Audio
+    AndroidMediaStreamTrack.VIDEO_TRACK_KIND -> MediaStreamTrackKind.Video
+    else -> error("Unknown track kind: $this")
+}
+
+internal fun MediaStreamTrackKind.asNative(): org.webrtc.MediaStreamTrack.MediaType = when (this) {
+    MediaStreamTrackKind.Audio -> org.webrtc.MediaStreamTrack.MediaType.MEDIA_TYPE_AUDIO
+    MediaStreamTrackKind.Video -> org.webrtc.MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO
+    MediaStreamTrackKind.Data -> error("Data track is not supported on Android")
+}
+
+private const val TAG = "MediaStreamTrackImpl"

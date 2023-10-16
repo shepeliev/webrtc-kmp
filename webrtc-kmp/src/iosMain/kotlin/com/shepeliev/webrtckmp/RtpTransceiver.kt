@@ -37,6 +37,10 @@ actual class RtpTransceiver(
     actual val stopped: Boolean
         get() = native.isStopped
 
+    actual fun setCodecPreferences(capabilities: List<RtpCapabilities.CodecCapability>) {
+        native.setCodecPreferences(capabilities.map { it.native })
+    }
+
     actual fun stop() = native.stopInternal()
 }
 

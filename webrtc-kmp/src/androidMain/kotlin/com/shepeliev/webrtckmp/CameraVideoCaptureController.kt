@@ -11,76 +11,17 @@ import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 internal class CameraVideoCaptureController(
-    private val constraints: MediaTrackConstraints,
     videoSource: VideoSource,
-) : VideoCaptureController(videoSource) {
-    private val enumerator = WebRtc.cameraEnumerator
+    constraints: MediaTrackConstraints,
+) : VideoCaptureController(videoSource, CameraCapturerHelper.buildMediaTrackSettings(constraints)) {
     private var pendingDeviceId: String? = null
 
     override fun createVideoCapturer(): VideoCapturer {
-        selectDevice()
-        return enumerator.createCapturer(
-            checkNotNull(settings.deviceId),
-            CameraEventsHandler()
-        )
-    }
-
-    private fun selectDevice() {
-        val isFrontFacing = constraints.facingMode?.value != FacingMode.Environment
-
-        val searchCriteria: (String) -> Boolean = if (constraints.deviceId != null) {
-            { it == constraints.deviceId }
-        } else {
-            { enumerator.isFrontFacing(it) == isFrontFacing }
-        }
-
-        val deviceId = enumerator.deviceNames.firstOrNull(searchCriteria)
-            ?: throw CameraVideoCapturerException.notFound(constraints)
-
-        settings = settings.copy(
-            deviceId = deviceId,
-
-            facingMode = (
-                if (isFrontFacing) {
-                    FacingMode.User
-                } else {
-                    FacingMode.Environment
-                }
-                )
-        )
-    }
-
-    override fun selectVideoSize(): Size {
-        val requestedWidth = constraints.width?.value ?: DEFAULT_VIDEO_WIDTH
-        val requestedHeight = constraints.height?.value ?: DEFAULT_VIDEO_HEIGHT
-        val formats = enumerator.getSupportedFormats(checkNotNull(settings.deviceId))
-        val sizes = formats?.map { Size(it.width, it.height) } ?: emptyList()
-        if (sizes.isEmpty()) throw CameraVideoCapturerException.notFound(constraints)
-
-        return CameraEnumerationAndroid.getClosestSupportedSize(
-            sizes,
-            requestedWidth,
-            requestedHeight
-        )
-    }
-
-    override fun selectFps(): Int {
-        val requestedFps = constraints.frameRate?.value ?: DEFAULT_FRAME_RATE
-        val formats = enumerator.getSupportedFormats(checkNotNull(settings.deviceId))
-        val frameRates = formats?.map { it.framerate } ?: emptyList()
-        if (frameRates.isEmpty()) throw CameraVideoCapturerException.notFound(constraints)
-
-        val requestedFpsInt = requestedFps.toInt()
-        val range = CameraEnumerationAndroid.getClosestSupportedFramerateRange(
-            frameRates,
-            requestedFpsInt
-        )
-
-        return requestedFpsInt.coerceIn(range.min / 1000, range.max / 1000)
+        return WebRtc.cameraEnumerator.createCapturer(checkNotNull(settings.deviceId), CameraEventsHandler())
     }
 
     suspend fun switchCamera() {
-        val deviceNames = enumerator.deviceNames
+        val deviceNames = WebRtc.cameraEnumerator.deviceNames
         if (deviceNames.size < 2) {
             throw CameraVideoCapturerException("Can't switch camera. No other camera available.")
         }
@@ -125,15 +66,15 @@ internal class CameraVideoCaptureController(
 
     private inner class CameraEventsHandler : CameraVideoCapturer.CameraEventsHandler {
         override fun onCameraError(errorDescription: String) {
-            videoCapturerErrorListener.onError("Error: $errorDescription")
+            videoCapturerStopListener.onStop("Error: $errorDescription")
         }
 
         override fun onCameraDisconnected() {
-            videoCapturerErrorListener.onError("Camera disconnected")
+            videoCapturerStopListener.onStop("Camera disconnected")
         }
 
         override fun onCameraFreezed(errorDescription: String) {
-            videoCapturerErrorListener.onError("Camera freezed: $errorDescription")
+            videoCapturerStopListener.onStop("Camera freezed: $errorDescription")
         }
 
         override fun onCameraOpening(cameraId: String) {
@@ -147,5 +88,61 @@ internal class CameraVideoCaptureController(
         override fun onCameraClosed() {
             // Do nothing
         }
+    }
+}
+
+private object CameraCapturerHelper {
+    fun buildMediaTrackSettings(constraints: MediaTrackConstraints): MediaTrackSettings {
+        val deviceId = selectDevice(constraints)
+        val facingMode = getFacingMode(deviceId)
+        val size = selectVideoSize(constraints, deviceId)
+        val frameRate = selectFps(constraints, deviceId)
+
+        return MediaTrackSettings(
+            width = size.width,
+            height = size.height,
+            deviceId = deviceId,
+            facingMode = facingMode,
+            frameRate = frameRate.toDouble()
+        )
+    }
+
+    private fun selectDevice(constraints: MediaTrackConstraints): String {
+        val isFrontFacing = constraints.facingMode?.value != FacingMode.Environment
+
+        val searchCriteria: (String) -> Boolean = if (constraints.deviceId != null) {
+            { it == constraints.deviceId }
+        } else {
+            { WebRtc.cameraEnumerator.isFrontFacing(it) == isFrontFacing }
+        }
+
+        return WebRtc.cameraEnumerator.deviceNames.firstOrNull(searchCriteria)
+            ?: throw CameraVideoCapturerException.notFound(constraints)
+    }
+
+    private fun getFacingMode(deviceId: String): FacingMode {
+        return if (WebRtc.cameraEnumerator.isFrontFacing(deviceId)) FacingMode.User else FacingMode.Environment
+    }
+
+    private fun selectVideoSize(constraints: MediaTrackConstraints, deviceId: String): Size {
+        val requestedWidth = constraints.width?.value ?: DEFAULT_VIDEO_WIDTH
+        val requestedHeight = constraints.height?.value ?: DEFAULT_VIDEO_HEIGHT
+        val formats = WebRtc.cameraEnumerator.getSupportedFormats(deviceId)
+        val sizes = formats?.map { Size(it.width, it.height) } ?: emptyList()
+        if (sizes.isEmpty()) throw CameraVideoCapturerException.notFound(constraints)
+
+        return CameraEnumerationAndroid.getClosestSupportedSize(sizes, requestedWidth, requestedHeight)
+    }
+
+    private fun selectFps(constraints: MediaTrackConstraints, deviceId: String): Int {
+        val requestedFps = constraints.frameRate?.value ?: DEFAULT_FRAME_RATE
+        val formats = WebRtc.cameraEnumerator.getSupportedFormats(deviceId)
+        val frameRates = formats?.map { it.framerate } ?: emptyList()
+        if (frameRates.isEmpty()) throw CameraVideoCapturerException.notFound(constraints)
+
+        val requestedFpsInt = requestedFps.toInt()
+        val range = CameraEnumerationAndroid.getClosestSupportedFramerateRange(frameRates, requestedFpsInt)
+
+        return requestedFpsInt.coerceIn(range.min / 1000, range.max / 1000)
     }
 }

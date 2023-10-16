@@ -15,10 +15,10 @@ kotlin {
         version = webRtcKmpVersion
         summary = "WebRTC Kotlin Multiplatform SDK"
         homepage = "https://github.com/shepeliev/webrtc-kmp"
-        ios.deploymentTarget = "10.0"
+        ios.deploymentTarget = "12.0"
 
         pod("WebRTC-SDK") {
-            version = "114.5735.02"
+            version = "114.5735.08"
             moduleName = "WebRTC"
             packageName = "WebRTC"
         }
@@ -57,6 +57,7 @@ dependencies {
     androidTestImplementation(deps.androidx.test.core)
     androidTestImplementation(deps.androidx.test.runner)
     jsMainImplementation(npm("webrtc-adapter", "8.1.1"))
+    jsMainImplementation(npm("uuid", "9.0.0"))
 }
 
 publishing {

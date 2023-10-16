@@ -38,6 +38,8 @@ expect class RtpTransceiver {
      */
     val stopped: Boolean
 
+    fun setCodecPreferences(capabilities: List<RtpCapabilities.CodecCapability>)
+
     /**
      * Permanently stops the [RtpTransceiver]. The associated sender stops sending data, and the
      * associated receiver likewise stops receiving and decoding incoming data.
@@ -45,4 +47,8 @@ expect class RtpTransceiver {
     fun stop()
 }
 
-enum class RtpTransceiverDirection { SendRecv, SendOnly, RecvOnly, Inactive, Stopped; }
+enum class RtpTransceiverDirection {
+    SendRecv, SendOnly, RecvOnly, Inactive, Stopped;
+
+    fun toCanonicalForm(): String = name.lowercase()
+}

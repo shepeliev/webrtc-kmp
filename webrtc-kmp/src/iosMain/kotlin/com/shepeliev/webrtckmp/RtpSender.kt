@@ -18,8 +18,19 @@ actual class RtpSender(val ios: RTCRtpSender, track: MediaStreamTrack?) {
     actual val dtmf: DtmfSender?
         get() = ios.dtmfSender?.let { DtmfSender(it) }
 
-    actual suspend fun replaceTrack(track: MediaStreamTrack?) {
-        ios.setTrack((track as? MediaStreamTrackImpl)?.ios)
+    actual fun replaceTrack(track: MediaStreamTrack?) {
+        ios.setTrack((track as? MediaStreamTrackImpl)?.native)
         _track = track
+    }
+
+    actual fun getCapabilities(kind: MediaStreamTrackKind): RtpCapabilities? {
+        require(kind in listOf(MediaStreamTrackKind.Audio, MediaStreamTrackKind.Video)) {
+            "Unsupported track kind: $kind"
+        }
+
+        return WebRtc.peerConnectionFactory.rtpSenderCapabilitiesFor(kind.asNative()).let {
+            // TODO: fill headerExtensions
+            RtpCapabilities(it, emptyList())
+        }
     }
 }

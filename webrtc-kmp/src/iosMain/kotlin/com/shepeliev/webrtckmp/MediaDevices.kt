@@ -21,24 +21,24 @@ private object MediaDevicesImpl : MediaDevices {
             )
             val audioSource = WebRtc.peerConnectionFactory.audioSourceWithConstraints(mediaConstraints)
             val track = WebRtc.peerConnectionFactory.audioTrackWithSource(audioSource, NSUUID.UUID().UUIDString())
-            LocalAudioStreamTrack(track, constraints.audio)
+            LocalAudioTrack(track, constraints.audio)
         }
 
         val videoTrack = constraints.video?.let { videoConstraints ->
             val videoSource = WebRtc.peerConnectionFactory.videoSource()
-            val iosVideoTrack = WebRtc.peerConnectionFactory.videoTrackWithSource(videoSource, NSUUID.UUID().UUIDString())
+            val iosVideoTrack =
+                WebRtc.peerConnectionFactory.videoTrackWithSource(videoSource, NSUUID.UUID().UUIDString())
             val videoCaptureController = CameraVideoCaptureController(videoConstraints, videoSource)
-            LocalVideoStreamTrack(iosVideoTrack, videoCaptureController)
+            LocalVideoTrack(iosVideoTrack, videoCaptureController)
         }
 
-        val localMediaStream = WebRtc.peerConnectionFactory.mediaStreamWithStreamId(NSUUID.UUID().UUIDString())
-        return MediaStream(localMediaStream).apply {
-            if (audioTrack != null) addTrack(audioTrack)
-            if (videoTrack != null) addTrack(videoTrack)
-        }
+        return MediaStream(listOfNotNull(audioTrack, videoTrack))
     }
 
-    override suspend fun getDisplayMedia(): MediaStream {
+    override suspend fun getDisplayMedia(
+        token: ScreenCaptureToken?,
+        streamConstraints: (MediaStreamConstraintsBuilder.() -> Unit)?,
+    ): MediaStream {
         TODO("Not yet implemented for iOS platform")
     }
 
@@ -55,3 +55,5 @@ private object MediaDevicesImpl : MediaDevices {
         }
     }
 }
+
+actual typealias ScreenCaptureToken = Any

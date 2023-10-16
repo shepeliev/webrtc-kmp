@@ -29,6 +29,10 @@ actual class RtpTransceiver(
     actual val stopped: Boolean
         get() = native.isStopped
 
+    actual fun setCodecPreferences(capabilities: List<RtpCapabilities.CodecCapability>) {
+        native.setCodecPreferences(capabilities.map { it.native })
+    }
+
     actual fun stop() = native.stop()
 }
 
@@ -62,6 +66,6 @@ internal fun RtpTransceiverDirection.asNative(): AndroidRtpTransceiver.RtpTransc
         RtpTransceiverDirection.SendOnly -> AndroidRtpTransceiver.RtpTransceiverDirection.SEND_ONLY
         RtpTransceiverDirection.RecvOnly -> AndroidRtpTransceiver.RtpTransceiverDirection.RECV_ONLY
         RtpTransceiverDirection.Inactive -> AndroidRtpTransceiver.RtpTransceiverDirection.INACTIVE
-        RtpTransceiverDirection.Stopped -> AndroidRtpTransceiver.RtpTransceiverDirection.INACTIVE
+        RtpTransceiverDirection.Stopped -> AndroidRtpTransceiver.RtpTransceiverDirection.STOPPED
     }
 }

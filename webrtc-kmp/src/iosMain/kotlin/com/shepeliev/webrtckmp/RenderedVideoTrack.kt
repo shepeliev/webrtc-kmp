@@ -3,16 +3,14 @@ package com.shepeliev.webrtckmp
 import WebRTC.RTCVideoRendererProtocol
 import WebRTC.RTCVideoTrack
 
-internal abstract class RenderedVideoStreamTrack(
+internal abstract class RenderedVideoTrack(
     ios: RTCVideoTrack
-) : MediaStreamTrackImpl(ios), VideoStreamTrack {
+) : MediaStreamTrackImpl(ios), VideoTrack {
     override fun addRenderer(renderer: RTCVideoRendererProtocol) {
-        ios as RTCVideoTrack
-        ios.addRenderer(renderer)
+        (native as RTCVideoTrack).addRenderer(renderer)
     }
 
     override fun removeRenderer(renderer: RTCVideoRendererProtocol) {
-        ios as RTCVideoTrack
-        ios.removeRenderer(renderer)
+        (native as RTCVideoTrack).removeRenderer(renderer)
     }
 }

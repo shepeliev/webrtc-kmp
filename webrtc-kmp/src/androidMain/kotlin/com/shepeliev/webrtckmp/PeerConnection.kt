@@ -14,9 +14,12 @@ import com.shepeliev.webrtckmp.PeerConnectionEvent.Track
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import org.webrtc.AudioTrack
 import org.webrtc.CandidatePairChangeEvent
 import org.webrtc.MediaConstraints
+import org.webrtc.RtpTransceiver.RtpTransceiverInit
 import org.webrtc.SdpObserver
+import org.webrtc.VideoTrack
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -30,28 +33,28 @@ import org.webrtc.SessionDescription as AndroidSessionDescription
 
 actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguration) {
 
-    val android: AndroidPeerConnection = WebRtc.peerConnectionFactory.createPeerConnection(
+    val native: AndroidPeerConnection = WebRtc.peerConnectionFactory.createPeerConnection(
         rtcConfiguration.android,
         AndroidPeerConnectionObserver()
     ) ?: error("Creating PeerConnection failed")
 
     actual val localDescription: SessionDescription?
-        get() = android.localDescription?.asCommon()
+        get() = native.localDescription?.asCommon()
 
     actual val remoteDescription: SessionDescription?
-        get() = android.remoteDescription?.asCommon()
+        get() = native.remoteDescription?.asCommon()
 
     actual val signalingState: SignalingState
-        get() = android.signalingState().asCommon()
+        get() = native.signalingState().asCommon()
 
     actual val iceConnectionState: IceConnectionState
-        get() = android.iceConnectionState().asCommon()
+        get() = native.iceConnectionState().asCommon()
 
     actual val connectionState: PeerConnectionState
-        get() = android.connectionState().asCommon()
+        get() = native.connectionState().asCommon()
 
     actual val iceGatheringState: IceGatheringState
-        get() = android.iceGatheringState().asCommon()
+        get() = native.iceGatheringState().asCommon()
 
     private val _peerConnectionEvent =
         MutableSharedFlow<PeerConnectionEvent>(extraBufferCapacity = FLOW_BUFFER_CAPACITY)
@@ -77,18 +80,18 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
             it.protocol = protocol
             it.negotiated = negotiated
         }
-        return android.createDataChannel(label, init)?.let { DataChannel(it) }
+        return native.createDataChannel(label, init)?.let { DataChannel(it) }
     }
 
     actual suspend fun createOffer(options: OfferAnswerOptions): SessionDescription {
         return suspendCoroutine { cont ->
-            android.createOffer(createSdpObserver(cont), options.toMediaConstraints())
+            native.createOffer(createSdpObserver(cont), options.toMediaConstraints())
         }
     }
 
     actual suspend fun createAnswer(options: OfferAnswerOptions): SessionDescription {
         return suspendCoroutine { cont ->
-            android.createAnswer(createSdpObserver(cont), options.toMediaConstraints())
+            native.createAnswer(createSdpObserver(cont), options.toMediaConstraints())
         }
     }
 
@@ -129,13 +132,13 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
 
     actual suspend fun setLocalDescription(description: SessionDescription) {
         return suspendCoroutine {
-            android.setLocalDescription(setSdpObserver(it), description.asAndroid())
+            native.setLocalDescription(setSdpObserver(it), description.asAndroid())
         }
     }
 
     actual suspend fun setRemoteDescription(description: SessionDescription) {
         return suspendCoroutine {
-            android.setRemoteDescription(setSdpObserver(it), description.asAndroid())
+            native.setRemoteDescription(setSdpObserver(it), description.asAndroid())
         }
     }
 
@@ -160,27 +163,27 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
     }
 
     actual fun setConfiguration(configuration: RtcConfiguration): Boolean {
-        return android.setConfiguration(configuration.android)
+        return native.setConfiguration(configuration.android)
     }
 
     actual fun addIceCandidate(candidate: IceCandidate): Boolean {
-        return android.addIceCandidate(candidate.native)
+        return native.addIceCandidate(candidate.native)
     }
 
     actual fun removeIceCandidates(candidates: List<IceCandidate>): Boolean {
-        return android.removeIceCandidates(candidates.map { it.native }.toTypedArray())
+        return native.removeIceCandidates(candidates.map { it.native }.toTypedArray())
     }
 
-    actual fun getSenders(): List<RtpSender> = android.senders.map {
+    actual fun getSenders(): List<RtpSender> = native.senders.map {
         RtpSender(it, localTracks[it.track()?.id()])
     }
 
-    actual fun getReceivers(): List<RtpReceiver> = android.receivers.map {
+    actual fun getReceivers(): List<RtpReceiver> = native.receivers.map {
         RtpReceiver(it, remoteTracks[it.track()?.id()])
     }
 
     actual fun getTransceivers(): List<RtpTransceiver> =
-        android.transceivers.map {
+        native.transceivers.map {
             val senderTrack = localTracks[it.sender.track()?.id()]
             val receiverTrack = remoteTracks[it.receiver.track()?.id()]
             RtpTransceiver(it, senderTrack, receiverTrack)
@@ -191,24 +194,59 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
 
         val streamIds = streams.map { it.id }
         localTracks[track.id] = track
-        return RtpSender(android.addTrack(track.android, streamIds), track)
+        return RtpSender(native.addTrack(track.native, streamIds), track)
+    }
+
+    actual fun addTransceiver(
+        track: MediaStreamTrack,
+        direction: RtpTransceiverDirection,
+        streamIds: List<String>,
+        sendEncodings: List<RtpEncodingParameters>,
+    ): RtpTransceiver {
+        require(track is MediaStreamTrackImpl)
+
+        val init = RtpTransceiverInit(direction.asNative(), streamIds, sendEncodings.map { it.native })
+        val nativeTransceiver = native.addTransceiver(track.native, init)
+        val nativeReceiverTrack = nativeTransceiver.receiver.track()
+        val receiverTrack = when (nativeReceiverTrack?.kind()) {
+            org.webrtc.MediaStreamTrack.VIDEO_TRACK_KIND -> RemoteVideoTrack(nativeReceiverTrack as VideoTrack)
+            org.webrtc.MediaStreamTrack.AUDIO_TRACK_KIND -> RemoteAudioTrack(nativeReceiverTrack as AudioTrack)
+            else -> null
+        }
+
+        localTracks[track.id] = track
+        receiverTrack?.let { remoteTracks[it.id] = receiverTrack }
+
+        return RtpTransceiver(nativeTransceiver, track, receiverTrack)
     }
 
     actual fun removeTrack(sender: RtpSender): Boolean {
         localTracks.remove(sender.track?.id)
-        return android.removeTrack(sender.android)
+        return native.removeTrack(sender.native)
     }
 
     actual suspend fun getStats(): RtcStatsReport? {
         return suspendCoroutine { cont ->
-            android.getStats { cont.resume(RtcStatsReport(it)) }
+            native.getStats { cont.resume(RtcStatsReport(it)) }
+        }
+    }
+
+    actual suspend fun getStats(sender: RtpSender): RtcStatsReport? {
+        return suspendCoroutine { cont ->
+            native.getStats(sender.native) { cont.resume(RtcStatsReport(it)) }
+        }
+    }
+
+    actual suspend fun getStats(receiver: RtpReceiver): RtcStatsReport? {
+        return suspendCoroutine { cont ->
+            native.getStats(receiver.native) { cont.resume(RtcStatsReport(it)) }
         }
     }
 
     actual fun close() {
         remoteTracks.values.forEach(MediaStreamTrack::stop)
         remoteTracks.clear()
-        android.dispose()
+        native.dispose()
     }
 
     internal inner class AndroidPeerConnectionObserver : AndroidPeerConnection.Observer {
@@ -268,24 +306,20 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
             receiver: AndroidRtpReceiver,
             androidStreams: Array<out AndroidMediaStream>
         ) {
-            val transceiver = android.transceivers.find { it.receiver.id() == receiver.id() } ?: return
+            val transceiver = native.transceivers.find { it.receiver.id() == receiver.id() } ?: return
 
-            val audioTracks = androidStreams
-                .flatMap { it.audioTracks }
-                .map { remoteTracks.getOrPut(it.id()) { RemoteAudioStreamTrack(it) } }
-
-            val videoTracks = androidStreams
-                .flatMap { it.videoTracks }
-                .map { remoteTracks.getOrPut(it.id()) { RemoteVideoStreamTrack(it) } }
+            val tracks = androidStreams.associate { stream ->
+                stream.id to listOf(
+                    stream.audioTracks.map { remoteTracks.getOrPut(it.id()) { RemoteAudioTrack(it) } },
+                    stream.videoTracks.map { remoteTracks.getOrPut(it.id()) { RemoteVideoTrack(it) } }
+                ).flatten()
+            }
 
             val streams = androidStreams.map { androidStream ->
                 MediaStream(
-                    android = androidStream,
+                    tracks = tracks[androidStream.id] ?: emptyList(),
                     id = androidStream.id,
-                ).also { stream ->
-                    audioTracks.forEach(stream::addTrack)
-                    videoTracks.forEach(stream::addTrack)
-                }
+                )
             }
 
             val senderTrack = localTracks[transceiver.sender.track()?.id()]

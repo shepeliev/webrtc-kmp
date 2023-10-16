@@ -14,7 +14,10 @@ interface MediaDevices {
         }
     }
 
-    suspend fun getDisplayMedia(): MediaStream
+    suspend fun getDisplayMedia(
+        token: ScreenCaptureToken? = null,
+        streamConstraints: (MediaStreamConstraintsBuilder.() -> Unit)? = null,
+    ): MediaStream
 
     suspend fun supportsDisplayMedia(): Boolean
 
@@ -23,6 +26,8 @@ interface MediaDevices {
     companion object : MediaDevices by mediaDevices
 }
 
+expect class ScreenCaptureToken
+
 internal expect val mediaDevices: MediaDevices
 
 internal fun MediaTrackConstraints.toMandatoryMap(): Map<Any?, *> {
@@ -30,6 +35,8 @@ internal fun MediaTrackConstraints.toMandatoryMap(): Map<Any?, *> {
         echoCancellation?.exact?.let { this += "googEchoCancellation" to "$it" }
         autoGainControl?.exact?.let { this += "googAutoGainControl" to "$it" }
         noiseSuppression?.exact?.let { this += "googNoiseSuppression" to "$it" }
+        highpassFilter?.exact?.let { this += "googHighpassFilter" to "$it" }
+        typingNoiseDetection?.exact?.let { this += "googTypingNoiseDetection" to "$it" }
     }
 }
 
@@ -38,5 +45,7 @@ internal fun MediaTrackConstraints.toOptionalMap(): Map<Any?, *> {
         echoCancellation?.ideal?.let { this += "googEchoCancellation" to "$it" }
         autoGainControl?.ideal?.let { this += "googAutoGainControl" to "$it" }
         noiseSuppression?.ideal?.let { this += "googNoiseSuppression" to "$it" }
+        highpassFilter?.exact?.let { this += "googHighpassFilter" to "$it" }
+        typingNoiseDetection?.exact?.let { this += "googTypingNoiseDetection" to "$it" }
     }
 }

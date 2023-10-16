@@ -2,6 +2,6 @@ package com.shepeliev.webrtckmp
 
 import org.w3c.dom.mediacapture.MediaStreamTrack as JsMediaStreamTrack
 
-internal class AudioStreamTrackImpl(
+internal class AudioTrackImpl(
     js: JsMediaStreamTrack
-) : MediaStreamTrackImpl(js), AudioStreamTrack
+) : MediaStreamTrackImpl(js), AudioTrack

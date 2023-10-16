@@ -8,4 +8,13 @@ actual class RtpReceiver(val native: NativeRtpReceiver, actual val track: MediaS
 
     actual val parameters: RtpParameters
         get() = RtpParameters(native.parameters)
+
+    actual fun getCapabilities(kind: MediaStreamTrackKind): RtpCapabilities? {
+        require(kind in listOf(MediaStreamTrackKind.Audio, MediaStreamTrackKind.Video)) {
+            "Unsupported track kind: $kind"
+        }
+
+        return WebRtc.peerConnectionFactory.getRtpReceiverCapabilities(kind.asNative())
+            ?.let { RtpCapabilities(it) }
+    }
 }

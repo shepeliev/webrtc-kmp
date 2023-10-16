@@ -34,7 +34,7 @@ sealed interface MediaStreamTrackState {
     }
 }
 
-enum class MediaStreamTrackKind { Audio, Video }
+enum class MediaStreamTrackKind { Audio, Video, Data }
 
 val MediaStreamTrack.muted: Boolean get() = state.value.muted
 

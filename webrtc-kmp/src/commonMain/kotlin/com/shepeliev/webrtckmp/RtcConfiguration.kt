@@ -49,4 +49,14 @@ expect class RtcConfiguration(
      * [RtcpMuxPolicy.Require].
      */
     rtcpMuxPolicy: RtcpMuxPolicy = RtcpMuxPolicy.Require,
-)
+
+    continualGatheringPolicy: ContinualGatheringPolicy = ContinualGatheringPolicy.GatherOnce,
+) {
+    val bundlePolicy: BundlePolicy
+    val certificates: List<RtcCertificatePem>?
+    val iceCandidatePoolSize: Int
+    val iceServers: List<IceServer>
+    val iceTransportPolicy: IceTransportPolicy
+    val rtcpMuxPolicy: RtcpMuxPolicy
+    val continualGatheringPolicy: ContinualGatheringPolicy
+}
