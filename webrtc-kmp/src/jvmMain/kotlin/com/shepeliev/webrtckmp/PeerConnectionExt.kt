@@ -11,47 +11,61 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 suspend fun RTCPeerConnection.createOffer(options: RTCOfferOptions = RTCOfferOptions()): RTCSessionDescription = suspendCancellableCoroutine {
-    createOffer(options, object : CreateSessionDescriptionObserver {
-        override fun onSuccess(description: RTCSessionDescription) {
-            it.resume(description)
-        }
+    createOffer(
+        options,
+        object : CreateSessionDescriptionObserver {
+            override fun onSuccess(description: RTCSessionDescription) {
+                it.resume(description)
+            }
 
-        override fun onFailure(error: String) {
-            it.resumeWithException(RuntimeException(error))
-        }
-    })
+            override fun onFailure(error: String) {
+                it.resumeWithException(RuntimeException(error))
+            }
+        },
+    )
 }
 
 suspend fun RTCPeerConnection.setLocalDescription(description: RTCSessionDescription) = suspendCancellableCoroutine {
-    setLocalDescription(description, object : SetSessionDescriptionObserver {
-        override fun onSuccess() {
-            it.resume(Unit)
-        }
-        override fun onFailure(error: String) {
-            it.resumeWithException(RuntimeException(error))
-        }
-    })
+    setLocalDescription(
+        description,
+        object : SetSessionDescriptionObserver {
+            override fun onSuccess() {
+                it.resume(Unit)
+            }
+
+            override fun onFailure(error: String) {
+                it.resumeWithException(RuntimeException(error))
+            }
+        },
+    )
 }
 
 suspend fun RTCPeerConnection.createAnswer(options: RTCAnswerOptions = RTCAnswerOptions()): RTCSessionDescription = suspendCancellableCoroutine {
-    createAnswer(options, object : CreateSessionDescriptionObserver {
-        override fun onSuccess(description: RTCSessionDescription) {
-            it.resume(description)
-        }
+    createAnswer(
+        options,
+        object : CreateSessionDescriptionObserver {
+            override fun onSuccess(description: RTCSessionDescription) {
+                it.resume(description)
+            }
 
-        override fun onFailure(error: String) {
-            it.resumeWithException(RuntimeException(error))
-        }
-    })
+            override fun onFailure(error: String) {
+                it.resumeWithException(RuntimeException(error))
+            }
+        },
+    )
 }
 
 suspend fun RTCPeerConnection.setRemoteDescription(description: RTCSessionDescription) = suspendCancellableCoroutine {
-    setRemoteDescription(description, object : SetSessionDescriptionObserver {
-        override fun onSuccess() {
-            it.resume(Unit)
-        }
-        override fun onFailure(error: String) {
-            it.resumeWithException(RuntimeException(error))
-        }
-    })
+    setRemoteDescription(
+        description,
+        object : SetSessionDescriptionObserver {
+            override fun onSuccess() {
+                it.resume(Unit)
+            }
+
+            override fun onFailure(error: String) {
+                it.resumeWithException(RuntimeException(error))
+            }
+        },
+    )
 }

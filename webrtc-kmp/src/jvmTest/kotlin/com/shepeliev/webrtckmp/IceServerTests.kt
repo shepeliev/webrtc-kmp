@@ -1,12 +1,7 @@
 package com.shepeliev.webrtckmp
 
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.forEach
-import kotlinx.coroutines.flow.onEach
 import org.junit.Test
-import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class IceServerTests {
@@ -69,5 +64,4 @@ class IceServerTests {
         pc1.close()
         pc2.close()
     }
-
 }

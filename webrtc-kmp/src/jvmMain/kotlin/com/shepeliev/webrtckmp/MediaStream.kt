@@ -2,8 +2,8 @@ package com.shepeliev.webrtckmp
 
 import dev.onvoid.webrtc.media.audio.AudioTrack
 import dev.onvoid.webrtc.media.video.VideoTrack
-import dev.onvoid.webrtc.media.MediaStream as NativeMediaStream
 import java.util.UUID
+import dev.onvoid.webrtc.media.MediaStream as NativeMediaStream
 
 actual class MediaStream internal constructor(
     val native: NativeMediaStream? = null,

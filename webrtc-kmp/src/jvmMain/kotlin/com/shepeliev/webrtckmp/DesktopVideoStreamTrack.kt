@@ -1,9 +1,7 @@
 package com.shepeliev.webrtckmp
 
 import dev.onvoid.webrtc.media.video.VideoDesktopSource
-import dev.onvoid.webrtc.media.video.VideoDeviceSource
 import dev.onvoid.webrtc.media.video.VideoTrack
-
 
 internal class DesktopVideoStreamTrack(
     native: VideoTrack,

@@ -11,7 +11,6 @@ import com.shepeliev.webrtckmp.PeerConnectionEvent.RemovedIceCandidates
 import com.shepeliev.webrtckmp.PeerConnectionEvent.SignalingStateChange
 import com.shepeliev.webrtckmp.PeerConnectionEvent.StandardizedIceConnectionChange
 import com.shepeliev.webrtckmp.PeerConnectionEvent.Track
-import dev.onvoid.webrtc.CreateSessionDescriptionObserver
 import dev.onvoid.webrtc.PeerConnectionObserver
 import dev.onvoid.webrtc.RTCAnswerOptions
 import dev.onvoid.webrtc.RTCDataChannel
@@ -20,24 +19,19 @@ import dev.onvoid.webrtc.RTCIceCandidate
 import dev.onvoid.webrtc.RTCIceConnectionState
 import dev.onvoid.webrtc.RTCIceGatheringState
 import dev.onvoid.webrtc.RTCOfferOptions
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlin.coroutines.Continuation
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 import dev.onvoid.webrtc.RTCPeerConnection
 import dev.onvoid.webrtc.RTCPeerConnectionIceErrorEvent
 import dev.onvoid.webrtc.RTCPeerConnectionState
 import dev.onvoid.webrtc.RTCRtpReceiver
 import dev.onvoid.webrtc.RTCRtpTransceiver
-import dev.onvoid.webrtc.RTCRtpTransceiverDirection
-import dev.onvoid.webrtc.RTCSessionDescription
 import dev.onvoid.webrtc.RTCSignalingState
-import dev.onvoid.webrtc.SetSessionDescriptionObserver
 import dev.onvoid.webrtc.media.audio.AudioTrack
 import dev.onvoid.webrtc.media.video.VideoTrack
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 import dev.onvoid.webrtc.media.MediaStream as NativeMediaStream
 
 actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguration) {
@@ -95,15 +89,19 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
     }
 
     actual suspend fun createOffer(options: OfferAnswerOptions): SessionDescription {
-        return native.createOffer(RTCOfferOptions().apply {
-            this.iceRestart = options.iceRestart == true
-        }).asCommon()
+        return native.createOffer(
+            RTCOfferOptions().apply {
+                this.iceRestart = options.iceRestart == true
+            },
+        ).asCommon()
     }
 
     actual suspend fun createAnswer(options: OfferAnswerOptions): SessionDescription {
-        return native.createAnswer(RTCAnswerOptions().apply {
-            this.voiceActivityDetection = options.voiceActivityDetection == true
-        }).asCommon()
+        return native.createAnswer(
+            RTCAnswerOptions().apply {
+                this.voiceActivityDetection = options.voiceActivityDetection == true
+            },
+        ).asCommon()
     }
 
     actual suspend fun setLocalDescription(description: SessionDescription) {
@@ -235,7 +233,7 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
                 .flatMap { it.videoTracks?.toList() ?: emptyList() }
                 .map { remoteTracks.getOrPut(it.id) { RemoteVideoStreamTrack(it) } }
 
-            if(audioTracks.isEmpty() && videoTracks.isEmpty()) {
+            if (audioTracks.isEmpty() && videoTracks.isEmpty()) {
                 return
             }
 

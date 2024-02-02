@@ -1,12 +1,7 @@
 package com.shepeliev.webrtckmp
 
-import dev.onvoid.webrtc.media.video.VideoFrame
-import dev.onvoid.webrtc.media.video.VideoTrackSink
-import kotlinx.coroutines.suspendCancellableCoroutine
 import org.junit.Test
-import kotlin.coroutines.resume
 import kotlin.test.assertTrue
-
 
 class MediaDevicesTests {
 
@@ -25,5 +20,4 @@ class MediaDevicesTests {
 
         mediaStream.release()
     }
-
 }

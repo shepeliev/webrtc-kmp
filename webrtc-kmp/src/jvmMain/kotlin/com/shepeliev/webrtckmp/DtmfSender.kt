@@ -1,6 +1,6 @@
 package com.shepeliev.webrtckmp
 
-actual class DtmfSender() {
+actual class DtmfSender {
 
     actual val canInsertDtmf: Boolean
         get() = false

@@ -4,7 +4,6 @@ package com.shepeliev.webrtckmp
 
 import dev.onvoid.webrtc.PeerConnectionFactory
 import dev.onvoid.webrtc.logging.Logging
-import dev.onvoid.webrtc.media.DeviceChangeListener
 import dev.onvoid.webrtc.media.MediaDevices
 import dev.onvoid.webrtc.media.audio.AudioDeviceModule
 import dev.onvoid.webrtc.media.audio.AudioProcessing

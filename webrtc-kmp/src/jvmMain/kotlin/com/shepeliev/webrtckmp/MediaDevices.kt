@@ -38,7 +38,7 @@ internal object MediaDevicesImpl : MediaDevices, DeviceChangeListener {
         if (constraints.audio != null) {
             val audioDevices = NativeMediaDevices.getAudioCaptureDevices()
 
-            if(audioDevices.isNotEmpty()) {
+            if (audioDevices.isNotEmpty()) {
                 val device = constraints.audio.deviceId?.let { deviceId ->
                     audioDevices.first { device ->
                         device.descriptor == deviceId
@@ -77,7 +77,7 @@ internal object MediaDevicesImpl : MediaDevices, DeviceChangeListener {
                     it.second.isNotEmpty()
                 }
 
-                if(matchingDevice != null) {
+                if (matchingDevice != null) {
                     val videoSource = VideoDeviceSource().apply {
                         setVideoCaptureDevice(matchingDevice.first)
                         setVideoCaptureCapability(matchingDevice.second.first())
@@ -105,9 +105,11 @@ internal object MediaDevicesImpl : MediaDevices, DeviceChangeListener {
         val capabilities = NativeMediaDevices.getVideoCaptureCapabilities(device)
 
         val exact = capabilities.firstOrNull { capability ->
-            constraints.height?.exact?.let { it == capability.height } ?: true &&
-            constraints.width?.exact?.let { it == capability.width } ?: true &&
-            constraints.frameRate?.exact?.let { it.toInt() == capability.frameRate } ?: true
+            val matchHeight = constraints.height?.exact?.let { it == capability.height } ?: true
+            val matchWidth = constraints.width?.exact?.let { it == capability.width } ?: true
+            val matchFrameRate = constraints.frameRate?.exact?.let { it.toInt() == capability.frameRate } ?: true
+
+            matchHeight && matchWidth && matchFrameRate
         }?.let {
             listOf(it)
         }
@@ -169,7 +171,6 @@ internal object MediaDevicesImpl : MediaDevices, DeviceChangeListener {
             )
         }
 
-
         return audioInputDevices + audioOutputDevices + videoDevices
     }
 
@@ -185,7 +186,7 @@ internal object MediaDevicesImpl : MediaDevices, DeviceChangeListener {
         val deviceInfo = MediaDeviceInfo(
             deviceId = device.descriptor,
             label = device.name,
-            kind = when(device) {
+            kind = when (device) {
                 is AudioDevice -> MediaDeviceKind.AudioInput
                 else -> MediaDeviceKind.VideoInput
             }
@@ -199,11 +200,12 @@ internal object MediaDevicesImpl : MediaDevices, DeviceChangeListener {
         val deviceInfo = MediaDeviceInfo(
             deviceId = device.descriptor,
             label = device.name,
-            kind = when(device) {
-                is AudioDevice -> if(NativeMediaDevices.getAudioCaptureDevices().contains(device))
+            kind = when (device) {
+                is AudioDevice -> if (NativeMediaDevices.getAudioCaptureDevices().contains(device))
                     MediaDeviceKind.AudioInput
                 else
                     MediaDeviceKind.AudioOutput
+
                 else -> MediaDeviceKind.VideoInput
             }
         )

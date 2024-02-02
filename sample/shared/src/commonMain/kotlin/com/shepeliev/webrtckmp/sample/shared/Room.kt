@@ -8,10 +8,13 @@ interface Room {
 
     val model: Value<Model>
 
-    fun openUserMedia(streamConstraints: MediaStreamConstraintsBuilder.() -> Unit = {
-        video()
-        audio()
-    })
+    fun openUserMedia(
+        streamConstraints: MediaStreamConstraintsBuilder.() -> Unit = {
+            video()
+            audio()
+        },
+    )
+
     fun openDesktopMedia()
     fun switchCamera()
     fun createRoom()

@@ -126,5 +126,4 @@ actual class RoomDataSource actual constructor() {
 
         awaitClose { registration.remove() }
     }
-
 }

@@ -40,5 +40,4 @@ class PeerConnectionsTests {
         pc1.close()
         pc2.close()
     }
-
 }

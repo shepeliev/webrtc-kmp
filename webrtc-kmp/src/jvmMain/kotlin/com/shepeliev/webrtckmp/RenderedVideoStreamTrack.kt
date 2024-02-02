@@ -3,7 +3,6 @@ package com.shepeliev.webrtckmp
 import dev.onvoid.webrtc.media.video.VideoTrack
 import dev.onvoid.webrtc.media.video.VideoTrackSink
 
-
 internal abstract class RenderedVideoStreamTrack(
     native: VideoTrack
 ) : MediaStreamTrackImpl(native), VideoStreamTrack {

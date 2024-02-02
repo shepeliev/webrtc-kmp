@@ -3,7 +3,6 @@ package com.shepeliev.webrtckmp
 import dev.onvoid.webrtc.media.video.VideoDeviceSource
 import dev.onvoid.webrtc.media.video.VideoTrack
 
-
 internal class LocalVideoStreamTrack(
     native: VideoTrack,
     private val videoSource: VideoDeviceSource,

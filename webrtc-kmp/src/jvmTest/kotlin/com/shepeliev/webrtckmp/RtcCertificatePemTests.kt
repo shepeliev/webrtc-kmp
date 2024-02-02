@@ -18,5 +18,4 @@ class RtcCertificatePemTests {
         assertTrue(cert.certificate.isNotEmpty())
         assertTrue(cert.privateKey.isNotEmpty())
     }
-
 }

@@ -27,7 +27,6 @@ import java.util.Date
 import javax.security.auth.x500.X500Principal
 import dev.onvoid.webrtc.RTCCertificatePEM as NativeRtcCertificatePem
 
-
 actual class RtcCertificatePem internal constructor(val native: NativeRtcCertificatePem) {
     actual val privateKey: String
         get() = native.privateKey
@@ -42,12 +41,13 @@ actual class RtcCertificatePem internal constructor(val native: NativeRtcCertifi
         }
 
         actual suspend fun generateCertificate(keyType: KeyType, expires: Long): RtcCertificatePem {
-            val generator = when(keyType) {
+            val generator = when (keyType) {
                 KeyType.RSA -> {
                     KeyPairGenerator.getInstance("RSA", "BC").apply {
                         initialize(1024)
                     }
                 }
+
                 KeyType.ECDSA -> {
                     KeyPairGenerator.getInstance("ECDSA", "BC").apply {
                         val ecSpec = ECNamedCurveTable.getParameterSpec("secp256r1")
@@ -60,7 +60,7 @@ actual class RtcCertificatePem internal constructor(val native: NativeRtcCertifi
             val cert = generateSelfSignedCertificate(
                 keyPair = pair,
                 expires = expires,
-                algorithm = when(keyType) {
+                algorithm = when (keyType) {
                     KeyType.ECDSA -> "SHA256withECDSA"
                     KeyType.RSA -> "SHA256withRSA"
                 }
