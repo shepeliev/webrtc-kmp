@@ -1,3 +1,5 @@
+@file:OptIn(kotlinx.cinterop.ExperimentalForeignApi::class)
+
 package com.shepeliev.webrtckmp
 
 import WebRTC.RTCLogEx
