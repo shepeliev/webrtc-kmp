@@ -22,7 +22,7 @@ import platform.darwin.dispatch_source_set_event_handler
 import platform.darwin.dispatch_source_set_timer
 import platform.darwin.dispatch_source_t
 import platform.darwin.dispatch_time
-import kotlin.native.concurrent.AtomicInt
+import kotlin.concurrent.AtomicInt
 
 internal class RemoteVideoStreamTrack internal constructor(
     ios: RTCVideoTrack,
@@ -66,7 +66,7 @@ internal class RemoteVideoStreamTrack internal constructor(
         private var muted = false
 
         override fun renderFrame(frame: RTCVideoFrame?) {
-            frameCount.increment()
+            frameCount.incrementAndGet()
         }
 
         override fun setSize(size: CValue<CGSize>) {
@@ -81,7 +81,7 @@ internal class RemoteVideoStreamTrack internal constructor(
             }
 
             timer =
-                dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_main_queue())
+                dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0u, 0u, dispatch_get_main_queue())
             dispatch_source_set_timer(
                 timer,
                 dispatch_time(
