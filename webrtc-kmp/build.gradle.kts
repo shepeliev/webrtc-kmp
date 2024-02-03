@@ -74,7 +74,25 @@ dependencies {
         group = deps.webrtc.java.get().group!!,
         name = deps.webrtc.java.get().name,
         version = deps.webrtc.java.get().version,
+        classifier = "macos-aarch64"
+    )
+    jvmMainImplementation(
+        group = deps.webrtc.java.get().group!!,
+        name = deps.webrtc.java.get().name,
+        version = deps.webrtc.java.get().version,
         classifier = "linux-x86_64"
+    )
+    jvmMainImplementation(
+        group = deps.webrtc.java.get().group!!,
+        name = deps.webrtc.java.get().name,
+        version = deps.webrtc.java.get().version,
+        classifier = "linux-aarch64"
+    )
+    jvmMainImplementation(
+        group = deps.webrtc.java.get().group!!,
+        name = deps.webrtc.java.get().name,
+        version = deps.webrtc.java.get().version,
+        classifier = "linux-aarch32"
     )
     jvmMainImplementation(deps.bouncyCastle)
 
