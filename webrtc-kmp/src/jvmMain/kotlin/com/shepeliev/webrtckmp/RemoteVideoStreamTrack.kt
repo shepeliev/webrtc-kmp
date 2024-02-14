@@ -22,7 +22,7 @@ internal class RemoteVideoStreamTrack(
     }
 
     override fun onTrackMute(track: MediaStreamTrack, muted: Boolean) {
-        if(track == native) {
+        if (track == native) {
             setMuted(muted)
         }
     }
