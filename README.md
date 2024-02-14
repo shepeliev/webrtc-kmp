@@ -18,50 +18,75 @@ The library is published to [Maven Central](https://search.maven.org/artifact/co
 Shared module build.gradle.kts
 ```Kotlin
 kotlin {
-  cocoapods {
-    version = "1.0.0"
-    summary = "Shared module"
-    homepage = "not published"
-    ios.deploymentTarget = "11.0"
-   
-    pod("WebRTC-SDK") {
-      version = "114.5735.02"
-      linkOnly = true
-    }
-  
-    podfile = project.file("../iosApp/Podfile")
-  
-    framework {
-      baseName = "shared"
-      export("com.shepeliev:webrtc-kmp:$webRtcKmpVersion")
-      transitiveExport = true
-    }
-  
-    xcodeConfigurationToNativeBuildType["CUSTOM_DEBUG"] = NativeBuildType.DEBUG
-    xcodeConfigurationToNativeBuildType["CUSTOM_RELEASE"] = NativeBuildType.RELEASE
-  }
- 
-  android()
-  
-  ios()
-  iosSimulatorArm64()
- 
-  js {
-   useCommonJs()
-   browser()
-  }
-  
-  sourceSets {
-      val commonMain by getting {
-          dependencies {
-              api("com.shepeliev:webrtc-kmp:$webRtcKmpVersion")
-          }
-      }
+    cocoapods {
+        version = "1.0.0"
+        summary = "Shared module"
+        homepage = "not published"
+        ios.deploymentTarget = "11.0"
 
-      val iosMain by getting
-      val iosSimulatorArm64Main by getting
-      iosSimulatorArm64Main.dependsOn(iosMain)
-  }
+        pod("WebRTC-SDK") {
+            version = "114.5735.02"
+            linkOnly = true
+        }
+
+        podfile = project.file("../iosApp/Podfile")
+
+        framework {
+            baseName = "shared"
+            export("com.shepeliev:webrtc-kmp:$webRtcKmpVersion")
+            transitiveExport = true
+        }
+
+        xcodeConfigurationToNativeBuildType["CUSTOM_DEBUG"] = NativeBuildType.DEBUG
+        xcodeConfigurationToNativeBuildType["CUSTOM_RELEASE"] = NativeBuildType.RELEASE
+    }
+
+    android()
+
+    ios()
+    iosSimulatorArm64()
+
+    js {
+        useCommonJs()
+        browser()
+    }
+
+    jvm()
+
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                api("com.shepeliev:webrtc-kmp:$webRtcKmpVersion")
+            }
+        }
+
+        val iosMain by getting
+        val iosSimulatorArm64Main by getting
+        iosSimulatorArm64Main.dependsOn(iosMain)
+    }
+}
+
+dependencies {
+    // Choose the right architecture for your system
+    // see https://github.com/devopvoid/webrtc-java for supported platforms
+    jvmMainImplementation(
+        group = "dev.onvoid.webrtc",
+        name = "webrtc-java",
+        version = "0.8.0",
+        classifier = "windows-x86_64"
+    )
+    jvmMainImplementation(
+        group = "dev.onvoid.webrtc",
+        name = "webrtc-java",
+        version = "0.8.0",
+        classifier = "macos-aarch64"
+    )
+    jvmMainImplementation(
+        group = "dev.onvoid.webrtc",
+        name = "webrtc-java",
+        version = "0.8.0",
+        classifier = "linux-x86_64"
+    )
 }
 ```
 

@@ -7,9 +7,4 @@ internal class LocalAudioStreamTrack(
     native: AudioTrack,
     private val audioSource: AudioTrackSource,
     override val constraints: MediaTrackConstraints,
-) : MediaStreamTrackImpl(native), AudioStreamTrack {
-
-    override fun onStop() {
-        // audioSource.dispose()
-    }
-}
+) : MediaStreamTrackImpl(native), AudioStreamTrack

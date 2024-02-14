@@ -1,20 +1,13 @@
 package com.shepeliev.webrtckmp
 
 import dev.onvoid.webrtc.logging.Logging
-import dev.onvoid.webrtc.media.video.VideoFrame
+import dev.onvoid.webrtc.media.MediaStreamTrack
+import dev.onvoid.webrtc.media.MediaStreamTrackMuteListener
 import dev.onvoid.webrtc.media.video.VideoTrack
-import dev.onvoid.webrtc.media.video.VideoTrackSink
-import java.util.Timer
-import java.util.TimerTask
-import java.util.concurrent.atomic.AtomicInteger
 
 internal class RemoteVideoStreamTrack(
     native: VideoTrack,
-) : RenderedVideoStreamTrack(native), VideoStreamTrack {
-    private val trackMuteDetector = TrackMuteDetector().apply {
-        addSink(this)
-        start()
-    }
+) : RenderedVideoStreamTrack(native), VideoStreamTrack, MediaStreamTrackMuteListener {
 
     override suspend fun switchCamera(deviceId: String?) {
         Logging.error("switchCamera is not supported for remote tracks")
@@ -22,75 +15,15 @@ internal class RemoteVideoStreamTrack(
 
     override fun onSetEnabled(enabled: Boolean) {
         if (enabled) {
-            trackMuteDetector.start()
+            native.addTrackMuteListener(this)
         } else {
-            trackMuteDetector.stop()
+            native.removeTrackMuteListener(this)
         }
     }
 
-    override fun onStop() {
-        removeSink(trackMuteDetector)
-        trackMuteDetector.dispose()
-    }
-
-    /**
-     * Implements 'mute'/'unmute' events for remote video tracks through the [VideoSink] interface.
-     *
-     * The original idea is from React Native WebRTC
-     * https://github.com/react-native-webrtc/react-native-webrtc/blob/95cf638dfa/android/src/main/java/com/oney/WebRTCModule/VideoTrackAdapter.java#L69
-     */
-    private inner class TrackMuteDetector : VideoTrackSink {
-        private val timer: Timer = Timer("VideoTrackMutedTimer")
-        private var setMuteTask: TimerTask? = null
-
-        @Volatile
-        private var disposed = false
-        private val frameCounter: AtomicInteger = AtomicInteger()
-        private var mutedState = false
-
-        override fun onVideoFrame(frame: VideoFrame) {
-            frameCounter.addAndGet(1)
-        }
-
-        fun start() {
-            if (disposed) return
-
-            synchronized(this) {
-                setMuteTask?.cancel()
-                setMuteTask = object : TimerTask() {
-                    private var lastFrameNumber: Int = frameCounter.get()
-
-                    override fun run() {
-                        if (disposed) return
-
-                        val frameCount = frameCounter.get()
-                        val isMuted = lastFrameNumber == frameCount
-                        if (isMuted != mutedState) {
-                            mutedState = isMuted
-                            setMuted(isMuted)
-                        }
-                        lastFrameNumber = frameCounter.get()
-                    }
-                }
-                timer.schedule(setMuteTask, INITIAL_MUTE_DELAY, MUTE_DELAY)
-            }
-        }
-
-        fun stop() {
-            if (disposed) return
-
-            synchronized(this) {
-                setMuteTask?.cancel()
-                setMuteTask = null
-            }
-        }
-
-        fun dispose() {
-            stop()
-            disposed = true
+    override fun onTrackMute(track: MediaStreamTrack, muted: Boolean) {
+        if(track == native) {
+            setMuted(muted)
         }
     }
 }
-
-private const val INITIAL_MUTE_DELAY: Long = 3000
-private const val MUTE_DELAY: Long = 1500

@@ -10,7 +10,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-suspend fun RTCPeerConnection.createOffer(options: RTCOfferOptions = RTCOfferOptions()): RTCSessionDescription = suspendCancellableCoroutine {
+internal suspend fun RTCPeerConnection.createOffer(options: RTCOfferOptions = RTCOfferOptions()): RTCSessionDescription = suspendCancellableCoroutine {
     createOffer(
         options,
         object : CreateSessionDescriptionObserver {
@@ -25,7 +25,7 @@ suspend fun RTCPeerConnection.createOffer(options: RTCOfferOptions = RTCOfferOpt
     )
 }
 
-suspend fun RTCPeerConnection.setLocalDescription(description: RTCSessionDescription) = suspendCancellableCoroutine {
+internal suspend fun RTCPeerConnection.setLocalDescription(description: RTCSessionDescription) = suspendCancellableCoroutine {
     setLocalDescription(
         description,
         object : SetSessionDescriptionObserver {
@@ -40,7 +40,7 @@ suspend fun RTCPeerConnection.setLocalDescription(description: RTCSessionDescrip
     )
 }
 
-suspend fun RTCPeerConnection.createAnswer(options: RTCAnswerOptions = RTCAnswerOptions()): RTCSessionDescription = suspendCancellableCoroutine {
+internal suspend fun RTCPeerConnection.createAnswer(options: RTCAnswerOptions = RTCAnswerOptions()): RTCSessionDescription = suspendCancellableCoroutine {
     createAnswer(
         options,
         object : CreateSessionDescriptionObserver {
@@ -55,7 +55,7 @@ suspend fun RTCPeerConnection.createAnswer(options: RTCAnswerOptions = RTCAnswer
     )
 }
 
-suspend fun RTCPeerConnection.setRemoteDescription(description: RTCSessionDescription) = suspendCancellableCoroutine {
+internal suspend fun RTCPeerConnection.setRemoteDescription(description: RTCSessionDescription) = suspendCancellableCoroutine {
     setRemoteDescription(
         description,
         object : SetSessionDescriptionObserver {

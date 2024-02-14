@@ -61,4 +61,23 @@ dependencies {
     androidMainImplementation(deps.kotlin.coroutinesPlayServices)
     jsMainImplementation(npm("firebase", version = "9.9.1"))
     jvmMainImplementation(deps.firebase.firestore.jvm)
+
+    jvmMainImplementation(
+        group = "dev.onvoid.webrtc",
+        name = "webrtc-java",
+        version = "0.8.0",
+        classifier = "windows-x86_64"
+    )
+    jvmMainImplementation(
+        group = "dev.onvoid.webrtc",
+        name = "webrtc-java",
+        version = "0.8.0",
+        classifier = "macos-aarch64"
+    )
+    jvmMainImplementation(
+        group = "dev.onvoid.webrtc",
+        name = "webrtc-java",
+        version = "0.8.0",
+        classifier = "linux-x86_64"
+    )
 }
