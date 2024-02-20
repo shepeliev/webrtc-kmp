@@ -57,7 +57,24 @@ dependencies {
     androidTestImplementation(deps.androidx.test.core)
     androidTestImplementation(deps.androidx.test.runner)
 
+    val osName = System.getProperty("os.name").lowercase()
+    val hostOS = if (osName.contains("mac")) {
+        "macos"
+    } else if (osName.contains("linux")) {
+        "linux"
+    } else if (osName.contains("windows")) {
+        "windows"
+    } else {
+        throw IllegalStateException("Unsupported OS: $osName")
+    }
+    val hostArch = System.getProperty("os.arch").lowercase()
     jvmMainApi(deps.webrtc.java)
+    jvmMainImplementation(
+        group = deps.webrtc.java.get().group!!,
+        name = deps.webrtc.java.get().name,
+        version = deps.webrtc.java.get().version,
+        classifier = "$hostOS-$hostArch"
+    )
     jvmMainImplementation(deps.bouncyCastle)
 
     jsMainImplementation(npm("webrtc-adapter", "8.1.1"))
