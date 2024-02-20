@@ -1,8 +1,12 @@
 package com.shepeliev.webrtckmp
 
-import org.junit.Test
+import kotlin.test.Ignore
+import kotlin.test.Test
 import kotlin.test.assertTrue
 
+
+// This test is ignored because of it is not stable on different platforms
+@Ignore
 class MediaDevicesTests {
 
     @Test

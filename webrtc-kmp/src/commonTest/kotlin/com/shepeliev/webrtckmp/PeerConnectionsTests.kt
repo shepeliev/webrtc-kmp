@@ -1,6 +1,6 @@
 package com.shepeliev.webrtckmp
 
-import org.junit.Test
+import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class PeerConnectionsTests {
