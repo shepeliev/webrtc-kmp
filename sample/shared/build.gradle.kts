@@ -72,7 +72,7 @@ dependencies {
     } else {
         throw IllegalStateException("Unsupported OS: $osName")
     }
-    val hostArch = when(val arch = System.getProperty("os.arch").lowercase()) {
+    val hostArch = when (val arch = System.getProperty("os.arch").lowercase()) {
         "amd64" -> "x86_64"
         else -> arch
     }
