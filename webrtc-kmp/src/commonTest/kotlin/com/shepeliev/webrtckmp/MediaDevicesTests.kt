@@ -1,8 +1,10 @@
 package com.shepeliev.webrtckmp
 
-import org.junit.Test
+import kotlin.test.Ignore
+import kotlin.test.Test
 import kotlin.test.assertTrue
 
+@Ignore // for local tests only
 class MediaDevicesTests {
 
     @Test

@@ -69,23 +69,25 @@ kotlin {
 dependencies {
     // Choose the right architecture for your system
     // see https://github.com/devopvoid/webrtc-java for supported platforms
+    val osName = System.getProperty("os.name").lowercase()
+    val hostOS = if (osName.contains("mac")) {
+        "macos"
+    } else if (osName.contains("linux")) {
+        "linux"
+    } else if (osName.contains("windows")) {
+        "windows"
+    } else {
+        throw IllegalStateException("Unsupported OS: $osName")
+    }
+    val hostArch = when(val arch = System.getProperty("os.arch").lowercase()) {
+        "amd64" -> "x86_64"
+        else -> arch
+    }
     jvmMainImplementation(
         group = "dev.onvoid.webrtc",
         name = "webrtc-java",
         version = "0.8.0",
-        classifier = "windows-x86_64"
-    )
-    jvmMainImplementation(
-        group = "dev.onvoid.webrtc",
-        name = "webrtc-java",
-        version = "0.8.0",
-        classifier = "macos-aarch64"
-    )
-    jvmMainImplementation(
-        group = "dev.onvoid.webrtc",
-        name = "webrtc-java",
-        version = "0.8.0",
-        classifier = "linux-x86_64"
+        classifier = "$hostOS-$hostArch"
     )
 }
 ```
