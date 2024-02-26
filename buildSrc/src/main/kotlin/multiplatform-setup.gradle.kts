@@ -12,6 +12,8 @@ kotlin {
         browser()
     }
 
+    jvm()
+
     sourceSets {
         getByName("commonTest") {
             dependencies {

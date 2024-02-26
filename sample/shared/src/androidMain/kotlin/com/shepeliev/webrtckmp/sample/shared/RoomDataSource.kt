@@ -20,7 +20,7 @@ actual class RoomDataSource actual constructor() {
     private val firestore by lazy { Firebase.firestore }
     private val roomsRef by lazy { firestore.collection("rooms") }
 
-    actual fun createRoom(): String {
+    actual suspend fun createRoom(): String {
         return roomsRef.document().id
     }
 

@@ -5,9 +5,9 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 
-actual fun runTest(
+inline fun runTest(
     timeout: Long,
-    block: suspend CoroutineScope.() -> Unit
+    crossinline block: suspend CoroutineScope.() -> Unit
 ) {
     runBlocking {
         withTimeout(timeout) {

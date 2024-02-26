@@ -5,7 +5,6 @@ import co.touchlab.kermit.platformLogWriter
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.decompose.value.MutableValue
 import com.arkivanov.decompose.value.Value
-import com.arkivanov.decompose.value.reduce
 import com.arkivanov.essenty.instancekeeper.InstanceKeeper
 import com.arkivanov.essenty.instancekeeper.getOrCreate
 import com.arkivanov.essenty.lifecycle.doOnCreate
@@ -16,6 +15,7 @@ import com.arkivanov.essenty.lifecycle.doOnStart
 import com.arkivanov.essenty.lifecycle.doOnStop
 import com.shepeliev.webrtckmp.IceServer
 import com.shepeliev.webrtckmp.MediaDevices
+import com.shepeliev.webrtckmp.MediaStreamConstraintsBuilder
 import com.shepeliev.webrtckmp.MediaStreamTrack
 import com.shepeliev.webrtckmp.MediaStreamTrackKind
 import com.shepeliev.webrtckmp.OfferAnswerOptions
@@ -29,6 +29,7 @@ import com.shepeliev.webrtckmp.onIceGatheringState
 import com.shepeliev.webrtckmp.onSignalingStateChange
 import com.shepeliev.webrtckmp.onTrack
 import com.shepeliev.webrtckmp.videoTracks
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.SupervisorJob
@@ -45,8 +46,11 @@ class RoomComponent(
     viewModel: Room,
 ) : Room by viewModel, ComponentContext by componentContext {
 
-    constructor(componentContext: ComponentContext) :
-        this(componentContext, componentContext.instanceKeeper.getOrCreate { ViewModel() })
+    constructor(
+        componentContext: ComponentContext,
+        scope: CoroutineScope = MainScope(),
+    ) :
+        this(componentContext, componentContext.instanceKeeper.getOrCreate { ViewModel(scope) })
 
     private val logger = Logger.withTag("RoomComponent")
 
@@ -61,29 +65,44 @@ class RoomComponent(
         lifecycle.doOnDestroy { logger.d { "onDestroy" } }
     }
 
-    private class ViewModel : InstanceKeeper.Instance, Room {
+    private class ViewModel(
+        val scope: CoroutineScope,
+    ) : InstanceKeeper.Instance, Room {
 
         private val logger = Logger.withTag("RoomComponent => ViewModel")
         private val _model = MutableValue(Room.Model())
         override val model: Value<Room.Model> get() = _model
 
-        private val scope = MainScope()
-
         private val roomDataSource = RoomDataSource()
         private var peerConnection: PeerConnection? = null
         private var roomSessionJob: Job? = null
 
-        override fun openUserMedia() {
+        override fun openUserMedia(streamConstraints: MediaStreamConstraintsBuilder.() -> Unit) {
             logger.i { "Open user media" }
             roomSessionJob = SupervisorJob()
 
             scope.launch {
                 try {
-                    val stream = MediaDevices.getUserMedia(audio = true, video = true)
-                    _model.reduce { it.copy(localStream = stream) }
+                    val stream = MediaDevices.getUserMedia(streamConstraints)
+                    _model.value = _model.value.copy(localStream = stream)
                     listenTrackState(stream.videoTracks.first(), "Local video")
                 } catch (e: Throwable) {
                     logger.e(e) { "Getting user media failed" }
+                }
+            }
+        }
+
+        override fun openDesktopMedia() {
+            logger.i { "Open desktop media" }
+            roomSessionJob = SupervisorJob()
+
+            scope.launch {
+                try {
+                    val stream = MediaDevices.getDisplayMedia()
+                    _model.value = _model.value.copy(localStream = stream)
+                    listenTrackState(stream.videoTracks.first(), "Local video")
+                } catch (e: Throwable) {
+                    logger.e(e) { "Getting desktop media failed" }
                 }
             }
         }
@@ -99,7 +118,7 @@ class RoomComponent(
         override fun createRoom() {
             logger.i { "Create room" }
 
-            _model.reduce { it.copy(isJoining = true, isCaller = true) }
+            _model.value = _model.value.copy(isJoining = true, isCaller = true)
             val peerConnection = createPeerConnection()
             this@ViewModel.peerConnection = peerConnection
 
@@ -114,7 +133,7 @@ class RoomComponent(
                 }
 
                 roomDataSource.insertOffer(roomId, offer)
-                _model.reduce { it.copy(roomId = roomId, isJoining = false) }
+                _model.value = _model.value.copy(roomId = roomId, isJoining = false)
 
                 logger.d { "Waiting answer" }
                 val answer = roomDataSource.getAnswer(roomId)
@@ -126,7 +145,7 @@ class RoomComponent(
         override fun joinRoom(roomId: String) {
             logger.i { "Join room: $roomId" }
 
-            _model.reduce { it.copy(isJoining = true, roomId = roomId, isCaller = false) }
+            _model.value = _model.value.copy(isJoining = true, roomId = roomId, isCaller = false)
             roomSessionJob = SupervisorJob()
 
             val peerConnection = createPeerConnection()
@@ -136,7 +155,7 @@ class RoomComponent(
                 val offer = roomDataSource.getOffer(roomId)
                 if (offer == null) {
                     logger.e { "No offer SDP in the room [id = $roomId]" }
-                    _model.reduce { it.copy(isJoining = false, isCaller = null) }
+                    _model.value = _model.value.copy(isJoining = false, isCaller = null)
                     return@launch
                 }
 
@@ -148,7 +167,7 @@ class RoomComponent(
                     roomDataSource.insertAnswer(roomId, it)
                 }
 
-                _model.reduce { it.copy(isJoining = false) }
+                _model.value = _model.value.copy(isJoining = false)
             }
         }
 
@@ -188,7 +207,7 @@ class RoomComponent(
             peerConnection.onTrack
                 .onEach { logger.i { "Remote track received: [id = ${it.track?.id}, kind: ${it.track?.kind} ]" } }
                 .filter { it.track?.kind == MediaStreamTrackKind.Video }
-                .onEach { event -> _model.reduce { it.copy(remoteStream = event.streams.first()) } }
+                .onEach { event -> _model.value = _model.value.copy(remoteStream = event.streams.first()) }
                 .onEach { listenTrackState(it.track!!, "Remote video") }
                 .launchIn(scope + roomSessionJob!!)
         }
@@ -223,7 +242,7 @@ class RoomComponent(
             roomSessionJob?.cancel()
             roomSessionJob = null
             _model.value.localStream?.release()
-            _model.reduce { Room.Model() }
+            _model.value = Room.Model()
 
             peerConnection?.close()
             peerConnection = null

@@ -13,6 +13,17 @@ Pod::Spec.new do |spec|
     spec.dependency 'FirebaseFirestore'
     spec.dependency 'WebRTC-SDK', '114.5735.02'
                 
+    if !Dir.exist?('build/cocoapods/framework/shared.framework') || Dir.empty?('build/cocoapods/framework/shared.framework')
+        raise "
+
+        Kotlin framework 'shared' doesn't exist yet, so a proper Xcode project can't be generated.
+        'pod install' should be executed after running ':generateDummyFramework' Gradle task:
+
+            ./gradlew :sample:shared:generateDummyFramework
+
+        Alternatively, proper pod installation is performed during Gradle sync in the IDE (if Podfile location is set)"
+    end
+                
     spec.pod_target_xcconfig = {
         'KOTLIN_PROJECT_PATH' => ':sample:shared',
         'PRODUCT_MODULE_NAME' => 'shared',

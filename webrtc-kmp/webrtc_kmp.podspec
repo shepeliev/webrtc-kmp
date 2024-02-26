@@ -11,6 +11,17 @@ Pod::Spec.new do |spec|
     spec.ios.deployment_target = '10.0'
     spec.dependency 'WebRTC-SDK', '114.5735.02'
                 
+    if !Dir.exist?('build/cocoapods/framework/webrtc_kmp.framework') || Dir.empty?('build/cocoapods/framework/webrtc_kmp.framework')
+        raise "
+
+        Kotlin framework 'webrtc_kmp' doesn't exist yet, so a proper Xcode project can't be generated.
+        'pod install' should be executed after running ':generateDummyFramework' Gradle task:
+
+            ./gradlew :webrtc-kmp:generateDummyFramework
+
+        Alternatively, proper pod installation is performed during Gradle sync in the IDE (if Podfile location is set)"
+    end
+                
     spec.pod_target_xcconfig = {
         'KOTLIN_PROJECT_PATH' => ':webrtc-kmp',
         'PRODUCT_MODULE_NAME' => 'webrtc_kmp',

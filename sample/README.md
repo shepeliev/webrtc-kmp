@@ -26,3 +26,9 @@ Open `sample/app-ios/app-ios.xcworkspace` in XCode build and run
 ```bash
 ./gradlew browserRun
 ```
+
+### JVM Desktop
+
+```bash
+./gradlew ":sample:app-jvm:jvmRun" -DmainClass="com.shepeliev.webrtckmp.MainKt" --quiet
+```

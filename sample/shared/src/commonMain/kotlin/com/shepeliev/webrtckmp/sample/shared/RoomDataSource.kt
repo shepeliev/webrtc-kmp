@@ -7,7 +7,7 @@ typealias IceCandidate = com.shepeliev.webrtckmp.IceCandidate
 typealias SessionDescriptionType = com.shepeliev.webrtckmp.SessionDescriptionType
 
 expect class RoomDataSource() {
-    fun createRoom(): String
+    suspend fun createRoom(): String
     suspend fun insertOffer(roomId: String, description: SessionDescription)
     suspend fun insertAnswer(roomId: String, description: SessionDescription)
     suspend fun insertIceCandidate(roomId: String, peerName: String, candidate: IceCandidate)

@@ -1,3 +1,5 @@
+@file:OptIn(kotlinx.cinterop.ExperimentalForeignApi::class)
+
 package com.shepeliev.webrtckmp
 
 import WebRTC.RTCCleanupSSL
@@ -11,6 +13,7 @@ import WebRTC.RTCPeerConnectionFactoryOptions
 import WebRTC.RTCShutdownInternalTracer
 import WebRTC.RTCVideoDecoderFactoryProtocol
 import WebRTC.RTCVideoEncoderFactoryProtocol
+import kotlin.native.concurrent.ThreadLocal
 
 @ThreadLocal
 object WebRtc {
