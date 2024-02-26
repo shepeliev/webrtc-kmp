@@ -1,7 +1,6 @@
 package com.shepeliev.webrtckmp
 
 import kotlinx.coroutines.flow.first
-import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
