@@ -102,7 +102,6 @@ fun VideoScreen(room: Room) {
                 Button(onClick = room::switchCamera) {
                     Text("Switch camera")
                 }
-
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
