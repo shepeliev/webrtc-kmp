@@ -1,13 +1,15 @@
 # WebRTC KMP ![Maven Central](https://img.shields.io/maven-central/v/com.shepeliev/webrtc-kmp?style=flat-square)
 
-WebRTC Kotlin Multiplatform SDK
+WebRTC Kotlin Multiplatform SDK is a comprehensive toolkit for integrating WebRTC functionality into your multiplatform projects. 
+It supports Android, iOS, JS. Other platforms - PRs are welcome.
+
 
 ## API implementation map
- API | Android | iOS | JS 
- :-: | :-----: | :-: | :---: 
- Audio/Video |  :white_check_mark: | :white_check_mark: | :white_check_mark:
+ API |      Android       | iOS | JS 
+ :-: |:------------------:| :-: | :---: 
+ Audio/Video | :white_check_mark: | :white_check_mark: | :white_check_mark:
  Data channel | :white_check_mark: | :white_check_mark: | :white_check_mark:
- Screen Capture | | | :white_check_mark:
+ Screen Capture | :white_check_mark: | | :white_check_mark:
 
 ## WebRTC revision
 Current revision: M114
