@@ -64,10 +64,21 @@ private object MediaDevicesImpl : MediaDevices {
     }
 
     override suspend fun getDisplayMedia(): MediaStream {
-        TODO("Not yet implemented for Android platform")
+        val videoSource = WebRtc.peerConnectionFactory.createVideoSource(false)
+        val screenCaptureController = ScreenCaptureController(videoSource)
+        val videoTrack = WebRtc.peerConnectionFactory.createVideoTrack(
+            UUID.randomUUID().toString(),
+            videoSource
+        )
+        val videoStreamTrack = LocalVideoStreamTrack(videoTrack, screenCaptureController)
+        val localMediaStream = WebRtc.peerConnectionFactory
+            .createLocalMediaStream(UUID.randomUUID().toString())
+        return MediaStream(localMediaStream).apply {
+            addTrack(videoStreamTrack)
+        }
     }
 
-    override suspend fun supportsDisplayMedia(): Boolean = false
+    override suspend fun supportsDisplayMedia(): Boolean = true
 
     private fun checkRecordAudioPermission() {
         val result = ContextCompat.checkSelfPermission(

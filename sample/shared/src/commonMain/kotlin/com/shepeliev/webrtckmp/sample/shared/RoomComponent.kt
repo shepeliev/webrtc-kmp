@@ -45,8 +45,7 @@ class RoomComponent(
     viewModel: Room,
 ) : Room by viewModel, ComponentContext by componentContext {
 
-    constructor(componentContext: ComponentContext) :
-        this(componentContext, componentContext.instanceKeeper.getOrCreate { ViewModel() })
+    constructor(componentContext: ComponentContext) : this(componentContext, componentContext.instanceKeeper.getOrCreate { ViewModel() })
 
     private val logger = Logger.withTag("RoomComponent")
 

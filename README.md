@@ -74,3 +74,15 @@ pod 'shared', :path => '../shared'
 ## Usage
 
 Please refer to [sample](sample/README.md).
+
+### Screen Share in Android
+```kotlin
+// Set MediaProjection permission intent using `MediaProjectionIntentHolder`
+val mediaProjectionPermissionLauncher = rememberLauncherForActivityResult(
+    contract = ActivityResultContracts.StartActivityForResult()
+) { activityResult ->
+    activityResult.data?.also {
+        MediaProjectionIntentHolder.intent = it
+    }
+}
+```
