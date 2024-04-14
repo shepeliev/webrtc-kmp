@@ -18,6 +18,7 @@ import com.shepeliev.webrtckmp.IceServer
 import com.shepeliev.webrtckmp.MediaDevices
 import com.shepeliev.webrtckmp.MediaStreamTrack
 import com.shepeliev.webrtckmp.MediaStreamTrackKind
+import com.shepeliev.webrtckmp.MediaStreamTrackState
 import com.shepeliev.webrtckmp.OfferAnswerOptions
 import com.shepeliev.webrtckmp.PeerConnection
 import com.shepeliev.webrtckmp.RtcConfiguration
@@ -194,6 +195,7 @@ class RoomComponent(
 
         private fun listenTrackState(track: MediaStreamTrack, logPrefix: String) {
             track.state
+                .filter { it is MediaStreamTrackState.Live }
                 .onEach { logger.w { "$logPrefix track [id = ${track.id}] state changed: $it" } }
                 .launchIn(scope + roomSessionJob!!)
         }
