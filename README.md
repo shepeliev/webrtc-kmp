@@ -1,6 +1,8 @@
 # WebRTC KMP ![Maven Central](https://img.shields.io/maven-central/v/com.shepeliev/webrtc-kmp?style=flat-square)
 
-WebRTC Kotlin Multiplatform SDK
+WebRTC Kotlin Multiplatform SDK is a comprehensive toolkit for integrating WebRTC functionality into your multiplatform projects. 
+It supports Android, iOS, JS. Other platforms - PRs are welcome.
+
 
 ## API implementation map
 |      API       |      Android       |        iOS         |         JS         |        JVM         |
@@ -101,3 +103,15 @@ pod 'shared', :path => '../shared'
 ## Usage
 
 Please refer to [sample](sample/README.md).
+
+### Screen Share in Android
+```kotlin
+// Set MediaProjection permission intent using `MediaProjectionIntentHolder`
+val mediaProjectionPermissionLauncher = rememberLauncherForActivityResult(
+    contract = ActivityResultContracts.StartActivityForResult()
+) { activityResult ->
+    activityResult.data?.also {
+        MediaProjectionIntentHolder.intent = it
+    }
+}
+```
