@@ -5,6 +5,7 @@ package com.shepeliev.webrtckmp
 import dev.onvoid.webrtc.PeerConnectionFactory
 import dev.onvoid.webrtc.logging.Logging
 import dev.onvoid.webrtc.media.MediaDevices
+import dev.onvoid.webrtc.media.audio.AudioDevice
 import dev.onvoid.webrtc.media.audio.AudioDeviceModule
 import dev.onvoid.webrtc.media.audio.AudioProcessing
 
@@ -39,13 +40,14 @@ object WebRtc {
 
     private fun initializePeerConnectionFactory() {
         with(builder) {
-            val audioModule = audioModule ?: AudioDeviceModule().apply {
-                MediaDevices.getDefaultAudioRenderDevice()?.let {
-                    setPlayoutDevice(it)
-                    initPlayout()
-                }
-            }
+            val audioModule = audioModule ?: AudioDeviceModule()
             _audioDeviceModule = audioModule
+
+            MediaDevices.getDefaultAudioRenderDevice()?.let {
+                audioModule.setPlayoutDevice(it)
+                audioModule.initPlayout()
+            }
+
             _peerConnectionFactory = PeerConnectionFactory(
                 audioModule,
                 audioProcessing,
@@ -71,12 +73,31 @@ object WebRtc {
         MediaDevicesImpl.removeDeviceChangeListener(listener)
     }
 
+    fun setAudioOutputDevice(device: AudioDevice) {
+        audioDeviceModule.stopPlayout()
+        audioDeviceModule.setPlayoutDevice(device)
+        audioDeviceModule.initPlayout()
+    }
+
     fun setAudioOutputDevice(device: MediaDeviceInfo) {
         MediaDevices.getAudioRenderDevices().firstOrNull {
             it.descriptor == device.deviceId
         }?.let {
-            audioDeviceModule.setPlayoutDevice(it)
-            audioDeviceModule.initPlayout()
+            setAudioOutputDevice(it)
+        }
+    }
+
+    fun setAudioInputDevice(device: AudioDevice) {
+        audioDeviceModule.stopRecording()
+        audioDeviceModule.setRecordingDevice(device)
+        audioDeviceModule.initRecording()
+    }
+
+    fun setAudioInputDevice(device: MediaDeviceInfo) {
+        MediaDevices.getAudioCaptureDevices().firstOrNull {
+            it.descriptor == device.deviceId
+        }?.let {
+            setAudioInputDevice(it)
         }
     }
 

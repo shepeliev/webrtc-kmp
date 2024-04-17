@@ -148,8 +148,11 @@ fun SelectMicrophoneCameraScreen(room: Room) {
                 DeviceSelector(
                     current = microphone,
                     list = microphoneList,
-                ) {
-                    microphone = it
+                ) { device ->
+                    if(device != null) {
+                        microphone = device
+                        WebRtc.setAudioInputDevice(device)
+                    }
                 }
             }
 
@@ -160,10 +163,10 @@ fun SelectMicrophoneCameraScreen(room: Room) {
                 DeviceSelector(
                     current = speaker,
                     list = speakerList,
-                ) {
-                    if(it != null) {
-                        speaker = it
-                        WebRtc.setAudioOutputDevice(it)
+                ) { device ->
+                    if(device != null) {
+                        speaker = device
+                        WebRtc.setAudioOutputDevice(device)
                     }
                 }
             }
