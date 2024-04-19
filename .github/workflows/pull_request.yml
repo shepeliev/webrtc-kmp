@@ -65,7 +65,7 @@ jobs:
           path: "webrtc-kmp/build/reports/tests/iosX64Test"
 
       - name: Run JS tests
-        run: ./gradlew cleanTest webrtc-kmp:jsTest
+        run: ./gradlew cleanTest kotlinUpgradeYarnLock webrtc-kmp:jsTest
 
       - name: Upload JS test artifact
         uses: actions/upload-artifact@v2
