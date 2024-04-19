@@ -9,7 +9,7 @@ It supports Android, iOS, JS. Other platforms - PRs are welcome.
 |:--------------:|:------------------:|:------------------:|:------------------:|:------------------:|
 |  Audio/Video   | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
 |  Data channel  | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| Screen Capture |                    |                    | :white_check_mark: | :white_check_mark: |
+| Screen Capture | :white_check_mark: |                    | :white_check_mark: | :white_check_mark: |
 
 ## WebRTC revision
 Current revision: M114
