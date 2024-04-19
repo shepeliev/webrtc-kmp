@@ -1,6 +1,9 @@
+@file:OptIn(ExperimentalForeignApi::class)
+
 package com.shepeliev.webrtckmp
 
 import WebRTC.RTCCertificate
+import kotlinx.cinterop.ExperimentalForeignApi
 
 actual class RtcCertificatePem(val native: RTCCertificate) {
     actual val privateKey: String

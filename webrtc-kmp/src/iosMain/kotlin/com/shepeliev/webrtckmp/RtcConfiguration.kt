@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalForeignApi::class)
+
 package com.shepeliev.webrtckmp
 
 import WebRTC.RTCBundlePolicy
@@ -5,6 +7,7 @@ import WebRTC.RTCConfiguration
 import WebRTC.RTCIceTransportPolicy
 import WebRTC.RTCRtcpMuxPolicy
 import WebRTC.RTCSdpSemantics
+import kotlinx.cinterop.ExperimentalForeignApi
 
 actual class RtcConfiguration actual constructor(
     bundlePolicy: BundlePolicy,

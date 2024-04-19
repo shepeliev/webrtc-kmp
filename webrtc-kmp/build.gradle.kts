@@ -24,21 +24,38 @@ kotlin {
         }
     }
 
-    android {
+    androidTarget {
         publishAllLibraryVariants()
     }
 
-    ios { configureIos() }
+    iosX64 { configureIos() }
+    iosArm64 { configureIos() }
     iosSimulatorArm64 { configureIos() }
 
-    sourceSets {
-        val iosMain by getting
-        val iosSimulatorArm64Main by getting
-        iosSimulatorArm64Main.dependsOn(iosMain)
+    js {
+        useCommonJs()
+        browser()
+    }
 
-        val iosTest by getting
-        val iosSimulatorArm64Test by getting
-        iosSimulatorArm64Test.dependsOn(iosTest)
+    sourceSets {
+        commonMain.dependencies {
+            implementation(deps.kotlin.coroutines)
+        }
+
+        androidMain.dependencies {
+            implementation(deps.kotlin.coroutines)
+            implementation(deps.androidx.coreKtx)
+            api(deps.webrtcSdk)
+        }
+
+        jsMain.dependencies {
+            implementation(npm("webrtc-adapter", "8.1.1"))
+        }
+
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            implementation(kotlin("test-annotations-common"))
+        }
     }
 }
 
@@ -48,15 +65,11 @@ android {
     defaultConfig {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-}
 
-dependencies {
-    commonMainImplementation(deps.kotlin.coroutines)
-    androidMainImplementation(deps.androidx.coreKtx)
-    androidMainApi(deps.webrtcSdk)
-    androidTestImplementation(deps.androidx.test.core)
-    androidTestImplementation(deps.androidx.test.runner)
-    jsMainImplementation(npm("webrtc-adapter", "8.1.1"))
+    dependencies {
+        androidTestImplementation(deps.androidx.test.core)
+        androidTestImplementation(deps.androidx.test.runner)
+    }
 }
 
 publishing {

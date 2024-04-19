@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalForeignApi::class)
+
 package com.shepeliev.webrtckmp
 
 import WebRTC.RTCCleanupSSL
@@ -11,8 +13,8 @@ import WebRTC.RTCPeerConnectionFactoryOptions
 import WebRTC.RTCShutdownInternalTracer
 import WebRTC.RTCVideoDecoderFactoryProtocol
 import WebRTC.RTCVideoEncoderFactoryProtocol
+import kotlinx.cinterop.ExperimentalForeignApi
 
-@ThreadLocal
 object WebRtc {
     var videoEncoderFactory: RTCVideoEncoderFactoryProtocol? = null
         set(value) {

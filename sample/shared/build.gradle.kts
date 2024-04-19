@@ -32,31 +32,37 @@ kotlin {
         xcodeConfigurationToNativeBuildType["CUSTOM_RELEASE"] = NativeBuildType.RELEASE
     }
 
-    ios()
+    androidTarget()
+
+    iosX64()
+    iosArm64()
     iosSimulatorArm64()
 
-    sourceSets {
-        val iosMain by getting
-        val iosSimulatorArm64Main by getting
-        iosSimulatorArm64Main.dependsOn(iosMain)
+    js {
+        useCommonJs()
+        browser()
+    }
 
-        val iosTest by getting
-        val iosSimulatorArm64Test by getting
-        iosSimulatorArm64Test.dependsOn(iosTest)
+    sourceSets {
+        commonMain.dependencies {
+            api(project(":webrtc-kmp"))
+            api(deps.decompose)
+            implementation(deps.kotlin.coroutines)
+            implementation(deps.kermit)
+        }
+
+        androidMain.dependencies {
+            implementation(project.dependencies.platform(deps.firebase.bom))
+            implementation(deps.firebase.firestore)
+            implementation(deps.kotlin.coroutinesPlayServices)
+        }
+
+        jsMain.dependencies {
+            implementation(npm("firebase", version = "9.9.1"))
+        }
     }
 }
 
 android {
     namespace = "com.shepeliev.webrtckmp.sample.shared"
-}
-
-dependencies {
-    commonMainApi(project(":webrtc-kmp"))
-    commonMainApi(deps.decompose)
-    commonMainImplementation(deps.kotlin.coroutines)
-    commonMainImplementation(deps.kermit)
-    androidMainImplementation(platform(deps.firebase.bom))
-    androidMainImplementation(deps.firebase.firestore)
-    androidMainImplementation(deps.kotlin.coroutinesPlayServices)
-    jsMainImplementation(npm("firebase", version = "9.9.1"))
 }

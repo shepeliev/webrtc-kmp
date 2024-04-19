@@ -1,6 +1,9 @@
+@file:OptIn(ExperimentalForeignApi::class)
+
 package com.shepeliev.webrtckmp
 
 import WebRTC.RTCLegacyStatsReport
+import kotlinx.cinterop.ExperimentalForeignApi
 
 actual class RtcStatsReport(val native: RTCLegacyStatsReport) {
     actual val timestampUs: Long = (native.timestamp * 1_000_000).toLong()
