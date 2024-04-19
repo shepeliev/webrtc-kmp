@@ -5,24 +5,18 @@ plugins {
 }
 
 kotlin {
-    android()
-
-    js {
-        useCommonJs()
-        browser()
-    }
-
-    sourceSets {
-        getByName("commonTest") {
-            dependencies {
-                implementation(kotlin("test"))
-                implementation(kotlin("test-annotations-common"))
+    targets.all {
+        compilations.all {
+            kotlinOptions {
+                freeCompilerArgs += listOf(
+                    "-opt-in=kotlin.RequiresOptIn",
+                    "-Xexpect-actual-classes",
+                )
             }
         }
     }
 }
 
-@Suppress("UnstableApiUsage")
 android {
     compileSdk = AndroidConfig.compileSdkVersion
 

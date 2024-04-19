@@ -1,7 +1,10 @@
+@file:OptIn(ExperimentalForeignApi::class)
+
 package com.shepeliev.webrtckmp
 
 import WebRTC.RTCCameraVideoCapturer
 import WebRTC.RTCMediaConstraints
+import kotlinx.cinterop.ExperimentalForeignApi
 import platform.AVFoundation.AVCaptureDevice
 import platform.Foundation.NSUUID
 

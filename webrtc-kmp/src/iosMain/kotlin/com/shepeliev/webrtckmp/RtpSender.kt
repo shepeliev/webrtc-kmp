@@ -1,6 +1,9 @@
+@file:OptIn(ExperimentalForeignApi::class)
+
 package com.shepeliev.webrtckmp
 
 import WebRTC.RTCRtpSender
+import kotlinx.cinterop.ExperimentalForeignApi
 
 actual class RtpSender(val ios: RTCRtpSender, track: MediaStreamTrack?) {
     actual val id: String

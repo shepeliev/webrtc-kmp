@@ -1,7 +1,10 @@
+@file:OptIn(ExperimentalForeignApi::class)
+
 package com.shepeliev.webrtckmp
 
 import WebRTC.RTCRtpTransceiver
 import WebRTC.RTCRtpTransceiverDirection
+import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.alloc
 import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.ptr

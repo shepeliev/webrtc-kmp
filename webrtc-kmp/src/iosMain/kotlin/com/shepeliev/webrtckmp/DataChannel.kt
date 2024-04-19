@@ -1,9 +1,12 @@
+@file:OptIn(ExperimentalForeignApi::class)
+
 package com.shepeliev.webrtckmp
 
 import WebRTC.RTCDataBuffer
 import WebRTC.RTCDataChannel
 import WebRTC.RTCDataChannelDelegateProtocol
 import WebRTC.RTCDataChannelState
+import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.Flow

@@ -1,6 +1,9 @@
+@file:OptIn(ExperimentalForeignApi::class)
+
 package com.shepeliev.webrtckmp
 
 import WebRTC.RTCIceCandidate
+import kotlinx.cinterop.ExperimentalForeignApi
 
 actual class IceCandidate internal constructor(val native: RTCIceCandidate) {
     actual constructor(sdpMid: String, sdpMLineIndex: Int, candidate: String) : this(

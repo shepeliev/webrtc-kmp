@@ -6,12 +6,6 @@ plugins {
 }
 
 allprojects {
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
-        kotlinOptions {
-            freeCompilerArgs = freeCompilerArgs + "-opt-in=kotlin.RequiresOptIn"
-        }
-    }
-
     val localProps = Properties()
     val localPropertiesFile = rootProject.file("local.properties")
     if (localPropertiesFile.exists()) {

@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalForeignApi::class)
+
 package com.shepeliev.webrtckmp
 
 import WebRTC.RTCAudioTrack
@@ -29,6 +31,7 @@ import com.shepeliev.webrtckmp.PeerConnectionEvent.RemovedIceCandidates
 import com.shepeliev.webrtckmp.PeerConnectionEvent.SignalingStateChange
 import com.shepeliev.webrtckmp.PeerConnectionEvent.StandardizedIceConnectionChange
 import com.shepeliev.webrtckmp.PeerConnectionEvent.Track
+import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
