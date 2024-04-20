@@ -1,9 +1,12 @@
 import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+
 
 plugins {
     kotlin("multiplatform")
     id("com.android.application")
+    kotlin("native.cocoapods")
     alias(libs.plugins.jetbrains.compose)
 }
 
@@ -27,14 +30,27 @@ kotlin {
 //        binaries.executable()
 //    }
 
+    cocoapods {
+        version = "1.0"
+        summary = "Compose app"
+        homepage = "not published"
+        ios.deploymentTarget = "13.0"
+
+        pod("WebRTC-SDK") {
+            version = "114.5735.02"
+            moduleName = "WebRTC"
+            packageName = "WebRTC"
+        }
+    }
+
     androidTarget {
         configureJvmTarget()
     }
 
     listOf(
-        iosX64(),
-        iosArm64(),
-        iosSimulatorArm64()
+        iosX64 { configureWebRtcCinterops() },
+        iosArm64 { configureWebRtcCinterops() },
+        iosSimulatorArm64 { configureWebRtcCinterops() }
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
@@ -50,7 +66,6 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
-            implementation(libs.accompanist.permissions)
             implementation(libs.kermit)
             implementation(project(":webrtc-kmp"))
         }
@@ -58,6 +73,7 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.compose.ui.tooling.preview)
             implementation(libs.androidx.activity.compose)
+            implementation(libs.accompanist.permissions)
         }
     }
 }
@@ -98,4 +114,27 @@ android {
 
 compose.experimental {
     web.application {}
+}
+
+fun KotlinNativeTarget.configureWebRtcCinterops() {
+    val webRtcFrameworkPath = file("$buildDir/cocoapods/synthetic/IOS/Pods/WebRTC-SDK")
+        .resolveArchPath(konanTarget, "WebRTC")
+    compilations.getByName("main") {
+        cinterops.getByName("WebRTC") {
+            compilerOpts("-framework", "WebRTC", "-F$webRtcFrameworkPath")
+        }
+    }
+
+    binaries {
+        getTest("DEBUG").apply {
+            linkerOpts(
+                "-framework",
+                "WebRTC",
+                "-F$webRtcFrameworkPath",
+                "-rpath",
+                "$webRtcFrameworkPath",
+                "-ObjC"
+            )
+        }
+    }
 }

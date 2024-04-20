@@ -20,6 +20,8 @@ import WebRTC.RTCSessionDescription
 import WebRTC.RTCSignalingState
 import WebRTC.RTCVideoTrack
 import WebRTC.dataChannelForLabel
+import WebRTC.kRTCMediaStreamTrackKindAudio
+import WebRTC.kRTCMediaStreamTrackKindVideo
 import com.shepeliev.webrtckmp.PeerConnectionEvent.ConnectionStateChange
 import com.shepeliev.webrtckmp.PeerConnectionEvent.IceConnectionStateChange
 import com.shepeliev.webrtckmp.PeerConnectionEvent.IceGatheringStateChange
@@ -32,9 +34,13 @@ import com.shepeliev.webrtckmp.PeerConnectionEvent.SignalingStateChange
 import com.shepeliev.webrtckmp.PeerConnectionEvent.StandardizedIceConnectionChange
 import com.shepeliev.webrtckmp.PeerConnectionEvent.Track
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.launch
 import platform.darwin.NSObject
 
 actual class PeerConnection actual constructor(
@@ -69,6 +75,7 @@ actual class PeerConnection actual constructor(
         MutableSharedFlow<PeerConnectionEvent>(extraBufferCapacity = FLOW_BUFFER_CAPACITY)
     internal actual val peerConnectionEvent: Flow<PeerConnectionEvent> = _peerConnectionEvent.asSharedFlow()
 
+    private val coroutineScope = CoroutineScope(Dispatchers.Main)
     private val localTracks = mutableMapOf<String, MediaStreamTrackImpl>()
     private val remoteTracks = mutableMapOf<String, MediaStreamTrackImpl>()
 
@@ -180,11 +187,12 @@ actual class PeerConnection actual constructor(
         remoteTracks.values.forEach(MediaStreamTrack::stop)
         remoteTracks.clear()
         ios.close()
+        coroutineScope.cancel()
     }
 
     override fun peerConnection(peerConnection: RTCPeerConnection, didChangeSignalingState: RTCSignalingState) {
         val event = SignalingStateChange(rtcSignalingStateAsCommon(didChangeSignalingState))
-        _peerConnectionEvent.tryEmit(event)
+        coroutineScope.launch { _peerConnectionEvent.emit(event) }
     }
 
     @Suppress("CONFLICTING_OVERLOADS", "PARAMETER_NAME_CHANGED_ON_OVERRIDE")
@@ -204,34 +212,34 @@ actual class PeerConnection actual constructor(
     }
 
     override fun peerConnectionShouldNegotiate(peerConnection: RTCPeerConnection) {
-        _peerConnectionEvent.tryEmit(NegotiationNeeded)
+        coroutineScope.launch { _peerConnectionEvent.emit(NegotiationNeeded) }
     }
 
     @Suppress("CONFLICTING_OVERLOADS", "PARAMETER_NAME_CHANGED_ON_OVERRIDE")
     override fun peerConnection(peerConnection: RTCPeerConnection, didChangeIceConnectionState: RTCIceConnectionState) {
         val event = IceConnectionStateChange(rtcIceConnectionStateAsCommon(didChangeIceConnectionState))
-        _peerConnectionEvent.tryEmit(event)
+        coroutineScope.launch { _peerConnectionEvent.emit(event) }
     }
 
     override fun peerConnection(peerConnection: RTCPeerConnection, didChangeIceGatheringState: RTCIceGatheringState) {
         val event = IceGatheringStateChange(rtcIceGatheringStateAsCommon(didChangeIceGatheringState))
-        _peerConnectionEvent.tryEmit(event)
+        coroutineScope.launch { _peerConnectionEvent.emit(event) }
     }
 
     override fun peerConnection(peerConnection: RTCPeerConnection, didGenerateIceCandidate: RTCIceCandidate) {
         val event = NewIceCandidate(IceCandidate(didGenerateIceCandidate))
-        _peerConnectionEvent.tryEmit(event)
+        coroutineScope.launch { _peerConnectionEvent.emit(event) }
     }
 
     override fun peerConnection(peerConnection: RTCPeerConnection, didRemoveIceCandidates: List<*>) {
         val candidates = didRemoveIceCandidates.map { IceCandidate(it as RTCIceCandidate) }
         val event = RemovedIceCandidates(candidates)
-        _peerConnectionEvent.tryEmit(event)
+        coroutineScope.launch { _peerConnectionEvent.emit(event) }
     }
 
     override fun peerConnection(peerConnection: RTCPeerConnection, didOpenDataChannel: RTCDataChannel) {
         val event = NewDataChannel(DataChannel(didOpenDataChannel))
-        _peerConnectionEvent.tryEmit(event)
+        coroutineScope.launch { _peerConnectionEvent.emit(event) }
     }
 
     @Suppress("CONFLICTING_OVERLOADS", "PARAMETER_NAME_CHANGED_ON_OVERRIDE")
@@ -242,12 +250,12 @@ actual class PeerConnection actual constructor(
         val event = StandardizedIceConnectionChange(
             rtcIceConnectionStateAsCommon(didChangeStandardizedIceConnectionState)
         )
-        _peerConnectionEvent.tryEmit(event)
+        coroutineScope.launch { _peerConnectionEvent.emit(event) }
     }
 
     override fun peerConnection(peerConnection: RTCPeerConnection, didChangeConnectionState: RTCPeerConnectionState) {
         val event = ConnectionStateChange(rtcPeerConnectionStateAsCommon(didChangeConnectionState))
-        _peerConnectionEvent.tryEmit(event)
+        coroutineScope.launch { _peerConnectionEvent.emit(event) }
     }
 
     override fun peerConnection(peerConnection: RTCPeerConnection, didAddReceiver: RTCRtpReceiver, streams: List<*>) {
@@ -256,27 +264,26 @@ actual class PeerConnection actual constructor(
             .find { it.receiver.receiverId == didAddReceiver.receiverId }
             ?: return
 
-        val iosStreams = streams.map { it as RTCMediaStream }
+        val senderTrack = localTracks[transceiver.sender.track?.trackId]
 
-        val audioTracks = iosStreams
-            .flatMap { it.audioTracks }
-            .map { it as RTCAudioTrack }
-            .map { remoteTracks.getOrPut(it.trackId) { RemoteAudioStreamTrack(it) } }
-
-        val videoTracks = iosStreams
-            .flatMap { it.videoTracks }
-            .map { it as RTCVideoTrack }
-            .map { remoteTracks.getOrPut(it.trackId) { RemoteVideoStreamTrack(it) } }
-
-        val commonStreams = iosStreams.map { iosStream ->
-            MediaStream(ios = iosStream, id = iosStream.streamId).also { stream ->
-                audioTracks.forEach(stream::addTrack)
-                videoTracks.forEach(stream::addTrack)
+        val receiverTrack = didAddReceiver.track()?.let {
+            remoteTracks.getOrPut(it.trackId) {
+                when (val kind = it.kind()) {
+                    kRTCMediaStreamTrackKindAudio -> RemoteAudioStreamTrack(it as RTCAudioTrack)
+                    kRTCMediaStreamTrackKindVideo -> RemoteVideoStreamTrack(it as RTCVideoTrack)
+                    else -> error("Unsupported track kind: $kind")
+                }
             }
         }
 
-        val receiverTrack = remoteTracks[didAddReceiver.track?.trackId]
-        val senderTrack = localTracks[transceiver.sender.track?.trackId]
+        val iosStreams = streams.map { it as RTCMediaStream }
+
+        val commonStreams = iosStreams.map { iosStream ->
+            MediaStream(ios = iosStream, id = iosStream.streamId).also { stream ->
+                iosStream.audioTracks.forEach { stream.addTrack(RemoteAudioStreamTrack(it as RTCAudioTrack)) }
+                iosStream.videoTracks.forEach { stream.addTrack(RemoteVideoStreamTrack(it as RTCVideoTrack)) }
+            }
+        }
 
         val trackEvent = TrackEvent(
             receiver = RtpReceiver(didAddReceiver, receiverTrack),
@@ -286,13 +293,13 @@ actual class PeerConnection actual constructor(
         )
 
         val event = Track(trackEvent)
-        _peerConnectionEvent.tryEmit(event)
+        coroutineScope.launch { _peerConnectionEvent.emit(event) }
     }
 
     override fun peerConnection(peerConnection: RTCPeerConnection, didRemoveReceiver: RTCRtpReceiver) {
         val track = remoteTracks.remove(didRemoveReceiver.track?.trackId)
         val event = RemoveTrack(RtpReceiver(didRemoveReceiver, track))
-        _peerConnectionEvent.tryEmit(event)
+        coroutineScope.launch { _peerConnectionEvent.emit(event) }
         track?.stop()
     }
 }
