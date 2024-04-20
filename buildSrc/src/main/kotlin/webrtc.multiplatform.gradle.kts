@@ -4,21 +4,10 @@ plugins {
 }
 
 kotlin {
-    targets.all {
-        compilations.all {
-            kotlinOptions {
-                freeCompilerArgs += listOf(
-                    "-opt-in=kotlin.RequiresOptIn",
-                    "-Xexpect-actual-classes",
-                )
-            }
-        }
-    }
+    configureKotlinCompilerArgs()
 
     androidTarget {
-        compilations.all {
-            kotlinOptions.jvmTarget = "1.8"
-        }
+        configureJvmTarget()
     }
 }
 

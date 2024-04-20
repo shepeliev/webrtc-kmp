@@ -3,6 +3,7 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.ktlint)
     alias(libs.plugins.nexus)
+    alias(libs.plugins.jetbrains.compose) apply false
 }
 
 val localProps = Properties()
