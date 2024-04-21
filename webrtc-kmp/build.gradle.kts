@@ -1,5 +1,7 @@
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+
 plugins {
-    id("multiplatform-setup")
+    id("webrtc.multiplatform")
     kotlin("native.cocoapods")
     id("maven-publish")
     id("signing")
@@ -15,10 +17,10 @@ kotlin {
         version = webRtcKmpVersion
         summary = "WebRTC Kotlin Multiplatform SDK"
         homepage = "https://github.com/shepeliev/webrtc-kmp"
-        ios.deploymentTarget = "10.0"
+        ios.deploymentTarget = "13.0"
 
         pod("WebRTC-SDK") {
-            version = "114.5735.02"
+            version = libs.versions.webrtc.ios.sdk.get()
             moduleName = "WebRTC"
             packageName = "WebRTC"
         }
@@ -27,18 +29,36 @@ kotlin {
     androidTarget {
         publishAllLibraryVariants()
     }
-    jvm()
-    ios { configureIos() }
-    iosSimulatorArm64 { configureIos() }
+
+    iosX64 { configureWebRtcCinterops() }
+    iosArm64 { configureWebRtcCinterops() }
+    iosSimulatorArm64 { configureWebRtcCinterops() }
+
+    js {
+        useCommonJs()
+        browser()
+    }
 
     sourceSets {
-        val iosMain by getting
-        val iosSimulatorArm64Main by getting
-        iosSimulatorArm64Main.dependsOn(iosMain)
+        commonMain.dependencies {
+            implementation(libs.kotlin.coroutines)
+        }
 
-        val iosTest by getting
-        val iosSimulatorArm64Test by getting
-        iosSimulatorArm64Test.dependsOn(iosTest)
+        androidMain.dependencies {
+            api(libs.webrtc.sdk)
+            implementation(libs.kotlin.coroutines.android)
+            implementation(libs.androidx.coreKtx)
+            implementation(libs.androidx.startup)
+        }
+
+        jsMain.dependencies {
+            implementation(npm("webrtc-adapter", "8.1.1"))
+        }
+
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            implementation(kotlin("test-annotations-common"))
+        }
     }
 }
 
@@ -48,40 +68,11 @@ android {
     defaultConfig {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-}
 
-dependencies {
-    commonMainImplementation(deps.kotlin.coroutines)
-    androidMainImplementation(deps.androidx.coreKtx)
-    androidMainApi(deps.webrtc.android)
-    androidTestImplementation(deps.androidx.test.core)
-    androidTestImplementation(deps.androidx.test.runner)
-
-    jvmMainApi(deps.webrtc.java)
-    jvmMainImplementation(deps.bouncyCastle)
-
-    val osName = System.getProperty("os.name").lowercase()
-    val hostOS = if (osName.contains("mac")) {
-        "macos"
-    } else if (osName.contains("linux")) {
-        "linux"
-    } else if (osName.contains("windows")) {
-        "windows"
-    } else {
-        throw IllegalStateException("Unsupported OS: $osName")
+    dependencies {
+        androidTestImplementation(libs.androidx.test.core)
+        androidTestImplementation(libs.androidx.test.runner)
     }
-    val hostArch = when (val arch = System.getProperty("os.arch").lowercase()) {
-        "amd64" -> "x86_64"
-        else -> arch
-    }
-    jvmTestImplementation(
-        group = deps.webrtc.java.get().group!!,
-        name = deps.webrtc.java.get().name,
-        version = deps.webrtc.java.get().version,
-        classifier = "$hostOS-$hostArch"
-    )
-
-    jsMainImplementation(npm("webrtc-adapter", "8.1.1"))
 }
 
 publishing {
@@ -125,14 +116,14 @@ publishing {
 }
 
 signing {
-    val signingKey: String by extra
-    val signingPassword: String by extra
+    val signingKey: String by rootProject.extra
+    val signingPassword: String by rootProject.extra
 
     useInMemoryPgpKeys(signingKey, signingPassword)
     sign(publishing.publications)
 }
 
-fun org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget.configureIos() {
+fun KotlinNativeTarget.configureWebRtcCinterops() {
     val webRtcFrameworkPath = file("$buildDir/cocoapods/synthetic/IOS/Pods/WebRTC-SDK")
         .resolveArchPath(konanTarget, "WebRTC")
     compilations.getByName("main") {

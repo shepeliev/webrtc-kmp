@@ -1,10 +1,11 @@
-@file:OptIn(kotlinx.cinterop.ExperimentalForeignApi::class)
+@file:OptIn(ExperimentalForeignApi::class)
 
 package com.shepeliev.webrtckmp
 
 import WebRTC.RTCAudioTrack
 import WebRTC.RTCMediaStream
 import WebRTC.RTCVideoTrack
+import kotlinx.cinterop.ExperimentalForeignApi
 import platform.Foundation.NSUUID
 
 actual class MediaStream internal constructor(

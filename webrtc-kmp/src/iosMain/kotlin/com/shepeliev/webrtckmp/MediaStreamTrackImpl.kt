@@ -1,4 +1,4 @@
-@file:OptIn(kotlinx.cinterop.ExperimentalForeignApi::class)
+@file:OptIn(ExperimentalForeignApi::class)
 
 package com.shepeliev.webrtckmp
 
@@ -6,6 +6,7 @@ import WebRTC.RTCMediaStreamTrack
 import WebRTC.RTCMediaStreamTrackState
 import WebRTC.kRTCMediaStreamTrackKindAudio
 import WebRTC.kRTCMediaStreamTrackKindVideo
+import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

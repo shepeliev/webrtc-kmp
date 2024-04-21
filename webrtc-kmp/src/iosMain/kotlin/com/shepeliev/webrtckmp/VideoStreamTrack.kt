@@ -1,8 +1,9 @@
-@file:OptIn(kotlinx.cinterop.ExperimentalForeignApi::class)
+@file:OptIn(ExperimentalForeignApi::class)
 
 package com.shepeliev.webrtckmp
 
 import WebRTC.RTCVideoRendererProtocol
+import kotlinx.cinterop.ExperimentalForeignApi
 
 actual interface VideoStreamTrack : MediaStreamTrack {
     actual suspend fun switchCamera(deviceId: String?)

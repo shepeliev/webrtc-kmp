@@ -1,11 +1,5 @@
 @Suppress("UnstableApiUsage")
 dependencyResolutionManagement {
-    versionCatalogs {
-        create("deps") {
-            from(files("libs.versions.toml"))
-        }
-    }
-
     repositories {
         mavenLocal()
         mavenCentral()
@@ -21,10 +15,7 @@ pluginManagement {
     }
 }
 
-rootProject.name = "WebRTC"
-
+rootProject.name = "webrtc-kmp"
 include(":webrtc-kmp")
-include(":sample:shared")
-include(":sample:app-android")
-include(":sample:app-web")
+include(":sample:composeApp")
 include(":sample:app-jvm")

@@ -81,24 +81,17 @@ private object MediaDevicesImpl : MediaDevices {
     override suspend fun supportsDisplayMedia(): Boolean = true
 
     private fun checkRecordAudioPermission() {
-        val result = ContextCompat.checkSelfPermission(
-            ApplicationContextHolder.context,
-            Manifest.permission.RECORD_AUDIO
-        )
+        val result = ContextCompat.checkSelfPermission(WebRtc.applicationContext, Manifest.permission.RECORD_AUDIO)
         if (result != PackageManager.PERMISSION_GRANTED) throw RecordAudioPermissionException()
     }
 
     private fun checkCameraPermission() {
-        val result = ContextCompat.checkSelfPermission(
-            ApplicationContextHolder.context,
-            Manifest.permission.CAMERA
-        )
+        val result = ContextCompat.checkSelfPermission(WebRtc.applicationContext, Manifest.permission.CAMERA)
         if (result != PackageManager.PERMISSION_GRANTED) throw CameraPermissionException()
     }
 
     override suspend fun enumerateDevices(): List<MediaDeviceInfo> {
-        val enumerator = Camera2Enumerator(ApplicationContextHolder.context)
-        return enumerator.deviceNames.map {
+        return WebRtc.cameraEnumerator.deviceNames.map {
             MediaDeviceInfo(
                 deviceId = it,
                 label = it,

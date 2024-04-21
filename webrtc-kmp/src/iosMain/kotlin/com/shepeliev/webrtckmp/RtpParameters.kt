@@ -1,4 +1,4 @@
-@file:OptIn(kotlinx.cinterop.ExperimentalForeignApi::class)
+@file:OptIn(ExperimentalForeignApi::class)
 
 package com.shepeliev.webrtckmp
 
@@ -7,6 +7,7 @@ import WebRTC.RTCRtpCodecParameters
 import WebRTC.RTCRtpEncodingParameters
 import WebRTC.RTCRtpHeaderExtension
 import WebRTC.RTCRtpParameters
+import kotlinx.cinterop.ExperimentalForeignApi
 
 actual class RtpParameters(val native: RTCRtpParameters) {
     actual val codecs: List<RtpCodecParameters>

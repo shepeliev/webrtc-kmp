@@ -1,8 +1,9 @@
-@file:OptIn(kotlinx.cinterop.ExperimentalForeignApi::class)
+@file:OptIn(ExperimentalForeignApi::class)
 
 package com.shepeliev.webrtckmp
 
 import WebRTC.RTCRtpReceiver
+import kotlinx.cinterop.ExperimentalForeignApi
 
 actual class RtpReceiver(val native: RTCRtpReceiver, actual val track: MediaStreamTrack?) {
     actual val id: String

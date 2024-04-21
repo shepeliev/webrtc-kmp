@@ -1,9 +1,10 @@
-@file:OptIn(kotlinx.cinterop.ExperimentalForeignApi::class)
+@file:OptIn(ExperimentalForeignApi::class)
 
 package com.shepeliev.webrtckmp
 
 import WebRTC.RTCSdpType
 import WebRTC.RTCSessionDescription
+import kotlinx.cinterop.ExperimentalForeignApi
 
 internal fun SessionDescription.asIos(): RTCSessionDescription {
     return RTCSessionDescription(type.asIos(), sdp)

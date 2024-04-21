@@ -1,12 +1,10 @@
 *.iml
 .gradle
-/local.properties
-/.idea
+.idea
+local.properties
 .DS_Store
 build/
-/captures
+captures
+xcuserdata
 .externalNativeBuild
 .cxx
-local.properties
-Carthage/
-Cartfile.resolved

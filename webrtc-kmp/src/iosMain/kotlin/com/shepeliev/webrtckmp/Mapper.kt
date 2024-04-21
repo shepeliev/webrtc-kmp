@@ -1,4 +1,4 @@
-@file:OptIn(kotlinx.cinterop.ExperimentalForeignApi::class)
+@file:OptIn(ExperimentalForeignApi::class)
 
 package com.shepeliev.webrtckmp
 
@@ -6,6 +6,7 @@ import WebRTC.RTCIceConnectionState
 import WebRTC.RTCIceGatheringState
 import WebRTC.RTCPeerConnectionState
 import WebRTC.RTCSignalingState
+import kotlinx.cinterop.ExperimentalForeignApi
 
 internal fun rtcSignalingStateAsCommon(state: RTCSignalingState): SignalingState {
     return when (state) {
