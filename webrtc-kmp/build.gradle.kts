@@ -1,5 +1,7 @@
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+
 plugins {
-    id("multiplatform-setup")
+    id("webrtc.multiplatform")
     kotlin("native.cocoapods")
     id("maven-publish")
     id("signing")
@@ -28,9 +30,9 @@ kotlin {
         publishAllLibraryVariants()
     }
 
-    iosX64 { configureIos() }
-    iosArm64 { configureIos() }
-    iosSimulatorArm64 { configureIos() }
+    iosX64 { configureWebRtcCinterops() }
+    iosArm64 { configureWebRtcCinterops() }
+    iosSimulatorArm64 { configureWebRtcCinterops() }
 
     js {
         useCommonJs()
@@ -39,13 +41,13 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(deps.kotlin.coroutines)
+            implementation(libs.kotlin.coroutines)
         }
 
         androidMain.dependencies {
-            implementation(deps.kotlin.coroutines)
-            implementation(deps.androidx.coreKtx)
-            api(deps.webrtcSdk)
+            implementation(libs.kotlin.coroutines.android)
+            implementation(libs.androidx.coreKtx)
+            api(libs.webrtc.sdk)
         }
 
         jsMain.dependencies {
@@ -67,8 +69,8 @@ android {
     }
 
     dependencies {
-        androidTestImplementation(deps.androidx.test.core)
-        androidTestImplementation(deps.androidx.test.runner)
+        androidTestImplementation(libs.androidx.test.core)
+        androidTestImplementation(libs.androidx.test.runner)
     }
 }
 
@@ -113,14 +115,14 @@ publishing {
 }
 
 signing {
-    val signingKey: String by extra
-    val signingPassword: String by extra
+    val signingKey: String by rootProject.extra
+    val signingPassword: String by rootProject.extra
 
     useInMemoryPgpKeys(signingKey, signingPassword)
     sign(publishing.publications)
 }
 
-fun org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget.configureIos() {
+fun KotlinNativeTarget.configureWebRtcCinterops() {
     val webRtcFrameworkPath = file("$buildDir/cocoapods/synthetic/IOS/Pods/WebRTC-SDK")
         .resolveArchPath(konanTarget, "WebRTC")
     compilations.getByName("main") {

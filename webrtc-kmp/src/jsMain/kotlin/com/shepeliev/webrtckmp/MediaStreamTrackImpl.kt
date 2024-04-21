@@ -9,7 +9,7 @@ import org.w3c.dom.mediacapture.LIVE
 import org.w3c.dom.mediacapture.MediaStreamTrack as JsMediaStreamTrack
 import org.w3c.dom.mediacapture.MediaStreamTrackState as JsMediaStreamTrackState
 
-internal abstract class MediaStreamTrackImpl(val js: JsMediaStreamTrack) : MediaStreamTrack {
+abstract class MediaStreamTrackImpl(val js: JsMediaStreamTrack) : MediaStreamTrack {
     override val id: String
         get() = js.id
 

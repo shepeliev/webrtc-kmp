@@ -6,11 +6,13 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
 import android.net.Uri
+import org.webrtc.PeerConnectionFactory
 
 internal class ApplicationContextHolder : ContentProvider() {
 
     override fun onCreate(): Boolean {
         ApplicationContextHolder.context = checkNotNull(context)
+        WebRtc.factoryInitializationOptionsBuilder = PeerConnectionFactory.InitializationOptions.builder(context)
         return true
     }
 
