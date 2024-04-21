@@ -20,7 +20,7 @@ kotlin {
         ios.deploymentTarget = "13.0"
 
         pod("WebRTC-SDK") {
-            version = "114.5735.02"
+            version = libs.versions.webrtc.ios.sdk.get()
             moduleName = "WebRTC"
             packageName = "WebRTC"
         }

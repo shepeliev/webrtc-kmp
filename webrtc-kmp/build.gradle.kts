@@ -17,10 +17,10 @@ kotlin {
         version = webRtcKmpVersion
         summary = "WebRTC Kotlin Multiplatform SDK"
         homepage = "https://github.com/shepeliev/webrtc-kmp"
-        ios.deploymentTarget = "10.0"
+        ios.deploymentTarget = "13.0"
 
         pod("WebRTC-SDK") {
-            version = "114.5735.02"
+            version = libs.versions.webrtc.ios.sdk.get()
             moduleName = "WebRTC"
             packageName = "WebRTC"
         }
