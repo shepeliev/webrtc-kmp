@@ -13,23 +13,6 @@ plugins {
 kotlin {
     configureKotlinCompilerArgs()
 
-//    @OptIn(ExperimentalWasmDsl::class)
-//    wasmJs {
-//        moduleName = "composeApp"
-//        browser {
-//            commonWebpackConfig {
-//                outputFileName = "composeApp.js"
-//                devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
-//                    static = (static ?: mutableListOf()).apply {
-//                        // Serve sources to debug inside browser
-//                        add(project.projectDir.path)
-//                    }
-//                }
-//            }
-//        }
-//        binaries.executable()
-//    }
-
     cocoapods {
         version = "1.0"
         summary = "Compose app"
@@ -58,6 +41,12 @@ kotlin {
         }
     }
 
+    js {
+        browser {
+            binaries.executable()
+        }
+    }
+
     sourceSets {
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -74,6 +63,14 @@ kotlin {
             implementation(libs.compose.ui.tooling.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.accompanist.permissions)
+        }
+
+        jsMain.dependencies {
+            implementation(project.dependencies.platform(libs.kotlin.wrappers.bom))
+            implementation(libs.kotlin.wrappers.mui)
+            implementation(libs.kotlin.wrappers.react)
+            implementation(libs.kotlin.wrappers.reactDom)
+            implementation(libs.kotlin.wrappers.emotion)
         }
     }
 }
@@ -110,10 +107,6 @@ android {
     dependencies {
         debugImplementation(libs.compose.ui.tooling)
     }
-}
-
-compose.experimental {
-    web.application {}
 }
 
 fun KotlinNativeTarget.configureWebRtcCinterops() {
