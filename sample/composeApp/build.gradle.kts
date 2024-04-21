@@ -55,11 +55,13 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
+            implementation(libs.kotlin.coroutines)
             implementation(libs.kermit)
             implementation(project(":webrtc-kmp"))
         }
 
         androidMain.dependencies {
+            implementation(libs.kotlin.coroutines.android)
             implementation(libs.compose.ui.tooling.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.accompanist.permissions)

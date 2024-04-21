@@ -45,7 +45,7 @@ kotlin {
         }
 
         androidMain.dependencies {
-            implementation(libs.kotlin.coroutines)
+            implementation(libs.kotlin.coroutines.android)
             implementation(libs.androidx.coreKtx)
             api(libs.webrtc.sdk)
         }
