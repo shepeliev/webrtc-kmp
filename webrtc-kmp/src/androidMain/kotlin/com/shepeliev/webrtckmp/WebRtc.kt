@@ -2,6 +2,7 @@
 
 package com.shepeliev.webrtckmp
 
+import android.content.Context
 import org.webrtc.Camera1Enumerator
 import org.webrtc.Camera2Enumerator
 import org.webrtc.CameraEnumerator
@@ -14,23 +15,20 @@ import org.webrtc.VideoEncoderFactory
 
 @Suppress("MemberVisibilityCanBePrivate")
 object WebRtc {
-    var videoEncoderFactory: VideoEncoderFactory? = null
-    var videoDecoderFactory: VideoDecoderFactory? = null
-    var customPeerConnectionFactory: PeerConnectionFactory? = null
-    lateinit var factoryInitializationOptionsBuilder: PeerConnectionFactory.InitializationOptions.Builder
-        internal set
-
     private var _rootEglBase: EglBase? = null
     val rootEglBase: EglBase by lazy {
         _rootEglBase ?: EglBase.create().also { _rootEglBase = it }
     }
 
-    var cameraEnumerator: CameraEnumerator =
-        if (Camera2Enumerator.isSupported(ApplicationContextHolder.context)) {
-            Camera2Enumerator(ApplicationContextHolder.context)
-        } else {
-            Camera1Enumerator()
-        }
+    var videoEncoderFactory: VideoEncoderFactory? = null
+    var videoDecoderFactory: VideoDecoderFactory? = null
+    var customCameraEnumerator: CameraEnumerator? = null
+    var customPeerConnectionFactory: PeerConnectionFactory? = null
+    lateinit var factoryInitializationOptionsBuilder: PeerConnectionFactory.InitializationOptions.Builder
+        private set
+
+    internal lateinit var applicationContext: Context
+        private set
 
     internal val peerConnectionFactory: PeerConnectionFactory by lazy {
         customPeerConnectionFactory ?: run {
@@ -48,9 +46,22 @@ object WebRtc {
         }
     }
 
+    internal val cameraEnumerator: CameraEnumerator by lazy {
+        customCameraEnumerator ?: if (Camera2Enumerator.isSupported(applicationContext)) {
+            Camera2Enumerator(applicationContext)
+        } else {
+            Camera1Enumerator()
+        }
+    }
+
     @Suppress("unused")
     fun setRootEglBase(eglBase: EglBase) {
         check(_rootEglBase == null) { "Root EglBase is already set" }
         _rootEglBase = eglBase
+    }
+
+    internal fun initialize(context: Context) {
+        applicationContext = context.applicationContext
+        factoryInitializationOptionsBuilder = PeerConnectionFactory.InitializationOptions.builder(context)
     }
 }
