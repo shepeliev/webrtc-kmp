@@ -21,7 +21,9 @@ object WebRtc {
         internal set
 
     private var _rootEglBase: EglBase? = null
-    val rootEglBase: EglBase by lazy { _rootEglBase ?: EglBase.create() }
+    val rootEglBase: EglBase by lazy {
+        _rootEglBase ?: EglBase.create().also { _rootEglBase = it }
+    }
 
     var cameraEnumerator: CameraEnumerator =
         if (Camera2Enumerator.isSupported(ApplicationContextHolder.context)) {
@@ -48,6 +50,7 @@ object WebRtc {
 
     @Suppress("unused")
     fun setRootEglBase(eglBase: EglBase) {
+        check(_rootEglBase == null) { "Root EglBase is already set" }
         _rootEglBase = eglBase
     }
 }
