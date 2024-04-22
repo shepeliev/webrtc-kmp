@@ -1,3 +1,4 @@
+import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
@@ -47,6 +48,12 @@ kotlin {
         }
     }
 
+    jvm {
+        compilations.all {
+            kotlinOptions.jvmTarget = "17"
+        }
+    }
+
     sourceSets {
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -73,6 +80,30 @@ kotlin {
             implementation(libs.kotlin.wrappers.react)
             implementation(libs.kotlin.wrappers.reactDom)
             implementation(libs.kotlin.wrappers.emotion)
+        }
+
+
+        jvmMain.dependencies {
+            implementation(compose.material)
+            implementation(compose.desktop.currentOs)
+            implementation(libs.kotlin.coroutines.swing)
+
+            val osName = System.getProperty("os.name").lowercase()
+            val hostOS = if (osName.contains("mac")) {
+                "macos"
+            } else if (osName.contains("linux")) {
+                "linux"
+            } else if (osName.contains("windows")) {
+                "windows"
+            } else {
+                throw IllegalStateException("Unsupported OS: $osName")
+            }
+            val hostArch = when (val arch = System.getProperty("os.arch").lowercase()) {
+                "amd64" -> "x86_64"
+                else -> arch
+            }
+
+            implementation(dependencies.variantOf(libs.webrtc.jvm.sdk) { classifier("$hostOS-$hostArch") })
         }
     }
 }
@@ -110,6 +141,31 @@ android {
         debugImplementation(libs.compose.ui.tooling)
     }
 }
+
+compose.desktop {
+    application {
+        mainClass = "com.shepeliev.webrtckmp.MainKt"
+        nativeDistributions {
+            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+            packageName = "KMPTemplate"
+            packageVersion = "1.0.0"
+            macOS {
+                infoPlist {
+                    extraKeysRawXml = macExtraPlistKeys
+                }
+            }
+        }
+    }
+}
+
+val macExtraPlistKeys = """
+    <key>NSCameraUsageDescription</key>
+    <string>Camera is required for video calls</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Microphone is required for audio calls</string>
+    <key>NSCameraUseContinuityCameraDeviceType</key>
+    <true/>
+""".trimIndent()
 
 fun KotlinNativeTarget.configureWebRtcCinterops() {
     val webRtcFrameworkPath = file("$buildDir/cocoapods/synthetic/IOS/Pods/WebRTC-SDK")

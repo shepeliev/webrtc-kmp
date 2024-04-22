@@ -39,13 +39,15 @@ kotlin {
         browser()
     }
 
+    jvm()
+
     sourceSets {
         commonMain.dependencies {
             implementation(libs.kotlin.coroutines)
         }
 
         androidMain.dependencies {
-            api(libs.webrtc.sdk)
+            api(libs.webrtc.android.sdk)
             implementation(libs.kotlin.coroutines.android)
             implementation(libs.androidx.coreKtx)
             implementation(libs.androidx.startup)
@@ -53,6 +55,11 @@ kotlin {
 
         jsMain.dependencies {
             implementation(npm("webrtc-adapter", "8.1.1"))
+        }
+
+        jvmMain.dependencies {
+            api(libs.webrtc.jvm.sdk)
+            implementation(libs.bouncy.castle)
         }
 
         commonTest.dependencies {
