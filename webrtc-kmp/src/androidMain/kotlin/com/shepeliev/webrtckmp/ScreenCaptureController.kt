@@ -23,8 +23,7 @@ internal class ScreenCaptureController(
     @Suppress("DEPRECATION")
     override fun selectVideoSize(): Size {
         val displayMetrics = DisplayMetrics()
-        val windowsManager =
-            ApplicationContextHolder.context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        val windowsManager = WebRtc.applicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         windowsManager.defaultDisplay.getRealMetrics(displayMetrics)
         return Size(displayMetrics.widthPixels, displayMetrics.heightPixels)
     }

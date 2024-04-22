@@ -1,8 +1,9 @@
-@file:OptIn(kotlinx.cinterop.ExperimentalForeignApi::class)
+@file:OptIn(ExperimentalForeignApi::class)
 
 package com.shepeliev.webrtckmp
 
 import WebRTC.RTCDtmfSenderProtocol
+import kotlinx.cinterop.ExperimentalForeignApi
 
 actual class DtmfSender(val native: RTCDtmfSenderProtocol) {
 

@@ -3,7 +3,7 @@ package com.shepeliev.webrtckmp
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class IceCandidateTest {
+open class IceCandidateTest {
 
     @Test
     fun should_be_constructed_successfully() {

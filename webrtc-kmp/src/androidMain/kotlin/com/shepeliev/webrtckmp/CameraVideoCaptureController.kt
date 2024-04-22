@@ -14,6 +14,7 @@ internal class CameraVideoCaptureController(
     private val constraints: MediaTrackConstraints,
     videoSource: VideoSource,
 ) : VideoCaptureController(videoSource) {
+
     private val enumerator = WebRtc.cameraEnumerator
     private var pendingDeviceId: String? = null
 

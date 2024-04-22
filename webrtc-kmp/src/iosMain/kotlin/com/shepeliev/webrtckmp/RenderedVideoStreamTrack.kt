@@ -1,9 +1,10 @@
-@file:OptIn(kotlinx.cinterop.ExperimentalForeignApi::class)
+@file:OptIn(ExperimentalForeignApi::class)
 
 package com.shepeliev.webrtckmp
 
 import WebRTC.RTCVideoRendererProtocol
 import WebRTC.RTCVideoTrack
+import kotlinx.cinterop.ExperimentalForeignApi
 
 internal abstract class RenderedVideoStreamTrack(
     ios: RTCVideoTrack

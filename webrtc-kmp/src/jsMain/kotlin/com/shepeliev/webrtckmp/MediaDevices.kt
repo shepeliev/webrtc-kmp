@@ -3,6 +3,7 @@ package com.shepeliev.webrtckmp
 import kotlinx.browser.window
 import kotlinx.coroutines.await
 import org.w3c.dom.mediacapture.AUDIOINPUT
+import org.w3c.dom.mediacapture.AUDIOOUTPUT
 import org.w3c.dom.mediacapture.VIDEOINPUT
 import kotlin.js.Json
 import kotlin.js.json
@@ -37,6 +38,7 @@ private object MediaDevicesImpl : MediaDevices {
         return devices.map {
             val kind = when (it.kind) {
                 JsMediaDeviceKind.AUDIOINPUT -> MediaDeviceKind.AudioInput
+                JsMediaDeviceKind.AUDIOOUTPUT -> MediaDeviceKind.AudioOutput
                 JsMediaDeviceKind.VIDEOINPUT -> MediaDeviceKind.VideoInput
                 else -> error("Unknown media device kind: ${it.kind}")
             }

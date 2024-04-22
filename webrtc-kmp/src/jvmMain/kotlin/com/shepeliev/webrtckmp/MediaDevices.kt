@@ -54,45 +54,17 @@ internal object MediaDevicesImpl : MediaDevices, DeviceChangeListener {
                     this.noiseSuppression = constraints.audio.noiseSuppression?.value == true
                 }
                 val audioSource = WebRtc.peerConnectionFactory.createAudioSource(mediaConstraints)
-                val androidTrack = WebRtc.peerConnectionFactory.createAudioTrack(
+                val nativeTrack = WebRtc.peerConnectionFactory.createAudioTrack(
                     UUID.randomUUID().toString(),
                     audioSource
                 )
-                audioTrack = LocalAudioStreamTrack(androidTrack, audioSource, constraints.audio)
+                audioTrack = LocalAudioStreamTrack(nativeTrack, audioSource, constraints.audio)
             }
         }
 
         var videoTrack: LocalVideoStreamTrack? = null
         if (constraints.video != null) {
-            val videoDevicesWithCapabilities = NativeMediaDevices.getVideoCaptureDevices().map {
-                Pair(it, getMatchingCapabilities(it, constraints.video))
-            }
-
-            if (videoDevicesWithCapabilities.isNotEmpty()) {
-                val matchingDevice = constraints.video.deviceId?.let { deviceId ->
-                    videoDevicesWithCapabilities.first { device ->
-                        device.first.descriptor == deviceId
-                    }
-                } ?: videoDevicesWithCapabilities.firstOrNull {
-                    it.second.isNotEmpty()
-                }
-
-                if (matchingDevice != null) {
-                    val videoSource = VideoDeviceSource().apply {
-                        setVideoCaptureDevice(matchingDevice.first)
-                        setVideoCaptureCapability(matchingDevice.second.first())
-                    }
-                    val nativeTrack = WebRtc.peerConnectionFactory.createVideoTrack(
-                        UUID.randomUUID().toString(),
-                        videoSource
-                    )
-                    videoTrack = LocalVideoStreamTrack(
-                        native = nativeTrack,
-                        videoSource = videoSource,
-                        settings = MediaTrackSettings(),
-                    )
-                }
-            }
+            videoTrack = getLocalVideoStreamTrack(constraints.video)
         }
 
         return MediaStream().apply {
@@ -101,7 +73,41 @@ internal object MediaDevicesImpl : MediaDevices, DeviceChangeListener {
         }
     }
 
-    private fun getMatchingCapabilities(device: VideoDevice, constraints: MediaTrackConstraints): List<VideoCaptureCapability> {
+    private fun getLocalVideoStreamTrack(constraints: MediaTrackConstraints): LocalVideoStreamTrack? {
+        val videoDevicesWithCapabilities = NativeMediaDevices.getVideoCaptureDevices().map {
+            Pair(it, getMatchingCapabilities(it, constraints))
+        }
+
+        if (videoDevicesWithCapabilities.isNotEmpty()) {
+            val matchingDevice = constraints.deviceId?.let { deviceId ->
+                videoDevicesWithCapabilities.first { device ->
+                    device.first.descriptor == deviceId
+                }
+            } ?: videoDevicesWithCapabilities.firstOrNull {
+                it.second.isNotEmpty()
+            }
+
+            if (matchingDevice != null) {
+                val videoSource = VideoDeviceSource().apply {
+                    setVideoCaptureDevice(matchingDevice.first)
+                    setVideoCaptureCapability(matchingDevice.second.first())
+                }
+                val nativeTrack = WebRtc.peerConnectionFactory.createVideoTrack(
+                    UUID.randomUUID().toString(),
+                    videoSource,
+                )
+                return LocalVideoStreamTrack(
+                    native = nativeTrack,
+                    videoSource = videoSource,
+                    settings = MediaTrackSettings(),
+                )
+            }
+        }
+
+        return null
+    }
+
+    internal fun getMatchingCapabilities(device: VideoDevice, constraints: MediaTrackConstraints): List<VideoCaptureCapability> {
         val capabilities = NativeMediaDevices.getVideoCaptureCapabilities(device)
 
         val exact = capabilities.firstOrNull { capability ->

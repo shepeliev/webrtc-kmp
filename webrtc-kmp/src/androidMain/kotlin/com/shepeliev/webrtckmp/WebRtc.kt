@@ -2,104 +2,66 @@
 
 package com.shepeliev.webrtckmp
 
+import android.content.Context
 import org.webrtc.Camera1Enumerator
 import org.webrtc.Camera2Enumerator
 import org.webrtc.CameraEnumerator
 import org.webrtc.DefaultVideoDecoderFactory
 import org.webrtc.DefaultVideoEncoderFactory
 import org.webrtc.EglBase
-import org.webrtc.Logging
 import org.webrtc.PeerConnectionFactory
+import org.webrtc.VideoDecoderFactory
+import org.webrtc.VideoEncoderFactory
 
+@Suppress("MemberVisibilityCanBePrivate")
 object WebRtc {
-    private const val TAG = "WebRtcKmp"
+    private var _rootEglBase: EglBase? = null
+    val rootEglBase: EglBase by lazy {
+        _rootEglBase ?: EglBase.create().also { _rootEglBase = it }
+    }
 
-    var peerConnectionFactoryInitOptions: PeerConnectionFactory.InitializationOptions? = null
-        set(value) {
-            field = value
-            if (_eglBase != null) {
-                Logging.e(
-                    TAG,
-                    "Peer connection factory is already initialized. Setting " +
-                        "peerConnectionFactoryInitOptions after initialization has no effect."
-                )
-            }
+    var videoEncoderFactory: VideoEncoderFactory? = null
+    var videoDecoderFactory: VideoDecoderFactory? = null
+    var customCameraEnumerator: CameraEnumerator? = null
+    var customPeerConnectionFactory: PeerConnectionFactory? = null
+    lateinit var factoryInitializationOptionsBuilder: PeerConnectionFactory.InitializationOptions.Builder
+        private set
+
+    internal lateinit var applicationContext: Context
+        private set
+
+    internal val peerConnectionFactory: PeerConnectionFactory by lazy {
+        customPeerConnectionFactory ?: run {
+            PeerConnectionFactory.initialize(factoryInitializationOptionsBuilder.createInitializationOptions())
+
+            val videoEncoderFactory = videoEncoderFactory
+                ?: DefaultVideoEncoderFactory(rootEglBase.eglBaseContext, true, true)
+            val videoDecoderFactory = videoDecoderFactory ?: DefaultVideoDecoderFactory(rootEglBase.eglBaseContext)
+
+            val factoryBuilder = PeerConnectionFactory.builder()
+                .setVideoEncoderFactory(videoEncoderFactory)
+                .setVideoDecoderFactory(videoDecoderFactory)
+
+            factoryBuilder.createPeerConnectionFactory()
         }
+    }
 
-    var peerConnectionFactoryBuilder: PeerConnectionFactory.Builder? = null
-        set(value) {
-            field = value
-            if (_peerConnectionFactory != null) {
-                Logging.e(
-                    TAG,
-                    "Peer connection factory is already initialized. Setting " +
-                        "peerConnectionFactoryBuilder after initialization has no effect."
-                )
-            }
-        }
-
-    private var _eglBase: EglBase? = null
-    val rootEglBase: EglBase
-        get() {
-            if (_eglBase == null) initialize()
-            return checkNotNull(_eglBase)
-        }
-
-    var cameraEnumerator: CameraEnumerator =
-        if (Camera2Enumerator.isSupported(ApplicationContextHolder.context)) {
-            Camera2Enumerator(ApplicationContextHolder.context)
+    internal val cameraEnumerator: CameraEnumerator by lazy {
+        customCameraEnumerator ?: if (Camera2Enumerator.isSupported(applicationContext)) {
+            Camera2Enumerator(applicationContext)
         } else {
             Camera1Enumerator()
         }
-
-    private var _peerConnectionFactory: PeerConnectionFactory? = null
-    internal val peerConnectionFactory: PeerConnectionFactory
-        get() {
-            if (_peerConnectionFactory == null) initialize()
-            return checkNotNull(_peerConnectionFactory)
-        }
-
-    private fun initialize() {
-        check(_eglBase == null) { "Peer connection factory is already initialized." }
-        _eglBase = EglBase.create()
-        initializePeerConnectionFactory()
-        val builder = peerConnectionFactoryBuilder ?: getDefaultPeerConnectionBuilder()
-        _peerConnectionFactory = builder.createPeerConnectionFactory()
     }
 
-    private fun initializePeerConnectionFactory() {
-        val initOptions = peerConnectionFactoryInitOptions
-            ?: getDefaultPeerConnectionFactoryInitOptions()
-        PeerConnectionFactory.initialize(initOptions)
+    @Suppress("unused")
+    fun setRootEglBase(eglBase: EglBase) {
+        check(_rootEglBase == null) { "Root EglBase is already set" }
+        _rootEglBase = eglBase
     }
 
-    private fun getDefaultPeerConnectionFactoryInitOptions() =
-        PeerConnectionFactory.InitializationOptions
-            .builder(ApplicationContextHolder.context)
-            .createInitializationOptions()
-
-    private fun getDefaultPeerConnectionBuilder(): PeerConnectionFactory.Builder {
-        val videoEncoderFactory = DefaultVideoEncoderFactory(
-            rootEglBase.eglBaseContext,
-            true,
-            false
-        )
-
-        val videoDecoderFactory = DefaultVideoDecoderFactory(rootEglBase.eglBaseContext)
-        return PeerConnectionFactory.builder()
-            .setVideoEncoderFactory(videoEncoderFactory)
-            .setVideoDecoderFactory(videoDecoderFactory)
-    }
-
-    fun disposePeerConnectionFactory() {
-        if (_peerConnectionFactory == null) return
-
-        _eglBase?.release()
-        _eglBase = null
-
-        _peerConnectionFactory?.dispose()
-        _peerConnectionFactory = null
-
-        PeerConnectionFactory.shutdownInternalTracer()
+    internal fun initialize(context: Context) {
+        applicationContext = context.applicationContext
+        factoryInitializationOptionsBuilder = PeerConnectionFactory.InitializationOptions.builder(context)
     }
 }

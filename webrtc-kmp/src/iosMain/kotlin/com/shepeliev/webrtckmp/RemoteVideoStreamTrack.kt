@@ -1,4 +1,4 @@
-@file:OptIn(kotlinx.cinterop.ExperimentalForeignApi::class)
+@file:OptIn(ExperimentalForeignApi::class)
 
 package com.shepeliev.webrtckmp
 
@@ -8,6 +8,7 @@ import WebRTC.RTCVideoFrame
 import WebRTC.RTCVideoRendererProtocol
 import WebRTC.RTCVideoTrack
 import kotlinx.cinterop.CValue
+import kotlinx.cinterop.ExperimentalForeignApi
 import platform.CoreGraphics.CGSize
 import platform.Foundation.NSTimeInterval
 import platform.darwin.DISPATCH_SOURCE_TYPE_TIMER
@@ -80,8 +81,7 @@ internal class RemoteVideoStreamTrack internal constructor(
                 dispatch_source_cancel(timer)
             }
 
-            timer =
-                dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0u, 0u, dispatch_get_main_queue())
+            timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0u, 0u, dispatch_get_main_queue())
             dispatch_source_set_timer(
                 timer,
                 dispatch_time(

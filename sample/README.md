@@ -19,16 +19,16 @@ Run Android emulator or connect real device.
 
 ### iOS
 
-Open `sample/app-ios/app-ios.xcworkspace` in XCode build and run
+Open `sample/iosApp/iosApp.xcodeproj` in XCode build and run
 
 ### Web
 
 ```bash
-./gradlew browserRun
+./gradlew jsBrowserRun
 ```
 
 ### JVM Desktop
 
 ```bash
-./gradlew ":sample:app-jvm:jvmRun" -DmainClass="com.shepeliev.webrtckmp.MainKt" --quiet
+./gradlew ":sample:composeApp:run" -DmainClass="MainKt" --quiet
 ```

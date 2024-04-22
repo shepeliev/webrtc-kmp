@@ -13,7 +13,7 @@ actual class MediaStream internal constructor(
     private val _tracks = mutableListOf<MediaStreamTrack>()
     actual val tracks: List<MediaStreamTrack> = _tracks
 
-    actual open fun addTrack(track: MediaStreamTrack) {
+    actual fun addTrack(track: MediaStreamTrack) {
         require(track is MediaStreamTrackImpl)
 
         native?.let {
@@ -26,11 +26,11 @@ actual class MediaStream internal constructor(
         _tracks += track
     }
 
-    actual open fun getTrackById(id: String): MediaStreamTrack? {
+    actual fun getTrackById(id: String): MediaStreamTrack? {
         return tracks.firstOrNull { it.id == id }
     }
 
-    actual open fun removeTrack(track: MediaStreamTrack) {
+    actual fun removeTrack(track: MediaStreamTrack) {
         require(track is MediaStreamTrackImpl)
 
         native?.let {
@@ -43,7 +43,7 @@ actual class MediaStream internal constructor(
         _tracks -= track
     }
 
-    actual open fun release() {
+    actual fun release() {
         tracks.forEach(MediaStreamTrack::stop)
         native?.dispose()
     }

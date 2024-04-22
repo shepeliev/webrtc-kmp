@@ -1,9 +1,10 @@
-@file:OptIn(kotlinx.cinterop.ExperimentalForeignApi::class)
+@file:OptIn(ExperimentalForeignApi::class)
 
 package com.shepeliev.webrtckmp
 
 import WebRTC.RTCIceServer
 import WebRTC.RTCTlsCertPolicy
+import kotlinx.cinterop.ExperimentalForeignApi
 
 actual class IceServer internal constructor(val native: RTCIceServer) {
     actual constructor(
