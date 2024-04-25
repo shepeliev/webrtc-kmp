@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withTimeout
+import kotlin.test.BeforeTest
 import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -14,6 +15,11 @@ import kotlin.test.assertEquals
 // TODO fix flaky test
 @Ignore
 class DataChannelTest {
+
+    @BeforeTest
+    fun setup() {
+        setupMocks()
+    }
     @Test
     fun data_channel_should_work() = runTest {
         val jobs = mutableListOf<Job>()

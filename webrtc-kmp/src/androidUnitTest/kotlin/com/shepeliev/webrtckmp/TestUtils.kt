@@ -15,3 +15,5 @@ inline fun runTest(
         }
     }
 }
+
+actual fun setupMocks() {}

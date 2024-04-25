@@ -1,9 +1,15 @@
 package com.shepeliev.webrtckmp
 
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
 class RtcCertificatePemTests {
+
+    @BeforeTest
+    fun setup() {
+        setupMocks()
+    }
 
     @Test
     fun generateEcdsaPem() = runTest {

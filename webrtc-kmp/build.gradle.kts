@@ -63,16 +63,14 @@ kotlin {
         jvmMain.dependencies {
             api(libs.webrtc.java)
             implementation(libs.java.bouncycastle)
-
-            val osName = System.getProperty("os.name").lowercase()
-            val hostOS = if (osName.contains("mac")) {
-                "macos"
-            } else if (osName.contains("linux")) {
-                "linux"
-            } else if (osName.contains("windows")) {
-                "windows"
-            } else {
-                throw IllegalStateException("Unsupported OS: $osName")
+        }
+        jvmTest.dependencies {
+            val osName = System.getProperty("os.name")
+            val hostOS = when {
+                osName == "Mac OS X" -> "macos"
+                osName.startsWith("Win") -> "windows"
+                osName.startsWith("Linux") -> "linux"
+                else -> error("Unsupported OS: $osName")
             }
             val hostArch = when (val arch = System.getProperty("os.arch").lowercase()) {
                 "amd64" -> "x86_64"

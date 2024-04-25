@@ -1,10 +1,16 @@
 package com.shepeliev.webrtckmp
 
 import kotlinx.coroutines.flow.first
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
 class IceServerTest {
+
+    @BeforeTest
+    fun setup() {
+        setupMocks()
+    }
 
     @Test
     fun should_build_successfully() {

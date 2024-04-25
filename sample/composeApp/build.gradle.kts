@@ -83,6 +83,19 @@ kotlin {
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlin.coroutines.swing)
+
+            val osName = System.getProperty("os.name")
+            val hostOS = when {
+                osName == "Mac OS X" -> "macos"
+                osName.startsWith("Win") -> "windows"
+                osName.startsWith("Linux") -> "linux"
+                else -> error("Unsupported OS: $osName")
+            }
+            val hostArch = when (val arch = System.getProperty("os.arch").lowercase()) {
+                "amd64" -> "x86_64"
+                else -> arch
+            }
+            implementation("${libs.webrtc.java.get()}:$hostOS-$hostArch")
         }
     }
 }

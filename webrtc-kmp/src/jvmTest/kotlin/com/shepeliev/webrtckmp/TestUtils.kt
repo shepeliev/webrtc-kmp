@@ -15,3 +15,9 @@ actual fun runTest(
         }
     }
 }
+
+actual fun setupMocks() {
+    WebRtc.configureBuilder {
+        audioModuleBuilder = { null }
+    }
+}

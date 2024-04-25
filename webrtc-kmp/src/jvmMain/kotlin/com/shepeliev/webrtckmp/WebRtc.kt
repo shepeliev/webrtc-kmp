@@ -8,6 +8,9 @@ import dev.onvoid.webrtc.media.MediaDevices
 import dev.onvoid.webrtc.media.audio.AudioDevice
 import dev.onvoid.webrtc.media.audio.AudioDeviceModule
 import dev.onvoid.webrtc.media.audio.AudioProcessing
+import java.util.Optional
+
+typealias AudioDeviceModuleBuilder = () -> AudioDeviceModule?
 
 object WebRtc {
 
@@ -40,16 +43,10 @@ object WebRtc {
 
     private fun initializePeerConnectionFactory() {
         with(builder) {
-            val audioModule = audioModule ?: AudioDeviceModule()
-            _audioDeviceModule = audioModule
-
-            MediaDevices.getDefaultAudioRenderDevice()?.let {
-                audioModule.setPlayoutDevice(it)
-                audioModule.initPlayout()
-            }
+            _audioDeviceModule = audioModuleBuilder()
 
             _peerConnectionFactory = PeerConnectionFactory(
-                audioModule,
+                _audioDeviceModule,
                 audioProcessing,
             )
         }
@@ -116,8 +113,18 @@ object WebRtc {
     }
 }
 
+internal val defaultAudioDeviceModuleBuilder: AudioDeviceModuleBuilder = {
+    AudioDeviceModule().apply {
+        MediaDevices.getDefaultAudioRenderDevice()?.let {
+            setPlayoutDevice(it)
+            initPlayout()
+            startPlayout()
+        }
+    }
+}
+
 class WebRtcBuilder(
     var loggingSeverity: Logging.Severity? = null,
-    val audioModule: AudioDeviceModule? = null,
-    val audioProcessing: AudioProcessing? = null,
+    var audioModuleBuilder: AudioDeviceModuleBuilder = defaultAudioDeviceModuleBuilder,
+    var audioProcessing: AudioProcessing? = null,
 )

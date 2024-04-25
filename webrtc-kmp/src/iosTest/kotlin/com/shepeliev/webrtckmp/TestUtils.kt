@@ -37,3 +37,5 @@ actual inline fun runTest(
         throw it
     }
 }
+
+actual fun setupMocks() {}

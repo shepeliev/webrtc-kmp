@@ -25,3 +25,5 @@ fun Throwable.log() {
         it.log()
     }
 }
+
+actual fun setupMocks() {}

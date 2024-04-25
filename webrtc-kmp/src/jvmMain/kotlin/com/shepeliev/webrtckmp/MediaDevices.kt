@@ -45,8 +45,7 @@ internal object MediaDevicesImpl : MediaDevices, DeviceChangeListener {
                     }
                 } ?: NativeMediaDevices.getDefaultAudioCaptureDevice()
 
-                WebRtc.audioDeviceModule.setRecordingDevice(device)
-                WebRtc.audioDeviceModule.initRecording()
+                WebRtc.setAudioInputDevice(device)
 
                 val mediaConstraints = AudioOptions().apply {
                     this.autoGainControl = constraints.audio.autoGainControl?.value == true

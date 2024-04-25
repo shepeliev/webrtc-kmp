@@ -1,11 +1,17 @@
 package com.shepeliev.webrtckmp
 
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class PeerConnectionTest {
+
+    @BeforeTest
+    fun setup() {
+        setupMocks()
+    }
 
     @Test
     fun should_be_created_successfully() {
