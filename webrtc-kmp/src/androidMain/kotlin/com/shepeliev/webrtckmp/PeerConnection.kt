@@ -13,6 +13,8 @@ import com.shepeliev.webrtckmp.PeerConnectionEvent.StandardizedIceConnectionChan
 import com.shepeliev.webrtckmp.PeerConnectionEvent.Track
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -37,9 +39,8 @@ import org.webrtc.RtpReceiver as AndroidRtpReceiver
 import org.webrtc.SessionDescription as AndroidSessionDescription
 
 actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguration) {
-
     val android: AndroidPeerConnection = WebRtc.peerConnectionFactory.createPeerConnection(
-        rtcConfiguration.android,
+        rtcConfiguration.toPlatform(),
         AndroidPeerConnectionObserver()
     ) ?: error("Creating PeerConnection failed")
 
@@ -50,7 +51,7 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         get() = android.remoteDescription?.asCommon()
 
     actual val signalingState: SignalingState
-        get() = android.signalingState().asCommon()
+        get() = if (closed) SignalingState.Closed else android.signalingState().asCommon()
 
     actual val iceConnectionState: IceConnectionState
         get() = android.iceConnectionState().asCommon()
@@ -65,15 +66,16 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         MutableSharedFlow<PeerConnectionEvent>(extraBufferCapacity = FLOW_BUFFER_CAPACITY)
     internal actual val peerConnectionEvent: Flow<PeerConnectionEvent> = _peerConnectionEvent.asSharedFlow()
 
-    private val coroutineScope = CoroutineScope(Dispatchers.Main)
+    private val coroutineScope = MainScope()
     private val localTracks = mutableMapOf<String, MediaStreamTrackImpl>()
     private val remoteTracks = mutableMapOf<String, MediaStreamTrackImpl>()
+    private var closed = false
 
     actual fun createDataChannel(
         label: String,
         id: Int,
         ordered: Boolean,
-        maxRetransmitTimeMs: Int,
+        maxPacketLifeTimeMs: Int,
         maxRetransmits: Int,
         protocol: String,
         negotiated: Boolean
@@ -81,7 +83,7 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         val init = AndroidDataChannel.Init().also {
             it.id = id
             it.ordered = ordered
-            it.maxRetransmitTimeMs = maxRetransmitTimeMs
+            it.maxRetransmitTimeMs = maxPacketLifeTimeMs
             it.maxRetransmits = maxRetransmits
             it.protocol = protocol
             it.negotiated = negotiated
@@ -169,10 +171,10 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
     }
 
     actual fun setConfiguration(configuration: RtcConfiguration): Boolean {
-        return android.setConfiguration(configuration.android)
+        return android.setConfiguration(configuration.toPlatform())
     }
 
-    actual fun addIceCandidate(candidate: IceCandidate): Boolean {
+    actual suspend fun addIceCandidate(candidate: IceCandidate): Boolean {
         return android.addIceCandidate(candidate.native)
     }
 
@@ -215,10 +217,15 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
     }
 
     actual fun close() {
+        if (closed) return
+        closed = true
         remoteTracks.values.forEach(MediaStreamTrack::stop)
         remoteTracks.clear()
         android.dispose()
-        coroutineScope.cancel()
+        coroutineScope.launch {
+            _peerConnectionEvent.emit(SignalingStateChange(SignalingState.Closed))
+            coroutineScope.cancel()
+        }
     }
 
     internal inner class AndroidPeerConnectionObserver : AndroidPeerConnection.Observer {

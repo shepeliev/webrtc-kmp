@@ -35,7 +35,6 @@ sealed interface ValueOrConstrain<T> {
 fun Boolean.asValueConstrain() = ValueOrConstrain.Value(this)
 fun Int.asValueConstrain() = ValueOrConstrain.Value(this)
 fun Double.asValueConstrain() = ValueOrConstrain.Value(this)
-
 fun FacingMode.asValueConstrain() = ValueOrConstrain.Value(this)
 
 val <T> ValueOrConstrain<T>.value: T?
@@ -55,6 +54,14 @@ val <T> ValueOrConstrain<T>.ideal: T?
         is ValueOrConstrain.Value -> value
         is ValueOrConstrain.Constrain -> ideal
     }
+
+fun <T, R> ValueOrConstrain<T>.map(transform: (T) -> R): ValueOrConstrain<R> = when (this) {
+    is ValueOrConstrain.Value -> ValueOrConstrain.Value(transform(value))
+    is ValueOrConstrain.Constrain -> ValueOrConstrain.Constrain(
+        exact?.let(transform),
+        ideal?.let(transform)
+    )
+}
 
 class MediaTrackConstraintsBuilder(internal var constraints: MediaTrackConstraints) {
     fun deviceId(id: String) {

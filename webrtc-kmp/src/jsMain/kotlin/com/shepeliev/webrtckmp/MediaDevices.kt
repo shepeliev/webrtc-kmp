@@ -1,5 +1,6 @@
 package com.shepeliev.webrtckmp
 
+import com.shepeliev.webrtckmp.externals.PlatformMediaStream
 import kotlinx.browser.window
 import kotlinx.coroutines.await
 import org.w3c.dom.mediacapture.AUDIOINPUT
@@ -11,6 +12,7 @@ import org.w3c.dom.mediacapture.MediaStreamConstraints as JsMediaStreamConstrain
 
 internal actual val mediaDevices: MediaDevices = MediaDevicesImpl
 
+@Suppress("UNCHECKED_CAST_TO_EXTERNAL_INTERFACE")
 private object MediaDevicesImpl : MediaDevices {
     override suspend fun getUserMedia(streamConstraints: MediaStreamConstraintsBuilder.() -> Unit): MediaStream {
         val constraints = MediaStreamConstraintsBuilder().let {
@@ -18,7 +20,7 @@ private object MediaDevicesImpl : MediaDevices {
             it.constraints
         }
         val jsStream = window.navigator.mediaDevices.getUserMedia(constraints.toJson()).await()
-        return MediaStream(jsStream)
+        return MediaStream(jsStream as PlatformMediaStream)
     }
 
     override suspend fun getDisplayMedia(): MediaStream {
@@ -27,7 +29,7 @@ private object MediaDevicesImpl : MediaDevices {
         }
 
         val jsStream = window.navigator.mediaDevices.getDisplayMedia().await()
-        return MediaStream(jsStream)
+        return MediaStream(jsStream as PlatformMediaStream)
     }
 
     override suspend fun supportsDisplayMedia(): Boolean = window.navigator.mediaDevices.supportsDisplayMedia()

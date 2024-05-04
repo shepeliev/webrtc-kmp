@@ -2,15 +2,8 @@ package com.shepeliev.webrtckmp
 
 import org.webrtc.PeerConnection
 
-actual class RtcConfiguration actual constructor(
-    bundlePolicy: BundlePolicy,
-    certificates: List<RtcCertificatePem>?,
-    iceCandidatePoolSize: Int,
-    iceServers: List<IceServer>,
-    iceTransportPolicy: IceTransportPolicy,
-    rtcpMuxPolicy: RtcpMuxPolicy,
-) {
-    val android = PeerConnection.RTCConfiguration(iceServers.map { it.native }).also {
+internal fun RtcConfiguration.toPlatform() = PeerConnection.RTCConfiguration(iceServers.map { it.toPlatform() })
+    .also {
         it.bundlePolicy = bundlePolicy.asNative()
         it.certificate = certificates?.firstOrNull()?.native
         it.iceCandidatePoolSize = iceCandidatePoolSize
@@ -18,7 +11,7 @@ actual class RtcConfiguration actual constructor(
         it.rtcpMuxPolicy = rtcpMuxPolicy.asNative()
         it.sdpSemantics = PeerConnection.SdpSemantics.UNIFIED_PLAN
     }
-}
+
 
 private fun RtcpMuxPolicy.asNative(): PeerConnection.RtcpMuxPolicy {
     return when (this) {

@@ -1,12 +1,12 @@
 package com.shepeliev.webrtckmp
 
-expect class RtcConfiguration(
+data class RtcConfiguration(
     /**
      * Specifies how to handle negotiation of candidates when the remote peer is not compatible
      * with the SDP BUNDLE standard. This must be one of the values from the enum [BundlePolicy].
      * If this value isn't included in the dictionary, "balanced" is assumed.
      */
-    bundlePolicy: BundlePolicy = BundlePolicy.Balanced,
+    val bundlePolicy: BundlePolicy = BundlePolicy.Balanced,
 
     /**
      * A [List] of objects of type [RtcCertificatePem] which are used by the connection for
@@ -16,7 +16,7 @@ expect class RtcConfiguration(
      * successfully connecting in some circumstances. @see <a href="https://developer.mozilla.org/en-US/docs/Web/API/RTCConfiguration/certificates#using_certificates">Using certificates</a>
      * for further information.
      */
-    certificates: List<RtcCertificatePem>? = null,
+    val certificates: List<RtcCertificatePem>? = null,
 
     /**
      * An unsigned 16-bit integer value which specifies the size of the prefetched ICE candidate
@@ -25,7 +25,7 @@ expect class RtcConfiguration(
      * start fetching ICE candidates before you start trying to connect, so that they're already
      * available for inspection when [PeerConnection.setLocalDescription] is called.
      */
-    iceCandidatePoolSize: Int = 0,
+    val iceCandidatePoolSize: Int = 0,
 
     /**
      * A [List] of [IceServer] objects, each describing one server which may be used by the ICE
@@ -33,7 +33,7 @@ expect class RtcConfiguration(
      * attempt will be made with no STUN or TURN server available, which limits the connection to
      * local peers.
      */
-    iceServers: List<IceServer> = emptyList(),
+    val iceServers: List<IceServer> = emptyList(),
 
     /**
      * The current ICE transport policy; this must be one of the values from the [IceTransportPolicy]
@@ -41,12 +41,12 @@ expect class RtcConfiguration(
      * allowing all candidates to be considered. A value of [IceTransportPolicy.Relay] limits the
      * candidates to those relayed through another server, such as a STUN or TURN server.
      */
-    iceTransportPolicy: IceTransportPolicy = IceTransportPolicy.All,
+    val iceTransportPolicy: IceTransportPolicy = IceTransportPolicy.All,
 
     /**
      * The RTCP mux policy to use when gathering ICE candidates, in order to support non-multiplexed
      * RTCP. The value must be one of those from the [RtcpMuxPolicy] enum. The default is
      * [RtcpMuxPolicy.Require].
      */
-    rtcpMuxPolicy: RtcpMuxPolicy = RtcpMuxPolicy.Require,
+    val rtcpMuxPolicy: RtcpMuxPolicy = RtcpMuxPolicy.Require,
 )
