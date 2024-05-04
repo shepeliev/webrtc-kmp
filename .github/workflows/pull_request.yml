@@ -70,4 +70,14 @@ jobs:
         if: failure()
         with:
           name: "JS Tests Report HTML"
-          path: "webrtc-kmp/build/reports/tests/jsTest"
+          path: "webrtc-kmp/build/reports/tests/js*Test"
+
+      - name: Run WasmJS tests
+        run: ./gradlew cleanTest kotlinUpgradeYarnLock webrtc-kmp:wasmJsTest
+
+      - name: Upload WasmJS test artifact
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: "JS Tests Report HTML"
+          path: "webrtc-kmp/build/reports/tests/wasmJs*Test"
