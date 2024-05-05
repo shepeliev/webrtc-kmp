@@ -3,7 +3,9 @@ package com.shepeliev.webrtckmp
 import com.shepeliev.webrtckmp.externals.PlatformMediaStream
 import com.shepeliev.webrtckmp.externals.getTracks
 
-actual class MediaStream internal constructor(internal val js: PlatformMediaStream) {
+actual class MediaStream internal constructor(val js: PlatformMediaStream) {
+    actual constructor() : this(PlatformMediaStream())
+
     actual val id: String get() = js.id
     actual val tracks: List<MediaStreamTrack> get() = js.getTracks().map { MediaStreamTrackImpl(it) }
 

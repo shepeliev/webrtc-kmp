@@ -13,7 +13,9 @@ import com.shepeliev.webrtckmp.externals.setLocalDescription
 import com.shepeliev.webrtckmp.externals.setRemoteDescription
 import com.shepeliev.webrtckmp.externals.streams
 import com.shepeliev.webrtckmp.externals.toSessionDescription
+import com.shepeliev.webrtckmp.internal.AudioTrackImpl
 import com.shepeliev.webrtckmp.internal.Console
+import com.shepeliev.webrtckmp.internal.VideoTrackImpl
 import com.shepeliev.webrtckmp.internal.toPlatform
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
@@ -86,7 +88,13 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
                     val trackEvent = TrackEvent(
                         receiver = RtpReceiver(rtcTrackEvent.receiver),
                         streams = rtcTrackEvent.streams.map { MediaStream(it) },
-                        track = MediaStreamTrackImpl(rtcTrackEvent.track),
+                        track = rtcTrackEvent.track.let {
+                            when (it.kind) {
+                                "audio" -> AudioTrackImpl(it)
+                                "video" -> VideoTrackImpl(it)
+                                else -> throw IllegalArgumentException("Unsupported track kind: ${it.kind}")
+                            }
+                        },
                         transceiver = RtpTransceiver(rtcTrackEvent.transceiver)
                     )
                     _peerConnectionEvent.emit(PeerConnectionEvent.Track(trackEvent))

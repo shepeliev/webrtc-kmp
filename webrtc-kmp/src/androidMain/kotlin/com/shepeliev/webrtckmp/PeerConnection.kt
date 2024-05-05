@@ -11,10 +11,7 @@ import com.shepeliev.webrtckmp.PeerConnectionEvent.RemovedIceCandidates
 import com.shepeliev.webrtckmp.PeerConnectionEvent.SignalingStateChange
 import com.shepeliev.webrtckmp.PeerConnectionEvent.StandardizedIceConnectionChange
 import com.shepeliev.webrtckmp.PeerConnectionEvent.Track
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -299,10 +296,7 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
             }
 
             val streams = androidStreams.map { androidStream ->
-                MediaStream(
-                    android = androidStream,
-                    id = androidStream.id,
-                ).also { stream ->
+                MediaStream(androidStream).also { stream ->
                     androidStream.audioTracks.forEach { stream.addTrack(RemoteAudioStreamTrack(it)) }
                     androidStream.videoTracks.forEach { stream.addTrack(RemoteVideoStreamTrack(it)) }
                 }

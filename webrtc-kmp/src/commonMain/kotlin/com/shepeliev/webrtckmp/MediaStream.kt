@@ -1,12 +1,6 @@
 package com.shepeliev.webrtckmp
 
-val MediaStream.audioTracks: List<AudioStreamTrack>
-    get() = tracks.mapNotNull { it as? AudioStreamTrack }
-
-val MediaStream.videoTracks: List<VideoStreamTrack>
-    get() = tracks.mapNotNull { it as? VideoStreamTrack }
-
-expect class MediaStream {
+expect class MediaStream() {
     val id: String
     val tracks: List<MediaStreamTrack>
 
@@ -15,3 +9,9 @@ expect class MediaStream {
     fun removeTrack(track: MediaStreamTrack)
     fun release()
 }
+
+val MediaStream.audioTracks: List<AudioStreamTrack>
+    get() = tracks.mapNotNull { it as? AudioStreamTrack }
+
+val MediaStream.videoTracks: List<VideoStreamTrack>
+    get() = tracks.mapNotNull { it as? VideoStreamTrack }

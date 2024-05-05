@@ -8,18 +8,17 @@ import WebRTC.RTCVideoTrack
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.Foundation.NSUUID
 
-actual class MediaStream internal constructor(
-    val ios: RTCMediaStream?,
-    actual val id: String = ios?.streamId ?: NSUUID.UUID().UUIDString,
-) {
+actual class MediaStream internal constructor(val ios: RTCMediaStream) {
+    actual constructor() : this(WebRtc.peerConnectionFactory.mediaStreamWithStreamId(NSUUID.UUID().UUIDString))
 
+    actual val id: String = ios.streamId
     private val _tracks = mutableListOf<MediaStreamTrack>()
     actual val tracks: List<MediaStreamTrack> = _tracks
 
     actual fun addTrack(track: MediaStreamTrack) {
         require(track is MediaStreamTrackImpl)
 
-        ios?.let {
+        ios.let {
             when (track.ios) {
                 is RTCAudioTrack -> it.addAudioTrack(track.ios)
                 is RTCVideoTrack -> it.addVideoTrack(track.ios)

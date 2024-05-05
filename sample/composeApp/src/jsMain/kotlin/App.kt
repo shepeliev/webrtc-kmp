@@ -34,9 +34,7 @@ val ReactApp = FC<Props> { _ ->
     }
 
     useEffect(remoteVideoTrack) {
-        val stream = org.w3c.dom.mediacapture.MediaStream().apply {
-            remoteVideoTrack?.js?.let { addTrack(it) }
-        }
+        val stream = MediaStream().apply { remoteVideoTrack?.let { addTrack(it) } }.js
         remoteVideoRef.current?.srcObject = stream
     }
 

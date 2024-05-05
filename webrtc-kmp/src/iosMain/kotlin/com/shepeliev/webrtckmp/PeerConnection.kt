@@ -282,7 +282,7 @@ actual class PeerConnection actual constructor(
         val iosStreams = streams.map { it as RTCMediaStream }
 
         val commonStreams = iosStreams.map { iosStream ->
-            MediaStream(ios = iosStream, id = iosStream.streamId).also { stream ->
+            MediaStream(iosStream).also { stream ->
                 iosStream.audioTracks.forEach { stream.addTrack(RemoteAudioStreamTrack(it as RTCAudioTrack)) }
                 iosStream.videoTracks.forEach { stream.addTrack(RemoteVideoStreamTrack(it as RTCVideoTrack)) }
             }
