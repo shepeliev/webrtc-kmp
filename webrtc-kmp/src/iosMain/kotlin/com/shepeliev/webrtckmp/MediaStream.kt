@@ -35,12 +35,10 @@ actual class MediaStream internal constructor(val ios: RTCMediaStream) {
     actual fun removeTrack(track: MediaStreamTrack) {
         require(track is MediaStreamTrackImpl)
 
-        ios?.let {
-            when (track.ios) {
-                is RTCAudioTrack -> it.removeAudioTrack(track.ios)
-                is RTCVideoTrack -> it.removeVideoTrack(track.ios)
-                else -> error("Unknown MediaStreamTrack kind: ${track.kind}")
-            }
+        when (track.ios) {
+            is RTCAudioTrack -> ios.removeAudioTrack(track.ios)
+            is RTCVideoTrack -> ios.removeVideoTrack(track.ios)
+            else -> error("Unknown MediaStreamTrack kind: ${track.kind}")
         }
         _tracks -= track
     }

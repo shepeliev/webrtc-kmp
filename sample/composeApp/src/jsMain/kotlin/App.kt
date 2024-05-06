@@ -1,7 +1,7 @@
 import com.shepeliev.webrtckmp.MediaDevices
 import com.shepeliev.webrtckmp.MediaStream
 import com.shepeliev.webrtckmp.PeerConnection
-import com.shepeliev.webrtckmp.VideoStreamTrack
+import com.shepeliev.webrtckmp.videoTracks
 import emotion.react.css
 import kotlinx.coroutines.launch
 import mui.material.Button
@@ -25,26 +25,30 @@ val ReactApp = FC<Props> { _ ->
     val scope = useCoroutineScope()
     val localVideoRef = useRef<HTMLVideoElement>(null)
     val remoteVideoRef = useRef<HTMLVideoElement>(null)
+    val remoteStream = useRef<MediaStream>(null)
     val (localStream, setLocalStream) = useState<MediaStream?>(null)
-    val (remoteVideoTrack, setRemoteVideoTrack) = useState<VideoStreamTrack?>(null)
     val (peerConnections, setPeerConnections) = useState<Pair<PeerConnection, PeerConnection>?>(null)
 
     useEffect(localStream) {
-        localVideoRef.current?.srcObject = localStream?.js
-    }
-
-    useEffect(remoteVideoTrack) {
-        val stream = MediaStream().apply { remoteVideoTrack?.let { addTrack(it) } }.js
-        remoteVideoRef.current?.srcObject = stream
+        val localVideoStream = MediaStream().apply { localStream?.videoTracks?.firstOrNull()?.let { addTrack(it) } }
+        localVideoRef.current?.srcObject = localVideoStream.js
     }
 
     useEffect(localStream, peerConnections) {
         if (peerConnections == null || localStream == null) return@useEffect
+        remoteStream.current = MediaStream()
         val job = scope.launch {
             makeCall(
                 peerConnections = peerConnections,
                 localStream = localStream,
-                setRemoteVideoTrack = { setRemoteVideoTrack(it) }
+                onRemoteVideoTrack = { track ->
+                    remoteStream.current?.addTrack(track)
+                    remoteVideoRef.current?.srcObject = remoteStream.current?.js
+                },
+                onRemoteAudioTrack = { track ->
+                    remoteStream.current?.addTrack(track)
+                    remoteVideoRef.current?.srcObject = remoteStream.current?.js
+                },
             )
         }
 
@@ -103,9 +107,11 @@ val ReactApp = FC<Props> { _ ->
             }
             variant = ButtonVariant.contained
             onClick = {
-                hangup(peerConnections, { setPeerConnections(it) }, { setRemoteVideoTrack(it) })
+                hangup(peerConnections)
                 localStream.release()
                 setLocalStream(null)
+                setPeerConnections(null)
+                remoteVideoRef.current?.srcObject = null
             }
             +"Stop"
         }
@@ -128,7 +134,9 @@ val ReactApp = FC<Props> { _ ->
                 }
                 variant = ButtonVariant.contained
                 onClick = {
-                    hangup(peerConnections, { setPeerConnections(it) }, { setRemoteVideoTrack(it) })
+                    hangup(peerConnections)
+                    setPeerConnections(null)
+                    remoteVideoRef.current?.srcObject = null
                 }
                 +"Hangup"
             }

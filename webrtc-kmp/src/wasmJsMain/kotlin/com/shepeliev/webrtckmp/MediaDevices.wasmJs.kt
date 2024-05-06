@@ -105,7 +105,7 @@ private fun jsMediaTrackConstraints(
     exactFrameRate: Double? = null,
     idealFrameRate: Double? = null,
 ): MediaTrackConstraints = js(
-    """
+    """{
     var constraints = {};
     if (exactDeviceId) {
         constraints.deviceId = { exact: exactDeviceId };
@@ -151,5 +151,6 @@ private fun jsMediaTrackConstraints(
     }
     
     return constraints;
+    }
 """
 )
