@@ -17,8 +17,6 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import platform.darwin.NSObject
-import platform.darwin.dispatch_async
-import platform.darwin.dispatch_get_main_queue
 import platform.posix.uint64_t
 
 actual class DataChannel(val ios: RTCDataChannel) {
@@ -99,40 +97,6 @@ actual class DataChannel(val ios: RTCDataChannel) {
             RTCDataChannelState.RTCDataChannelStateClosing -> DataChannelState.Closing
             RTCDataChannelState.RTCDataChannelStateClosed -> DataChannelState.Closed
             else -> error("Unknown RTCDataChannelState: $state")
-        }
-    }
-}
-
-private class ProxyDataChannelDelegate : NSObject(), RTCDataChannelDelegateProtocol {
-    private val delegates: MutableSet<RTCDataChannelDelegateProtocol> = mutableSetOf()
-
-    fun addDelegate(delegate: RTCDataChannelDelegateProtocol) {
-        dispatch_async(dispatch_get_main_queue()) {
-            delegates.add(delegate)
-        }
-    }
-
-    fun removeDelegate(delegate: RTCDataChannelDelegateProtocol) {
-        dispatch_async(dispatch_get_main_queue()) {
-            delegates.remove(delegate)
-        }
-    }
-
-    override fun dataChannel(dataChannel: RTCDataChannel, didChangeBufferedAmount: uint64_t) {
-        dispatch_async(dispatch_get_main_queue()) {
-            delegates.forEach { it.dataChannel(dataChannel, didChangeBufferedAmount) }
-        }
-    }
-
-    override fun dataChannel(dataChannel: RTCDataChannel, didReceiveMessageWithBuffer: RTCDataBuffer) {
-        dispatch_async(dispatch_get_main_queue()) {
-            delegates.forEach { it.dataChannel(dataChannel, didReceiveMessageWithBuffer) }
-        }
-    }
-
-    override fun dataChannelDidChangeState(dataChannel: RTCDataChannel) {
-        dispatch_async(dispatch_get_main_queue()) {
-            delegates.forEach { it.dataChannelDidChangeState(dataChannel) }
         }
     }
 }
