@@ -158,55 +158,24 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         return true
     }
 
-    /**
-     * Gets all RtpSenders associated with this peer connection.
-     * Note that calling getSenders will dispose of the senders previously
-     * returned.
-     */
     actual fun getSenders(): List<RtpSender> {
         return platform.getSenders().map { RtpSender(it) }
     }
 
-    /**
-     * Gets all RtpReceivers associated with this peer connection.
-     * Note that calling getReceivers will dispose of the receivers previously
-     * returned.
-     */
     actual fun getReceivers(): List<RtpReceiver> {
         return platform.getReceivers().map { RtpReceiver(it) }
     }
 
-    /**
-     * Gets all RtpTransceivers associated with this peer connection.
-     * Note that calling getTransceivers will dispose of the transceivers previously
-     * returned.
-     * Note: This is only available with SdpSemantics.UNIFIED_PLAN specified.
-     */
     actual fun getTransceivers(): List<RtpTransceiver> {
         return platform.getTransceivers().map { RtpTransceiver(it) }
     }
 
-    /**
-     * Adds a new media stream track to be sent on this peer connection, and returns
-     * the newly created RtpSender. If streamIds are specified, the RtpSender will
-     * be associated with the streams specified in the streamIds list.
-     *
-     * @throws IllegalStateException if an error accors in C++ addTrack.
-     * An error can occur if:
-     * - A sender already exists for the track.
-     * - The peer connection is closed.
-     */
     actual fun addTrack(track: MediaStreamTrack, vararg streams: MediaStream): RtpSender {
         require(track is MediaStreamTrackImpl)
         val platformSender = platform.addTrack(track.platform, *Array(streams.size) { streams[it].js })
         return RtpSender(platformSender)
     }
 
-    /**
-     * Stops sending media from sender. The sender will still appear in getSenders. Future
-     * calls to createOffer will mark the m section for the corresponding transceiver as
-     * receive only or inactive, as defined in JSEP. Returns true on success.
-     */
     actual fun removeTrack(sender: RtpSender): Boolean {
         return runCatching { platform.removeTrack(sender.js) }
             .onFailure { Console.error("Remove track failed: $it") }
@@ -214,9 +183,6 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
             .getOrDefault(false)
     }
 
-    /**
-     * Gets stats using the new stats collection API, see webrtc/api/stats/.
-     */
     actual suspend fun getStats(): RtcStatsReport? {
         return runCatching { platform.getStats() }
             .map { RtcStatsReport() }
@@ -224,22 +190,6 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
             .getOrNull()
     }
 
-    /**
-     * Free native resources associated with this PeerConnection instance.
-     *
-     * This method removes a reference count from the C++ PeerConnection object,
-     * which should result in it being destroyed. It also calls equivalent
-     * "dispose" methods on the Java objects attached to this PeerConnection
-     * (streams, senders, receivers), such that their associated C++ objects
-     * will also be destroyed.
-     *
-     *
-     * Note that this method cannot be safely called from an observer callback
-     * (PeerConnection.Observer, DataChannel.Observer, etc.). If you want to, for
-     * example, destroy the PeerConnection after an "ICE failed" callback, you
-     * must do this asynchronously (in other words, unwind the stack first). See
-     * [bug 3721](https://bugs.chromium.org/p/webrtc/issues/detail?id=3721) for more details.
-     */
     actual fun close() {
         platform.close()
         scope.launch {
