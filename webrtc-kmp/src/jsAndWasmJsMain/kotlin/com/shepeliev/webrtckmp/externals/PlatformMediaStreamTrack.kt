@@ -1,5 +1,6 @@
 package com.shepeliev.webrtckmp.externals
 
+import kotlin.js.JsName
 import com.shepeliev.webrtckmp.FacingMode
 import com.shepeliev.webrtckmp.MediaStreamTrackState
 import com.shepeliev.webrtckmp.MediaTrackConstraints

@@ -1,5 +1,7 @@
 package com.shepeliev.webrtckmp.internal
 
+import kotlin.js.JsName
+
 @JsName("console")
 internal external object Console {
     fun log(message: String)
