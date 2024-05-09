@@ -1,0 +1,31 @@
+name: Pull Request Checks
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v1
+        with:
+          java-version: 17
+          cache: gradle
+
+      - name: Gradle cache
+        uses: gradle/gradle-build-action@v2
+
+      - name: Cache konan directory
+        uses: actions/cache@v3
+        with:
+          path: ~/.konan
+          key: ${{ runner.os }}-konan-${{ hashFiles('*.gradle.kts', 'buildSrc/*') }}
+          restore-keys: |
+            ${{ runner.os }}-konan-
+
+      - name: Run Kotlin linter
+        run: ./gradlew ktlintCheck
