@@ -1,4 +1,4 @@
-name: Build All
+name: Build and test all
 
 on:
   push:
@@ -24,3 +24,7 @@ jobs:
   build-macos:
     name: Build macOS
     uses: ./.github/workflows/build-macos.yml
+
+  build-sample-app-macos:
+    name: Build Sample App macOS
+    uses: ./.github/workflows/build-sample-app-macos.yml

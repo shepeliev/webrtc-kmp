@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    name: Build and test WebRTC KMP for iOS
+    name: Build sample app for iOS
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
@@ -39,12 +39,7 @@ jobs:
             */build/classes
           key: cocoapods-cache
 
-      - name: Run iOS tests
-        run: ./gradlew cleanTest webrtc-kmp:iosSimulatorArm64Test
-
-      - name: Upload iOS test artifact
-        uses: actions/upload-artifact@v2
-        if: failure()
-        with:
-          name: "iOS Tests Report HTML"
-          path: "webrtc-kmp/build/reports/tests/iosX64Test"
+      - name: Build sample app
+        run: |
+          cd sample/iosApp 
+          xcodebuild -configuration Debug -scheme iosApp -sdk iphonesimulator -arch arm64
