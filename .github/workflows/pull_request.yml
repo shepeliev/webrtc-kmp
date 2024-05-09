@@ -1,11 +1,84 @@
-name: Pull Request
+name: Pull Request Checks
 
 on:
   pull_request:
     branches: [ main ]
 
 jobs:
-  build:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v1
+        with:
+          java-version: 17
+          cache: gradle
+
+      - name: Gradle cache
+        uses: gradle/gradle-build-action@v2
+
+      - name: Run Kotlin linter
+        run: ./gradlew ktlintCheck
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v1
+        with:
+          java-version: 17
+          cache: gradle
+
+      - name: Gradle cache
+        uses: gradle/gradle-build-action@v2
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Run Android instrumented tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          target: google_apis
+          arch: x86_64
+          profile: Nexus 6
+          script: ./gradlew webrtc-kmp:connectedAndroidTest
+
+      - name: Upload Android test artifact
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: "Android Instrumented Tests Report HTML"
+          path: "webrtc-kmp/build/reports/androidTests/connected"
+
+      - name: Run JS tests
+        run: ./gradlew cleanTest kotlinUpgradeYarnLock webrtc-kmp:jsTest
+
+      - name: Upload JS test artifact
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: "JS Tests Report HTML"
+          path: "webrtc-kmp/build/reports/tests/js*Test"
+
+      - name: Run WasmJS tests
+        run: ./gradlew cleanTest kotlinUpgradeYarnLock webrtc-kmp:wasmJsTest
+
+      - name: Upload WasmJS test artifact
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: "JS Tests Report HTML"
+          path: "webrtc-kmp/build/reports/tests/wasmJs*Test"
+
+  test-ios:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
@@ -30,32 +103,8 @@ jobs:
       - name: Gradle cache
         uses: gradle/gradle-build-action@v2
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
-      - name: Run Kotlin linter
-        run: ./gradlew ktlintCheck
-
-# TODO: Android instrumented tests don't work
-
-#      - name: Run Android instrumented tests
-#        uses: reactivecircus/android-emulator-runner@v2
-#        with:
-#          api-level: 29
-#          target: google_apis
-#          arch: x86_64
-#          profile: Nexus 6
-#          script: ./gradlew webrtc-kmp:connectedAndroidTest
-#
-#      - name: Upload Android test artifact
-#        uses: actions/upload-artifact@v2
-#        if: failure()
-#        with:
-#          name: "Android Instrumented Tests Report HTML"
-#          path: "webrtc-kmp/build/reports/androidTests/connected"
-
       - name: Run iOS tests
-        run: ./gradlew cleanTest webrtc-kmp:iosX64Test
+        run: ./gradlew cleanTest webrtc-kmp:iosSimulatorArm64Test
 
       - name: Upload iOS test artifact
         uses: actions/upload-artifact@v2
@@ -63,13 +112,3 @@ jobs:
         with:
           name: "iOS Tests Report HTML"
           path: "webrtc-kmp/build/reports/tests/iosX64Test"
-
-      - name: Run JS tests
-        run: ./gradlew cleanTest kotlinUpgradeYarnLock webrtc-kmp:jsTest
-
-      - name: Upload JS test artifact
-        uses: actions/upload-artifact@v2
-        if: failure()
-        with:
-          name: "JS Tests Report HTML"
-          path: "webrtc-kmp/build/reports/tests/jsTest"

@@ -5,7 +5,6 @@ package com.shepeliev.webrtckmp
 import android.Manifest
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
-import org.webrtc.Camera2Enumerator
 import org.webrtc.MediaConstraints
 import java.util.UUID
 
@@ -55,9 +54,7 @@ private object MediaDevicesImpl : MediaDevices {
             videoTrack = LocalVideoStreamTrack(androidTrack, videoCaptureController)
         }
 
-        val localMediaStream =
-            WebRtc.peerConnectionFactory.createLocalMediaStream(UUID.randomUUID().toString())
-        return MediaStream(localMediaStream).apply {
+        return MediaStream().apply {
             if (audioTrack != null) addTrack(audioTrack)
             if (videoTrack != null) addTrack(videoTrack)
         }
@@ -71,11 +68,7 @@ private object MediaDevicesImpl : MediaDevices {
             videoSource
         )
         val videoStreamTrack = LocalVideoStreamTrack(videoTrack, screenCaptureController)
-        val localMediaStream = WebRtc.peerConnectionFactory
-            .createLocalMediaStream(UUID.randomUUID().toString())
-        return MediaStream(localMediaStream).apply {
-            addTrack(videoStreamTrack)
-        }
+        return MediaStream().apply { addTrack(videoStreamTrack) }
     }
 
     override suspend fun supportsDisplayMedia(): Boolean = true

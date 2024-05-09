@@ -9,6 +9,7 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import com.shepeliev.webrtckmp.AudioStreamTrack
 import com.shepeliev.webrtckmp.VideoStreamTrack
 import com.shepeliev.webrtckmp.WebRtc
 import org.webrtc.RendererCommon
@@ -16,21 +17,21 @@ import org.webrtc.SurfaceViewRenderer
 import org.webrtc.VideoSink
 
 @Composable
-actual fun Video(track: VideoStreamTrack, modifier: Modifier) {
+actual fun Video(videoTrack: VideoStreamTrack, modifier: Modifier, audioTrack: AudioStreamTrack?) {
     var renderer by remember { mutableStateOf<SurfaceViewRenderer?>(null) }
 
-    val lifecycleEventObserver = remember(renderer, track) {
+    val lifecycleEventObserver = remember(renderer, videoTrack) {
         LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_RESUME -> {
                     renderer?.also {
                         it.init(WebRtc.rootEglBase.eglBaseContext, null)
-                        track.addSinkCatching(it)
+                        videoTrack.addSinkCatching(it)
                     }
                 }
 
                 Lifecycle.Event.ON_PAUSE -> {
-                    renderer?.also { track.removeSinkCatching(it) }
+                    renderer?.also { videoTrack.removeSinkCatching(it) }
                     renderer?.release()
                 }
 
@@ -46,7 +47,7 @@ actual fun Video(track: VideoStreamTrack, modifier: Modifier) {
         lifecycle.addObserver(lifecycleEventObserver)
 
         onDispose {
-            renderer?.let { track.removeSinkCatching(it) }
+            renderer?.let { videoTrack.removeSinkCatching(it) }
             renderer?.release()
             lifecycle.removeObserver(lifecycleEventObserver)
         }

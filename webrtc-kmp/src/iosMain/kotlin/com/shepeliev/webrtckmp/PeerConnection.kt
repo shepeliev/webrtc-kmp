@@ -33,9 +33,9 @@ import com.shepeliev.webrtckmp.PeerConnectionEvent.RemovedIceCandidates
 import com.shepeliev.webrtckmp.PeerConnectionEvent.SignalingStateChange
 import com.shepeliev.webrtckmp.PeerConnectionEvent.StandardizedIceConnectionChange
 import com.shepeliev.webrtckmp.PeerConnectionEvent.Track
+import com.shepeliev.webrtckmp.internal.toPlatform
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -49,7 +49,7 @@ actual class PeerConnection actual constructor(
 
     val ios: RTCPeerConnection = checkNotNull(
         WebRtc.peerConnectionFactory.peerConnectionWithConfiguration(
-            configuration = rtcConfiguration.native,
+            configuration = rtcConfiguration.toPlatform(),
             constraints = RTCMediaConstraints(),
             delegate = this
         )
@@ -75,7 +75,7 @@ actual class PeerConnection actual constructor(
         MutableSharedFlow<PeerConnectionEvent>(extraBufferCapacity = FLOW_BUFFER_CAPACITY)
     internal actual val peerConnectionEvent: Flow<PeerConnectionEvent> = _peerConnectionEvent.asSharedFlow()
 
-    private val coroutineScope = CoroutineScope(Dispatchers.Main)
+    private val coroutineScope = MainScope()
     private val localTracks = mutableMapOf<String, MediaStreamTrackImpl>()
     private val remoteTracks = mutableMapOf<String, MediaStreamTrackImpl>()
 
@@ -83,7 +83,7 @@ actual class PeerConnection actual constructor(
         label: String,
         id: Int,
         ordered: Boolean,
-        maxRetransmitTimeMs: Int,
+        maxPacketLifeTimeMs: Int,
         maxRetransmits: Int,
         protocol: String,
         negotiated: Boolean
@@ -91,7 +91,7 @@ actual class PeerConnection actual constructor(
         val config = RTCDataChannelConfiguration().also {
             it.channelId = id
             it.isOrdered = ordered
-            it.maxRetransmitTimeMs = maxRetransmitTimeMs.toLong()
+            it.maxRetransmitTimeMs = maxPacketLifeTimeMs.toLong()
             it.maxRetransmits = maxRetransmits
             it.protocol = protocol
             it.isNegotiated = negotiated
@@ -134,10 +134,10 @@ actual class PeerConnection actual constructor(
     }
 
     actual fun setConfiguration(configuration: RtcConfiguration): Boolean {
-        return ios.setConfiguration(configuration.native)
+        return ios.setConfiguration(configuration.toPlatform())
     }
 
-    actual fun addIceCandidate(candidate: IceCandidate): Boolean {
+    actual suspend fun addIceCandidate(candidate: IceCandidate): Boolean {
         ios.addIceCandidate(candidate.native)
         return true
     }
@@ -187,7 +187,10 @@ actual class PeerConnection actual constructor(
         remoteTracks.values.forEach(MediaStreamTrack::stop)
         remoteTracks.clear()
         ios.close()
-        coroutineScope.cancel()
+        coroutineScope.launch {
+            _peerConnectionEvent.emit(PeerConnectionEvent.SignalingStateChange(SignalingState.Closed))
+            coroutineScope.cancel()
+        }
     }
 
     override fun peerConnection(peerConnection: RTCPeerConnection, didChangeSignalingState: RTCSignalingState) {
@@ -279,7 +282,7 @@ actual class PeerConnection actual constructor(
         val iosStreams = streams.map { it as RTCMediaStream }
 
         val commonStreams = iosStreams.map { iosStream ->
-            MediaStream(ios = iosStream, id = iosStream.streamId).also { stream ->
+            MediaStream(iosStream).also { stream ->
                 iosStream.audioTracks.forEach { stream.addTrack(RemoteAudioStreamTrack(it as RTCAudioTrack)) }
                 iosStream.videoTracks.forEach { stream.addTrack(RemoteVideoStreamTrack(it as RTCVideoTrack)) }
             }

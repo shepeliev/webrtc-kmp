@@ -21,8 +21,14 @@ Run Android emulator or connect real device.
 
 Open `sample/iosApp/iosApp.xcodeproj` in XCode build and run
 
-### Web
+### Web JS
 
 ```bash
-./gradlew jsBrowserRun
+./gradlew sample:composeApp:jsBrowserRun 
+```
+
+### Web WasmJS
+
+```bash
+./gradlew sample:composeApp:wasmJsBrowserRun 
 ```

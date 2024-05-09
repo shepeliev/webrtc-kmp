@@ -1,5 +1,6 @@
 package com.shepeliev.webrtckmp
 
+import com.shepeliev.webrtckmp.internal.asCommon
 import org.w3c.dom.mediacapture.ConstrainBooleanParameters
 import org.w3c.dom.mediacapture.ConstrainDOMStringParameters
 import org.w3c.dom.mediacapture.ConstrainDoubleRange

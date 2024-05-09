@@ -5,7 +5,7 @@ It supports Android, iOS, JS. Other platforms - PRs are welcome.
 
 
 ## API implementation map
- API |      Android       | iOS | JS 
+ API |      Android       | iOS | JS/WasmJS 
  :-: |:------------------:| :-: | :---: 
  Audio/Video | :white_check_mark: | :white_check_mark: | :white_check_mark:
  Data channel | :white_check_mark: | :white_check_mark: | :white_check_mark:
