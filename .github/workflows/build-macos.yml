@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    name: Build and test WebRTC KMP for iOS
+    name: Build and test iOS
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2

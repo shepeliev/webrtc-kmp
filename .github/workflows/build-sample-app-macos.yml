@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    name: Build sample app for iOS
+    name: Build sample app iOS
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
