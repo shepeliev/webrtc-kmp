@@ -49,4 +49,6 @@ jobs:
           path: "webrtc-kmp/build/reports/tests/iosX64Test"
 
       - name: Build sample app
-        run: xcodebuild -configuration Debug -scheme iosApp -sdk iphonesimulator -arch arm64
+        run: |
+          cd sample/iosApp 
+          xcodebuild -configuration Debug -scheme iosApp -sdk iphonesimulator -arch arm64
