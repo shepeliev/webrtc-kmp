@@ -1,5 +1,7 @@
 package com.shepeliev.webrtckmp.externals
 
+import kotlin.js.JsName
+
 @JsName("MediaStream")
 external interface PlatformMediaStream {
     val id: String
