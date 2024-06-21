@@ -10,6 +10,7 @@ class MediaStreamConstraintsBuilderTest {
     fun setup() {
         setupMocks()
     }
+
     @Test
     fun should_work() {
         val builder = MediaStreamConstraintsBuilder()

@@ -7,19 +7,19 @@ import WebRTC.RTCDataChannel
 import WebRTC.RTCDataChannelDelegateProtocol
 import WebRTC.RTCDataChannelState
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.channels.trySendBlocking
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import platform.darwin.NSObject
 import platform.posix.uint64_t
 
 actual class DataChannel(val ios: RTCDataChannel) {
-
     actual val label: String
         get() = ios.label()
 
@@ -32,22 +32,25 @@ actual class DataChannel(val ios: RTCDataChannel) {
     actual val bufferedAmount: Long
         get() = ios.bufferedAmount.toLong()
 
-    private val dataChannelEvent = callbackFlow {
+    private val coroutineScope = MainScope()
+    private val dataChannelEvent = MutableSharedFlow<DataChannelEvent>()
+
+    init {
         ios.delegate = object : NSObject(), RTCDataChannelDelegateProtocol {
             override fun dataChannel(dataChannel: RTCDataChannel, didChangeBufferedAmount: uint64_t) {
                 // not implemented
             }
 
             override fun dataChannel(dataChannel: RTCDataChannel, didReceiveMessageWithBuffer: RTCDataBuffer) {
-                trySendBlocking(DataChannelEvent.MessageReceived(didReceiveMessageWithBuffer))
+                coroutineScope.launch {
+                    dataChannelEvent.emit(DataChannelEvent.MessageReceived(didReceiveMessageWithBuffer))
+                }
             }
 
             override fun dataChannelDidChangeState(dataChannel: RTCDataChannel) {
-                trySendBlocking(DataChannelEvent.StateChanged)
+                coroutineScope.launch { dataChannelEvent.emit(DataChannelEvent.StateChanged) }
             }
         }
-
-        awaitClose { ios.delegate = null }
     }
 
     actual val onOpen: Flow<Unit> = dataChannelEvent
@@ -74,20 +77,26 @@ actual class DataChannel(val ios: RTCDataChannel) {
         return ios.sendData(buffer)
     }
 
-    actual fun close() = ios.close()
+    actual fun close() {
+        ios.close()
+        coroutineScope.launch {
+            dataChannelEvent.emit(DataChannelEvent.StateChanged)
+            coroutineScope.cancel()
+        }
+    }
 
     private sealed interface DataChannelEvent {
-        object StateChanged : DataChannelEvent
+        data object StateChanged : DataChannelEvent
         data class MessageReceived(val buffer: RTCDataBuffer) : DataChannelEvent
     }
-}
 
-private fun rtcDataChannelStateAsCommon(state: RTCDataChannelState): DataChannelState {
-    return when (state) {
-        RTCDataChannelState.RTCDataChannelStateConnecting -> DataChannelState.Connecting
-        RTCDataChannelState.RTCDataChannelStateOpen -> DataChannelState.Open
-        RTCDataChannelState.RTCDataChannelStateClosing -> DataChannelState.Closing
-        RTCDataChannelState.RTCDataChannelStateClosed -> DataChannelState.Closed
-        else -> error("Unknown RTCDataChannelState: $state")
+    private fun rtcDataChannelStateAsCommon(state: RTCDataChannelState): DataChannelState {
+        return when (state) {
+            RTCDataChannelState.RTCDataChannelStateConnecting -> DataChannelState.Connecting
+            RTCDataChannelState.RTCDataChannelStateOpen -> DataChannelState.Open
+            RTCDataChannelState.RTCDataChannelStateClosing -> DataChannelState.Closing
+            RTCDataChannelState.RTCDataChannelStateClosed -> DataChannelState.Closed
+            else -> error("Unknown RTCDataChannelState: $state")
+        }
     }
 }

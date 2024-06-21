@@ -22,7 +22,7 @@ expect class PeerConnection(rtcConfiguration: RtcConfiguration = RtcConfiguratio
         label: String,
         id: Int = -1,
         ordered: Boolean = true,
-        maxRetransmitTimeMs: Int = -1,
+        maxPacketLifeTimeMs: Int = -1,
         maxRetransmits: Int = -1,
         protocol: String = "",
         negotiated: Boolean = false,
@@ -34,7 +34,7 @@ expect class PeerConnection(rtcConfiguration: RtcConfiguration = RtcConfiguratio
     suspend fun setRemoteDescription(description: SessionDescription)
 
     fun setConfiguration(configuration: RtcConfiguration): Boolean
-    fun addIceCandidate(candidate: IceCandidate): Boolean
+    suspend fun addIceCandidate(candidate: IceCandidate): Boolean
     fun removeIceCandidates(candidates: List<IceCandidate>): Boolean
 
     /**

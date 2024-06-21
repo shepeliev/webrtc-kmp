@@ -1,30 +1,16 @@
 package com.shepeliev.webrtckmp
 
-import dev.onvoid.webrtc.RTCIceServer as NativeIceServer
+import dev.onvoid.webrtc.RTCIceServer
 import dev.onvoid.webrtc.TlsCertPolicy as NativeTlsCertPolicy
 
-actual class IceServer internal constructor(val native: NativeIceServer) {
-    actual constructor(
-        urls: List<String>,
-        username: String,
-        password: String,
-        tlsCertPolicy: TlsCertPolicy,
-        hostname: String,
-        tlsAlpnProtocols: List<String>?,
-        tlsEllipticCurves: List<String>?
-    ) : this(
-        NativeIceServer().apply {
-            this.urls = urls
-            this.username = username
-            this.password = password
-            this.tlsCertPolicy = tlsCertPolicy.asNative()
-            this.hostname = hostname
-            this.tlsAlpnProtocols = tlsAlpnProtocols
-            this.tlsEllipticCurves = tlsEllipticCurves
-        }
-    )
-
-    actual override fun toString(): String = native.toString()
+fun IceServer.asNative(): RTCIceServer = RTCIceServer().apply {
+    urls = this@asNative.urls
+    username = this@asNative.username
+    password = this@asNative.password
+    tlsCertPolicy = this@asNative.tlsCertPolicy.asNative()
+    hostname = this@asNative.hostname
+    tlsAlpnProtocols = this@asNative.tlsAlpnProtocols
+    tlsEllipticCurves = this@asNative.tlsEllipticCurves
 }
 
 private fun TlsCertPolicy.asNative(): NativeTlsCertPolicy {

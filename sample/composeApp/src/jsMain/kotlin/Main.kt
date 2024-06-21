@@ -10,8 +10,7 @@ fun main() {
 
     root.render(
         Fragment.create {
-            ReactApp {
-            }
+            ReactApp()
         }
     )
 }

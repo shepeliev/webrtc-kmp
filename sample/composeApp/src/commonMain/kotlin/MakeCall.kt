@@ -1,4 +1,5 @@
 import co.touchlab.kermit.Logger
+import com.shepeliev.webrtckmp.AudioStreamTrack
 import com.shepeliev.webrtckmp.IceCandidate
 import com.shepeliev.webrtckmp.MediaStream
 import com.shepeliev.webrtckmp.MediaStreamTrackKind
@@ -13,14 +14,16 @@ import com.shepeliev.webrtckmp.onSignalingStateChange
 import com.shepeliev.webrtckmp.onTrack
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 
 suspend fun makeCall(
     peerConnections: Pair<PeerConnection, PeerConnection>,
     localStream: MediaStream,
-    setRemoteVideoTrack: (VideoStreamTrack?) -> Unit
+    onRemoteVideoTrack: (VideoStreamTrack) -> Unit,
+    onRemoteAudioTrack: (AudioStreamTrack) -> Unit = {},
 ): Nothing = coroutineScope {
     val (pc1, pc2) = peerConnections
     localStream.tracks.forEach { pc1.addTrack(it) }
@@ -81,8 +84,15 @@ suspend fun makeCall(
         .launchIn(this)
     pc2.onTrack
         .onEach { Logger.d { "PC2 onTrack: ${it.track?.kind}" } }
-        .filter { it.track?.kind == MediaStreamTrackKind.Video }
-        .onEach { setRemoteVideoTrack(it.track as VideoStreamTrack) }
+        .map { it.track }
+        .filterNotNull()
+        .onEach {
+            if (it.kind == MediaStreamTrackKind.Audio) {
+                onRemoteAudioTrack(it as AudioStreamTrack)
+            } else if (it.kind == MediaStreamTrackKind.Video) {
+                onRemoteVideoTrack(it as VideoStreamTrack)
+            }
+        }
         .launchIn(this)
     val offer = pc1.createOffer(OfferAnswerOptions(offerToReceiveVideo = true, offerToReceiveAudio = true))
     pc1.setLocalDescription(offer)

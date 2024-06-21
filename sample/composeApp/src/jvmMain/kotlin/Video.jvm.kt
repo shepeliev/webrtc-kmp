@@ -10,6 +10,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asComposeImageBitmap
 import androidx.compose.ui.unit.IntSize
+import com.shepeliev.webrtckmp.AudioStreamTrack
 import com.shepeliev.webrtckmp.VideoStreamTrack
 import dev.onvoid.webrtc.media.FourCC
 import dev.onvoid.webrtc.media.video.VideoBufferConverter
@@ -26,12 +27,12 @@ import java.nio.ByteBuffer
 
 @Composable
 actual fun Video(
-    track: VideoStreamTrack,
-    modifier: Modifier,
+    videoTrack: VideoStreamTrack,
+    modifier: Modifier, audioTrack: AudioStreamTrack?,
 ) {
-    val renderer = remember(track) { VideoRenderer(track = track) }
+    val renderer = remember(videoTrack) { VideoRenderer(track = videoTrack) }
 
-    DisposableEffect(track) {
+    DisposableEffect(videoTrack) {
         renderer.start()
 
         onDispose {

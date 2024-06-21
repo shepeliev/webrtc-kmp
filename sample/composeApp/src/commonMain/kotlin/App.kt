@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.platformLogWriter
+import com.shepeliev.webrtckmp.AudioStreamTrack
 import com.shepeliev.webrtckmp.MediaDevices
 import com.shepeliev.webrtckmp.MediaStream
 import com.shepeliev.webrtckmp.PeerConnection
@@ -35,22 +36,29 @@ fun App() {
         val scope = rememberCoroutineScope()
         val (localStream, setLocalStream) = remember { mutableStateOf<MediaStream?>(null) }
         val (remoteVideoTrack, setRemoteVideoTrack) = remember { mutableStateOf<VideoStreamTrack?>(null) }
+        val (remoteAudioTrack, setRemoteAudioTrack) = remember { mutableStateOf<AudioStreamTrack?>(null) }
         val (peerConnections, setPeerConnections) = remember {
             mutableStateOf<Pair<PeerConnection, PeerConnection>?>(null)
         }
 
         LaunchedEffect(localStream, peerConnections) {
             if (peerConnections == null || localStream == null) return@LaunchedEffect
-            makeCall(peerConnections, localStream, setRemoteVideoTrack)
+            makeCall(peerConnections, localStream, setRemoteVideoTrack, setRemoteAudioTrack)
         }
 
         Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
             val localVideoTrack = localStream?.videoTracks?.firstOrNull()
 
-            localVideoTrack?.let { Video(track = it, modifier = Modifier.weight(1f)) }
+            localVideoTrack?.let { Video(videoTrack = it, modifier = Modifier.weight(1f)) }
                 ?: Box(modifier = Modifier.weight(1f))
 
-            remoteVideoTrack?.let { Video(track = it, modifier = Modifier.weight(1f)) }
+            remoteVideoTrack?.let {
+                Video(
+                    videoTrack = it,
+                    audioTrack = remoteAudioTrack,
+                    modifier = Modifier.weight(1f),
+                )
+            }
                 ?: Box(modifier = Modifier.weight(1f))
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -60,9 +68,12 @@ fun App() {
                 else {
                     StopButton(
                         onClick = {
-                            hangup(peerConnections, setPeerConnections, setRemoteVideoTrack)
+                        hangup(peerConnections)
                             localStream.release()
                             setLocalStream(null)
+                        setPeerConnections(null)
+                        setRemoteVideoTrack(null)
+                        setRemoteAudioTrack(null)
                         }
                     )
 
@@ -76,7 +87,10 @@ fun App() {
                         )
                     } else {
                         HangupButton(onClick = {
-                            hangup(peerConnections, setPeerConnections, setRemoteVideoTrack)
+                        hangup(peerConnections)
+                        setPeerConnections(null)
+                        setRemoteVideoTrack(null)
+                        setRemoteAudioTrack(null)
                         })
                     }
                 }

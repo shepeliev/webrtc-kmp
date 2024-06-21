@@ -38,7 +38,7 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
 
     val native: RTCPeerConnection by lazy {
         WebRtc.peerConnectionFactory.createPeerConnection(
-            rtcConfiguration.native,
+            rtcConfiguration.asNative(),
             NativePeerConnectionObserver()
         ) ?: error("Creating PeerConnection failed")
     }
@@ -64,7 +64,8 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
     private val _peerConnectionEvent = MutableSharedFlow<PeerConnectionEvent>(
         extraBufferCapacity = FLOW_BUFFER_CAPACITY,
     )
-    internal actual val peerConnectionEvent: Flow<PeerConnectionEvent> = _peerConnectionEvent.asSharedFlow()
+    internal actual val peerConnectionEvent: Flow<PeerConnectionEvent> =
+        _peerConnectionEvent.asSharedFlow()
 
     private val localTracks = mutableMapOf<String, MediaStreamTrackImpl>()
     private val remoteTracks = mutableMapOf<String, MediaStreamTrackImpl>()
@@ -73,10 +74,10 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         label: String,
         id: Int,
         ordered: Boolean,
-        maxRetransmitTimeMs: Int,
+        maxPacketLifeTimeMs: Int,
         maxRetransmits: Int,
         protocol: String,
-        negotiated: Boolean
+        negotiated: Boolean ,
     ): DataChannel? {
         val init = RTCDataChannelInit().apply {
             this.id = id
@@ -113,11 +114,11 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
     }
 
     actual fun setConfiguration(configuration: RtcConfiguration): Boolean {
-        native.configuration = configuration.native
+        native.configuration = configuration.asNative()
         return true
     }
 
-    actual fun addIceCandidate(candidate: IceCandidate): Boolean {
+    actual suspend fun addIceCandidate(candidate: IceCandidate): Boolean {
         native.addIceCandidate(candidate.native)
         return true
     }
@@ -221,8 +222,12 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
             _peerConnectionEvent.tryEmit(NegotiationNeeded)
         }
 
-        override fun onAddTrack(receiver: RTCRtpReceiver, mediaStreams: Array<out NativeMediaStream>) {
-            val transceiver = native.transceivers.find { it.receiver.track.id == receiver.track.id } ?: return
+        override fun onAddTrack(
+            receiver: RTCRtpReceiver,
+            mediaStreams: Array<out NativeMediaStream>
+        ) {
+            val transceiver =
+                native.transceivers.find { it.receiver.track.id == receiver.track.id } ?: return
             if (mediaStreams.isEmpty()) return
 
             val audioTracks = mediaStreams
@@ -269,8 +274,18 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
             transceiver.receiver?.let { receiver ->
                 receiver.track?.let { mediaTrack ->
                     val track = when (mediaTrack.kind) {
-                        "audio" -> remoteTracks.getOrPut(mediaTrack.id) { RemoteAudioStreamTrack(mediaTrack as AudioTrack) }
-                        "video" -> remoteTracks.getOrPut(mediaTrack.id) { RemoteVideoStreamTrack(mediaTrack as VideoTrack) }
+                        "audio" -> remoteTracks.getOrPut(mediaTrack.id) {
+                            RemoteAudioStreamTrack(
+                                mediaTrack as AudioTrack
+                            )
+                        }
+
+                        "video" -> remoteTracks.getOrPut(mediaTrack.id) {
+                            RemoteVideoStreamTrack(
+                                mediaTrack as VideoTrack
+                            )
+                        }
+
                         else -> error("Unknown media stream track kind: $this")
                     }
 

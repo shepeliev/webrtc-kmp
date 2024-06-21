@@ -1,10 +1,10 @@
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import react.useEffect
 
 fun useCoroutineScope(): CoroutineScope {
-    val scope = CoroutineScope(Dispatchers.Main)
+    val scope = MainScope()
     useEffect(Unit) {
         cleanup { scope.cancel() }
     }

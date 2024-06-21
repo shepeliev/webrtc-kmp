@@ -34,8 +34,7 @@ private object MediaDevicesImpl : MediaDevices {
             LocalVideoStreamTrack(iosVideoTrack, videoCaptureController)
         }
 
-        val localMediaStream = WebRtc.peerConnectionFactory.mediaStreamWithStreamId(NSUUID.UUID().UUIDString())
-        return MediaStream(localMediaStream).apply {
+        return MediaStream().apply {
             if (audioTrack != null) addTrack(audioTrack)
             if (videoTrack != null) addTrack(videoTrack)
         }
