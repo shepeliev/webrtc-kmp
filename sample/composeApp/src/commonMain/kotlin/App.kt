@@ -63,44 +63,36 @@ fun App() {
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (localStream == null) {
-                    StartButton(onClick = {
-                        scope.launch {
-                            val stream = MediaDevices.getUserMedia(audio = true, video = true)
-                            setLocalStream(stream)
-                        }
-                    })
-
-                    return@MaterialTheme
+                    StartButton(setLocalStream = setLocalStream)
                 }
-
-                StopButton(
-                    onClick = {
+                else {
+                    StopButton(
+                        onClick = {
                         hangup(peerConnections)
-                        localStream.release()
-                        setLocalStream(null)
+                            localStream.release()
+                            setLocalStream(null)
                         setPeerConnections(null)
                         setRemoteVideoTrack(null)
                         setRemoteAudioTrack(null)
-                    }
-                )
-
-                SwitchCameraButton(
-                    onClick = {
-                        scope.launch { localStream.videoTracks.firstOrNull()?.switchCamera() }
-                    }
-                )
-
-                if (peerConnections == null) {
-                    CallButton(
-                        onClick = { setPeerConnections(Pair(PeerConnection(), PeerConnection())) },
+                        }
                     )
-                } else {
-                    HangupButton(onClick = {
+
+                    DeviceSelectButton(
+                        localStream = localStream,
+                    )
+
+                    if (peerConnections == null) {
+                        CallButton(
+                            onClick = { setPeerConnections(Pair(PeerConnection(), PeerConnection())) },
+                        )
+                    } else {
+                        HangupButton(onClick = {
                         hangup(peerConnections)
                         setPeerConnections(null)
                         setRemoteVideoTrack(null)
                         setRemoteAudioTrack(null)
-                    })
+                        })
+                    }
                 }
             }
         }
@@ -108,14 +100,14 @@ fun App() {
 }
 
 @Composable
-private fun CallButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+internal fun CallButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
     Button(onClick, modifier = modifier) {
         Text("Call")
     }
 }
 
 @Composable
-private fun HangupButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+internal fun HangupButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
     Button(onClick, modifier = modifier) {
         Text("Hangup")
     }
@@ -129,7 +121,7 @@ private fun SwitchCameraButton(onClick: () -> Unit, modifier: Modifier = Modifie
 }
 
 @Composable
-private fun StopButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+internal fun StopButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
     Button(onClick = onClick, modifier = modifier) {
         Text("Stop")
     }

@@ -13,9 +13,11 @@ androidx-test-rules = "1.5.0"
 accompanist-permision = "0.34.0"
 compose = "1.6.6"
 kermit = "2.0.3"
+bouncy-castle = "1.77"
 kotlin-wrappers = "1.0.0-pre.732"
 webrtc-android-sdk = "114.5735.10"
 webrtc-ios-sdk = "114.5735.09"
+webrtc-java-sdk = "0.8.0"
 
 #Android
 minSdk = "21"
@@ -29,10 +31,12 @@ nexus = "1.3.0"
 compose-plugin = "1.6.2"
 
 [libraries]
-webrtc-sdk = { module = "io.github.webrtc-sdk:android", version.ref = "webrtc-android-sdk" }
+webrtc-android = { module = "io.github.webrtc-sdk:android", version.ref = "webrtc-android-sdk" }
+webrtc-java = { module = "dev.onvoid.webrtc:webrtc-java", version.ref = "webrtc-java-sdk" }
 kotlin-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlin-coroutines" }
 kotlin-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlin-coroutines" }
 kotlin-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlin-coroutines" }
+kotlin-coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlin-coroutines" }
 androidx-coreKtx = { module = "androidx.core:core-ktx", version.ref = "androidx-core" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "androidx-appcompat" }
 androidx-lifecycle-runtime = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "androidx-lifecycle" }
@@ -43,6 +47,7 @@ accompanist-permissions = { module = "com.google.accompanist:accompanist-permiss
 compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose" }
 compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose" }
 kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
+java-bouncycastle = { module = "org.bouncycastle:bcpkix-jdk18on", version.ref = "bouncy-castle" }
 androidx-test-core = { module = "androidx.test:core", version.ref = "androidx-test-core" }
 androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidx-test-runner" }
 androidx-test-rules = { module = "androidx.test:rules", version.ref = "androidx-test-rules" }

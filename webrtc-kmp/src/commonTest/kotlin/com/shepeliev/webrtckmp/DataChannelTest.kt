@@ -3,14 +3,11 @@ package com.shepeliev.webrtckmp
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.resetMain
@@ -29,6 +26,7 @@ class DataChannelTest {
 
     @BeforeTest
     fun setUp() {
+        setupMocks()
         Dispatchers.setMain(StandardTestDispatcher(scope.testScheduler))
     }
 

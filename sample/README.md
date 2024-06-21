@@ -32,3 +32,9 @@ Open `sample/iosApp/iosApp.xcodeproj` in XCode build and run
 ```bash
 ./gradlew sample:composeApp:wasmJsBrowserRun 
 ```
+
+### JVM Desktop
+
+```bash
+./gradlew ":sample:composeApp:run" -DmainClass="MainKt" --quiet
+```

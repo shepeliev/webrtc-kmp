@@ -6,16 +6,31 @@ import android.provider.Settings
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.edit
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.shepeliev.webrtckmp.MediaDevices
+import com.shepeliev.webrtckmp.MediaStream
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-actual fun StartButton(onClick: () -> Unit, modifier: Modifier) {
+actual fun StartButton(setLocalStream: (MediaStream?) -> Unit, modifier: Modifier) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
+    val openMediaStreams = remember {
+        {
+            scope.launch {
+                val stream = MediaDevices.getUserMedia(audio = true, video = true)
+                setLocalStream(stream)
+            }
+        }
+    }
 
     val permissions = rememberMultiplePermissionsState(
         listOf(
@@ -24,13 +39,13 @@ actual fun StartButton(onClick: () -> Unit, modifier: Modifier) {
         )
     ) {
         if (it.all { (_, granted) -> granted }) {
-            onClick()
+            openMediaStreams()
         }
     }
 
     Button(onClick = {
         if (permissions.allPermissionsGranted) {
-            onClick()
+            openMediaStreams()
         } else {
             val prefs = PreferenceManager.getDefaultSharedPreferences(context)
             val permissionsRequested = prefs.getBoolean("permissionsRequested", false)
