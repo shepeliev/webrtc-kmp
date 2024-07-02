@@ -9,7 +9,7 @@ Pod::Spec.new do |spec|
     spec.vendored_frameworks      = 'build/cocoapods/framework/webrtc_kmp.framework'
     spec.libraries                = 'c++'
     spec.ios.deployment_target = '13.0'
-    spec.dependency 'WebRTC-SDK', '114.5735.09'
+    spec.dependency 'WebRTC-SDK', '125.6422.02'
                 
     if !Dir.exist?('build/cocoapods/framework/webrtc_kmp.framework') || Dir.empty?('build/cocoapods/framework/webrtc_kmp.framework')
         raise "
