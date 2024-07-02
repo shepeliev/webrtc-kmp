@@ -12,7 +12,7 @@ It supports Android, iOS, JS. Other platforms - PRs are welcome.
  Screen Capture | :white_check_mark: | | :white_check_mark:
 
 ## WebRTC revision
-Current revision: M114
+Current revision: M125
 
 ## Installation
 The library is published to [Maven Central](https://search.maven.org/artifact/com.shepeliev/webrtc-kmp).
@@ -27,7 +27,7 @@ kotlin {
     ios.deploymentTarget = "11.0"
    
     pod("WebRTC-SDK") {
-      version = "114.5735.02"
+      version = "125.6422.02"
       linkOnly = true
     }
   
