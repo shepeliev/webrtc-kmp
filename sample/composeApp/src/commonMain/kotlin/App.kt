@@ -35,8 +35,16 @@ fun App() {
     MaterialTheme {
         val scope = rememberCoroutineScope()
         val (localStream, setLocalStream) = remember { mutableStateOf<MediaStream?>(null) }
-        val (remoteVideoTrack, setRemoteVideoTrack) = remember { mutableStateOf<VideoStreamTrack?>(null) }
-        val (remoteAudioTrack, setRemoteAudioTrack) = remember { mutableStateOf<AudioStreamTrack?>(null) }
+        val (remoteVideoTrack, setRemoteVideoTrack) = remember {
+            mutableStateOf<VideoStreamTrack?>(
+                null
+            )
+        }
+        val (remoteAudioTrack, setRemoteAudioTrack) = remember {
+            mutableStateOf<AudioStreamTrack?>(
+                null
+            )
+        }
         val (peerConnections, setPeerConnections) = remember {
             mutableStateOf<Pair<PeerConnection, PeerConnection>?>(null)
         }
@@ -69,27 +77,24 @@ fun App() {
                             setLocalStream(stream)
                         }
                     })
+                } else {
+                    StopButton(
+                        onClick = {
+                            hangup(peerConnections)
+                            localStream.release()
+                            setLocalStream(null)
+                            setPeerConnections(null)
+                            setRemoteVideoTrack(null)
+                            setRemoteAudioTrack(null)
+                        }
+                    )
 
-                    return@MaterialTheme
+                    SwitchCameraButton(
+                        onClick = {
+                            scope.launch { localStream.videoTracks.firstOrNull()?.switchCamera() }
+                        }
+                    )
                 }
-
-                StopButton(
-                    onClick = {
-                        hangup(peerConnections)
-                        localStream.release()
-                        setLocalStream(null)
-                        setPeerConnections(null)
-                        setRemoteVideoTrack(null)
-                        setRemoteAudioTrack(null)
-                    }
-                )
-
-                SwitchCameraButton(
-                    onClick = {
-                        scope.launch { localStream.videoTracks.firstOrNull()?.switchCamera() }
-                    }
-                )
-
                 if (peerConnections == null) {
                     CallButton(
                         onClick = { setPeerConnections(Pair(PeerConnection(), PeerConnection())) },

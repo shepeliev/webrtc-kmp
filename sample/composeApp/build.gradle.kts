@@ -7,7 +7,9 @@ plugins {
     kotlin("multiplatform")
     id("com.android.application")
     kotlin("native.cocoapods")
+
     alias(libs.plugins.jetbrains.compose)
+    alias(libs.plugins.compose.compiler)
 }
 
 kotlin {
