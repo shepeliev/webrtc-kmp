@@ -42,4 +42,4 @@ jobs:
       - name: Build sample app
         run: |
           cd sample/iosApp 
-          xcodebuild -configuration Debug -scheme iosApp -sdk iphonesimulator -arch arm64
+          xcodebuild -workspace iosApp.xcworkspace -configuration Debug -scheme iosApp -sdk iphonesimulator -arch arm64
