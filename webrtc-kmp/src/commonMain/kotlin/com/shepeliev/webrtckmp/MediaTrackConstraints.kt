@@ -162,8 +162,8 @@ class MediaTrackConstraintsBuilder(internal var constraints: MediaTrackConstrain
         constraints = constraints.copy(facingMode = constrain)
     }
 
-    fun frameRate(ratio: Double) {
-        constraints = constraints.copy(frameRate = ratio.asValueConstrain())
+    fun frameRate(fps: Double) {
+        constraints = constraints.copy(frameRate = fps.asValueConstrain())
     }
 
     fun frameRate(build: ValueOrConstrain.Constrain<Double>.() -> Unit) {
