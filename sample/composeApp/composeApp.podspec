@@ -6,15 +6,15 @@ Pod::Spec.new do |spec|
     spec.authors                  = ''
     spec.license                  = ''
     spec.summary                  = 'Compose app'
-    spec.vendored_frameworks      = 'build/cocoapods/framework/composeApp.framework'
+    spec.vendored_frameworks      = 'build/cocoapods/framework/ComposeApp.framework'
     spec.libraries                = 'c++'
-    spec.ios.deployment_target = '13.0'
+    spec.ios.deployment_target    = '13.0'
     spec.dependency 'WebRTC-SDK', '125.6422.02'
                 
-    if !Dir.exist?('build/cocoapods/framework/composeApp.framework') || Dir.empty?('build/cocoapods/framework/composeApp.framework')
+    if !Dir.exist?('build/cocoapods/framework/ComposeApp.framework') || Dir.empty?('build/cocoapods/framework/ComposeApp.framework')
         raise "
 
-        Kotlin framework 'composeApp' doesn't exist yet, so a proper Xcode project can't be generated.
+        Kotlin framework 'ComposeApp' doesn't exist yet, so a proper Xcode project can't be generated.
         'pod install' should be executed after running ':generateDummyFramework' Gradle task:
 
             ./gradlew :sample:composeApp:generateDummyFramework
@@ -22,9 +22,13 @@ Pod::Spec.new do |spec|
         Alternatively, proper pod installation is performed during Gradle sync in the IDE (if Podfile location is set)"
     end
                 
+    spec.xcconfig = {
+        'ENABLE_USER_SCRIPT_SANDBOXING' => 'NO',
+    }
+                
     spec.pod_target_xcconfig = {
         'KOTLIN_PROJECT_PATH' => ':sample:composeApp',
-        'PRODUCT_MODULE_NAME' => 'composeApp',
+        'PRODUCT_MODULE_NAME' => 'ComposeApp',
     }
                 
     spec.script_phases = [
@@ -46,5 +50,5 @@ Pod::Spec.new do |spec|
             SCRIPT
         }
     ]
-    spec.resources = ['build/compose/ios/composeApp/compose-resources']
+    spec.resources = ['build/compose/cocoapods/compose-resources']
 end
