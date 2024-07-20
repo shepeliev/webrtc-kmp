@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalForeignApi::class)
-
 package com.shepeliev.webrtckmp
 
 import WebRTC.RTCCameraVideoCapturer
@@ -10,6 +8,7 @@ import platform.Foundation.NSUUID
 
 internal actual val mediaDevices: MediaDevices = MediaDevicesImpl
 
+@OptIn(ExperimentalForeignApi::class)
 private object MediaDevicesImpl : MediaDevices {
     override suspend fun getUserMedia(streamConstraints: MediaStreamConstraintsBuilder.() -> Unit): MediaStream {
         val constraints = MediaStreamConstraintsBuilder().let {
@@ -29,8 +28,15 @@ private object MediaDevicesImpl : MediaDevices {
 
         val videoTrack = constraints.video?.let { videoConstraints ->
             val videoSource = WebRtc.peerConnectionFactory.videoSource()
-            val iosVideoTrack = WebRtc.peerConnectionFactory.videoTrackWithSource(videoSource, NSUUID.UUID().UUIDString())
-            val videoCaptureController = CameraVideoCaptureController(videoConstraints, videoSource)
+            val videoProcessor = WebRtc.videoProcessorFactory?.createVideoProcessor(videoSource)
+            val iosVideoTrack = WebRtc.peerConnectionFactory.videoTrackWithSource(
+                source = videoSource,
+                trackId = NSUUID.UUID().UUIDString()
+            )
+            val videoCaptureController = CameraVideoCaptureController(
+                constraints = videoConstraints,
+                videoSource = videoProcessor ?: videoSource
+            )
             LocalVideoStreamTrack(iosVideoTrack, videoCaptureController)
         }
 

@@ -16,6 +16,7 @@ object WebRtc {
     var videoDecoderFactory: RTCVideoDecoderFactoryProtocol? = null
     var peerConnectionFactoryOptions: RTCPeerConnectionFactoryOptions? = null
     var customPeerConnectionFactory: RTCPeerConnectionFactory? = null
+    var videoProcessorFactory: VideoProcessorFactory? = null
 
     internal val peerConnectionFactory: RTCPeerConnectionFactory by lazy {
         customPeerConnectionFactory ?: run {
