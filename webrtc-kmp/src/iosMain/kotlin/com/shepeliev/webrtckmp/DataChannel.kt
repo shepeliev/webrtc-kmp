@@ -6,6 +6,7 @@ import WebRTC.RTCDataBuffer
 import WebRTC.RTCDataChannel
 import WebRTC.RTCDataChannelDelegateProtocol
 import WebRTC.RTCDataChannelState
+import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
@@ -35,22 +36,10 @@ actual class DataChannel(val ios: RTCDataChannel) {
     private val coroutineScope = MainScope()
     private val dataChannelEvent = MutableSharedFlow<DataChannelEvent>()
 
+    private val delegate = Delegate()
+
     init {
-        ios.delegate = object : NSObject(), RTCDataChannelDelegateProtocol {
-            override fun dataChannel(dataChannel: RTCDataChannel, didChangeBufferedAmount: uint64_t) {
-                // not implemented
-            }
-
-            override fun dataChannel(dataChannel: RTCDataChannel, didReceiveMessageWithBuffer: RTCDataBuffer) {
-                coroutineScope.launch {
-                    dataChannelEvent.emit(DataChannelEvent.MessageReceived(didReceiveMessageWithBuffer))
-                }
-            }
-
-            override fun dataChannelDidChangeState(dataChannel: RTCDataChannel) {
-                coroutineScope.launch { dataChannelEvent.emit(DataChannelEvent.StateChanged) }
-            }
-        }
+        ios.delegate = delegate
     }
 
     actual val onOpen: Flow<Unit> = dataChannelEvent
@@ -72,6 +61,7 @@ actual class DataChannel(val ios: RTCDataChannel) {
         .filterNotNull()
         .map { it.buffer.data.toByteArray() }
 
+    @BetaInteropApi
     actual fun send(data: ByteArray): Boolean {
         val buffer = RTCDataBuffer(data.toNSData(), true)
         return ios.sendData(buffer)
@@ -97,6 +87,22 @@ actual class DataChannel(val ios: RTCDataChannel) {
             RTCDataChannelState.RTCDataChannelStateClosing -> DataChannelState.Closing
             RTCDataChannelState.RTCDataChannelStateClosed -> DataChannelState.Closed
             else -> error("Unknown RTCDataChannelState: $state")
+        }
+    }
+
+    private inner class Delegate : NSObject(), RTCDataChannelDelegateProtocol {
+        override fun dataChannel(dataChannel: RTCDataChannel, didChangeBufferedAmount: uint64_t) {
+            // not implemented
+        }
+
+        override fun dataChannel(dataChannel: RTCDataChannel, didReceiveMessageWithBuffer: RTCDataBuffer) {
+            coroutineScope.launch {
+                dataChannelEvent.emit(DataChannelEvent.MessageReceived(didReceiveMessageWithBuffer))
+            }
+        }
+
+        override fun dataChannelDidChangeState(dataChannel: RTCDataChannel) {
+            coroutineScope.launch { dataChannelEvent.emit(DataChannelEvent.StateChanged) }
         }
     }
 }
