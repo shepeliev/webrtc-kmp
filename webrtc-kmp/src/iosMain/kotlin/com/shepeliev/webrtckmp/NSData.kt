@@ -2,6 +2,7 @@
 
 package com.shepeliev.webrtckmp
 
+import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.memScoped
@@ -11,6 +12,7 @@ import platform.Foundation.NSData
 import platform.Foundation.create
 import platform.posix.memcpy
 
+@BetaInteropApi
 internal fun ByteArray.toNSData(): NSData = memScoped {
     NSData.create(bytes = this@toNSData.toCValues().ptr, length = size.toULong())
 }
