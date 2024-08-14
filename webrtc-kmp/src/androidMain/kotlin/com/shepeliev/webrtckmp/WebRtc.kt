@@ -20,14 +20,14 @@ object WebRtc {
         _rootEglBase ?: EglBase.create().also { _rootEglBase = it }
     }
 
-    lateinit var factoryInitializationOptionsBuilder: PeerConnectionFactory.InitializationOptions.Builder
-        private set
-
     var videoEncoderFactory: VideoEncoderFactory? = null
     var videoDecoderFactory: VideoDecoderFactory? = null
     var customCameraEnumerator: CameraEnumerator? = null
     var customPeerConnectionFactory: PeerConnectionFactory? = null
     var videoProcessorFactory: VideoProcessorFactory? = null
+
+    lateinit var factoryInitializationOptionsBuilder: PeerConnectionFactory.InitializationOptions.Builder
+        private set
 
     internal lateinit var applicationContext: Context
         private set
@@ -62,7 +62,7 @@ object WebRtc {
         _rootEglBase = eglBase
     }
 
-    fun initialize(context: Context) {
+    internal fun initialize(context: Context) {
         applicationContext = context.applicationContext
         factoryInitializationOptionsBuilder = PeerConnectionFactory.InitializationOptions.builder(context)
     }
