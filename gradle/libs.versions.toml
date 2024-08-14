@@ -14,8 +14,8 @@ accompanist-permision = "0.34.0"
 compose = "1.6.6"
 kermit = "2.0.3"
 kotlin-wrappers = "1.0.0-pre.732"
-webrtc-android-sdk = "125.6422.02"
-webrtc-ios-sdk = "125.6422.02"
+webrtc-android-sdk = "125.6422.04"
+webrtc-ios-sdk = "125.6422.04"
 
 #Android
 minSdk = "21"
