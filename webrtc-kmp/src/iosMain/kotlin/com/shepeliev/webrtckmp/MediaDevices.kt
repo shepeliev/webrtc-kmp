@@ -35,7 +35,7 @@ private object MediaDevicesImpl : MediaDevices {
             )
             val videoCaptureController = CameraVideoCaptureController(
                 constraints = videoConstraints,
-                videoSource = videoProcessor ?: videoSource
+                videoCapturerDelegate = videoProcessor ?: videoSource
             )
             LocalVideoStreamTrack(iosVideoTrack, videoCaptureController)
         }

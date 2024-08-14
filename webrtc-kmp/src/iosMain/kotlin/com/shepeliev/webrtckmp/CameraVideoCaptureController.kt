@@ -19,7 +19,7 @@ import kotlin.math.abs
 
 internal class CameraVideoCaptureController(
     private val constraints: MediaTrackConstraints,
-    private val videoSource: RTCVideoCapturerDelegateProtocol,
+    private val videoCapturerDelegate: RTCVideoCapturerDelegateProtocol,
 ) : VideoCaptureController {
     private var videoCapturer: RTCCameraVideoCapturer? = null
     private var position: AVCaptureDevicePosition = AVCaptureDevicePositionBack
@@ -32,7 +32,7 @@ internal class CameraVideoCaptureController(
 
     override fun startCapture() {
         if (videoCapturer != null) return
-        videoCapturer = RTCCameraVideoCapturer(videoSource)
+        videoCapturer = RTCCameraVideoCapturer(videoCapturerDelegate)
         if (!this::device.isInitialized) selectDevice()
         selectFormat()
         selectFps()
