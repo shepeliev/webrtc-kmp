@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
     spec.name                     = 'webrtc_kmp'
-    spec.version                  = '0.125.0'
+    spec.version                  = '0.125.2'
     spec.homepage                 = 'https://github.com/shepeliev/webrtc-kmp'
     spec.source                   = { :http=> ''}
     spec.authors                  = ''
