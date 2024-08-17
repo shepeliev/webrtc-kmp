@@ -33,8 +33,11 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      - name: Extract version from tag
+        run: ./version-up.sh --prefix v --stay
+
       - name: Publish to MavenCentral
-        run: ./gradlew publishAllPublicationsToSonatypeRepository --max-workers 1 closeAndReleaseSonatypeStagingRepository
+        run: VERSION=$(cat version.properties | grep snapshot.version | awk -F '=v' '{print $2}') ./gradlew publishAllPublicationsToSonatypeRepository --max-workers 1 closeAndReleaseSonatypeStagingRepository
         env:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
