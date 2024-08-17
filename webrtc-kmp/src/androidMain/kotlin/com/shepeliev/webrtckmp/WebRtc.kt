@@ -24,6 +24,8 @@ object WebRtc {
     var videoDecoderFactory: VideoDecoderFactory? = null
     var customCameraEnumerator: CameraEnumerator? = null
     var customPeerConnectionFactory: PeerConnectionFactory? = null
+    var videoProcessorFactory: VideoProcessorFactory? = null
+
     lateinit var factoryInitializationOptionsBuilder: PeerConnectionFactory.InitializationOptions.Builder
         private set
 
