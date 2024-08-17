@@ -63,7 +63,7 @@ private object MediaDevicesImpl : MediaDevices {
 
     override suspend fun getDisplayMedia(): MediaStream {
         val videoSource = WebRtc.peerConnectionFactory.createVideoSource(false)
-        videoSource.setVideoProcessor(WebRtc.videoProcessorFactory?.createVideoProcessor())
+        WebRtc.videoProcessorFactory?.createVideoProcessor()?.let { videoSource.setVideoProcessor(it) }
         val screenCaptureController = ScreenCaptureController(videoSource)
         val videoTrack = WebRtc.peerConnectionFactory.createVideoTrack(
             UUID.randomUUID().toString(),
