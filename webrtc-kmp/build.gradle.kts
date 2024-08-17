@@ -13,12 +13,11 @@ plugins {
 
 group = "com.shepeliev"
 
-val webRtcKmpVersion: String by properties
-version = webRtcKmpVersion
+version = System.getenv("VERSION") ?: "0.0.0"
 
 kotlin {
     cocoapods {
-        version = webRtcKmpVersion
+        version = project.version.toString()
         summary = "WebRTC Kotlin Multiplatform SDK"
         homepage = "https://github.com/shepeliev/webrtc-kmp"
         ios.deploymentTarget = "13.0"
