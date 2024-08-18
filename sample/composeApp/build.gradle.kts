@@ -91,7 +91,7 @@ kotlin {
 
         androidMain.dependencies {
             implementation(libs.kotlin.coroutines.android)
-            implementation(libs.compose.ui.tooling.preview)
+            implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.accompanist.permissions)
         }
@@ -136,7 +136,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
     dependencies {
-        debugImplementation(libs.compose.ui.tooling)
+        debugImplementation(compose.uiTooling)
     }
 }
 
