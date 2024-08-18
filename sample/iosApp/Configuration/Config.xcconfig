@@ -1,3 +1,3 @@
-TEAM_ID=Q86C89UZUH
-BUNDLE_ID=com.shepeliev.webrtckmp.sample.WebRTCKMPPlayground
+TEAM_ID=<YOUR_TEAM_ID>
+BUNDLE_ID=<YOUR_BUNDLE_ID>
 APP_NAME=WebRTC KMP Playground
