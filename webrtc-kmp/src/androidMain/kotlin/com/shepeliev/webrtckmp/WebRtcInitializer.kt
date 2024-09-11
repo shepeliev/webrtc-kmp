@@ -6,7 +6,7 @@ import androidx.startup.Initializer
 @Suppress("unused")
 class WebRtcInitializer : Initializer<WebRtc> {
     override fun create(context: Context): WebRtc {
-        WebRtc.initialize(context)
+        WebRtc.initializeApplicationContext(context)
         return WebRtc
     }
 
