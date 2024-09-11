@@ -44,7 +44,7 @@ jobs:
           script: ./gradlew webrtc-kmp:connectedAndroidTest
 
       - name: Upload Android test artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: "Android Instrumented Tests Report HTML"
@@ -54,7 +54,7 @@ jobs:
         run: ./gradlew cleanTest kotlinUpgradeYarnLock webrtc-kmp:jsTest
 
       - name: Upload JS test artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: "JS Tests Report HTML"
@@ -64,7 +64,7 @@ jobs:
         run: ./gradlew cleanTest kotlinUpgradeYarnLock webrtc-kmp:wasmJsTest
 
       - name: Upload WasmJS test artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: "JS Tests Report HTML"
