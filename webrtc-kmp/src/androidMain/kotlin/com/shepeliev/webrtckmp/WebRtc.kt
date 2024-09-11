@@ -70,7 +70,9 @@ object WebRtc {
         cameraEnumerator: CameraEnumerator? = null,
         videoProcessorFactory: VideoProcessorFactory? = null,
     ) {
-        check(_rootEglBase == null) { "WebRtc.configure must be called before first call to MediaDevices." }
+        check(_rootEglBase == null) {
+            "WebRtc.configurePeerConnectionFactory() must be called once only and before any access to MediaDevices."
+        }
 
         this._rootEglBase = rootEglBase ?: EglBase.create()
         this.factoryInitializationOptions = peerConnectionFactoryInitializationOptions

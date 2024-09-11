@@ -21,15 +21,9 @@ object WebRtc {
     internal var videoProcessorFactory: VideoProcessorFactory? = null
         private set
 
-    internal val peerConnectionFactory: RTCPeerConnectionFactory by lazy {
-        RTCInitializeSSL()
-        loggingSeverity?.let { RTCSetMinDebugLogLevel(it) }
-        val encoderFactory = videoEncoderFactory ?: RTCDefaultVideoEncoderFactory()
-        val decoderFactory = videoDecoderFactory ?: RTCDefaultVideoDecoderFactory()
-        RTCPeerConnectionFactory(encoderFactory, decoderFactory).apply {
-            peerConnectionFactoryOptions?.let { setOptions(it) }
-        }
-    }
+    private var _peerConnectionFactory: RTCPeerConnectionFactory? = null
+    internal val peerConnectionFactory: RTCPeerConnectionFactory
+        get() = _peerConnectionFactory ?: createPeerConnectionFactory().also { _peerConnectionFactory = it }
 
     @Suppress("unused")
     fun configurePeerConnectionFactory(loggingSeverity: RTCLoggingSeverity) {
@@ -207,7 +201,13 @@ object WebRtc {
         videoDecoderFactory: RTCVideoDecoderFactoryProtocol,
         videoProcessorFactory: VideoProcessorFactory
     ) {
-        configurePeerConnectionFactoryInternal(null, videoEncoderFactory, videoDecoderFactory, null, videoProcessorFactory)
+        configurePeerConnectionFactoryInternal(
+            null,
+            videoEncoderFactory,
+            videoDecoderFactory,
+            null,
+            videoProcessorFactory
+        )
     }
 
     @Suppress("unused")
@@ -261,7 +261,13 @@ object WebRtc {
         options: RTCPeerConnectionFactoryOptions,
         videoProcessorFactory: VideoProcessorFactory
     ) {
-        configurePeerConnectionFactoryInternal(loggingSeverity, videoEncoderFactory, null, options, videoProcessorFactory)
+        configurePeerConnectionFactoryInternal(
+            loggingSeverity,
+            videoEncoderFactory,
+            null,
+            options,
+            videoProcessorFactory
+        )
     }
 
     @Suppress("unused")
@@ -271,7 +277,13 @@ object WebRtc {
         options: RTCPeerConnectionFactoryOptions,
         videoProcessorFactory: VideoProcessorFactory
     ) {
-        configurePeerConnectionFactoryInternal(loggingSeverity, null, videoDecoderFactory, options, videoProcessorFactory)
+        configurePeerConnectionFactoryInternal(
+            loggingSeverity,
+            null,
+            videoDecoderFactory,
+            options,
+            videoProcessorFactory
+        )
     }
 
     @Suppress("unused")
@@ -281,7 +293,13 @@ object WebRtc {
         options: RTCPeerConnectionFactoryOptions,
         videoProcessorFactory: VideoProcessorFactory
     ) {
-        configurePeerConnectionFactoryInternal(null, videoEncoderFactory, videoDecoderFactory, options, videoProcessorFactory)
+        configurePeerConnectionFactoryInternal(
+            null,
+            videoEncoderFactory,
+            videoDecoderFactory,
+            options,
+            videoProcessorFactory
+        )
     }
 
     @Suppress("unused")
@@ -292,7 +310,13 @@ object WebRtc {
         options: RTCPeerConnectionFactoryOptions,
         videoProcessorFactory: VideoProcessorFactory,
     ) {
-        configurePeerConnectionFactoryInternal(loggingSeverity, videoEncoderFactory, videoDecoderFactory, options, videoProcessorFactory)
+        configurePeerConnectionFactoryInternal(
+            loggingSeverity,
+            videoEncoderFactory,
+            videoDecoderFactory,
+            options,
+            videoProcessorFactory
+        )
     }
 
     private fun configurePeerConnectionFactoryInternal(
@@ -302,10 +326,25 @@ object WebRtc {
         options: RTCPeerConnectionFactoryOptions?,
         videoProcessorFactory: VideoProcessorFactory?,
     ) {
+        check(_peerConnectionFactory == null) {
+            "WebRtc.configurePeerConnectionFactory() must be called once only and before any access to MediaDevices."
+        }
+
         this.loggingSeverity = loggingSeverity
         this.videoEncoderFactory = videoEncoderFactory
         this.videoDecoderFactory = videoDecoderFactory
         this.peerConnectionFactoryOptions = options
         this.videoProcessorFactory = videoProcessorFactory
+        _peerConnectionFactory = createPeerConnectionFactory()
+    }
+
+    private fun createPeerConnectionFactory(): RTCPeerConnectionFactory {
+        RTCInitializeSSL()
+        loggingSeverity?.let { RTCSetMinDebugLogLevel(it) }
+        val encoderFactory = videoEncoderFactory ?: RTCDefaultVideoEncoderFactory()
+        val decoderFactory = videoDecoderFactory ?: RTCDefaultVideoDecoderFactory()
+        val factory = RTCPeerConnectionFactory(encoderFactory, decoderFactory)
+        peerConnectionFactoryOptions?.let { factory.setOptions(it) }
+        return factory
     }
 }
