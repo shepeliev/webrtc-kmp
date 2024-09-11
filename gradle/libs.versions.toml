@@ -13,7 +13,7 @@ androidx-test-rules = "1.5.0"
 accompanist-permision = "0.34.0"
 kermit = "2.0.3"
 kotlin-wrappers = "1.0.0-pre.732"
-webrtc-android-sdk = "125.6422.04"
+webrtc-android-sdk = "125.6422.05"
 webrtc-ios-sdk = "125.6422.04"
 
 #Android
