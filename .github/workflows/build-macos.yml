@@ -43,7 +43,7 @@ jobs:
         run: ./gradlew cleanTest webrtc-kmp:iosSimulatorArm64Test
 
       - name: Upload iOS test artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: "iOS Tests Report HTML"

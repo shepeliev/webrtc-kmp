@@ -10,13 +10,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.shepeliev.webrtckmp.WebRtc
 import org.webrtc.Loggable
 import org.webrtc.Logging
+import org.webrtc.PeerConnectionFactory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        WebRtc.factoryInitializationOptionsBuilder
+        val initializationOptions = PeerConnectionFactory.InitializationOptions.builder(this)
             .setInjectableLogger(WebRtcLogger, Logging.Severity.LS_ERROR)
+            .createInitializationOptions()
+        WebRtc.configurePeerConnectionFactory(peerConnectionFactoryInitializationOptions = initializationOptions)
 
         setContent {
             App()
