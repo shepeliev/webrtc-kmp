@@ -32,6 +32,7 @@ kotlin {
 
         framework {
             baseName = "ComposeApp"
+            isStatic = true
         }
 
         xcodeConfigurationToNativeBuildType["CUSTOM_DEBUG"] = NativeBuildType.DEBUG
@@ -42,16 +43,9 @@ kotlin {
         configureJvmTarget()
     }
 
-    listOf(
-        iosX64 { configureWebRtcCinterops() },
-        iosArm64 { configureWebRtcCinterops() },
-        iosSimulatorArm64 { configureWebRtcCinterops() }
-    ).forEach { iosTarget ->
-        iosTarget.binaries.framework {
-            baseName = "ComposeApp"
-            isStatic = true
-        }
-    }
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
 
     js {
         browser {
@@ -142,27 +136,4 @@ android {
 
 compose.experimental {
     web.application {}
-}
-
-fun KotlinNativeTarget.configureWebRtcCinterops() {
-    val webRtcFrameworkPath = file("$buildDir/cocoapods/synthetic/IOS/Pods/WebRTC-SDK")
-        .resolveArchPath(konanTarget, "WebRTC")
-    compilations.getByName("main") {
-        cinterops.getByName("WebRTC") {
-            compilerOpts("-framework", "WebRTC", "-F$webRtcFrameworkPath")
-        }
-    }
-
-    binaries {
-        getTest("DEBUG").apply {
-            linkerOpts(
-                "-framework",
-                "WebRTC",
-                "-F$webRtcFrameworkPath",
-                "-rpath",
-                "$webRtcFrameworkPath",
-                "-ObjC"
-            )
-        }
-    }
 }
