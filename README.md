@@ -17,53 +17,48 @@ Current revision: M125
 ## Installation
 The library is published to [Maven Central](https://search.maven.org/artifact/com.shepeliev/webrtc-kmp).
 
-Shared module build.gradle.kts
-```Kotlin
+
+### Add dependency to your common source set:
+```kotlin
+commonMain.dependencies {
+  dependencies {
+    api("com.shepeliev:webrtc-kmp:$webRtcKmpVersion")
+  }
+}
+```
+
+### Running on iOS
+On iOS the WebRTC SDK is not linked as transitive dependency. You need to add it to your iOS project manually.
+This can be done using CocoaPods or SPM. The concrete implementation depends on your project setup. 
+Here is an example how to link the WebRTC SDK using CocoaPods in gradle.build.kts:
+
+```kotlin
 kotlin {
   cocoapods {
     version = "1.0.0"
     summary = "Shared module"
     homepage = "not published"
-    ios.deploymentTarget = "11.0"
+    ios.deploymentTarget = "13.0"
    
-    pod("WebRTC-SDK") {
-      version = "125.6422.02"
-      linkOnly = true
+    pod("WebRTC-SDK") { 
+      version = "125.6422.04"
+      moduleName = "WebRTC"
     }
   
     podfile = project.file("../iosApp/Podfile")
   
     framework {
       baseName = "shared"
-      export("com.shepeliev:webrtc-kmp:$webRtcKmpVersion")
-      transitiveExport = true
+      isStatic = true  
     }
   
     xcodeConfigurationToNativeBuildType["CUSTOM_DEBUG"] = NativeBuildType.DEBUG
     xcodeConfigurationToNativeBuildType["CUSTOM_RELEASE"] = NativeBuildType.RELEASE
   }
- 
-  android()
-  
-  ios()
-  iosSimulatorArm64()
- 
-  js {
-   useCommonJs()
-   browser()
-  }
-  
-  sourceSets {
-      val commonMain by getting {
-          dependencies {
-              api("com.shepeliev:webrtc-kmp:$webRtcKmpVersion")
-          }
-      }
 
-      val iosMain by getting
-      val iosSimulatorArm64Main by getting
-      iosSimulatorArm64Main.dependsOn(iosMain)
-  }
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
 }
 ```
 
