@@ -22,7 +22,7 @@ The library is published to [Maven Central](https://search.maven.org/artifact/co
 ```kotlin
 commonMain.dependencies {
   dependencies {
-    api("com.shepeliev:webrtc-kmp:$webRtcKmpVersion")
+    implementation("com.shepeliev:webrtc-kmp:$webRtcKmpVersion")
   }
 }
 ```
