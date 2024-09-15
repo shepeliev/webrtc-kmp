@@ -22,6 +22,8 @@ kotlin {
         homepage = "https://github.com/shepeliev/webrtc-kmp"
         ios.deploymentTarget = "13.0"
 
+        noPodspec()
+
         pod("WebRTC-SDK") {
             version = libs.versions.webrtc.ios.sdk.get()
             moduleName = "WebRTC"
@@ -37,9 +39,9 @@ kotlin {
         }
     }
 
-    iosX64 { configureWebRtcCinterops() }
-    iosArm64 { configureWebRtcCinterops() }
-    iosSimulatorArm64 { configureWebRtcCinterops() }
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
 
     js {
         useCommonJs()
@@ -155,27 +157,4 @@ signing {
 
     useInMemoryPgpKeys(signingKey, signingPassword)
     sign(publishing.publications)
-}
-
-fun KotlinNativeTarget.configureWebRtcCinterops() {
-    val webRtcFrameworkPath = file("$buildDir/cocoapods/synthetic/IOS/Pods/WebRTC-SDK")
-        .resolveArchPath(konanTarget, "WebRTC")
-    compilations.getByName("main") {
-        cinterops.getByName("WebRTC") {
-            compilerOpts("-framework", "WebRTC", "-F$webRtcFrameworkPath")
-        }
-    }
-
-    binaries {
-        getTest("DEBUG").apply {
-            linkerOpts(
-                "-framework",
-                "WebRTC",
-                "-F$webRtcFrameworkPath",
-                "-rpath",
-                "$webRtcFrameworkPath",
-                "-ObjC"
-            )
-        }
-    }
 }
