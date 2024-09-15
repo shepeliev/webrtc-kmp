@@ -28,9 +28,9 @@ commonMain.dependencies {
 ```
 
 ### Running on iOS
-On iOS the WebRTC SDK is not linked as transitive dependency. You need to add it to your iOS project manually.
-This can be done using CocoaPods or SPM. The concrete implementation depends on your project setup. 
-Here is an example how to link the WebRTC SDK using CocoaPods in gradle.build.kts:
+On iOS, the WebRTC SDK is not linked as a transitive dependency, so you need to add it to your iOS project manually.
+This can be done using CocoaPods or SPM, depending on your project setup. Here is an example of how to link 
+the WebRTC SDK using CocoaPods in `build.gradle.kts`:
 
 ```kotlin
 kotlin {
