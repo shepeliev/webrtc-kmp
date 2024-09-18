@@ -57,17 +57,30 @@ fun App() {
         Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
             val localVideoTrack = localStream?.videoTracks?.firstOrNull()
 
-            localVideoTrack?.let { Video(videoTrack = it, modifier = Modifier.weight(1f)) }
-                ?: Box(modifier = Modifier.weight(1f))
+            localVideoTrack?.let {
+                Video(
+                    videoTrack = it,
+                    modifier = Modifier.weight(1f).fillMaxWidth()
+                )
+            } ?: Box(
+                modifier = Modifier.weight(1f).fillMaxWidth(),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text("Local video")
+            }
 
             remoteVideoTrack?.let {
                 Video(
                     videoTrack = it,
                     audioTrack = remoteAudioTrack,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f).fillMaxWidth(),
                 )
+            } ?: Box(
+                modifier = Modifier.weight(1f).fillMaxWidth(),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text("Remote video")
             }
-                ?: Box(modifier = Modifier.weight(1f))
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (localStream == null) {
