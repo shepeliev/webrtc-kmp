@@ -33,7 +33,7 @@ private object MediaDevicesImpl : MediaDevices {
                 source = videoSource,
                 trackId = NSUUID.UUID().UUIDString()
             )
-            val videoCaptureController = CameraVideoCaptureController(
+            val videoCaptureController = CameraVideoCapturerController(
                 constraints = videoConstraints,
                 videoCapturerDelegate = videoProcessor ?: videoSource
             )

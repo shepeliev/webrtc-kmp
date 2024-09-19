@@ -17,10 +17,10 @@ import platform.CoreMedia.CMFormatDescriptionGetMediaSubType
 import platform.CoreMedia.CMVideoFormatDescriptionGetDimensions
 import kotlin.math.abs
 
-internal class CameraVideoCaptureController(
+internal class CameraVideoCapturerController(
     private val constraints: MediaTrackConstraints,
     private val videoCapturerDelegate: RTCVideoCapturerDelegateProtocol,
-) : VideoCaptureController {
+) : VideoCapturerController {
     private var videoCapturer: RTCCameraVideoCapturer? = null
     private var position: AVCaptureDevicePosition = AVCaptureDevicePositionBack
     private lateinit var device: AVCaptureDevice
