@@ -28,6 +28,16 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-konan-  
 
+      - name: Run Android unit tests
+        run: ./gradlew cleanAllTests testDebugUnitTest --tests "*UnitTest"
+
+      - name: Upload Android unit tests artifact
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: "Android Instrumented Tests Report HTML"
+          path: "webrtc-kmp/build/reports/tests/testDebugUnitTest"
+
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -43,7 +53,7 @@ jobs:
           profile: Nexus 6
           script: ./gradlew webrtc-kmp:connectedAndroidTest
 
-      - name: Upload Android test artifact
+      - name: Upload Android instrumented tests artifact
         uses: actions/upload-artifact@v4
         if: failure()
         with:
