@@ -3,8 +3,8 @@
 package com.shepeliev.webrtckmp
 
 import WebRTC.RTCVideoTrack
-import com.shepeliev.webrtckmp.video.CameraVideoCapturerController
-import com.shepeliev.webrtckmp.video.VideoCapturerController
+import com.shepeliev.webrtckmp.capturer.CameraVideoCapturerController
+import com.shepeliev.webrtckmp.capturer.VideoCapturerController
 import kotlinx.cinterop.ExperimentalForeignApi
 
 internal class LocalVideoStreamTrack(

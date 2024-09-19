@@ -9,7 +9,6 @@ import WebRTC.RTCPeerConnectionFactoryOptions
 import WebRTC.RTCSetMinDebugLogLevel
 import WebRTC.RTCVideoDecoderFactoryProtocol
 import WebRTC.RTCVideoEncoderFactoryProtocol
-import com.shepeliev.webrtckmp.video.VideoProcessorFactory
 import kotlinx.cinterop.ExperimentalForeignApi
 
 @OptIn(ExperimentalForeignApi::class)

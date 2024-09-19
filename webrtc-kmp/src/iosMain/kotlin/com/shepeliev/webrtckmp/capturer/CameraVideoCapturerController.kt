@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalForeignApi::class)
 
-package com.shepeliev.webrtckmp.video
+package com.shepeliev.webrtckmp.capturer
 
 import WebRTC.RTCVideoCapturerDelegateProtocol
 import com.shepeliev.webrtckmp.MediaTrackConstraints

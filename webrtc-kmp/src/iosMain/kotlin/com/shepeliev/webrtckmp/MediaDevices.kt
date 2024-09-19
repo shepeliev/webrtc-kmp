@@ -2,7 +2,7 @@ package com.shepeliev.webrtckmp
 
 import WebRTC.RTCCameraVideoCapturer
 import WebRTC.RTCMediaConstraints
-import com.shepeliev.webrtckmp.video.CameraVideoCapturerController
+import com.shepeliev.webrtckmp.capturer.CameraVideoCapturerController
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.AVFoundation.AVCaptureDevice
 import platform.Foundation.NSBundle
