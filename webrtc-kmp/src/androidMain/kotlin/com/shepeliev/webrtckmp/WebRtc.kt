@@ -3,8 +3,8 @@
 package com.shepeliev.webrtckmp
 
 import android.content.Context
-import com.shepeliev.webrtckmp.video.CameraSelector
-import com.shepeliev.webrtckmp.video.CameraVideoCapturerFactory
+import com.shepeliev.webrtckmp.capturer.CameraSelector
+import com.shepeliev.webrtckmp.capturer.CameraVideoCapturerFactory
 import org.webrtc.Camera1Enumerator
 import org.webrtc.Camera2Enumerator
 import org.webrtc.CameraEnumerator

@@ -1,4 +1,4 @@
-package com.shepeliev.webrtckmp.video
+package com.shepeliev.webrtckmp.capturer
 
 import org.webrtc.CameraEnumerationAndroid
 import org.webrtc.CameraEnumerator

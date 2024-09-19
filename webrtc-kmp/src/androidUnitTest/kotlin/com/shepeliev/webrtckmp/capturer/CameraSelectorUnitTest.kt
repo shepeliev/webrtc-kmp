@@ -1,4 +1,4 @@
-package com.shepeliev.webrtckmp.video
+package com.shepeliev.webrtckmp.capturer
 
 import com.shepeliev.webrtckmp.FacingMode
 import com.shepeliev.webrtckmp.MediaTrackConstraints
