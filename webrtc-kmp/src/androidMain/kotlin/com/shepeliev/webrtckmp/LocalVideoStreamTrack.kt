@@ -1,5 +1,8 @@
 package com.shepeliev.webrtckmp
 
+import com.shepeliev.webrtckmp.capturer.CameraVideoCapturerController
+import com.shepeliev.webrtckmp.capturer.VideoCapturerController
+import com.shepeliev.webrtckmp.capturer.VideoCapturerErrorListener
 import org.webrtc.VideoTrack
 
 internal class LocalVideoStreamTrack(
