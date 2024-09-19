@@ -10,10 +10,10 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-internal class CameraVideoCaptureController(
+internal class CameraVideoCapturerController(
     private val constraints: MediaTrackConstraints,
     videoSource: VideoSource,
-) : VideoCaptureController(videoSource) {
+) : VideoCapturerController(videoSource) {
 
     private val enumerator = WebRtc.cameraEnumerator
     private var pendingDeviceId: String? = null

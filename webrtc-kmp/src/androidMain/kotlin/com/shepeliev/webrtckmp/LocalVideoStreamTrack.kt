@@ -4,30 +4,30 @@ import org.webrtc.VideoTrack
 
 internal class LocalVideoStreamTrack(
     android: VideoTrack,
-    private val videoCaptureController: VideoCaptureController,
+    private val videoCapturerController: VideoCapturerController,
 ) : RenderedVideoStreamTrack(android), VideoStreamTrack {
-    override val settings: MediaTrackSettings get() = videoCaptureController.settings
+    override val settings: MediaTrackSettings get() = videoCapturerController.settings
 
     init {
-        videoCaptureController.videoCapturerErrorListener = VideoCapturerErrorListener { stop() }
-        videoCaptureController.startCapture()
+        videoCapturerController.videoCapturerErrorListener = VideoCapturerErrorListener { stop() }
+        videoCapturerController.startCapture()
     }
 
     override suspend fun switchCamera(deviceId: String?) {
-        (videoCaptureController as? CameraVideoCaptureController)?.let { controller ->
+        (videoCapturerController as? CameraVideoCapturerController)?.let { controller ->
             deviceId?.let { controller.switchCamera(it) } ?: controller.switchCamera()
         }
     }
 
     override fun onSetEnabled(enabled: Boolean) {
         if (enabled) {
-            videoCaptureController.startCapture()
+            videoCapturerController.startCapture()
         } else {
-            videoCaptureController.stopCapture()
+            videoCapturerController.stopCapture()
         }
     }
 
     override fun onStop() {
-        videoCaptureController.dispose()
+        videoCapturerController.dispose()
     }
 }

@@ -9,9 +9,9 @@ import org.webrtc.Size
 import org.webrtc.VideoCapturer
 import org.webrtc.VideoSource
 
-internal class ScreenCaptureController(
+internal class ScreenCapturerController(
     videoSource: VideoSource,
-) : VideoCaptureController(videoSource) {
+) : VideoCapturerController(videoSource) {
 
     override fun createVideoCapturer(): VideoCapturer {
         return ScreenCapturerAndroid(
