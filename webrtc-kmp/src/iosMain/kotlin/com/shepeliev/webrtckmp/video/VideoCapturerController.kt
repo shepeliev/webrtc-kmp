@@ -2,8 +2,10 @@ package com.shepeliev.webrtckmp.video
 
 import com.shepeliev.webrtckmp.MediaTrackSettings
 
-internal interface VideoCapturerController {
-    val settings: MediaTrackSettings
-    fun startCapture()
-    fun stopCapture()
+internal abstract class VideoCapturerController {
+    var settings: MediaTrackSettings = MediaTrackSettings()
+        protected set
+
+    abstract fun startCapture()
+    abstract fun stopCapture()
 }

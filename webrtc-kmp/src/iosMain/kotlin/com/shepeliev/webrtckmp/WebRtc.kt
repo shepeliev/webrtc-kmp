@@ -26,6 +26,11 @@ object WebRtc {
     internal val peerConnectionFactory: RTCPeerConnectionFactory
         get() = _peerConnectionFactory ?: createPeerConnectionFactory().also { _peerConnectionFactory = it }
 
+    /**
+     * The name of the bundled video file to use as a fallback for the camera in the iOS simulator.
+     */
+    var simulatorCameraFallbackFileName: String = "simulator-camera.mp4"
+
     @Suppress("unused")
     fun configurePeerConnectionFactory(loggingSeverity: RTCLoggingSeverity) {
         configurePeerConnectionFactoryInternal(loggingSeverity, null, null, null, null)
