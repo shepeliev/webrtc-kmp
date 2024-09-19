@@ -24,39 +24,26 @@ internal class CameraVideoCapturerController(
 ) : VideoCapturerController(videoSource) {
 
     private val enumerator = WebRtc.cameraEnumerator
+    private val cameraSelector = WebRtc.cameraSelector
+    private val capturerFactory = WebRtc.cameraVideoCapturerFactory
     private var pendingDeviceId: String? = null
 
     override fun createVideoCapturer(): VideoCapturer {
-        selectDevice()
-        return enumerator.createCapturer(
-            checkNotNull(settings.deviceId),
+        val deviceId = cameraSelector.selectCameraId(enumerator, constraints)
+        updateSettings(deviceId)
+        val capturer = capturerFactory.createCameraVideoCapturer(
+            deviceId,
+            enumerator,
             CameraEventsHandler()
         )
+        return capturer ?: throw CameraVideoCapturerException.notFound(constraints)
     }
 
-    private fun selectDevice() {
-        val isFrontFacing = constraints.facingMode?.value != FacingMode.Environment
-
-        val searchCriteria: (String) -> Boolean = if (constraints.deviceId != null) {
-            { it == constraints.deviceId }
-        } else {
-            { enumerator.isFrontFacing(it) == isFrontFacing }
+    private fun updateSettings(deviceId: String?) {
+        val facingMode = deviceId?.let {
+            if (enumerator.isFrontFacing(it)) FacingMode.User else FacingMode.Environment
         }
-
-        val deviceId = enumerator.deviceNames.firstOrNull(searchCriteria)
-            ?: throw CameraVideoCapturerException.notFound(constraints)
-
-        settings = settings.copy(
-            deviceId = deviceId,
-
-            facingMode = (
-                if (isFrontFacing) {
-                    FacingMode.User
-                } else {
-                    FacingMode.Environment
-                }
-                )
-        )
+        settings = settings.copy(deviceId = deviceId, facingMode = facingMode)
     }
 
     override fun selectVideoSize(): Size {

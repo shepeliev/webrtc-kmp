@@ -3,6 +3,8 @@
 package com.shepeliev.webrtckmp
 
 import android.content.Context
+import com.shepeliev.webrtckmp.video.CameraSelector
+import com.shepeliev.webrtckmp.video.CameraVideoCapturerFactory
 import org.webrtc.Camera1Enumerator
 import org.webrtc.Camera2Enumerator
 import org.webrtc.CameraEnumerator
@@ -35,6 +37,13 @@ object WebRtc {
     internal var videoProcessorFactory: VideoProcessorFactory? = null
         private set
 
+    internal var cameraVideoCapturerFactory: CameraVideoCapturerFactory =
+        CameraVideoCapturerFactory()
+        private set
+
+    internal var cameraSelector: CameraSelector = CameraSelector()
+        private set
+
     private var _cameraEnumerator: CameraEnumerator? = null
     internal val cameraEnumerator: CameraEnumerator by lazy {
         _cameraEnumerator ?: if (Camera2Enumerator.isSupported(applicationContext)) {
@@ -49,13 +58,20 @@ object WebRtc {
             ?: InitializationOptions.builder(applicationContext).createInitializationOptions()
         PeerConnectionFactory.initialize(initializationOptions)
 
+        val videoDecoderFactory =
+            videoDecoderFactory ?: DefaultVideoDecoderFactory(rootEglBase.eglBaseContext)
+
+        val videoEncoderFactory = videoEncoderFactory ?: DefaultVideoEncoderFactory(
+            /* eglContext = */ rootEglBase.eglBaseContext,
+            /* enableIntelVp8Encoder = */ true,
+            /* enableH264HighProfile = */ true
+        )
+
         PeerConnectionFactory.builder()
             .setOptions(options)
             .setAudioDeviceModule(audioDeviceModule)
-            .setVideoDecoderFactory(videoDecoderFactory ?: DefaultVideoDecoderFactory(rootEglBase.eglBaseContext))
-            .setVideoEncoderFactory(
-                videoEncoderFactory ?: DefaultVideoEncoderFactory(rootEglBase.eglBaseContext, true, true)
-            )
+            .setVideoDecoderFactory(videoDecoderFactory)
+            .setVideoEncoderFactory(videoEncoderFactory)
             .createPeerConnectionFactory()
     }
 
@@ -69,6 +85,8 @@ object WebRtc {
         videoDecoderFactory: VideoDecoderFactory? = null,
         cameraEnumerator: CameraEnumerator? = null,
         videoProcessorFactory: VideoProcessorFactory? = null,
+        cameraVideoCapturerFactory: CameraVideoCapturerFactory = CameraVideoCapturerFactory(),
+        cameraSelector: CameraSelector = CameraSelector()
     ) {
         check(_rootEglBase == null) {
             "WebRtc.configurePeerConnectionFactory() must be called once only and before any access to MediaDevices."
@@ -82,6 +100,8 @@ object WebRtc {
         this.videoDecoderFactory = videoDecoderFactory
         this._cameraEnumerator = cameraEnumerator
         this.videoProcessorFactory = videoProcessorFactory
+        this.cameraVideoCapturerFactory = cameraVideoCapturerFactory
+        this.cameraSelector = cameraSelector
     }
 
     internal fun initializeApplicationContext(context: Context) {
