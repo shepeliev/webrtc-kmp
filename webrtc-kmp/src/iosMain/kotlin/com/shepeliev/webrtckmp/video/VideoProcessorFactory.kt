@@ -1,4 +1,4 @@
-package com.shepeliev.webrtckmp
+package com.shepeliev.webrtckmp.video
 
 import WebRTC.RTCVideoCapturerDelegateProtocol
 import WebRTC.RTCVideoSource
