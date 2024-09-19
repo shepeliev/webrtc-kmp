@@ -2,8 +2,11 @@ package com.shepeliev.webrtckmp
 
 import WebRTC.RTCCameraVideoCapturer
 import WebRTC.RTCMediaConstraints
+import com.shepeliev.webrtckmp.capturer.CameraVideoCapturerController
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.AVFoundation.AVCaptureDevice
+import platform.Foundation.NSBundle
+import platform.Foundation.NSFileManager
 import platform.Foundation.NSUUID
 
 internal actual val mediaDevices: MediaDevices = MediaDevicesImpl
@@ -21,8 +24,13 @@ private object MediaDevicesImpl : MediaDevices {
                 mandatoryConstraints = audioConstraints.toMandatoryMap(),
                 optionalConstraints = audioConstraints.toOptionalMap()
             )
-            val audioSource = WebRtc.peerConnectionFactory.audioSourceWithConstraints(mediaConstraints)
-            val track = WebRtc.peerConnectionFactory.audioTrackWithSource(audioSource, NSUUID.UUID().UUIDString())
+            val audioSource =
+                WebRtc.peerConnectionFactory.audioSourceWithConstraints(mediaConstraints)
+
+            val track = WebRtc.peerConnectionFactory.audioTrackWithSource(
+                source = audioSource,
+                trackId = NSUUID.UUID().UUIDString()
+            )
             LocalAudioStreamTrack(track, constraints.audio)
         }
 
@@ -33,7 +41,7 @@ private object MediaDevicesImpl : MediaDevices {
                 source = videoSource,
                 trackId = NSUUID.UUID().UUIDString()
             )
-            val videoCaptureController = CameraVideoCaptureController(
+            val videoCaptureController = CameraVideoCapturerController(
                 constraints = videoConstraints,
                 videoCapturerDelegate = videoProcessor ?: videoSource
             )
@@ -53,7 +61,7 @@ private object MediaDevicesImpl : MediaDevices {
     override suspend fun supportsDisplayMedia(): Boolean = false
 
     override suspend fun enumerateDevices(): List<MediaDeviceInfo> {
-        return RTCCameraVideoCapturer.captureDevices().map {
+        val captureDevices = RTCCameraVideoCapturer.captureDevices().map {
             val device = it as AVCaptureDevice
             MediaDeviceInfo(
                 deviceId = device.uniqueID,
@@ -61,5 +69,22 @@ private object MediaDevicesImpl : MediaDevices {
                 kind = MediaDeviceKind.VideoInput
             )
         }
+        val fallbackDeviceInfo = getFallbackMediaDeviceInfo()
+        return fallbackDeviceInfo?.let { captureDevices + it } ?: captureDevices
+    }
+
+    private fun getFallbackMediaDeviceInfo(): MediaDeviceInfo? {
+        val nameComponents = WebRtc.simulatorCameraFallbackFileName.split(".")
+        if (nameComponents.size != 2) return null
+
+        val path =
+            NSBundle.mainBundle.pathForResource(nameComponents[0], nameComponents[1]) ?: return null
+        if (!NSFileManager.defaultManager.fileExistsAtPath(path)) return null
+
+        return MediaDeviceInfo(
+            deviceId = WebRtc.simulatorCameraFallbackFileName,
+            label = "Simulator Camera",
+            kind = MediaDeviceKind.VideoInput
+        )
     }
 }

@@ -1,6 +1,5 @@
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
-import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 
@@ -68,7 +67,7 @@ kotlin {
         common {
             group("jsAndWasmJs") {
                 withJs()
-                withWasm()
+                withWasmJs()
             }
         }
     }
@@ -94,6 +93,15 @@ kotlin {
             implementation(kotlin("test-annotations-common"))
             implementation(libs.kotlin.coroutines.test)
         }
+
+        val iosX64AndSimulatorArm64Main by creating {
+            dependsOn(iosMain.get())
+        }
+
+        val iosX64Main by getting
+        iosX64Main.dependsOn(iosX64AndSimulatorArm64Main)
+        val iosSimulatorArm64Main by getting
+        iosSimulatorArm64Main.dependsOn(iosX64AndSimulatorArm64Main)
     }
 }
 

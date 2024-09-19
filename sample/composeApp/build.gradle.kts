@@ -33,6 +33,7 @@ kotlin {
         framework {
             baseName = "ComposeApp"
             isStatic = true
+            export(project(":webrtc-kmp"))
         }
 
         xcodeConfigurationToNativeBuildType["CUSTOM_DEBUG"] = NativeBuildType.DEBUG
@@ -80,7 +81,7 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(libs.kotlin.coroutines)
             implementation(libs.kermit)
-            implementation(project(":webrtc-kmp"))
+            api(project(":webrtc-kmp"))
         }
 
         androidMain.dependencies {

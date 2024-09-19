@@ -1,9 +1,14 @@
-@file:OptIn(ExperimentalForeignApi::class)
-
-package com.shepeliev.webrtckmp
+package com.shepeliev.webrtckmp.capturer
 
 import WebRTC.RTCCameraVideoCapturer
 import WebRTC.RTCVideoCapturerDelegateProtocol
+import com.shepeliev.webrtckmp.CameraVideoCapturerException
+import com.shepeliev.webrtckmp.DEFAULT_FRAME_RATE
+import com.shepeliev.webrtckmp.DEFAULT_VIDEO_HEIGHT
+import com.shepeliev.webrtckmp.DEFAULT_VIDEO_WIDTH
+import com.shepeliev.webrtckmp.FacingMode
+import com.shepeliev.webrtckmp.MediaTrackConstraints
+import com.shepeliev.webrtckmp.value
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.useContents
 import platform.AVFoundation.AVCaptureDevice
@@ -17,20 +22,18 @@ import platform.CoreMedia.CMFormatDescriptionGetMediaSubType
 import platform.CoreMedia.CMVideoFormatDescriptionGetDimensions
 import kotlin.math.abs
 
-internal class CameraVideoCaptureController(
+@OptIn(ExperimentalForeignApi::class)
+internal actual class CameraVideoCapturerController actual constructor(
     private val constraints: MediaTrackConstraints,
-    private val videoCapturerDelegate: RTCVideoCapturerDelegateProtocol,
-) : VideoCaptureController {
+    private val videoCapturerDelegate: RTCVideoCapturerDelegateProtocol
+) : VideoCapturerController() {
     private var videoCapturer: RTCCameraVideoCapturer? = null
     private var position: AVCaptureDevicePosition = AVCaptureDevicePositionBack
     private lateinit var device: AVCaptureDevice
     private lateinit var format: AVCaptureDeviceFormat
     private var fps: Long = -1
 
-    override var settings: MediaTrackSettings = MediaTrackSettings()
-        private set
-
-    override fun startCapture() {
+    actual override fun startCapture() {
         if (videoCapturer != null) return
         videoCapturer = RTCCameraVideoCapturer(videoCapturerDelegate)
         if (!this::device.isInitialized) selectDevice()
@@ -55,7 +58,7 @@ internal class CameraVideoCaptureController(
         videoCapturer?.startCaptureWithDevice(device, format, fps)
     }
 
-    override fun stopCapture() {
+    actual override fun stopCapture() {
         videoCapturer?.stopCapture()
         videoCapturer = null
     }
@@ -123,7 +126,7 @@ internal class CameraVideoCaptureController(
         fps = minOf(maxSupportedFrameRate, requestedFps.toDouble()).toLong()
     }
 
-    fun switchCamera() {
+    actual fun switchCamera() {
         checkNotNull(videoCapturer) { "Video capturing is not started." }
         val captureDevices = RTCCameraVideoCapturer.captureDevices()
         if (captureDevices.size < 2) {
@@ -143,7 +146,7 @@ internal class CameraVideoCaptureController(
         )
     }
 
-    fun switchCamera(deviceId: String) {
+    actual fun switchCamera(deviceId: String) {
         checkNotNull(videoCapturer) { "Video capturing is not started." }
 
         stopCapture()

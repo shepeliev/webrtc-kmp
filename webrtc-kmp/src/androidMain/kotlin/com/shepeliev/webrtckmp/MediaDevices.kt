@@ -5,6 +5,8 @@ package com.shepeliev.webrtckmp
 import android.Manifest
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
+import com.shepeliev.webrtckmp.capturer.CameraVideoCapturerController
+import com.shepeliev.webrtckmp.capturer.ScreenCapturerController
 import org.webrtc.MediaConstraints
 import java.util.UUID
 
@@ -44,7 +46,7 @@ private object MediaDevicesImpl : MediaDevices {
             checkCameraPermission()
             val videoSource = WebRtc.peerConnectionFactory.createVideoSource(false)
             videoSource.setVideoProcessor(WebRtc.videoProcessorFactory?.createVideoProcessor())
-            val videoCaptureController = CameraVideoCaptureController(
+            val videoCaptureController = CameraVideoCapturerController(
                 constraints.video,
                 videoSource
             )
@@ -64,7 +66,7 @@ private object MediaDevicesImpl : MediaDevices {
     override suspend fun getDisplayMedia(): MediaStream {
         val videoSource = WebRtc.peerConnectionFactory.createVideoSource(false)
         WebRtc.videoProcessorFactory?.createVideoProcessor()?.let { videoSource.setVideoProcessor(it) }
-        val screenCaptureController = ScreenCaptureController(videoSource)
+        val screenCaptureController = ScreenCapturerController(videoSource)
         val videoTrack = WebRtc.peerConnectionFactory.createVideoTrack(
             UUID.randomUUID().toString(),
             videoSource

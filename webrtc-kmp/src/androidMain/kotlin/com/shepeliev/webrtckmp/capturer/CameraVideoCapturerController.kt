@@ -1,5 +1,13 @@
-package com.shepeliev.webrtckmp
+package com.shepeliev.webrtckmp.capturer
 
+import com.shepeliev.webrtckmp.CameraVideoCapturerException
+import com.shepeliev.webrtckmp.DEFAULT_FRAME_RATE
+import com.shepeliev.webrtckmp.DEFAULT_VIDEO_HEIGHT
+import com.shepeliev.webrtckmp.DEFAULT_VIDEO_WIDTH
+import com.shepeliev.webrtckmp.FacingMode
+import com.shepeliev.webrtckmp.MediaTrackConstraints
+import com.shepeliev.webrtckmp.WebRtc
+import com.shepeliev.webrtckmp.value
 import org.webrtc.CameraEnumerationAndroid
 import org.webrtc.CameraVideoCapturer
 import org.webrtc.Size
@@ -10,10 +18,10 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
-internal class CameraVideoCaptureController(
+internal class CameraVideoCapturerController(
     private val constraints: MediaTrackConstraints,
     videoSource: VideoSource,
-) : VideoCaptureController(videoSource) {
+) : VideoCapturerController(videoSource) {
 
     private val enumerator = WebRtc.cameraEnumerator
     private var pendingDeviceId: String? = null
