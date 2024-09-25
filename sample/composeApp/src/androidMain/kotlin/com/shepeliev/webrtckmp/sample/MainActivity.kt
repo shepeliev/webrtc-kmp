@@ -10,16 +10,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.shepeliev.webrtckmp.WebRtc
 import org.webrtc.Loggable
 import org.webrtc.Logging
-import org.webrtc.PeerConnectionFactory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val initializationOptions = PeerConnectionFactory.InitializationOptions.builder(this)
+        val initializationOptionsBuilder = WebRtc.createInitializationOptionsBuilder()
             .setInjectableLogger(WebRtcLogger, Logging.Severity.LS_ERROR)
-            .createInitializationOptions()
-        WebRtc.configurePeerConnectionFactory(peerConnectionFactoryInitializationOptions = initializationOptions)
+        val peerConnectionFactoryBuilder = WebRtc.createPeerConnectionFactoryBuilder(initializationOptionsBuilder)
+        WebRtc.configure(peerConnectionFactoryBuilder = peerConnectionFactoryBuilder)
 
         setContent {
             App()
@@ -34,9 +33,7 @@ private object WebRtcLogger : Loggable {
             Logging.Severity.LS_WARNING -> Log.w(tag, message)
             Logging.Severity.LS_INFO -> Log.i(tag, message)
             Logging.Severity.LS_VERBOSE -> Log.v(tag, message)
-            Logging.Severity.LS_NONE -> {
-
-            }
+            Logging.Severity.LS_NONE -> {}
         }
     }
 }
