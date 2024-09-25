@@ -43,5 +43,5 @@ jobs:
         run: |
           ./gradlew :sample:composeApp:generateDummyFramework
           cd sample/iosApp
-          pod install
+          pod install --repo-update
           xcodebuild -workspace iosApp.xcworkspace -configuration Debug -scheme iosApp -sdk iphonesimulator -arch arm64
