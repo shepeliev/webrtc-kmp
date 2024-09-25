@@ -18,8 +18,7 @@ class MainActivity : ComponentActivity() {
 
         val initializationOptions = PeerConnectionFactory.InitializationOptions.builder(this)
             .setInjectableLogger(WebRtcLogger, Logging.Severity.LS_ERROR)
-            .createInitializationOptions()
-        WebRtc.configurePeerConnectionFactory(peerConnectionFactoryInitializationOptions = initializationOptions)
+        WebRtc.configure(peerConnectionInitializationOptionsBuilder = initializationOptions)
 
         setContent {
             App()
@@ -34,9 +33,7 @@ private object WebRtcLogger : Loggable {
             Logging.Severity.LS_WARNING -> Log.w(tag, message)
             Logging.Severity.LS_INFO -> Log.i(tag, message)
             Logging.Severity.LS_VERBOSE -> Log.v(tag, message)
-            Logging.Severity.LS_NONE -> {
-
-            }
+            Logging.Severity.LS_NONE -> {}
         }
     }
 }

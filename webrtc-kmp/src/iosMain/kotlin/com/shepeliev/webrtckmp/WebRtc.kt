@@ -1,355 +1,139 @@
 package com.shepeliev.webrtckmp
 
-import WebRTC.RTCDefaultVideoDecoderFactory
-import WebRTC.RTCDefaultVideoEncoderFactory
 import WebRTC.RTCInitializeSSL
 import WebRTC.RTCLoggingSeverity
 import WebRTC.RTCPeerConnectionFactory
-import WebRTC.RTCPeerConnectionFactoryOptions
 import WebRTC.RTCSetMinDebugLogLevel
-import WebRTC.RTCVideoDecoderFactoryProtocol
-import WebRTC.RTCVideoEncoderFactoryProtocol
 import kotlinx.cinterop.ExperimentalForeignApi
 
 @OptIn(ExperimentalForeignApi::class)
 object WebRtc {
-    private var videoEncoderFactory: RTCVideoEncoderFactoryProtocol? = null
-    private var videoDecoderFactory: RTCVideoDecoderFactoryProtocol? = null
-    private var peerConnectionFactoryOptions: RTCPeerConnectionFactoryOptions? = null
-    private var loggingSeverity: RTCLoggingSeverity? = null
-
     internal var videoProcessorFactory: VideoProcessorFactory? = null
         private set
 
     private var _peerConnectionFactory: RTCPeerConnectionFactory? = null
-    internal val peerConnectionFactory: RTCPeerConnectionFactory
-        get() = _peerConnectionFactory ?: createPeerConnectionFactory().also { _peerConnectionFactory = it }
+    internal val peerConnectionFactory: RTCPeerConnectionFactory by lazy {
+        _peerConnectionFactory ?: run {
+            initialize()
+            RTCPeerConnectionFactory().also { _peerConnectionFactory = it }
+        }
+    }
 
     /**
      * The name of the bundled video file to use as a fallback for the camera in the iOS simulator.
      */
     var simulatorCameraFallbackFileName: String = "simulator-camera.mp4"
 
-    @Suppress("unused")
-    fun configurePeerConnectionFactory(loggingSeverity: RTCLoggingSeverity) {
-        configurePeerConnectionFactoryInternal(loggingSeverity, null, null, null, null)
+    /**
+     * Configures the WebRTC KMP library with the specified parameters.
+     *
+     * @param loggingSeverity The severity of the logging output.
+     */
+    fun configure(loggingSeverity: RTCLoggingSeverity) {
+        configurePeerConnectionFactoryInternal(loggingSeverity = loggingSeverity)
     }
 
-    @Suppress("unused")
-    fun configurePeerConnectionFactory(videoEncoderFactory: RTCVideoEncoderFactoryProtocol) {
-        configurePeerConnectionFactoryInternal(null, videoEncoderFactory, null, null, null)
+    /**
+     * Configures the WebRTC KMP library with the specified parameters.
+     *
+     * @param videoProcessorFactory The factory to create video processors.
+     */
+    fun configure(videoProcessorFactory: VideoProcessorFactory) {
+        configurePeerConnectionFactoryInternal(videoProcessorFactory = videoProcessorFactory)
     }
 
-    @Suppress("unused")
-    fun configurePeerConnectionFactory(videoDecoderFactory: RTCVideoDecoderFactoryProtocol) {
-        configurePeerConnectionFactoryInternal(null, null, videoDecoderFactory, null, null)
+    /**
+     * Configures the WebRTC KMP library with the specified parameters.
+     *
+     * @param rtcPeerConnectionFactory The peer connection factory to use.
+     */
+    fun configure(rtcPeerConnectionFactory: RTCPeerConnectionFactory) {
+        configurePeerConnectionFactoryInternal(rtcPeerConnectionFactory = rtcPeerConnectionFactory)
     }
 
-    @Suppress("unused")
-    fun configurePeerConnectionFactory(options: RTCPeerConnectionFactoryOptions) {
-        configurePeerConnectionFactoryInternal(null, null, null, options, null)
-    }
-
-    @Suppress("unused")
-    fun configurePeerConnectionFactory(
-        videoProcessorFactory: VideoProcessorFactory
-    ) {
-        configurePeerConnectionFactoryInternal(null, null, null, null, videoProcessorFactory)
-    }
-
-    @Suppress("unused")
-    fun configurePeerConnectionFactory(
+    /**
+     * Configures the WebRTC KMP library with the specified parameters.
+     *
+     * @param loggingSeverity The severity of the logging output.
+     * @param videoProcessorFactory The factory to create video processors.
+     */
+    fun configure(
         loggingSeverity: RTCLoggingSeverity,
-        videoEncoderFactory: RTCVideoEncoderFactoryProtocol
-    ) {
-        configurePeerConnectionFactoryInternal(loggingSeverity, videoEncoderFactory, null, null, null)
-    }
-
-    @Suppress("unused")
-    fun configurePeerConnectionFactory(
-        loggingSeverity: RTCLoggingSeverity,
-        videoDecoderFactory: RTCVideoDecoderFactoryProtocol
-    ) {
-        configurePeerConnectionFactoryInternal(loggingSeverity, null, videoDecoderFactory, null, null)
-    }
-
-    @Suppress("unused")
-    fun configurePeerConnectionFactory(
-        loggingSeverity: RTCLoggingSeverity,
-        options: RTCPeerConnectionFactoryOptions
-    ) {
-        configurePeerConnectionFactoryInternal(loggingSeverity, null, null, options, null)
-    }
-
-    @Suppress("unused")
-    fun configurePeerConnectionFactory(
-        loggingSeverity: RTCLoggingSeverity,
-        videoProcessorFactory: VideoProcessorFactory
-    ) {
-        configurePeerConnectionFactoryInternal(loggingSeverity, null, null, null, videoProcessorFactory)
-    }
-
-    @Suppress("unused")
-    fun configurePeerConnectionFactory(
-        videoEncoderFactory: RTCVideoEncoderFactoryProtocol,
-        videoDecoderFactory: RTCVideoDecoderFactoryProtocol
-    ) {
-        configurePeerConnectionFactoryInternal(null, videoEncoderFactory, videoDecoderFactory, null, null)
-    }
-
-    @Suppress("unused")
-    fun configurePeerConnectionFactory(
-        videoEncoderFactory: RTCVideoEncoderFactoryProtocol,
-        options: RTCPeerConnectionFactoryOptions
-    ) {
-        configurePeerConnectionFactoryInternal(null, videoEncoderFactory, null, options, null)
-    }
-
-    @Suppress("unused")
-    fun configurePeerConnectionFactory(
-        videoEncoderFactory: RTCVideoEncoderFactoryProtocol,
-        videoProcessorFactory: VideoProcessorFactory
-    ) {
-        configurePeerConnectionFactoryInternal(null, videoEncoderFactory, null, null, videoProcessorFactory)
-    }
-
-    @Suppress("unused")
-    fun configurePeerConnectionFactory(
-        videoDecoderFactory: RTCVideoDecoderFactoryProtocol,
-        options: RTCPeerConnectionFactoryOptions
-    ) {
-        configurePeerConnectionFactoryInternal(null, null, videoDecoderFactory, options, null)
-    }
-
-    @Suppress("unused")
-    fun configurePeerConnectionFactory(
-        videoDecoderFactory: RTCVideoDecoderFactoryProtocol,
-        videoProcessorFactory: VideoProcessorFactory
-    ) {
-        configurePeerConnectionFactoryInternal(null, null, videoDecoderFactory, null, videoProcessorFactory)
-    }
-
-    @Suppress("unused")
-    fun configurePeerConnectionFactory(
-        options: RTCPeerConnectionFactoryOptions,
-        videoProcessorFactory: VideoProcessorFactory
-    ) {
-        configurePeerConnectionFactoryInternal(null, null, null, options, videoProcessorFactory)
-    }
-
-    @Suppress("unused")
-    fun configurePeerConnectionFactory(
-        loggingSeverity: RTCLoggingSeverity,
-        videoEncoderFactory: RTCVideoEncoderFactoryProtocol,
-        videoDecoderFactory: RTCVideoDecoderFactoryProtocol
-    ) {
-        configurePeerConnectionFactoryInternal(loggingSeverity, videoEncoderFactory, videoDecoderFactory, null, null)
-    }
-
-    @Suppress("unused")
-    fun configurePeerConnectionFactory(
-        loggingSeverity: RTCLoggingSeverity,
-        videoEncoderFactory: RTCVideoEncoderFactoryProtocol,
-        options: RTCPeerConnectionFactoryOptions
-    ) {
-        configurePeerConnectionFactoryInternal(loggingSeverity, videoEncoderFactory, null, options, null)
-    }
-
-    @Suppress("unused")
-    fun configurePeerConnectionFactory(
-        loggingSeverity: RTCLoggingSeverity,
-        videoEncoderFactory: RTCVideoEncoderFactoryProtocol,
-        videoProcessorFactory: VideoProcessorFactory
-    ) {
-        configurePeerConnectionFactoryInternal(loggingSeverity, videoEncoderFactory, null, null, videoProcessorFactory)
-    }
-
-    @Suppress("unused")
-    fun configurePeerConnectionFactory(
-        loggingSeverity: RTCLoggingSeverity,
-        videoDecoderFactory: RTCVideoDecoderFactoryProtocol,
-        options: RTCPeerConnectionFactoryOptions
-    ) {
-        configurePeerConnectionFactoryInternal(loggingSeverity, null, videoDecoderFactory, options, null)
-    }
-
-    @Suppress("unused")
-    fun configurePeerConnectionFactory(
-        loggingSeverity: RTCLoggingSeverity,
-        videoDecoderFactory: RTCVideoDecoderFactoryProtocol,
-        videoProcessorFactory: VideoProcessorFactory
-    ) {
-        configurePeerConnectionFactoryInternal(loggingSeverity, null, videoDecoderFactory, null, videoProcessorFactory)
-    }
-
-    @Suppress("unused")
-    fun configurePeerConnectionFactory(
-        loggingSeverity: RTCLoggingSeverity,
-        options: RTCPeerConnectionFactoryOptions,
-        videoProcessorFactory: VideoProcessorFactory
-    ) {
-        configurePeerConnectionFactoryInternal(loggingSeverity, null, null, options, videoProcessorFactory)
-    }
-
-    @Suppress("unused")
-    fun configurePeerConnectionFactory(
-        videoEncoderFactory: RTCVideoEncoderFactoryProtocol,
-        videoDecoderFactory: RTCVideoDecoderFactoryProtocol,
-        options: RTCPeerConnectionFactoryOptions
-    ) {
-        configurePeerConnectionFactoryInternal(null, videoEncoderFactory, videoDecoderFactory, options, null)
-    }
-
-    @Suppress("unused")
-    fun configurePeerConnectionFactory(
-        videoEncoderFactory: RTCVideoEncoderFactoryProtocol,
-        videoDecoderFactory: RTCVideoDecoderFactoryProtocol,
-        videoProcessorFactory: VideoProcessorFactory
-    ) {
-        configurePeerConnectionFactoryInternal(
-            null,
-            videoEncoderFactory,
-            videoDecoderFactory,
-            null,
-            videoProcessorFactory
-        )
-    }
-
-    @Suppress("unused")
-    fun configurePeerConnectionFactory(
-        videoEncoderFactory: RTCVideoEncoderFactoryProtocol,
-        options: RTCPeerConnectionFactoryOptions,
-        videoProcessorFactory: VideoProcessorFactory
-    ) {
-        configurePeerConnectionFactoryInternal(null, videoEncoderFactory, null, options, videoProcessorFactory)
-    }
-
-    @Suppress("unused")
-    fun configurePeerConnectionFactory(
-        videoDecoderFactory: RTCVideoDecoderFactoryProtocol,
-        options: RTCPeerConnectionFactoryOptions,
-        videoProcessorFactory: VideoProcessorFactory
-    ) {
-        configurePeerConnectionFactoryInternal(null, null, videoDecoderFactory, options, videoProcessorFactory)
-    }
-
-    @Suppress("unused")
-    fun configurePeerConnectionFactory(
-        loggingSeverity: RTCLoggingSeverity,
-        videoEncoderFactory: RTCVideoEncoderFactoryProtocol,
-        videoDecoderFactory: RTCVideoDecoderFactoryProtocol,
-        options: RTCPeerConnectionFactoryOptions
-    ) {
-        configurePeerConnectionFactoryInternal(loggingSeverity, videoEncoderFactory, videoDecoderFactory, options, null)
-    }
-
-    @Suppress("unused")
-    fun configurePeerConnectionFactory(
-        loggingSeverity: RTCLoggingSeverity,
-        videoEncoderFactory: RTCVideoEncoderFactoryProtocol,
-        videoDecoderFactory: RTCVideoDecoderFactoryProtocol,
-        videoProcessorFactory: VideoProcessorFactory
-    ) {
-        configurePeerConnectionFactoryInternal(
-            loggingSeverity,
-            videoEncoderFactory,
-            videoDecoderFactory,
-            null,
-            videoProcessorFactory
-        )
-    }
-
-    @Suppress("unused")
-    fun configurePeerConnectionFactory(
-        loggingSeverity: RTCLoggingSeverity,
-        videoEncoderFactory: RTCVideoEncoderFactoryProtocol,
-        options: RTCPeerConnectionFactoryOptions,
-        videoProcessorFactory: VideoProcessorFactory
-    ) {
-        configurePeerConnectionFactoryInternal(
-            loggingSeverity,
-            videoEncoderFactory,
-            null,
-            options,
-            videoProcessorFactory
-        )
-    }
-
-    @Suppress("unused")
-    fun configurePeerConnectionFactory(
-        loggingSeverity: RTCLoggingSeverity,
-        videoDecoderFactory: RTCVideoDecoderFactoryProtocol,
-        options: RTCPeerConnectionFactoryOptions,
-        videoProcessorFactory: VideoProcessorFactory
-    ) {
-        configurePeerConnectionFactoryInternal(
-            loggingSeverity,
-            null,
-            videoDecoderFactory,
-            options,
-            videoProcessorFactory
-        )
-    }
-
-    @Suppress("unused")
-    fun configurePeerConnectionFactory(
-        videoEncoderFactory: RTCVideoEncoderFactoryProtocol,
-        videoDecoderFactory: RTCVideoDecoderFactoryProtocol,
-        options: RTCPeerConnectionFactoryOptions,
-        videoProcessorFactory: VideoProcessorFactory
-    ) {
-        configurePeerConnectionFactoryInternal(
-            null,
-            videoEncoderFactory,
-            videoDecoderFactory,
-            options,
-            videoProcessorFactory
-        )
-    }
-
-    @Suppress("unused")
-    private fun configurePeerConnectionFactory(
-        loggingSeverity: RTCLoggingSeverity,
-        videoEncoderFactory: RTCVideoEncoderFactoryProtocol,
-        videoDecoderFactory: RTCVideoDecoderFactoryProtocol,
-        options: RTCPeerConnectionFactoryOptions,
         videoProcessorFactory: VideoProcessorFactory,
     ) {
         configurePeerConnectionFactoryInternal(
-            loggingSeverity,
-            videoEncoderFactory,
-            videoDecoderFactory,
-            options,
-            videoProcessorFactory
+            loggingSeverity = loggingSeverity,
+            videoProcessorFactory = videoProcessorFactory
+        )
+    }
+
+    /**
+     * Configures the WebRTC KMP library with the specified parameters.
+     *
+     * @param loggingSeverity The severity of the logging output.
+     * @param rtcPeerConnectionFactory The peer connection factory to use.
+     */
+    fun configure(
+        loggingSeverity: RTCLoggingSeverity,
+        rtcPeerConnectionFactory: RTCPeerConnectionFactory,
+    ) {
+        configurePeerConnectionFactoryInternal(
+            loggingSeverity = loggingSeverity,
+            rtcPeerConnectionFactory = rtcPeerConnectionFactory
+        )
+    }
+
+    /**
+     * Configures the WebRTC KMP library with the specified parameters.
+     *
+     * @param videoProcessorFactory The factory to create video processors.
+     * @param rtcPeerConnectionFactory The peer connection factory to use.
+     */
+    fun configure(
+        videoProcessorFactory: VideoProcessorFactory,
+        rtcPeerConnectionFactory: RTCPeerConnectionFactory,
+    ) {
+        configurePeerConnectionFactoryInternal(
+            videoProcessorFactory = videoProcessorFactory,
+            rtcPeerConnectionFactory = rtcPeerConnectionFactory
+        )
+    }
+
+    /**
+     * Configures the WebRTC KMP library with the specified parameters.
+     *
+     * @param loggingSeverity The severity of the logging output.
+     * @param videoProcessorFactory The factory to create video processors.
+     * @param rtcPeerConnectionFactory The peer connection factory to use.
+     */
+    fun configure(
+        loggingSeverity: RTCLoggingSeverity,
+        videoProcessorFactory: VideoProcessorFactory,
+        rtcPeerConnectionFactory: RTCPeerConnectionFactory,
+    ) {
+        configurePeerConnectionFactoryInternal(
+            loggingSeverity = loggingSeverity,
+            videoProcessorFactory = videoProcessorFactory,
+            rtcPeerConnectionFactory = rtcPeerConnectionFactory,
         )
     }
 
     private fun configurePeerConnectionFactoryInternal(
-        loggingSeverity: RTCLoggingSeverity?,
-        videoEncoderFactory: RTCVideoEncoderFactoryProtocol?,
-        videoDecoderFactory: RTCVideoDecoderFactoryProtocol?,
-        options: RTCPeerConnectionFactoryOptions?,
-        videoProcessorFactory: VideoProcessorFactory?,
+        loggingSeverity: RTCLoggingSeverity? = null,
+        videoProcessorFactory: VideoProcessorFactory? = null,
+        rtcPeerConnectionFactory: RTCPeerConnectionFactory? = null,
     ) {
         check(_peerConnectionFactory == null) {
-            "WebRtc.configurePeerConnectionFactory() must be called once only and before any access to MediaDevices."
+            "WebRtc.configure() must be called once only and before any access to MediaDevices."
         }
 
-        this.loggingSeverity = loggingSeverity
-        this.videoEncoderFactory = videoEncoderFactory
-        this.videoDecoderFactory = videoDecoderFactory
-        this.peerConnectionFactoryOptions = options
         this.videoProcessorFactory = videoProcessorFactory
-        _peerConnectionFactory = createPeerConnectionFactory()
+        _peerConnectionFactory = rtcPeerConnectionFactory
+        initialize(loggingSeverity)
     }
 
-    private fun createPeerConnectionFactory(): RTCPeerConnectionFactory {
+    private fun initialize(loggingSeverity: RTCLoggingSeverity? = null) {
         RTCInitializeSSL()
         loggingSeverity?.let { RTCSetMinDebugLogLevel(it) }
-        val encoderFactory = videoEncoderFactory ?: RTCDefaultVideoEncoderFactory()
-        val decoderFactory = videoDecoderFactory ?: RTCDefaultVideoDecoderFactory()
-        val factory = RTCPeerConnectionFactory(encoderFactory, decoderFactory)
-        peerConnectionFactoryOptions?.let { factory.setOptions(it) }
-        return factory
     }
 }
