@@ -30,7 +30,7 @@ object WebRtc {
      * @param loggingSeverity The severity of the logging output.
      */
     fun configure(loggingSeverity: RTCLoggingSeverity) {
-        configurePeerConnectionFactoryInternal(loggingSeverity = loggingSeverity)
+        configureInternal(loggingSeverity = loggingSeverity)
     }
 
     /**
@@ -39,7 +39,7 @@ object WebRtc {
      * @param videoProcessorFactory The factory to create video processors.
      */
     fun configure(videoProcessorFactory: VideoProcessorFactory) {
-        configurePeerConnectionFactoryInternal(videoProcessorFactory = videoProcessorFactory)
+        configureInternal(videoProcessorFactory = videoProcessorFactory)
     }
 
     /**
@@ -48,7 +48,7 @@ object WebRtc {
      * @param rtcPeerConnectionFactory The peer connection factory to use.
      */
     fun configure(rtcPeerConnectionFactory: RTCPeerConnectionFactory) {
-        configurePeerConnectionFactoryInternal(rtcPeerConnectionFactory = rtcPeerConnectionFactory)
+        configureInternal(rtcPeerConnectionFactory = rtcPeerConnectionFactory)
     }
 
     /**
@@ -61,7 +61,7 @@ object WebRtc {
         loggingSeverity: RTCLoggingSeverity,
         videoProcessorFactory: VideoProcessorFactory,
     ) {
-        configurePeerConnectionFactoryInternal(
+        configureInternal(
             loggingSeverity = loggingSeverity,
             videoProcessorFactory = videoProcessorFactory
         )
@@ -77,7 +77,7 @@ object WebRtc {
         loggingSeverity: RTCLoggingSeverity,
         rtcPeerConnectionFactory: RTCPeerConnectionFactory,
     ) {
-        configurePeerConnectionFactoryInternal(
+        configureInternal(
             loggingSeverity = loggingSeverity,
             rtcPeerConnectionFactory = rtcPeerConnectionFactory
         )
@@ -93,7 +93,7 @@ object WebRtc {
         videoProcessorFactory: VideoProcessorFactory,
         rtcPeerConnectionFactory: RTCPeerConnectionFactory,
     ) {
-        configurePeerConnectionFactoryInternal(
+        configureInternal(
             videoProcessorFactory = videoProcessorFactory,
             rtcPeerConnectionFactory = rtcPeerConnectionFactory
         )
@@ -111,14 +111,14 @@ object WebRtc {
         videoProcessorFactory: VideoProcessorFactory,
         rtcPeerConnectionFactory: RTCPeerConnectionFactory,
     ) {
-        configurePeerConnectionFactoryInternal(
+        configureInternal(
             loggingSeverity = loggingSeverity,
             videoProcessorFactory = videoProcessorFactory,
             rtcPeerConnectionFactory = rtcPeerConnectionFactory,
         )
     }
 
-    private fun configurePeerConnectionFactoryInternal(
+    private fun configureInternal(
         loggingSeverity: RTCLoggingSeverity? = null,
         videoProcessorFactory: VideoProcessorFactory? = null,
         rtcPeerConnectionFactory: RTCPeerConnectionFactory? = null,
