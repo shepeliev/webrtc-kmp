@@ -11,10 +11,15 @@ import org.webrtc.DefaultVideoEncoderFactory
 import org.webrtc.EglBase
 import org.webrtc.PeerConnectionFactory
 import org.webrtc.PeerConnectionFactory.InitializationOptions
+import org.webrtc.VideoProcessor
 
 @Suppress("MemberVisibilityCanBePrivate")
 object WebRtc {
     private var _rootEglBase: EglBase? = null
+
+    /**
+     * The root [EglBase] instance.
+     */
     val rootEglBase: EglBase by lazy {
         _rootEglBase ?: EglBase.create().also { _rootEglBase = it }
     }
@@ -36,19 +41,56 @@ object WebRtc {
 
     private var _peerConnectionFactory: PeerConnectionFactory? = null
     internal val peerConnectionFactory: PeerConnectionFactory by lazy {
-        _peerConnectionFactory ?: createPeerConnectionFactory(
-            defaultPeerConnectionFactoryInitializationOptionsBuilder(),
-            defaultPeerConnectionBuilder()
-        ).also { _peerConnectionFactory = it }
+        _peerConnectionFactory ?: createPeerConnectionFactoryBuilder().createPeerConnectionFactory()
+            .also { _peerConnectionFactory = it }
     }
 
+    /**
+     * Creates a new default [InitializationOptions.Builder].
+     */
+    fun createInitializationOptionsBuilder(): InitializationOptions.Builder {
+        return InitializationOptions.builder(applicationContext)
+    }
+
+    /**
+     * Creates a new default [PeerConnectionFactory.Builder].
+     */
+    fun createPeerConnectionFactoryBuilder(
+        initializationOptionsBuilder: InitializationOptions.Builder = createInitializationOptionsBuilder(),
+        enableIntelVp8Encoder: Boolean = true,
+        enableH264HighProfile: Boolean = true
+    ): PeerConnectionFactory.Builder {
+        PeerConnectionFactory.initialize(initializationOptionsBuilder.createInitializationOptions())
+
+        val videoDecoderFactory = DefaultVideoDecoderFactory(rootEglBase.eglBaseContext)
+        val defaultVideoEncoderFactory = DefaultVideoEncoderFactory(
+            rootEglBase.eglBaseContext,
+            enableIntelVp8Encoder,
+            enableH264HighProfile
+        )
+        return PeerConnectionFactory.builder()
+            .setVideoDecoderFactory(videoDecoderFactory)
+            .setVideoEncoderFactory(defaultVideoEncoderFactory)
+    }
+
+    /**
+     * Configures the WebRTC library. This method must be called once only and before any access to
+     * MediaDevices.
+     *
+     * @param rootEglBase The root [EglBase] instance. If not provided, a new instance will be
+     * created.
+     * @param videoProcessorFactory The factory to create [VideoProcessor] instances.
+     * @param cameraEnumerator The camera enumerator to use. If not provided, the default enumerator
+     * will be used.
+     * @param peerConnectionFactoryBuilder The [PeerConnectionFactory.Builder] to use for creating
+     * [PeerConnectionFactory].
+     */
     @Suppress("unused")
     fun configure(
         rootEglBase: EglBase? = null,
         videoProcessorFactory: VideoProcessorFactory? = null,
         cameraEnumerator: CameraEnumerator? = null,
-        peerConnectionInitializationOptionsBuilder: InitializationOptions.Builder = defaultPeerConnectionFactoryInitializationOptionsBuilder(),
-        peerConnectionFactoryBuilder: PeerConnectionFactory.Builder = defaultPeerConnectionBuilder(),
+        peerConnectionFactoryBuilder: PeerConnectionFactory.Builder = createPeerConnectionFactoryBuilder(),
     ) {
         check(_peerConnectionFactory == null) {
             "WebRtc.configurePeerConnectionFactory() must be called once only and before any access to MediaDevices."
@@ -61,37 +103,10 @@ object WebRtc {
 
         this.videoProcessorFactory = videoProcessorFactory
         _cameraEnumerator = cameraEnumerator
-        _peerConnectionFactory = createPeerConnectionFactory(
-            peerConnectionInitializationOptionsBuilder,
-            peerConnectionFactoryBuilder
-        )
+        _peerConnectionFactory = peerConnectionFactoryBuilder.createPeerConnectionFactory()
     }
 
     internal fun initializeApplicationContext(context: Context) {
         applicationContext = context.applicationContext
-    }
-
-    private fun createPeerConnectionFactory(
-        peerConnectionInitializationOptionsBuilder: InitializationOptions.Builder,
-        peerConnectionFactoryBuilder: PeerConnectionFactory.Builder
-    ): PeerConnectionFactory {
-        PeerConnectionFactory.initialize(peerConnectionInitializationOptionsBuilder.createInitializationOptions())
-        return peerConnectionFactoryBuilder.createPeerConnectionFactory()
-    }
-
-    private fun defaultPeerConnectionFactoryInitializationOptionsBuilder(): InitializationOptions.Builder {
-        return InitializationOptions.builder(applicationContext)
-    }
-
-    private fun defaultPeerConnectionBuilder(): PeerConnectionFactory.Builder {
-        return PeerConnectionFactory.builder()
-            .setVideoDecoderFactory(DefaultVideoDecoderFactory(rootEglBase.eglBaseContext))
-            .setVideoEncoderFactory(
-                DefaultVideoEncoderFactory(
-                    rootEglBase.eglBaseContext,
-                    true,
-                    true
-                )
-            )
     }
 }
