@@ -10,6 +10,6 @@ struct iOSApp: App {
 	}
     
     init() {
-        WebRtc.shared.configure(loggingSeverity: .rtcloggingseveritywarning)
+        WebRtc.shared.configure(loggingSeverity: .rtcloggingseverityinfo)
     }
 }
