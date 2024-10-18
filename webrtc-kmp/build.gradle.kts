@@ -1,10 +1,12 @@
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
-import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 
 plugins {
-    id("webrtc.multiplatform")
+    alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.androidLibrary)
     kotlin("native.cocoapods")
     id("maven-publish")
     id("signing")
@@ -15,6 +17,11 @@ group = "com.shepeliev"
 version = System.getenv("VERSION") ?: "0.0.0"
 
 kotlin {
+    @OptIn(ExperimentalKotlinGradlePluginApi::class)
+    compilerOptions {
+        freeCompilerArgs.add("-Xexpect-actual-classes")
+    }
+
     cocoapods {
         version = project.version.toString()
         summary = "WebRTC Kotlin Multiplatform SDK"
@@ -27,14 +34,20 @@ kotlin {
             version = libs.versions.webrtc.ios.sdk.get()
             moduleName = "WebRTC"
             packageName = "WebRTC"
+
+            // workaround for https://youtrack.jetbrains.com/issue/KT-69094
+            extraOpts += listOf("-compiler-option", "-ivfsoverlay", "-compiler-option", "../vfsoverlay/overlay.yaml")
         }
     }
 
+    @OptIn(ExperimentalKotlinGradlePluginApi::class)
     androidTarget {
         publishAllLibraryVariants()
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
         instrumentedTestVariant {
             sourceSetTree.set(KotlinSourceSetTree.test)
+        }
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_1_8
         }
     }
 
@@ -108,9 +121,22 @@ kotlin {
 android {
     namespace = "com.shepeliev.webrtckmp"
 
+    compileSdk = libs.versions.compileSdk.get().toInt()
+    sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
+    sourceSets["main"].res.srcDir("src/androidMain/res")
+
     defaultConfig {
-        targetSdk = libs.versions.targetSdk.get().toInt()
+        minSdk = libs.versions.minSdk.get().toInt()
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    testOptions {
+        targetSdk = libs.versions.targetSdk.get().toInt()
     }
 
     dependencies {
