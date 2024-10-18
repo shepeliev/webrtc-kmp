@@ -1,21 +1,18 @@
-import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
-import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType
 
-
 plugins {
-    kotlin("multiplatform")
-    id("com.android.application")
-    kotlin("native.cocoapods")
-
+    alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrains.compose)
     alias(libs.plugins.compose.compiler)
+    kotlin("native.cocoapods")
 }
 
 kotlin {
-    configureKotlinCompilerArgs()
-
     cocoapods {
         version = "1.0"
         summary = "Compose app"
@@ -26,6 +23,7 @@ kotlin {
             version = libs.versions.webrtc.ios.sdk.get()
             moduleName = "WebRTC"
             packageName = "WebRTC"
+            linkOnly = true
         }
 
         podfile = project.file("../iosApp/Podfile")
@@ -40,8 +38,11 @@ kotlin {
         xcodeConfigurationToNativeBuildType["CUSTOM_RELEASE"] = NativeBuildType.RELEASE
     }
 
+    @OptIn(ExperimentalKotlinGradlePluginApi::class)
     androidTarget {
-        configureJvmTarget()
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_1_8
+        }
     }
 
     iosX64()
@@ -133,8 +134,4 @@ android {
     dependencies {
         debugImplementation(compose.uiTooling)
     }
-}
-
-compose.experimental {
-    web.application {}
 }

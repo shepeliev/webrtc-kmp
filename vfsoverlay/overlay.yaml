@@ -1,0 +1,28 @@
+{
+  'case-sensitive': 'false',
+  'roots': [
+    {
+      "contents": [
+        { 'external-contents': "../vfsoverlay/packed.h", 'name': "simd/packed.h", 'type': 'file' },
+        { 'external-contents': "../vfsoverlay/types.h", 'name': "simd/types.h", 'type': 'file' },
+        { 'external-contents': "../vfsoverlay/quaternion.h", 'name': "simd/quaternion.h", 'type': 'file' },
+        { 'external-contents': "../vfsoverlay/matrix_types.h", 'name': "simd/matrix_types.h", 'type': 'file' },
+        { 'external-contents': "../vfsoverlay/matrix.h", 'name': "simd/matrix.h", 'type': 'file' },
+        { 'external-contents': "../vfsoverlay/conversion.h", 'name': "simd/conversion.h", 'type': 'file' },
+        { 'external-contents': "../vfsoverlay/vector_make.h", 'name': "simd/vector_make.h", 'type': 'file' },
+        { 'external-contents': "../vfsoverlay/common.h", 'name': "simd/common.h", 'type': 'file' },
+        { 'external-contents': "../vfsoverlay/logic.h", 'name': "simd/logic.h", 'type': 'file' },
+        { 'external-contents': "../vfsoverlay/simd.h", 'name': "simd/simd.h", 'type': 'file' },
+        { 'external-contents': "../vfsoverlay/vector_types.h", 'name': "simd/vector_types.h", 'type': 'file' },
+        { 'external-contents': "../vfsoverlay/math.h", 'name': "simd/math.h", 'type': 'file' },
+        { 'external-contents': "../vfsoverlay/extern.h", 'name': "simd/extern.h", 'type': 'file' },
+        { 'external-contents': "../vfsoverlay/vector.h", 'name': "simd/vector.h", 'type': 'file' },
+        { 'external-contents': "../vfsoverlay/geometry.h", 'name': "simd/geometry.h", 'type': 'file' },
+        { 'external-contents': "../vfsoverlay/base.h", 'name': "simd/base.h", 'type': 'file' }
+      ],
+      'name': "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator18.0.sdk/usr/include",
+      'type': 'directory'
+    },
+  ],
+  'version': 0,
+}

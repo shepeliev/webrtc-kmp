@@ -1,15 +1,15 @@
 [versions]
 kotlin = "2.0.21"
-kotlin-coroutines = "1.8.0"
+kotlin-coroutines = "1.9.0"
 androidx-activity-compose = "1.9.0"
-androidx-appcompat = "1.6.1"
-androidx-core = "1.13.0"
-androidx-material = "1.11.0"
-androidx-lifecycle = "2.7.0"
-androidx-startup = "1.1.1"
-androidx-test-core = "1.5.0"
-androidx-test-runner = "1.5.2"
-androidx-test-rules = "1.5.0"
+androidx-appcompat = "1.7.0"
+androidx-core = "1.13.1"
+androidx-material = "1.12.0"
+androidx-lifecycle = "2.8.6"
+androidx-startup = "1.2.0"
+androidx-test-core = "1.6.1"
+androidx-test-runner = "1.6.2"
+androidx-test-rules = "1.6.1"
 accompanist-permision = "0.34.0"
 kermit = "2.0.3"
 kotlin-wrappers = "1.0.0-pre.732"
@@ -49,12 +49,11 @@ kotlin-wrappers-react = { module = "org.jetbrains.kotlin-wrappers:kotlin-react" 
 kotlin-wrappers-reactDom = { module = "org.jetbrains.kotlin-wrappers:kotlin-react-dom" }
 kotlin-wrappers-mui = { module = "org.jetbrains.kotlin-wrappers:kotlin-mui-material" }
 
-# Plugin dependencies
-kotlin-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
-agp-plugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
-
 [plugins]
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
 nexus = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "nexus" }
 jetbrains-compose = { id = "org.jetbrains.compose", version.ref = "compose-plugin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+androidApplication = { id = "com.android.application", version.ref = "agp" }
+androidLibrary = { id = "com.android.library", version.ref = "agp" }
