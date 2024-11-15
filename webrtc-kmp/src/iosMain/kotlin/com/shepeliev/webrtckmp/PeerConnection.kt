@@ -35,6 +35,7 @@ import com.shepeliev.webrtckmp.PeerConnectionEvent.StandardizedIceConnectionChan
 import com.shepeliev.webrtckmp.PeerConnectionEvent.Track
 import com.shepeliev.webrtckmp.internal.toPlatform
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.ObjCSignatureOverride
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
@@ -198,13 +199,15 @@ actual class PeerConnection actual constructor(
         coroutineScope.launch { _peerConnectionEvent.emit(event) }
     }
 
-    @Suppress("CONFLICTING_OVERLOADS", "PARAMETER_NAME_CHANGED_ON_OVERRIDE")
+    @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
+    @ObjCSignatureOverride
     override fun peerConnection(peerConnection: RTCPeerConnection, didAddStream: RTCMediaStream) {
         // this deprecated API should not longer be used
         // https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/onaddstream
     }
 
-    @Suppress("CONFLICTING_OVERLOADS", "PARAMETER_NAME_CHANGED_ON_OVERRIDE")
+    @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
+    @ObjCSignatureOverride
     override fun peerConnection(peerConnection: RTCPeerConnection, didRemoveStream: RTCMediaStream) {
         // The removestream event has been removed from the WebRTC specification in favor of
         // the existing removetrack event on the remote MediaStream and the corresponding
@@ -218,7 +221,8 @@ actual class PeerConnection actual constructor(
         coroutineScope.launch { _peerConnectionEvent.emit(NegotiationNeeded) }
     }
 
-    @Suppress("CONFLICTING_OVERLOADS", "PARAMETER_NAME_CHANGED_ON_OVERRIDE")
+    @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
+    @ObjCSignatureOverride
     override fun peerConnection(peerConnection: RTCPeerConnection, didChangeIceConnectionState: RTCIceConnectionState) {
         val event = IceConnectionStateChange(rtcIceConnectionStateAsCommon(didChangeIceConnectionState))
         coroutineScope.launch { _peerConnectionEvent.emit(event) }
@@ -245,7 +249,8 @@ actual class PeerConnection actual constructor(
         coroutineScope.launch { _peerConnectionEvent.emit(event) }
     }
 
-    @Suppress("CONFLICTING_OVERLOADS", "PARAMETER_NAME_CHANGED_ON_OVERRIDE")
+    @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
+    @ObjCSignatureOverride
     override fun peerConnection(
         peerConnection: RTCPeerConnection,
         didChangeStandardizedIceConnectionState: RTCIceConnectionState

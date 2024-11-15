@@ -1,11 +1,12 @@
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
-import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
-import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 
 plugins {
-    id("webrtc.multiplatform")
+    alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.androidLibrary)
     kotlin("native.cocoapods")
     id("maven-publish")
     id("signing")
@@ -13,34 +14,46 @@ plugins {
 
 group = "com.shepeliev"
 
-val webRtcKmpVersion: String by properties
-version = webRtcKmpVersion
+version = System.getenv("VERSION") ?: "0.0.0"
 
 kotlin {
+    @OptIn(ExperimentalKotlinGradlePluginApi::class)
+    compilerOptions {
+        freeCompilerArgs.add("-Xexpect-actual-classes")
+    }
+
     cocoapods {
-        version = webRtcKmpVersion
+        version = project.version.toString()
         summary = "WebRTC Kotlin Multiplatform SDK"
         homepage = "https://github.com/shepeliev/webrtc-kmp"
         ios.deploymentTarget = "13.0"
+
+        noPodspec()
 
         pod("WebRTC-SDK") {
             version = libs.versions.webrtc.ios.sdk.get()
             moduleName = "WebRTC"
             packageName = "WebRTC"
+
+            // workaround for https://youtrack.jetbrains.com/issue/KT-69094
+            extraOpts += listOf("-compiler-option", "-ivfsoverlay", "-compiler-option", "../vfsoverlay/overlay.yaml")
         }
     }
 
+    @OptIn(ExperimentalKotlinGradlePluginApi::class)
     androidTarget {
         publishAllLibraryVariants()
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
         instrumentedTestVariant {
             sourceSetTree.set(KotlinSourceSetTree.test)
         }
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_1_8
+        }
     }
     jvm()
-    iosX64 { configureWebRtcCinterops() }
-    iosArm64 { configureWebRtcCinterops() }
-    iosSimulatorArm64 { configureWebRtcCinterops() }
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
 
     js {
         useCommonJs()
@@ -67,7 +80,7 @@ kotlin {
         common {
             group("jsAndWasmJs") {
                 withJs()
-                withWasm()
+                withWasmJs()
             }
         }
     }
@@ -112,15 +125,37 @@ kotlin {
             }
             implementation("${libs.webrtc.java.get()}:$hostOS-$hostArch")
         }
+
+        val iosX64AndSimulatorArm64Main by creating {
+            dependsOn(iosMain.get())
+        }
+
+        val iosX64Main by getting
+        iosX64Main.dependsOn(iosX64AndSimulatorArm64Main)
+        val iosSimulatorArm64Main by getting
+        iosSimulatorArm64Main.dependsOn(iosX64AndSimulatorArm64Main)
     }
 }
 
 android {
     namespace = "com.shepeliev.webrtckmp"
 
+    compileSdk = libs.versions.compileSdk.get().toInt()
+    sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
+    sourceSets["main"].res.srcDir("src/androidMain/res")
+
     defaultConfig {
-        targetSdk = libs.versions.targetSdk.get().toInt()
+        minSdk = libs.versions.minSdk.get().toInt()
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    testOptions {
+        targetSdk = libs.versions.targetSdk.get().toInt()
     }
 
     dependencies {
@@ -175,27 +210,4 @@ signing {
 
     useInMemoryPgpKeys(signingKey, signingPassword)
     sign(publishing.publications)
-}
-
-fun KotlinNativeTarget.configureWebRtcCinterops() {
-    val webRtcFrameworkPath = file("$buildDir/cocoapods/synthetic/IOS/Pods/WebRTC-SDK")
-        .resolveArchPath(konanTarget, "WebRTC")
-    compilations.getByName("main") {
-        cinterops.getByName("WebRTC") {
-            compilerOpts("-framework", "WebRTC", "-F$webRtcFrameworkPath")
-        }
-    }
-
-    binaries {
-        getTest("DEBUG").apply {
-            linkerOpts(
-                "-framework",
-                "WebRTC",
-                "-F$webRtcFrameworkPath",
-                "-rpath",
-                "$webRtcFrameworkPath",
-                "-ObjC"
-            )
-        }
-    }
 }

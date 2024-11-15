@@ -2,9 +2,11 @@
 .gradle
 .idea
 local.properties
+version.properties
 .DS_Store
 build/
 captures
 xcuserdata
 .externalNativeBuild
 .cxx
+.kotlin/

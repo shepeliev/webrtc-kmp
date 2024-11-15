@@ -12,60 +12,55 @@ It supports Android, iOS, JS. Other platforms - PRs are welcome.
 | Screen Capture | :white_check_mark: |                    | :white_check_mark: | :white_check_mark: |
 
 ## WebRTC revision
-Current revision: M114
+Current revision: M125
 
 ## Installation
 The library is published to [Maven Central](https://search.maven.org/artifact/com.shepeliev/webrtc-kmp).
 
-Shared module build.gradle.kts
-```Kotlin
+
+### Add dependency to your common source set:
+```kotlin
+commonMain.dependencies {
+  dependencies {
+    implementation("com.shepeliev:webrtc-kmp:$webRtcKmpVersion")
+  }
+}
+```
+
+### Running on iOS
+On iOS, the WebRTC SDK is not linked as a transitive dependency, so you need to add it to your iOS project manually.
+This can be done using CocoaPods or SPM, depending on your project setup. Here is an example of how to link 
+the WebRTC SDK using CocoaPods in `build.gradle.kts`:
+
+```kotlin
 kotlin {
     cocoapods {
         version = "1.0.0"
         summary = "Shared module"
         homepage = "not published"
-        ios.deploymentTarget = "11.0"
+        ios.deploymentTarget = "13.0"
 
         pod("WebRTC-SDK") {
-            version = "114.5735.02"
-            linkOnly = true
+              version = "125.6422.05"
+              moduleName = "WebRTC"
         }
 
         podfile = project.file("../iosApp/Podfile")
 
         framework {
             baseName = "shared"
-            export("com.shepeliev:webrtc-kmp:$webRtcKmpVersion")
-            transitiveExport = true
+            isStatic = true  
         }
 
         xcodeConfigurationToNativeBuildType["CUSTOM_DEBUG"] = NativeBuildType.DEBUG
         xcodeConfigurationToNativeBuildType["CUSTOM_RELEASE"] = NativeBuildType.RELEASE
     }
 
-    android()
-
-    ios()
+    iosX64()
+    iosArm64()
     iosSimulatorArm64()
-
-    js {
-        useCommonJs()
-        browser()
-    }
-
     jvm()
 
-    sourceSets {
-        val commonMain by getting {
-            dependencies {
-                api("com.shepeliev:webrtc-kmp:$webRtcKmpVersion")
-            }
-        }
-
-        val iosMain by getting
-        val iosSimulatorArm64Main by getting
-        iosSimulatorArm64Main.dependsOn(iosMain)
-    }
 }
 
 dependencies {

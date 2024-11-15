@@ -13,10 +13,11 @@ actual fun Video(videoTrack: VideoStreamTrack, modifier: Modifier, audioTrack: A
     UIKitView(
         factory = {
             RTCMTLVideoView().apply {
-                contentMode = UIViewContentMode.UIViewContentModeScaleAspectFit
+                videoContentMode = UIViewContentMode.UIViewContentModeScaleAspectFit
                 videoTrack.addRenderer(this)
             }
         },
         modifier = modifier,
+        onRelease = { videoTrack.removeRenderer(it) }
     )
 }

@@ -18,8 +18,15 @@ Run Android emulator or connect real device.
 ```
 
 ### iOS
+In `sample/iosApp/Configuration/Config.xcconfig` set `TEAM_ID` and `BUNDLE_ID` to your values.
 
-Open `sample/iosApp/iosApp.xcodeproj` in XCode build and run
+```bash
+./gradlew generateDummyFramework
+cd sample/iosApp
+pod install
+```
+
+Open `sample/iosApp/iosApp.xcworkspace` in XCode build and run
 
 ### Web JS
 

@@ -14,6 +14,7 @@ internal suspend inline fun <T> T.await(function: T.(callback: (NSError?) -> Uni
         } else {
             deferred.completeExceptionally(RuntimeException(error.localizedDescription))
         }
+        Unit
     }
 
     function(handler)
@@ -29,6 +30,7 @@ internal suspend inline fun <T, reified R> T.awaitResult(function: T.(callback: 
         } else {
             deferred.completeExceptionally(RuntimeException(error.localizedDescription))
         }
+        Unit
     }
 
     function(handler)
