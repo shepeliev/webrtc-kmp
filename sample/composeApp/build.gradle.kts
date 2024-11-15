@@ -1,3 +1,5 @@
+import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -55,6 +57,12 @@ kotlin {
         }
     }
 
+    jvm {
+        compilations.all {
+            kotlinOptions.jvmTarget = "17"
+        }
+    }
+
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
         moduleName = "composeApp"
@@ -99,6 +107,24 @@ kotlin {
             implementation(libs.kotlin.wrappers.reactDom)
             implementation(libs.kotlin.wrappers.emotion)
         }
+
+        jvmMain.dependencies {
+            implementation(compose.desktop.currentOs)
+            implementation(libs.kotlin.coroutines.swing)
+
+            val osName = System.getProperty("os.name")
+            val hostOS = when {
+                osName == "Mac OS X" -> "macos"
+                osName.startsWith("Win") -> "windows"
+                osName.startsWith("Linux") -> "linux"
+                else -> error("Unsupported OS: $osName")
+            }
+            val hostArch = when (val arch = System.getProperty("os.arch").lowercase()) {
+                "amd64" -> "x86_64"
+                else -> arch
+            }
+            implementation("${libs.webrtc.java.get()}:$hostOS-$hostArch")
+        }
     }
 }
 
@@ -133,5 +159,16 @@ android {
     }
     dependencies {
         debugImplementation(compose.uiTooling)
+    }
+}
+
+compose.desktop {
+    application {
+        mainClass = "MainKt"
+        nativeDistributions {
+            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+            packageName = "KMPTemplate"
+            packageVersion = "1.0.0"
+        }
     }
 }

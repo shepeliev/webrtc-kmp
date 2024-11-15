@@ -1,9 +1,16 @@
 package com.shepeliev.webrtckmp
 
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class MediaStreamConstraintsBuilderTest {
+
+    @BeforeTest
+    fun setup() {
+        setupMocks()
+    }
+
     @Test
     fun should_work() {
         val builder = MediaStreamConstraintsBuilder()

@@ -50,7 +50,7 @@ kotlin {
             jvmTarget = JvmTarget.JVM_1_8
         }
     }
-
+    jvm()
     iosX64()
     iosArm64()
     iosSimulatorArm64()
@@ -91,7 +91,7 @@ kotlin {
         }
 
         androidMain.dependencies {
-            api(libs.webrtc.sdk)
+            api(libs.webrtc.android)
             implementation(libs.kotlin.coroutines.android)
             implementation(libs.androidx.coreKtx)
             implementation(libs.androidx.startup)
@@ -105,6 +105,25 @@ kotlin {
             implementation(kotlin("test"))
             implementation(kotlin("test-annotations-common"))
             implementation(libs.kotlin.coroutines.test)
+        }
+
+        jvmMain.dependencies {
+            api(libs.webrtc.java)
+            implementation(libs.java.bouncycastle)
+        }
+        jvmTest.dependencies {
+            val osName = System.getProperty("os.name")
+            val hostOS = when {
+                osName == "Mac OS X" -> "macos"
+                osName.startsWith("Win") -> "windows"
+                osName.startsWith("Linux") -> "linux"
+                else -> error("Unsupported OS: $osName")
+            }
+            val hostArch = when (val arch = System.getProperty("os.arch").lowercase()) {
+                "amd64" -> "x86_64"
+                else -> arch
+            }
+            implementation("${libs.webrtc.java.get()}:$hostOS-$hostArch")
         }
 
         val iosX64AndSimulatorArm64Main by creating {

@@ -1,9 +1,15 @@
 package com.shepeliev.webrtckmp
 
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 open class IceCandidateTest {
+
+    @BeforeTest
+    fun setup() {
+        setupMocks()
+    }
 
     @Test
     fun should_be_constructed_successfully() {

@@ -28,6 +28,7 @@ class PeerConnectionTest {
 
     @BeforeTest
     fun setUp() {
+        setupMocks()
         Dispatchers.setMain(StandardTestDispatcher(scope.testScheduler))
     }
 

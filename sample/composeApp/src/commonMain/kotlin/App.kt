@@ -17,12 +17,10 @@ import androidx.compose.ui.unit.dp
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.platformLogWriter
 import com.shepeliev.webrtckmp.AudioStreamTrack
-import com.shepeliev.webrtckmp.MediaDevices
 import com.shepeliev.webrtckmp.MediaStream
 import com.shepeliev.webrtckmp.PeerConnection
 import com.shepeliev.webrtckmp.VideoStreamTrack
 import com.shepeliev.webrtckmp.videoTracks
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -84,12 +82,7 @@ fun App() {
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (localStream == null) {
-                    StartButton(onClick = {
-                        scope.launch {
-                            val stream = MediaDevices.getUserMedia(audio = true, video = true)
-                            setLocalStream(stream)
-                        }
-                    })
+                    StartButton(setLocalStream = setLocalStream)
                 } else {
                     StopButton(
                         onClick = {
@@ -102,10 +95,8 @@ fun App() {
                         }
                     )
 
-                    SwitchCameraButton(
-                        onClick = {
-                            scope.launch { localStream.videoTracks.firstOrNull()?.switchCamera() }
-                        }
+                    DeviceSelectButton(
+                        localStream = localStream,
                     )
                 }
                 if (peerConnections == null) {
@@ -125,15 +116,16 @@ fun App() {
     }
 }
 
+
 @Composable
-private fun CallButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+internal fun CallButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
     Button(onClick, modifier = modifier) {
         Text("Call")
     }
 }
 
 @Composable
-private fun HangupButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+internal fun HangupButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
     Button(onClick, modifier = modifier) {
         Text("Hangup")
     }
@@ -147,7 +139,7 @@ private fun SwitchCameraButton(onClick: () -> Unit, modifier: Modifier = Modifie
 }
 
 @Composable
-private fun StopButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+internal fun StopButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
     Button(onClick = onClick, modifier = modifier) {
         Text("Stop")
     }

@@ -16,5 +16,6 @@ pluginManagement {
 }
 
 rootProject.name = "webrtc-kmp"
+
 include(":webrtc-kmp")
 include(":sample:composeApp")
