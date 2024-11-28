@@ -6,7 +6,7 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.useContents
 
 @OptIn(ExperimentalForeignApi::class)
-internal inline fun <reified T : CStructVar> CValue<T>.copyContent(): T {
+internal inline fun <reified T : CStructVar> CValue<T>.copyContents(): T {
     lateinit var value: T
     this.useContents { value = this }
     return value

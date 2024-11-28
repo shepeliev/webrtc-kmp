@@ -10,7 +10,7 @@ import com.shepeliev.webrtckmp.DEFAULT_VIDEO_HEIGHT
 import com.shepeliev.webrtckmp.DEFAULT_VIDEO_WIDTH
 import com.shepeliev.webrtckmp.FacingMode
 import com.shepeliev.webrtckmp.MediaTrackConstraints
-import com.shepeliev.webrtckmp.utils.copyContent
+import com.shepeliev.webrtckmp.utils.copyContents
 import com.shepeliev.webrtckmp.value
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.AVFoundation.AVCaptureDevice
@@ -66,7 +66,7 @@ internal actual class CameraVideoCapturerController actual constructor(
         )
 
         val dimensions =
-            CMVideoFormatDescriptionGetDimensions(format.formatDescription).copyContent()
+            CMVideoFormatDescriptionGetDimensions(format.formatDescription).copyContents()
 
         settings = settings.copy(
             deviceId = device.uniqueID,
@@ -117,7 +117,7 @@ internal actual class CameraVideoCapturerController actual constructor(
             if (format.multiCamSupported != AVCaptureMultiCamSession.multiCamSupported) continue
 
             val dimensions =
-                CMVideoFormatDescriptionGetDimensions(format.formatDescription).copyContent()
+                CMVideoFormatDescriptionGetDimensions(format.formatDescription).copyContents()
             val pixelFormat = CMFormatDescriptionGetMediaSubType(format.formatDescription)
             val diff = abs(targetWidth - dimensions.width) + abs(targetHeight - dimensions.height)
             if (diff < currentDiff) {
