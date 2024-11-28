@@ -1,6 +1,8 @@
 package com.shepeliev.webrtckmp.capturer
 
 import WebRTC.RTCCameraVideoCapturer
+import WebRTC.RTCLogEx
+import WebRTC.RTCLoggingSeverity
 import WebRTC.RTCVideoCapturerDelegateProtocol
 import com.shepeliev.webrtckmp.CameraVideoCapturerException
 import com.shepeliev.webrtckmp.DEFAULT_FRAME_RATE
@@ -8,15 +10,17 @@ import com.shepeliev.webrtckmp.DEFAULT_VIDEO_HEIGHT
 import com.shepeliev.webrtckmp.DEFAULT_VIDEO_WIDTH
 import com.shepeliev.webrtckmp.FacingMode
 import com.shepeliev.webrtckmp.MediaTrackConstraints
+import com.shepeliev.webrtckmp.utils.copyContents
 import com.shepeliev.webrtckmp.value
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.cinterop.useContents
 import platform.AVFoundation.AVCaptureDevice
 import platform.AVFoundation.AVCaptureDeviceFormat
 import platform.AVFoundation.AVCaptureDevicePosition
 import platform.AVFoundation.AVCaptureDevicePositionBack
 import platform.AVFoundation.AVCaptureDevicePositionFront
+import platform.AVFoundation.AVCaptureMultiCamSession
 import platform.AVFoundation.AVFrameRateRange
+import platform.AVFoundation.multiCamSupported
 import platform.AVFoundation.position
 import platform.CoreMedia.CMFormatDescriptionGetMediaSubType
 import platform.CoreMedia.CMVideoFormatDescriptionGetDimensions
@@ -28,48 +32,63 @@ internal actual class CameraVideoCapturerController actual constructor(
     private val videoCapturerDelegate: RTCVideoCapturerDelegateProtocol
 ) : VideoCapturerController() {
     private var videoCapturer: RTCCameraVideoCapturer? = null
-    private var position: AVCaptureDevicePosition = AVCaptureDevicePositionBack
-    private lateinit var device: AVCaptureDevice
-    private lateinit var format: AVCaptureDeviceFormat
-    private var fps: Long = -1
+    private var device: AVCaptureDevice? = null
 
     actual override fun startCapture() {
         if (videoCapturer != null) return
         videoCapturer = RTCCameraVideoCapturer(videoCapturerDelegate)
-        if (!this::device.isInitialized) selectDevice()
-        selectFormat()
-        selectFps()
 
-        var width: Int? = null
-        var height: Int? = null
-        CMVideoFormatDescriptionGetDimensions(format.formatDescription).useContents {
-            width = this.width
-            height = this.height
+        val device = device
+            ?: run {
+                val position = constraints.facingMode?.value.toAVCaptureDevicePosition()
+                selectDevice(position).also { device = it }
+            }
+            ?: run {
+                RTCLogEx(RTCLoggingSeverity.RTCLoggingSeverityWarning, "[$TAG] No capture devices found.")
+                return
+            }
+
+        val format = selectFormat(
+            device = device,
+            targetWidth = constraints.width?.value ?: DEFAULT_VIDEO_WIDTH,
+            targetHeight = constraints.height?.value ?: DEFAULT_VIDEO_HEIGHT
+        ) ?: run {
+            RTCLogEx(
+                RTCLoggingSeverity.RTCLoggingSeverityWarning,
+                "[$TAG] No valid formats for device $device."
+            )
+            return
         }
+
+        val fps = selectFps(
+            format = format,
+            targetFps = constraints.frameRate?.value ?: DEFAULT_FRAME_RATE.toDouble()
+        )
+
+        val dimensions =
+            CMVideoFormatDescriptionGetDimensions(format.formatDescription).copyContents()
 
         settings = settings.copy(
             deviceId = device.uniqueID,
             facingMode = device.position.toFacingMode(),
-            width = width,
-            height = height,
-            frameRate = fps.toDouble()
+            width = dimensions.width,
+            height = dimensions.height,
+            frameRate = fps
         )
 
-        videoCapturer?.startCaptureWithDevice(device, format, fps)
+        RTCLogEx(RTCLoggingSeverity.RTCLoggingSeverityInfo, "[$TAG] Start capturing video.")
+
+        videoCapturer?.startCaptureWithDevice(device, format, fps.toLong())
     }
 
     actual override fun stopCapture() {
-        videoCapturer?.stopCapture()
-        videoCapturer = null
+        val videoCapturer = videoCapturer ?: return
+        this.videoCapturer = null
+        RTCLogEx(RTCLoggingSeverity.RTCLoggingSeverityInfo, "[$TAG] Stop capturing video.")
+        videoCapturer.stopCapture()
     }
 
-    private fun selectDevice() {
-        position = when (constraints.facingMode?.value) {
-            FacingMode.User -> AVCaptureDevicePositionFront
-            FacingMode.Environment -> AVCaptureDevicePositionBack
-            null -> AVCaptureDevicePositionFront
-        }
-
+    private fun selectDevice(position: AVCaptureDevicePosition): AVCaptureDevice? {
         val searchCriteria: (Any?) -> Boolean = when {
             constraints.deviceId != null -> {
                 { (it as AVCaptureDevice).uniqueID == constraints.deviceId }
@@ -80,85 +99,72 @@ internal actual class CameraVideoCapturerController actual constructor(
             }
         }
 
-        device = RTCCameraVideoCapturer.captureDevices()
-            .firstOrNull(searchCriteria) as? AVCaptureDevice
-            ?: throw CameraVideoCapturerException.notFound(constraints)
-
-        settings = settings.copy(
-            deviceId = device.uniqueID,
-            facingMode = device.position.toFacingMode()
-        )
+        val device = RTCCameraVideoCapturer.captureDevices().firstOrNull(searchCriteria)
+        return device as? AVCaptureDevice
     }
 
-    private fun selectFormat() {
-        val targetWidth = constraints.width?.value ?: DEFAULT_VIDEO_WIDTH
-        val targetHeight = constraints.height?.value ?: DEFAULT_VIDEO_HEIGHT
+    private fun selectFormat(
+        device: AVCaptureDevice,
+        targetWidth: Int,
+        targetHeight: Int
+    ): AVCaptureDeviceFormat? {
         val formats = RTCCameraVideoCapturer.supportedFormatsForDevice(device)
+        var selectedFormat: AVCaptureDeviceFormat? = null
+        var currentDiff = Int.MAX_VALUE
 
-        format = formats.fold(Pair(Int.MAX_VALUE, null as AVCaptureDeviceFormat?)) { acc, fmt ->
-            val format = fmt as AVCaptureDeviceFormat
-            val (currentDiff, currentFormat) = acc
+        for (format in formats) {
+            format as? AVCaptureDeviceFormat ?: continue
+            if (format.multiCamSupported != AVCaptureMultiCamSession.multiCamSupported) continue
 
-            var diff = currentDiff
-            CMVideoFormatDescriptionGetDimensions(format.formatDescription).useContents {
-                diff = abs(targetWidth - width) + abs(targetHeight - height)
-            }
+            val dimensions =
+                CMVideoFormatDescriptionGetDimensions(format.formatDescription).copyContents()
             val pixelFormat = CMFormatDescriptionGetMediaSubType(format.formatDescription)
+            val diff = abs(targetWidth - dimensions.width) + abs(targetHeight - dimensions.height)
             if (diff < currentDiff) {
-                return@fold Pair(diff, format)
+                selectedFormat = format
+                currentDiff = diff
             } else if (diff == currentDiff && pixelFormat == videoCapturer!!.preferredOutputPixelFormat()) {
-                return@fold Pair(currentDiff, format)
+                selectedFormat = format
             }
-            Pair(0, currentFormat)
-        }.second ?: throw CameraVideoCapturerException(
-            "No valid video format for device $device. Requested video frame size: ${targetWidth}x$targetHeight"
-        )
-    }
-
-    private fun selectFps() {
-        val requestedFps = constraints.frameRate?.value ?: DEFAULT_FRAME_RATE
-
-        val maxSupportedFrameRate = format.videoSupportedFrameRateRanges.fold(0.0) { acc, range ->
-            val fpsRange = range as AVFrameRateRange
-            maxOf(acc, fpsRange.maxFrameRate)
         }
 
-        fps = minOf(maxSupportedFrameRate, requestedFps.toDouble()).toLong()
+        return selectedFormat
+    }
+
+    private fun selectFps(format: AVCaptureDeviceFormat, targetFps: Double): Double {
+        val maxSupportedFrameRate = format.videoSupportedFrameRateRanges.maxOf {
+            (it as AVFrameRateRange).maxFrameRate
+        }
+        return targetFps.coerceAtMost(maxSupportedFrameRate)
     }
 
     actual fun switchCamera() {
-        checkNotNull(videoCapturer) { "Video capturing is not started." }
+        checkNotNull(videoCapturer) { "[$TAG] Video capturing is not started." }
         val captureDevices = RTCCameraVideoCapturer.captureDevices()
         if (captureDevices.size < 2) {
-            throw CameraVideoCapturerException("No other camera device found.")
+            RTCLogEx(
+                RTCLoggingSeverity.RTCLoggingSeverityWarning,
+                "[$TAG] No other camera device found."
+            )
+            return
         }
 
         stopCapture()
         val deviceIndex = captureDevices.indexOfFirst {
-            (it as AVCaptureDevice).uniqueID == device.uniqueID
+            (it as AVCaptureDevice).uniqueID == device?.uniqueID
         }
         device = captureDevices[(deviceIndex + 1) % captureDevices.size] as AVCaptureDevice
         startCapture()
-
-        settings = settings.copy(
-            deviceId = device.uniqueID,
-            facingMode = device.position.toFacingMode()
-        )
     }
 
     actual fun switchCamera(deviceId: String) {
-        checkNotNull(videoCapturer) { "Video capturing is not started." }
+        checkNotNull(videoCapturer) { "[$TAG] Video capturing is not started." }
 
         stopCapture()
         device = RTCCameraVideoCapturer.captureDevices()
             .firstOrNull { (it as AVCaptureDevice).uniqueID == deviceId } as? AVCaptureDevice
             ?: throw CameraVideoCapturerException.notFound(deviceId)
         startCapture()
-
-        settings = settings.copy(
-            deviceId = device.uniqueID,
-            facingMode = device.position.toFacingMode()
-        )
     }
 
     private fun AVCaptureDevicePosition.toFacingMode(): FacingMode? {
@@ -167,5 +173,17 @@ internal actual class CameraVideoCapturerController actual constructor(
             AVCaptureDevicePositionBack -> FacingMode.Environment
             else -> null
         }
+    }
+
+    private fun FacingMode?.toAVCaptureDevicePosition(): AVCaptureDevicePosition {
+        return when (this) {
+            FacingMode.User -> AVCaptureDevicePositionFront
+            FacingMode.Environment -> AVCaptureDevicePositionBack
+            else -> AVCaptureDevicePositionFront
+        }
+    }
+
+    companion object {
+        private const val TAG = "CameraVideoCapturerController"
     }
 }
