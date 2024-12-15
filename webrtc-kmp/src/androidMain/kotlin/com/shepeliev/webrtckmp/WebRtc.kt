@@ -40,7 +40,7 @@ object WebRtc {
     }
 
     private var _peerConnectionFactory: PeerConnectionFactory? = null
-    val peerConnectionFactory: PeerConnectionFactory by lazy {
+    internal val peerConnectionFactory: PeerConnectionFactory by lazy {
         _peerConnectionFactory ?: createPeerConnectionFactoryBuilder().createPeerConnectionFactory()
             .also { _peerConnectionFactory = it }
     }
