@@ -15,6 +15,8 @@ data class MediaTrackConstraints(
     val sampleRate: ValueOrConstrain<Int>? = null,
     val sampleSize: ValueOrConstrain<Int>? = null,
     val width: ValueOrConstrain<Int>? = null,
+    val highpassFilter: ValueOrConstrain<Boolean>? = null,
+    val typingNoiseDetection: ValueOrConstrain<Boolean>? = null,
 )
 
 enum class FacingMode { User, Environment }
@@ -102,6 +104,16 @@ class MediaTrackConstraintsBuilder(internal var constraints: MediaTrackConstrain
         constraints = constraints.copy(echoCancellation = constrain)
     }
 
+    fun highpassFilter(enable: Boolean = true) {
+        constraints = constraints.copy(highpassFilter = enable.asValueConstrain())
+    }
+
+    fun highpassFilter(build: ValueOrConstrain.Constrain<Boolean>.() -> Unit) {
+        val constrain = ValueOrConstrain.Constrain<Boolean>()
+        build(constrain)
+        constraints = constraints.copy(highpassFilter = constrain)
+    }
+
     fun latency(latency: Double) {
         constraints = constraints.copy(latency = latency.asValueConstrain())
     }
@@ -140,6 +152,16 @@ class MediaTrackConstraintsBuilder(internal var constraints: MediaTrackConstrain
         val constrain = ValueOrConstrain.Constrain<Int>()
         build(constrain)
         constraints = constraints.copy(sampleRate = constrain)
+    }
+
+    fun typingNoiseDetection(enable: Boolean = true) {
+        constraints = constraints.copy(typingNoiseDetection = enable.asValueConstrain())
+    }
+
+    fun typingNoiseDetection(build: ValueOrConstrain.Constrain<Boolean>.() -> Unit) {
+        val constrain = ValueOrConstrain.Constrain<Boolean>()
+        build(constrain)
+        constraints = constraints.copy(typingNoiseDetection = constrain)
     }
 
     fun aspectRatio(ratio: Double) {

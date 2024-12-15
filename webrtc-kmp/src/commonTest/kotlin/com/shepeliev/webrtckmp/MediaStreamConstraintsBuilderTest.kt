@@ -17,6 +17,8 @@ class MediaStreamConstraintsBuilderTest {
             latency(42.0)
             noiseSuppression(true)
             sampleRate(42)
+            highpassFilter(true)
+            typingNoiseDetection(true)
         }
 
         builder.video {
@@ -40,6 +42,8 @@ class MediaStreamConstraintsBuilderTest {
                     latency = 42.0.asValueConstrain(),
                     noiseSuppression = true.asValueConstrain(),
                     sampleRate = 42.asValueConstrain(),
+                    highpassFilter = true.asValueConstrain(),
+                    typingNoiseDetection = true.asValueConstrain(),
                 ),
 
                 video = MediaTrackConstraints(
