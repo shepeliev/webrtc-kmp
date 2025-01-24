@@ -17,7 +17,6 @@ group = "com.shepeliev"
 version = System.getenv("VERSION") ?: "0.0.0"
 
 kotlin {
-    @OptIn(ExperimentalKotlinGradlePluginApi::class)
     compilerOptions {
         freeCompilerArgs.add("-Xexpect-actual-classes")
     }
@@ -34,9 +33,6 @@ kotlin {
             version = libs.versions.webrtc.ios.sdk.get()
             moduleName = "WebRTC"
             packageName = "WebRTC"
-
-            // workaround for https://youtrack.jetbrains.com/issue/KT-69094
-            extraOpts += listOf("-compiler-option", "-ivfsoverlay", "-compiler-option", "../vfsoverlay/overlay.yaml")
         }
     }
 
@@ -99,6 +95,10 @@ kotlin {
 
         jsMain.dependencies {
             implementation(npm("webrtc-adapter", "8.1.1"))
+        }
+
+        wasmJsMain.dependencies {
+            implementation(libs.kotlin.browser)
         }
 
         commonTest.dependencies {
