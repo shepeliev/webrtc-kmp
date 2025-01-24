@@ -11,7 +11,7 @@ actual class RtpTransceiver(
     actual var direction: RtpTransceiverDirection
         get() = native.direction.asCommon()
         set(value) {
-            native.direction = value.asNative()
+            native.direction = value.toPlatform()
         }
 
     actual val currentDirection: RtpTransceiverDirection?
@@ -56,7 +56,7 @@ private fun AndroidRtpTransceiver.RtpTransceiverDirection.asCommon(): RtpTransce
     }
 }
 
-internal fun RtpTransceiverDirection.asNative(): AndroidRtpTransceiver.RtpTransceiverDirection {
+internal fun RtpTransceiverDirection.toPlatform(): AndroidRtpTransceiver.RtpTransceiverDirection {
     return when (this) {
         RtpTransceiverDirection.SendRecv -> AndroidRtpTransceiver.RtpTransceiverDirection.SEND_RECV
         RtpTransceiverDirection.SendOnly -> AndroidRtpTransceiver.RtpTransceiverDirection.SEND_ONLY

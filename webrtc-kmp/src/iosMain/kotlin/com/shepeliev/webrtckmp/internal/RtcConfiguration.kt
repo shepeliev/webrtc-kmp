@@ -4,10 +4,12 @@ package com.shepeliev.webrtckmp.internal
 
 import WebRTC.RTCBundlePolicy
 import WebRTC.RTCConfiguration
+import WebRTC.RTCContinualGatheringPolicy
 import WebRTC.RTCIceTransportPolicy
 import WebRTC.RTCRtcpMuxPolicy
 import WebRTC.RTCSdpSemantics
 import com.shepeliev.webrtckmp.BundlePolicy
+import com.shepeliev.webrtckmp.ContinualGatheringPolicy
 import com.shepeliev.webrtckmp.IceServer
 import com.shepeliev.webrtckmp.IceTransportPolicy
 import com.shepeliev.webrtckmp.RtcConfiguration
@@ -23,6 +25,7 @@ internal fun RtcConfiguration.toPlatform(): RTCConfiguration {
         it.rtcpMuxPolicy = rtcpMuxPolicy.toPlatform()
         it.iceTransportPolicy = iceTransportPolicy.toPlatform()
         it.sdpSemantics = RTCSdpSemantics.RTCSdpSemanticsUnifiedPlan
+        it.continualGatheringPolicy = continualGatheringPolicy.toPlatform()
     }
 }
 
@@ -47,5 +50,12 @@ private fun IceTransportPolicy.toPlatform(): RTCIceTransportPolicy {
         IceTransportPolicy.Relay -> RTCIceTransportPolicy.RTCIceTransportPolicyRelay
         IceTransportPolicy.NoHost -> RTCIceTransportPolicy.RTCIceTransportPolicyNoHost
         IceTransportPolicy.All -> RTCIceTransportPolicy.RTCIceTransportPolicyAll
+    }
+}
+
+private fun ContinualGatheringPolicy.toPlatform(): RTCContinualGatheringPolicy {
+    return when (this) {
+        ContinualGatheringPolicy.GatherOnce -> RTCContinualGatheringPolicy.RTCContinualGatheringPolicyGatherOnce
+        ContinualGatheringPolicy.GatherContinually -> RTCContinualGatheringPolicy.RTCContinualGatheringPolicyGatherContinually
     }
 }
