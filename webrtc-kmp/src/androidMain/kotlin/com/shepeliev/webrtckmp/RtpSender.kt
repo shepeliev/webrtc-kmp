@@ -22,7 +22,10 @@ actual class RtpSender internal constructor(
         get() = android.dtmf()?.let { DtmfSender(it) }
 
     actual suspend fun replaceTrack(track: MediaStreamTrack?) {
-        android.setTrack((track as? MediaStreamTrackImpl)?.android, true)
+        android.setTrack(
+            /* track = */ (track as? MediaStreamTrackImpl)?.android,
+            /* takeOwnership = */ false // ownership MUST be managed by the caller
+        )
         _track = track
     }
 }
