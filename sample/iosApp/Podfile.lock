@@ -1,7 +1,7 @@
 PODS:
   - composeApp (1.0):
-    - WebRTC-SDK (= 125.6422.06)
-  - WebRTC-SDK (125.6422.06)
+    - WebRTC-SDK (= 125.6422.07)
+  - WebRTC-SDK (125.6422.07)
 
 DEPENDENCIES:
   - composeApp (from `../composeApp`)
@@ -15,8 +15,8 @@ EXTERNAL SOURCES:
     :path: "../composeApp"
 
 SPEC CHECKSUMS:
-  composeApp: c085a673c8bcf62fa780653e7dd5358b4940f6f1
-  WebRTC-SDK: 79942c006ea64f6fb48d7da8a4786dfc820bc1db
+  composeApp: df6342466354084e4d0c902c15e34391aeb654c1
+  WebRTC-SDK: dff00a3892bc570b6014e046297782084071657e
 
 PODFILE CHECKSUM: 93cb910915abe7895a05e1dca8ba57520db8947f
 
