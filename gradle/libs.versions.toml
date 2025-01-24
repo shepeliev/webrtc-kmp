@@ -1,17 +1,18 @@
 [versions]
-kotlin = "2.0.21"
-kotlin-coroutines = "1.9.0"
+kotlin = "2.1.0"
+kotlin-coroutines = "1.10.1"
+kotlin-browser = "0.3"
 androidx-activity-compose = "1.9.0"
 androidx-appcompat = "1.7.0"
 androidx-core = "1.13.1"
 androidx-material = "1.12.0"
-androidx-lifecycle = "2.8.6"
+androidx-lifecycle = "2.8.7"
 androidx-startup = "1.2.0"
 androidx-test-core = "1.6.1"
 androidx-test-runner = "1.6.2"
 androidx-test-rules = "1.6.1"
 accompanist-permision = "0.34.0"
-kermit = "2.0.3"
+kermit = "2.0.5"
 kotlin-wrappers = "1.0.0-pre.732"
 webrtc-android-sdk = "125.6422.06.1"
 webrtc-ios-sdk = "125.6422.06"
@@ -25,13 +26,14 @@ targetSdk = "34"
 agp = "8.2.2"
 ktlint = "10.3.0"
 nexus = "1.3.0"
-compose-plugin = "1.6.11"
+compose-plugin = "1.7.3"
 
 [libraries]
 webrtc-sdk = { module = "io.github.webrtc-sdk:android", version.ref = "webrtc-android-sdk" }
 kotlin-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlin-coroutines" }
 kotlin-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlin-coroutines" }
 kotlin-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlin-coroutines" }
+kotlin-browser = { module = "org.jetbrains.kotlinx:kotlinx-browser", version.ref = "kotlin-browser" }
 androidx-coreKtx = { module = "androidx.core:core-ktx", version.ref = "androidx-core" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "androidx-appcompat" }
 androidx-lifecycle-runtime = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "androidx-lifecycle" }
