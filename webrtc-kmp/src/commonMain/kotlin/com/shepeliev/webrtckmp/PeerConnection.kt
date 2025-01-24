@@ -227,3 +227,5 @@ enum class IceConnectionState {
 enum class PeerConnectionState { New, Connecting, Connected, Disconnected, Failed, Closed; }
 
 enum class IceGatheringState { New, Gathering, Complete }
+
+enum class ContinualGatheringPolicy { GatherOnce, GatherContinually }

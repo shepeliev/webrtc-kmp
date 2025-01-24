@@ -49,4 +49,6 @@ data class RtcConfiguration(
      * [RtcpMuxPolicy.Require].
      */
     val rtcpMuxPolicy: RtcpMuxPolicy = RtcpMuxPolicy.Require,
+
+    val continualGatheringPolicy: ContinualGatheringPolicy = ContinualGatheringPolicy.GatherOnce,
 )
