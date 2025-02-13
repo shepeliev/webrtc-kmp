@@ -7,4 +7,8 @@ import kotlinx.cinterop.ExperimentalForeignApi
 
 internal class RemoteAudioStreamTrack(
     ios: RTCAudioTrack
-) : MediaStreamTrackImpl(ios), AudioStreamTrack
+) : MediaStreamTrackImpl(ios), AudioStreamTrack {
+    override fun setVolume(volume: Double) {
+        (ios as RTCAudioTrack).source().setVolume(volume)
+    }
+}
