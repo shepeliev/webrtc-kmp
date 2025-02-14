@@ -12,4 +12,8 @@ internal class LocalAudioStreamTrack(
     override fun onStop() {
         audioSource.dispose()
     }
+
+    override fun setVolume(volume: Double) {
+        (android as AudioTrack).setVolume(volume)
+    }
 }

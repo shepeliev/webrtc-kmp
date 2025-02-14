@@ -1,3 +1,5 @@
 package com.shepeliev.webrtckmp
 
-interface AudioStreamTrack : MediaStreamTrack
+interface AudioStreamTrack : MediaStreamTrack {
+    fun setVolume(volume: Double)
+}
