@@ -22,6 +22,7 @@ import WebRTC.RTCVideoTrack
 import WebRTC.dataChannelForLabel
 import WebRTC.kRTCMediaStreamTrackKindAudio
 import WebRTC.kRTCMediaStreamTrackKindVideo
+import WebRTC.statisticsWithCompletionHandler
 import com.shepeliev.webrtckmp.PeerConnectionEvent.ConnectionStateChange
 import com.shepeliev.webrtckmp.PeerConnectionEvent.IceConnectionStateChange
 import com.shepeliev.webrtckmp.PeerConnectionEvent.IceGatheringStateChange
@@ -43,6 +44,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import platform.darwin.NSObject
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 actual class PeerConnection actual constructor(
     rtcConfiguration: RtcConfiguration
@@ -180,8 +183,11 @@ actual class PeerConnection actual constructor(
     }
 
     actual suspend fun getStats(): RtcStatsReport? {
-        // TODO not implemented yet
-        return null
+        return suspendCoroutine { cont ->
+            ios.statisticsWithCompletionHandler { report ->
+                report?.let { cont.resume(RtcStatsReport(it)) }
+            }
+        }
     }
 
     actual fun close() {

@@ -2,24 +2,16 @@
 
 package com.shepeliev.webrtckmp
 
-import WebRTC.RTCLegacyStatsReport
+import WebRTC.RTCStatistics
+import WebRTC.RTCStatisticsReport
 import kotlinx.cinterop.ExperimentalForeignApi
 
-actual class RtcStatsReport(val native: RTCLegacyStatsReport) {
-    actual val timestampUs: Long = (native.timestamp * 1_000_000).toLong()
-    actual val stats: Map<String, RtcStats> = buildStats()
+@OptIn(ExperimentalForeignApi::class)
+actual class RtcStatsReport(val native: RTCStatisticsReport) {
+    actual val timestampUs: Long = (native.timestamp_us).toLong()
+    actual val stats: Map<String, RtcStats> = native.statistics
+        .map { (k, v) -> "$k" to RtcStats(v as RTCStatistics) }
+        .toMap()
+
     actual override fun toString(): String = native.toString()
-
-    private fun buildStats(): Map<String, RtcStats> {
-        val rtcStats = RtcStats(
-            timestampUs = timestampUs,
-            type = native.type,
-            id = native.reportId,
-            members = native.values
-                .filterValues { it != null }
-                .map { (k, v) -> "$k" to v!! }.toMap()
-        )
-
-        return mapOf(native.reportId to rtcStats)
-    }
 }
