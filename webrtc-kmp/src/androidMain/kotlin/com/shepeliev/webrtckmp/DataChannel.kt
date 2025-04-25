@@ -1,13 +1,18 @@
 package com.shepeliev.webrtckmp
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.shareIn
 import java.nio.ByteBuffer
 import org.webrtc.DataChannel as AndroidDataChannel
 
@@ -43,7 +48,11 @@ actual class DataChannel(val android: AndroidDataChannel) {
         android.registerObserver(observer)
 
         awaitClose { android.unregisterObserver() }
-    }
+    }.shareIn(
+        scope = CoroutineScope(Dispatchers.Default + SupervisorJob()),
+        started = SharingStarted.Eagerly,
+        replay = 1
+    )
 
     actual val onOpen: Flow<Unit> = dataChannelEvent
         .filter { it is DataChannelEvent.StateChanged && android.state() == AndroidDataChannel.State.OPEN }
