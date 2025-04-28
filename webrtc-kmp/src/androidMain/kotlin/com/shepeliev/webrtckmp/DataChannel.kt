@@ -1,5 +1,6 @@
 package com.shepeliev.webrtckmp
 
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -7,6 +8,7 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.receiveAsFlow
 import java.nio.ByteBuffer
 import org.webrtc.DataChannel as AndroidDataChannel
 
@@ -24,9 +26,9 @@ actual class DataChannel(val android: AndroidDataChannel) {
     actual val bufferedAmount: Long
         get() = android.bufferedAmount()
 
-    private val _dataChannelEvent = MutableSharedFlow<DataChannelEvent>()
+    private val _dataChannelEvent = Channel<DataChannelEvent>(capacity = Channel.UNLIMITED)
 
-    private val dataChannelEvent: SharedFlow<DataChannelEvent> = _dataChannelEvent
+    private val dataChannelEvent: Flow<DataChannelEvent> = _dataChannelEvent.receiveAsFlow()
 
     private val observer = object : AndroidDataChannel.Observer {
         override fun onBufferedAmountChange(p0: Long) {
@@ -34,11 +36,11 @@ actual class DataChannel(val android: AndroidDataChannel) {
         }
 
         override fun onStateChange() {
-            _dataChannelEvent.tryEmit(DataChannelEvent.StateChanged)
+            _dataChannelEvent.trySend(DataChannelEvent.StateChanged)
         }
 
         override fun onMessage(buffer: org.webrtc.DataChannel.Buffer) {
-            _dataChannelEvent.tryEmit(DataChannelEvent.MessageReceived(buffer))
+            _dataChannelEvent.trySend(DataChannelEvent.MessageReceived(buffer))
         }
     }
 
