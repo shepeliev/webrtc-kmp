@@ -86,10 +86,10 @@ class DataChannelTest {
         assertEquals("Hello WebRTC KMP!", pc2MessageDeferred.await())
         assertEquals("Hello WebRTC KMP!", pc1MessageDeferred.await())
 
-        pc1.close()
-        pc2.close()
         pc1DataChannel.close()
         pc2DataChannel.close()
+        pc1.close()
+        pc2.close()
     }
 
     @Test
