@@ -1,18 +1,12 @@
 package com.shepeliev.webrtckmp
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.shareIn
 import java.nio.ByteBuffer
 import org.webrtc.DataChannel as AndroidDataChannel
 
@@ -30,29 +24,27 @@ actual class DataChannel(val android: AndroidDataChannel) {
     actual val bufferedAmount: Long
         get() = android.bufferedAmount()
 
-    private val dataChannelEvent = callbackFlow {
-        val observer = object : AndroidDataChannel.Observer {
-            override fun onBufferedAmountChange(p0: Long) {
-                // not implemented
-            }
+    private val _dataChannelEvent = MutableSharedFlow<DataChannelEvent>()
 
-            override fun onStateChange() {
-                trySendBlocking(DataChannelEvent.StateChanged)
-            }
+    private val dataChannelEvent: SharedFlow<DataChannelEvent> = _dataChannelEvent
 
-            override fun onMessage(buffer: org.webrtc.DataChannel.Buffer) {
-                trySendBlocking(DataChannelEvent.MessageReceived(buffer))
-            }
+    private val observer = object : AndroidDataChannel.Observer {
+        override fun onBufferedAmountChange(p0: Long) {
+            // not implemented
         }
 
-        android.registerObserver(observer)
+        override fun onStateChange() {
+            _dataChannelEvent.tryEmit(DataChannelEvent.StateChanged)
+        }
 
-        awaitClose { android.unregisterObserver() }
-    }.shareIn(
-        scope = CoroutineScope(Dispatchers.Default + SupervisorJob()),
-        started = SharingStarted.Eagerly,
-        replay = 1
-    )
+        override fun onMessage(buffer: org.webrtc.DataChannel.Buffer) {
+            _dataChannelEvent.tryEmit(DataChannelEvent.MessageReceived(buffer))
+        }
+    }
+
+    init {
+        android.registerObserver(observer)
+    }
 
     actual val onOpen: Flow<Unit> = dataChannelEvent
         .filter { it is DataChannelEvent.StateChanged && android.state() == AndroidDataChannel.State.OPEN }
@@ -78,7 +70,10 @@ actual class DataChannel(val android: AndroidDataChannel) {
         return android.send(buffer)
     }
 
-    actual fun close() = android.dispose()
+    actual fun close() {
+        android.unregisterObserver()
+        android.dispose()
+    }
 
     private fun AndroidDataChannel.State.toCommon(): DataChannelState {
         return when (this) {
