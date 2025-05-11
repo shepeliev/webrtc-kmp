@@ -58,6 +58,7 @@ actual class DataChannel(val android: AndroidDataChannel) {
 
     actual fun close() {
         android.close()
+        // android DataChannel is disposed asynchronously in the observer
     }
 
     private fun AndroidDataChannel.State.toCommon(): DataChannelState {
