@@ -53,7 +53,7 @@ actual class DataChannel internal constructor(internal val js: RTCDataChannel) {
 
     private fun <T> tryEmit(flow: MutableSharedFlow<T>, event: T) {
         check(flow.tryEmit(event)) {
-            // This should never happen, as we use `Channel.UNLIMITED` for the flow
+            // as we use SharedFlow with unlimited buffer, this should never happen
             "Failed to emit event: $event"
         }
     }
