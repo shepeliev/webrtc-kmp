@@ -8,15 +8,13 @@ import WebRTC.RTCDataChannelDelegateProtocol
 import WebRTC.RTCDataChannelState
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import platform.darwin.NSObject
 import platform.posix.uint64_t
 
@@ -33,8 +31,9 @@ actual class DataChannel(val ios: RTCDataChannel) {
     actual val bufferedAmount: Long
         get() = ios.bufferedAmount.toLong()
 
-    private val coroutineScope = MainScope()
-    private val dataChannelEvent = MutableSharedFlow<DataChannelEvent>()
+    private val events = MutableSharedFlow<DataChannelEvent>(
+        extraBufferCapacity = Channel.UNLIMITED
+    )
 
     private val delegate = Delegate()
 
@@ -42,21 +41,21 @@ actual class DataChannel(val ios: RTCDataChannel) {
         ios.delegate = delegate
     }
 
-    actual val onOpen: Flow<Unit> = dataChannelEvent
-        .filter { it is DataChannelEvent.StateChanged && ios.readyState == RTCDataChannelState.RTCDataChannelStateOpen }
+    actual val onOpen: Flow<Unit> = events
+        .filter { it is DataChannelEvent.StateChanged && it.state == RTCDataChannelState.RTCDataChannelStateOpen }
         .map { }
 
-    actual val onClosing: Flow<Unit> = dataChannelEvent
-        .filter { it is DataChannelEvent.StateChanged && ios.readyState == RTCDataChannelState.RTCDataChannelStateClosing }
+    actual val onClosing: Flow<Unit> = events
+        .filter { it is DataChannelEvent.StateChanged && it.state == RTCDataChannelState.RTCDataChannelStateClosing }
         .map { }
 
-    actual val onClose: Flow<Unit> = dataChannelEvent
-        .filter { it is DataChannelEvent.StateChanged && ios.readyState == RTCDataChannelState.RTCDataChannelStateClosed }
+    actual val onClose: Flow<Unit> = events
+        .filter { it is DataChannelEvent.StateChanged && it.state == RTCDataChannelState.RTCDataChannelStateClosed }
         .map { }
 
     actual val onError: Flow<String> = emptyFlow()
 
-    actual val onMessage: Flow<ByteArray> = dataChannelEvent
+    actual val onMessage: Flow<ByteArray> = events
         .map { it as? DataChannelEvent.MessageReceived }
         .filterNotNull()
         .map { it.buffer.data.toByteArray() }
@@ -69,14 +68,10 @@ actual class DataChannel(val ios: RTCDataChannel) {
 
     actual fun close() {
         ios.close()
-        coroutineScope.launch {
-            dataChannelEvent.emit(DataChannelEvent.StateChanged)
-            coroutineScope.cancel()
-        }
     }
 
     private sealed interface DataChannelEvent {
-        data object StateChanged : DataChannelEvent
+        data class StateChanged(val state: RTCDataChannelState) : DataChannelEvent
         data class MessageReceived(val buffer: RTCDataBuffer) : DataChannelEvent
     }
 
@@ -95,14 +90,25 @@ actual class DataChannel(val ios: RTCDataChannel) {
             // not implemented
         }
 
-        override fun dataChannel(dataChannel: RTCDataChannel, didReceiveMessageWithBuffer: RTCDataBuffer) {
-            coroutineScope.launch {
-                dataChannelEvent.emit(DataChannelEvent.MessageReceived(didReceiveMessageWithBuffer))
+        override fun dataChannel(
+            dataChannel: RTCDataChannel,
+            didReceiveMessageWithBuffer: RTCDataBuffer
+        ) {
+            check(events.tryEmit(DataChannelEvent.MessageReceived(didReceiveMessageWithBuffer))) {
+                // as we use SharedFlow with unlimited buffer, this should never happen
+                "Failed to emit MessageReceived event"
             }
         }
 
         override fun dataChannelDidChangeState(dataChannel: RTCDataChannel) {
-            coroutineScope.launch { dataChannelEvent.emit(DataChannelEvent.StateChanged) }
+            val state = dataChannel.readyState
+            check(events.tryEmit(DataChannelEvent.StateChanged(state))) {
+                // as we use SharedFlow with unlimited buffer, this should never happen
+                "Failed to emit StateChanged event."
+            }
+            if (state == RTCDataChannelState.RTCDataChannelStateClosed) {
+                ios.delegate = null
+            }
         }
     }
 }

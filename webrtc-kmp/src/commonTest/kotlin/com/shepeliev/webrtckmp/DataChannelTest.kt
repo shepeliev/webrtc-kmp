@@ -3,19 +3,19 @@ package com.shepeliev.webrtckmp
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.withContext
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -38,57 +38,38 @@ class DataChannelTest {
     }
 
     @Test
-    fun data_channel_should_work() = runTest(timeout = 5.seconds) {
+    fun testSendAndReceiveData() = runTest(timeout = 5.seconds) {
         val pc1 = PeerConnection()
         val pc2 = PeerConnection()
 
         val pc1DataChannel = pc1.createDataChannel("dataChannel", maxRetransmits = 10)!!
         val pc2DataChannelDeferred = async(start = CoroutineStart.UNDISPATCHED) { pc2.onDataChannel.first() }
 
-        val pc1IceCandidates = async(start = CoroutineStart.UNDISPATCHED) {
-            val candidates = mutableListOf<IceCandidate>()
-            val job = pc1.onIceCandidate.onEach { candidates += it }.launchIn(this)
-            pc1.onIceGatheringState.first { it == IceGatheringState.Complete }
-            job.cancel()
-            candidates
-        }
-
-        val pc2IceCandidates = async(start = CoroutineStart.UNDISPATCHED) {
-            val candidates = mutableListOf<IceCandidate>()
-            val job = pc2.onIceCandidate.onEach { candidates += it }.launchIn(this)
-            pc2.onIceGatheringState.first { it == IceGatheringState.Complete }
-            job.cancel()
-            candidates
-        }
-
         val offer = pc1.createOffer(OfferAnswerOptions())
         pc1.setLocalDescription(offer)
-        pc2.setRemoteDescription(offer)
+        pc1.onIceGatheringState.first { it == IceGatheringState.Complete }
+        pc2.setRemoteDescription(pc1.localDescription!!)
+
         val answer = pc2.createAnswer(OfferAnswerOptions())
         pc2.setLocalDescription(answer)
-        pc1.setRemoteDescription(answer)
-
-        pc1IceCandidates.await().forEach { pc2.addIceCandidate(it) }
-        pc2IceCandidates.await().forEach { pc1.addIceCandidate(it) }
+        pc2.onIceGatheringState.first { it == IceGatheringState.Complete }
+        pc1.setRemoteDescription(pc2.localDescription!!)
 
         val pc2DataChannel = pc2DataChannelDeferred.await()
         if (pc2DataChannel.readyState != DataChannelState.Open) {
-            println("Waiting for pc2DataChannel: ${pc2DataChannel.readyState}")
             pc2DataChannel.onOpen.first()
         }
 
         if (pc1DataChannel.readyState != DataChannelState.Open) {
-            println("Waiting for pc1DataChannel: ${pc1DataChannel.readyState}")
             pc1DataChannel.onOpen.first()
         }
 
-        // TODO: This fails in iOS simulator test
-//        val pc1MessageDeferred = async(start = CoroutineStart.UNDISPATCHED) {
-//            pc1DataChannel.onMessage
-//                .onEach { println("Message received PC1: ${it.decodeToString()}") }
-//                .map { it.decodeToString() }
-//                .first()
-//        }
+        val pc1MessageDeferred = async(start = CoroutineStart.UNDISPATCHED) {
+            pc1DataChannel.onMessage
+                .onEach { println("Message received PC1: ${it.decodeToString()}") }
+                .map { it.decodeToString() }
+                .first()
+        }
 
         val pc2MessageDeferred = async(start = CoroutineStart.UNDISPATCHED) {
             pc2DataChannel.onMessage
@@ -103,13 +84,99 @@ class DataChannelTest {
         assertTrue { pc2DataChannel.send(data) }
 
         assertEquals("Hello WebRTC KMP!", pc2MessageDeferred.await())
+        assertEquals("Hello WebRTC KMP!", pc1MessageDeferred.await())
 
-        // TODO: This fails in iOS simulator test
-//        assertEquals("Hello WebRTC KMP!", pc1MessageDeferred.await())
-
-        pc1.close()
-        pc2.close()
         pc1DataChannel.close()
         pc2DataChannel.close()
+        pc1.close()
+        pc2.close()
+    }
+
+    @Test
+    fun testWithMultipleObservers() = runTest(timeout = 5.seconds) {
+        val pc1 = PeerConnection()
+        val pc2 = PeerConnection()
+
+        val pc1DataChannel = pc1.createDataChannel("dataChannel", maxRetransmits = 10)!!
+        val pc2DataChannelDeferred =
+            async(start = CoroutineStart.UNDISPATCHED) { pc2.onDataChannel.first() }
+
+        val offer = pc1.createOffer(OfferAnswerOptions())
+        pc1.setLocalDescription(offer)
+        pc1.onIceGatheringState.first { it == IceGatheringState.Complete }
+        pc2.setRemoteDescription(pc1.localDescription!!)
+
+        val answer = pc2.createAnswer(OfferAnswerOptions())
+        pc2.setLocalDescription(answer)
+        pc2.onIceGatheringState.first { it == IceGatheringState.Complete }
+        pc1.setRemoteDescription(pc2.localDescription!!)
+
+        val pc2DataChannel = pc2DataChannelDeferred.await()
+        if (pc2DataChannel.readyState != DataChannelState.Open) {
+            pc2DataChannel.onOpen.first()
+        }
+
+        if (pc1DataChannel.readyState != DataChannelState.Open) {
+            pc1DataChannel.onOpen.first()
+        }
+
+        val messageFrom1stObserver = async(start = CoroutineStart.UNDISPATCHED) {
+            pc2DataChannel.onMessage
+                .onEach { withContext(Dispatchers.Default) { delay(200) } } // simulate some processing
+                .map { it.decodeToString() }
+                .first()
+        }
+
+        val messageFrom2ndObserver = async(start = CoroutineStart.UNDISPATCHED) {
+            pc2DataChannel.onMessage
+                .onEach { withContext(Dispatchers.Default) { delay(1000) } } // simulate some processing
+                .map { it.decodeToString() }
+                .first()
+        }
+
+        pc1DataChannel.send("Hello WebRTC KMP!".encodeToByteArray())
+
+        assertEquals(messageFrom1stObserver.await(), messageFrom2ndObserver.await())
+    }
+
+    @Test
+    fun testCloseEvents() = runTest(timeout = 5.seconds) {
+        val pc1 = PeerConnection()
+        val pc2 = PeerConnection()
+
+        val pc1DataChannel = pc1.createDataChannel("dataChannel", maxRetransmits = 10)!!
+        val pc2DataChannelDeferred =
+            async(start = CoroutineStart.UNDISPATCHED) { pc2.onDataChannel.first() }
+
+        val offer = pc1.createOffer(OfferAnswerOptions())
+        pc1.setLocalDescription(offer)
+        pc1.onIceGatheringState.first { it == IceGatheringState.Complete }
+        pc2.setRemoteDescription(pc1.localDescription!!)
+
+        val answer = pc2.createAnswer(OfferAnswerOptions())
+        pc2.setLocalDescription(answer)
+        pc2.onIceGatheringState.first { it == IceGatheringState.Complete }
+        pc1.setRemoteDescription(pc2.localDescription!!)
+
+        val pc2DataChannel = pc2DataChannelDeferred.await()
+        if (pc2DataChannel.readyState != DataChannelState.Open) {
+            pc2DataChannel.onOpen.first()
+        }
+
+        if (pc1DataChannel.readyState != DataChannelState.Open) {
+            pc1DataChannel.onOpen.first()
+        }
+
+        val waitPc1ClosedJob = launch(start = CoroutineStart.UNDISPATCHED) {
+            pc1DataChannel.onClose.first()
+        }
+
+        val waitPc2ClosedJob = launch(start = CoroutineStart.UNDISPATCHED) {
+            pc2DataChannel.onClose.first()
+        }
+
+        pc1DataChannel.close()
+
+        listOf(waitPc1ClosedJob, waitPc2ClosedJob).joinAll()
     }
 }

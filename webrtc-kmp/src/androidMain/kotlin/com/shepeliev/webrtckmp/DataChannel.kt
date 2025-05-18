@@ -1,9 +1,8 @@
 package com.shepeliev.webrtckmp
 
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.channels.trySendBlocking
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
@@ -25,41 +24,29 @@ actual class DataChannel(val android: AndroidDataChannel) {
     actual val bufferedAmount: Long
         get() = android.bufferedAmount()
 
-    private val dataChannelEvent = callbackFlow {
-        val observer = object : AndroidDataChannel.Observer {
-            override fun onBufferedAmountChange(p0: Long) {
-                // not implemented
-            }
+    private val events = MutableSharedFlow<DataChannelEvent>(
+        extraBufferCapacity = Channel.UNLIMITED
+    )
 
-            override fun onStateChange() {
-                trySendBlocking(DataChannelEvent.StateChanged)
-            }
-
-            override fun onMessage(buffer: org.webrtc.DataChannel.Buffer) {
-                trySendBlocking(DataChannelEvent.MessageReceived(buffer))
-            }
-        }
-
-        android.registerObserver(observer)
-
-        awaitClose { android.unregisterObserver() }
+    init {
+        android.registerObserver(DataChannelObserver())
     }
 
-    actual val onOpen: Flow<Unit> = dataChannelEvent
-        .filter { it is DataChannelEvent.StateChanged && android.state() == AndroidDataChannel.State.OPEN }
+    actual val onOpen: Flow<Unit> = events
+        .filter { it is DataChannelEvent.StateChanged && it.state == AndroidDataChannel.State.OPEN }
         .map { }
 
-    actual val onClosing: Flow<Unit> = dataChannelEvent
-        .filter { it is DataChannelEvent.StateChanged && android.state() == AndroidDataChannel.State.CLOSING }
+    actual val onClosing: Flow<Unit> = events
+        .filter { it is DataChannelEvent.StateChanged && it.state == AndroidDataChannel.State.CLOSING }
         .map { }
 
-    actual val onClose: Flow<Unit> = dataChannelEvent
-        .filter { it is DataChannelEvent.StateChanged && android.state() == AndroidDataChannel.State.CLOSED }
+    actual val onClose: Flow<Unit> = events
+        .filter { it is DataChannelEvent.StateChanged && it.state == AndroidDataChannel.State.CLOSED }
         .map { }
 
     actual val onError: Flow<String> = emptyFlow()
 
-    actual val onMessage: Flow<ByteArray> = dataChannelEvent
+    actual val onMessage: Flow<ByteArray> = events
         .map { it as? DataChannelEvent.MessageReceived }
         .filterNotNull()
         .map { it.buffer.data.toByteArray() }
@@ -69,7 +56,10 @@ actual class DataChannel(val android: AndroidDataChannel) {
         return android.send(buffer)
     }
 
-    actual fun close() = android.dispose()
+    actual fun close() {
+        android.close()
+        // android DataChannel is disposed asynchronously in the observer
+    }
 
     private fun AndroidDataChannel.State.toCommon(): DataChannelState {
         return when (this) {
@@ -81,7 +71,32 @@ actual class DataChannel(val android: AndroidDataChannel) {
     }
 
     private sealed interface DataChannelEvent {
-        object StateChanged : DataChannelEvent
+        data class StateChanged(val state: AndroidDataChannel.State) : DataChannelEvent
         data class MessageReceived(val buffer: AndroidDataChannel.Buffer) : DataChannelEvent
+    }
+
+    private inner class DataChannelObserver : AndroidDataChannel.Observer {
+        override fun onBufferedAmountChange(p0: Long) {
+            // not implemented
+        }
+
+        override fun onStateChange() {
+            val state = android.state()
+            check(events.tryEmit(DataChannelEvent.StateChanged(state))) {
+                // as we use SharedFlow with unlimited buffer, this should never happen
+                "Failed to emit StateChanged event."
+            }
+            if (state == AndroidDataChannel.State.CLOSED) {
+                android.unregisterObserver()
+                android.dispose()
+            }
+        }
+
+        override fun onMessage(buffer: AndroidDataChannel.Buffer) {
+            check(events.tryEmit(DataChannelEvent.MessageReceived(buffer))) {
+                // as we use SharedFlow with unlimited buffer, this should never happen
+                "Failed to emit MessageReceived event"
+            }
+        }
     }
 }
