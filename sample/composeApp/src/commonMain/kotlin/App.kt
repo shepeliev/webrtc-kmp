@@ -2,9 +2,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,92 +37,108 @@ fun App() {
     }
 
     MaterialTheme {
-        val scope = rememberCoroutineScope()
-        val (localStream, setLocalStream) = remember { mutableStateOf<MediaStream?>(null) }
-        val (remoteVideoTrack, setRemoteVideoTrack) = remember {
-            mutableStateOf<VideoStreamTrack?>(
-                null
-            )
-        }
-        val (remoteAudioTrack, setRemoteAudioTrack) = remember {
-            mutableStateOf<AudioStreamTrack?>(
-                null
-            )
-        }
-        val (peerConnections, setPeerConnections) = remember {
-            mutableStateOf<Pair<PeerConnection, PeerConnection>?>(null)
-        }
-
-        LaunchedEffect(localStream, peerConnections) {
-            if (peerConnections == null || localStream == null) return@LaunchedEffect
-            makeCall(peerConnections, localStream, setRemoteVideoTrack, setRemoteAudioTrack)
-        }
-
-        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-            val localVideoTrack = localStream?.videoTracks?.firstOrNull()
-
-            localVideoTrack?.let {
-                Video(
-                    videoTrack = it,
-                    modifier = Modifier.weight(1f).fillMaxWidth()
+        Scaffold(
+            contentWindowInsets = WindowInsets.systemBars,
+        ) { innerPadding ->
+            val scope = rememberCoroutineScope()
+            val (localStream, setLocalStream) = remember { mutableStateOf<MediaStream?>(null) }
+            val (remoteVideoTrack, setRemoteVideoTrack) = remember {
+                mutableStateOf<VideoStreamTrack?>(
+                    null
                 )
-            } ?: Box(
-                modifier = Modifier.weight(1f).fillMaxWidth(),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text("Local video")
+            }
+            val (remoteAudioTrack, setRemoteAudioTrack) = remember {
+                mutableStateOf<AudioStreamTrack?>(
+                    null
+                )
+            }
+            val (peerConnections, setPeerConnections) = remember {
+                mutableStateOf<Pair<PeerConnection, PeerConnection>?>(null)
             }
 
-            remoteVideoTrack?.let {
-                Video(
-                    videoTrack = it,
-                    audioTrack = remoteAudioTrack,
+            LaunchedEffect(localStream, peerConnections) {
+                if (peerConnections == null || localStream == null) return@LaunchedEffect
+                makeCall(peerConnections, localStream, setRemoteVideoTrack, setRemoteAudioTrack)
+            }
+
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(innerPadding),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                val localVideoTrack = localStream?.videoTracks?.firstOrNull()
+
+                localVideoTrack?.let {
+                    Video(
+                        videoTrack = it,
+                        modifier = Modifier.weight(1f).fillMaxWidth()
+                    )
+                } ?: Box(
                     modifier = Modifier.weight(1f).fillMaxWidth(),
-                )
-            } ?: Box(
-                modifier = Modifier.weight(1f).fillMaxWidth(),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text("Remote video")
-            }
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text("Local video")
+                }
 
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (localStream == null) {
-                    StartButton(onClick = {
-                        scope.launch {
-                            val stream = MediaDevices.getUserMedia(audio = true, video = true)
-                            setLocalStream(stream)
-                        }
-                    })
-                } else {
-                    StopButton(
-                        onClick = {
+                remoteVideoTrack?.let {
+                    Video(
+                        videoTrack = it,
+                        audioTrack = remoteAudioTrack,
+                        modifier = Modifier.weight(1f).fillMaxWidth(),
+                    )
+                } ?: Box(
+                    modifier = Modifier.weight(1f).fillMaxWidth(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text("Remote video")
+                }
+
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    if (localStream == null) {
+                        StartButton(onClick = {
+                            scope.launch {
+                                val stream = MediaDevices.getUserMedia(audio = true, video = true)
+                                setLocalStream(stream)
+                            }
+                        })
+                    } else {
+                        StopButton(
+                            onClick = {
+                                hangup(peerConnections)
+                                localStream.release()
+                                setLocalStream(null)
+                                setPeerConnections(null)
+                                setRemoteVideoTrack(null)
+                                setRemoteAudioTrack(null)
+                            }
+                        )
+
+                        SwitchCameraButton(
+                            onClick = {
+                                scope.launch {
+                                    localStream.videoTracks.firstOrNull()?.switchCamera()
+                                }
+                            }
+                        )
+                    }
+                    if (peerConnections == null) {
+                        CallButton(
+                            onClick = {
+                                setPeerConnections(
+                                    Pair(
+                                        PeerConnection(),
+                                        PeerConnection()
+                                    )
+                                )
+                            },
+                        )
+                    } else {
+                        HangupButton(onClick = {
                             hangup(peerConnections)
-                            localStream.release()
-                            setLocalStream(null)
                             setPeerConnections(null)
                             setRemoteVideoTrack(null)
                             setRemoteAudioTrack(null)
-                        }
-                    )
-
-                    SwitchCameraButton(
-                        onClick = {
-                            scope.launch { localStream.videoTracks.firstOrNull()?.switchCamera() }
-                        }
-                    )
-                }
-                if (peerConnections == null) {
-                    CallButton(
-                        onClick = { setPeerConnections(Pair(PeerConnection(), PeerConnection())) },
-                    )
-                } else {
-                    HangupButton(onClick = {
-                        hangup(peerConnections)
-                        setPeerConnections(null)
-                        setRemoteVideoTrack(null)
-                        setRemoteAudioTrack(null)
-                    })
+                        })
+                    }
                 }
             }
         }

@@ -31,11 +31,11 @@ Open `sample/iosApp/iosApp.xcworkspace` in XCode build and run
 ### Web JS
 
 ```bash
-./gradlew sample:composeApp:jsBrowserRun 
+./gradlew sample:composeApp:jsBrowserDevelopmentRun 
 ```
 
 ### Web WasmJS
 
 ```bash
-./gradlew sample:composeApp:wasmJsBrowserRun 
+./gradlew sample:composeApp:wasmJsBrowserDevelopmentRun 
 ```
