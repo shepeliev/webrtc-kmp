@@ -16,22 +16,22 @@ if (localPropertiesFile.exists()) {
 }
 
 val signingKey by extra(
-    localProps.getOrDefault("signing.key", System.getenv("SIGNING_KEY") ?: "")
+    localProps.getOrDefault("signing.key", System.getenv("SIGNING_KEY") ?: ""),
 )
 val signingPassword by extra(
-    localProps.getOrDefault("signing.password", System.getenv("SIGNING_PASSWORD") ?: "")
+    localProps.getOrDefault("signing.password", System.getenv("SIGNING_PASSWORD") ?: ""),
 )
 val ossrhUsername by extra(
-    localProps.getOrDefault("ossrhUsername", System.getenv("OSSRH_USERNAME") ?: "")
+    localProps.getOrDefault("ossrhUsername", System.getenv("OSSRH_USERNAME") ?: ""),
 )
 val ossrhPassword by extra(
-    localProps.getOrDefault("ossrhPassword", System.getenv("OSSRH_PASSWORD") ?: "")
+    localProps.getOrDefault("ossrhPassword", System.getenv("OSSRH_PASSWORD") ?: ""),
 )
 val sonatypeStagingProfileId by extra(
     localProps.getOrDefault(
         "sonatypeStagingProfileId",
-        System.getenv("SONATYPE_STAGING_PROFILE_ID") ?: ""
-    )
+        System.getenv("SONATYPE_STAGING_PROFILE_ID") ?: "",
+    ),
 )
 
 nexusPublishing {
