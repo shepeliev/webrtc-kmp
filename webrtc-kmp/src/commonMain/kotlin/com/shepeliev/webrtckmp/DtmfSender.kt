@@ -1,10 +1,15 @@
 package com.shepeliev.webrtckmp
 
-expect class DtmfSender {
-    val canInsertDtmf: Boolean
-    val duration: Int
-    val interToneGap: Int
+public expect class DtmfSender {
+    public val canInsertDtmf: Boolean
+    public val duration: Int
+    public val interToneGap: Int
 
-    fun insertDtmf(tones: String, durationMs: Int = 300, interToneGapMs: Int = 50): Boolean
-    fun tones(): String
+    public fun insertDtmf(
+        tones: String,
+        durationMs: Int = 300,
+        interToneGapMs: Int = 50,
+    ): Boolean
+
+    public fun tones(): String
 }

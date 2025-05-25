@@ -3,16 +3,16 @@ package com.shepeliev.webrtckmp
 import com.shepeliev.webrtckmp.externals.RTCCertificate
 import com.shepeliev.webrtckmp.externals.generateRTCCertificate
 
-actual class RtcCertificatePem internal constructor(val js: RTCCertificate) {
-    actual val privateKey: String
-        get() = ""
+public actual class RtcCertificatePem internal constructor(
+    internal val js: RTCCertificate,
+) {
+    public actual val privateKey: String get() = ""
+    public actual val certificate: String get() = ""
 
-    actual val certificate: String
-        get() = ""
-
-    actual companion object {
-        actual suspend fun generateCertificate(keyType: KeyType, expires: Long): RtcCertificatePem {
-            return RtcCertificatePem(generateRTCCertificate(keyType, expires))
-        }
+    public actual companion object {
+        public actual suspend fun generateCertificate(
+            keyType: KeyType,
+            expires: Long,
+        ): RtcCertificatePem = RtcCertificatePem(generateRTCCertificate(keyType, expires))
     }
 }

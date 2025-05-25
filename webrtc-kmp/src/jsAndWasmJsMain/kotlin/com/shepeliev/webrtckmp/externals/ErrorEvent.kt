@@ -1,5 +1,5 @@
 package com.shepeliev.webrtckmp.externals
 
-external class ErrorEvent {
+internal external class ErrorEvent {
     val message: String
 }

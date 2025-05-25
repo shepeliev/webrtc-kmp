@@ -2,20 +2,21 @@ package com.shepeliev.webrtckmp
 
 import kotlinx.coroutines.flow.Flow
 
-expect class DataChannel {
-    val id: Int
-    val label: String
-    val readyState: DataChannelState
-    val bufferedAmount: Long
+public expect class DataChannel {
+    public val id: Int
+    public val label: String
+    public val readyState: DataChannelState
+    public val bufferedAmount: Long
 
-    val onOpen: Flow<Unit>
-    val onClose: Flow<Unit>
-    val onClosing: Flow<Unit>
-    val onError: Flow<String>
-    val onMessage: Flow<ByteArray>
+    public val onOpen: Flow<Unit>
+    public val onClose: Flow<Unit>
+    public val onClosing: Flow<Unit>
+    public val onError: Flow<String>
+    public val onMessage: Flow<ByteArray>
 
-    fun send(data: ByteArray): Boolean
-    fun close()
+    public fun send(data: ByteArray): Boolean
+
+    public fun close()
 }
 
-enum class DataChannelState { Connecting, Open, Closing, Closed; }
+public enum class DataChannelState { Connecting, Open, Closing, Closed; }

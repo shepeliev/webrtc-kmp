@@ -9,42 +9,39 @@ import kotlinx.cinterop.alloc
 import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.ptr
 
-actual class RtpTransceiver(
-    val native: RTCRtpTransceiver,
+public actual class RtpTransceiver(
+    public val native: RTCRtpTransceiver,
     private val senderTrack: MediaStreamTrack?,
     private val receiverTrack: MediaStreamTrack?,
 ) {
-
-    actual var direction: RtpTransceiverDirection
+    public actual var direction: RtpTransceiverDirection
         get() = rtcRtpTransceiverDirectionAsCommon(native.direction)
         set(value) {
             native.setDirection(value.asNative(), null)
         }
 
-    actual val currentDirection: RtpTransceiverDirection?
-        get() = memScoped {
-            val d = alloc<RTCRtpTransceiverDirection.Var>()
-            native.currentDirection(d.ptr)
-            rtcRtpTransceiverDirectionAsCommon(d.value)
-        }
+    public actual val currentDirection: RtpTransceiverDirection?
+        get() =
+            memScoped {
+                val d = alloc<RTCRtpTransceiverDirection.Var>()
+                native.currentDirection(d.ptr)
+                rtcRtpTransceiverDirectionAsCommon(d.value)
+            }
 
-    actual val mid: String
-        get() = native.mid
+    public actual val mid: String get() = native.mid
+    public actual val sender: RtpSender get() = RtpSender(native.sender, senderTrack)
+    public actual val receiver: RtpReceiver get() = RtpReceiver(native.receiver, receiverTrack)
+    public actual val stopped: Boolean get() = native.isStopped
 
-    actual val sender: RtpSender
-        get() = RtpSender(native.sender, senderTrack)
-
-    actual val receiver: RtpReceiver
-        get() = RtpReceiver(native.receiver, receiverTrack)
-
-    actual val stopped: Boolean
-        get() = native.isStopped
-
-    actual fun stop() = native.stopInternal()
+    public actual fun stop() {
+        native.stopInternal()
+    }
 }
 
-private fun rtcRtpTransceiverDirectionAsCommon(direction: RTCRtpTransceiverDirection): RtpTransceiverDirection {
-    return when (direction) {
+private fun rtcRtpTransceiverDirectionAsCommon(
+    direction: RTCRtpTransceiverDirection,
+): RtpTransceiverDirection =
+    when (direction) {
         RTCRtpTransceiverDirection.RTCRtpTransceiverDirectionSendRecv -> {
             RtpTransceiverDirection.SendRecv
         }
@@ -67,10 +64,9 @@ private fun rtcRtpTransceiverDirectionAsCommon(direction: RTCRtpTransceiverDirec
 
         else -> error("Unknown RTCRtpTransceiverDirection: $direction")
     }
-}
 
-internal fun RtpTransceiverDirection.asNative(): RTCRtpTransceiverDirection {
-    return when (this) {
+internal fun RtpTransceiverDirection.asNative(): RTCRtpTransceiverDirection =
+    when (this) {
         RtpTransceiverDirection.SendRecv -> {
             RTCRtpTransceiverDirection.RTCRtpTransceiverDirectionSendRecv
         }
@@ -90,4 +86,3 @@ internal fun RtpTransceiverDirection.asNative(): RTCRtpTransceiverDirection {
             RTCRtpTransceiverDirection.RTCRtpTransceiverDirectionStopped
         }
     }
-}

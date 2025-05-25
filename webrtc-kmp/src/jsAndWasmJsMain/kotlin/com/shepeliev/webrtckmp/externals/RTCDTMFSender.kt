@@ -1,6 +1,11 @@
 package com.shepeliev.webrtckmp.externals
 
-external interface RTCDTMFSender {
+internal external interface RTCDTMFSender {
     val toneBuffer: String
-    fun insertDTMF(tones: String, duration: Long, interToneGap: Long)
+
+    fun insertDTMF(
+        tones: String,
+        duration: Long,
+        interToneGap: Long,
+    )
 }

@@ -7,10 +7,11 @@ import WebRTC.RTCSetMinDebugLogLevel
 import kotlinx.cinterop.ExperimentalForeignApi
 
 @OptIn(ExperimentalForeignApi::class)
-object WebRtc {
+public object WebRtc {
     internal var videoProcessorFactory: VideoProcessorFactory? = null
         private set
 
+    @Suppress("ktlint:standard:backing-property-naming")
     private var _peerConnectionFactory: RTCPeerConnectionFactory? = null
     internal val peerConnectionFactory: RTCPeerConnectionFactory by lazy {
         _peerConnectionFactory ?: run {
@@ -22,14 +23,14 @@ object WebRtc {
     /**
      * The name of the bundled video file to use as a fallback for the camera in the iOS simulator.
      */
-    var simulatorCameraFallbackFileName: String = "simulator-camera.mp4"
+    public var simulatorCameraFallbackFileName: String = "simulator-camera.mp4"
 
     /**
      * Configures the WebRTC KMP library with the specified parameters.
      *
      * @param loggingSeverity The severity of the logging output.
      */
-    fun configure(loggingSeverity: RTCLoggingSeverity) {
+    public fun configure(loggingSeverity: RTCLoggingSeverity) {
         configureInternal(loggingSeverity = loggingSeverity)
     }
 
@@ -38,7 +39,7 @@ object WebRtc {
      *
      * @param videoProcessorFactory The factory to create video processors.
      */
-    fun configure(videoProcessorFactory: VideoProcessorFactory) {
+    public fun configure(videoProcessorFactory: VideoProcessorFactory) {
         configureInternal(videoProcessorFactory = videoProcessorFactory)
     }
 
@@ -47,7 +48,7 @@ object WebRtc {
      *
      * @param rtcPeerConnectionFactory The peer connection factory to use.
      */
-    fun configure(rtcPeerConnectionFactory: RTCPeerConnectionFactory) {
+    public fun configure(rtcPeerConnectionFactory: RTCPeerConnectionFactory) {
         configureInternal(rtcPeerConnectionFactory = rtcPeerConnectionFactory)
     }
 
@@ -57,13 +58,13 @@ object WebRtc {
      * @param loggingSeverity The severity of the logging output.
      * @param videoProcessorFactory The factory to create video processors.
      */
-    fun configure(
+    public fun configure(
         loggingSeverity: RTCLoggingSeverity,
         videoProcessorFactory: VideoProcessorFactory,
     ) {
         configureInternal(
             loggingSeverity = loggingSeverity,
-            videoProcessorFactory = videoProcessorFactory
+            videoProcessorFactory = videoProcessorFactory,
         )
     }
 
@@ -73,13 +74,13 @@ object WebRtc {
      * @param loggingSeverity The severity of the logging output.
      * @param rtcPeerConnectionFactory The peer connection factory to use.
      */
-    fun configure(
+    public fun configure(
         loggingSeverity: RTCLoggingSeverity,
         rtcPeerConnectionFactory: RTCPeerConnectionFactory,
     ) {
         configureInternal(
             loggingSeverity = loggingSeverity,
-            rtcPeerConnectionFactory = rtcPeerConnectionFactory
+            rtcPeerConnectionFactory = rtcPeerConnectionFactory,
         )
     }
 
@@ -89,13 +90,13 @@ object WebRtc {
      * @param videoProcessorFactory The factory to create video processors.
      * @param rtcPeerConnectionFactory The peer connection factory to use.
      */
-    fun configure(
+    public fun configure(
         videoProcessorFactory: VideoProcessorFactory,
         rtcPeerConnectionFactory: RTCPeerConnectionFactory,
     ) {
         configureInternal(
             videoProcessorFactory = videoProcessorFactory,
-            rtcPeerConnectionFactory = rtcPeerConnectionFactory
+            rtcPeerConnectionFactory = rtcPeerConnectionFactory,
         )
     }
 
@@ -106,7 +107,7 @@ object WebRtc {
      * @param videoProcessorFactory The factory to create video processors.
      * @param rtcPeerConnectionFactory The peer connection factory to use.
      */
-    fun configure(
+    public fun configure(
         loggingSeverity: RTCLoggingSeverity,
         videoProcessorFactory: VideoProcessorFactory,
         rtcPeerConnectionFactory: RTCPeerConnectionFactory,

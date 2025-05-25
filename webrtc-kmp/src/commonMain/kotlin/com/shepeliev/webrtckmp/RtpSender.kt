@@ -1,10 +1,10 @@
 package com.shepeliev.webrtckmp
 
-expect class RtpSender {
-    val id: String
-    val track: MediaStreamTrack?
-    var parameters: RtpParameters
-    val dtmf: DtmfSender?
+public expect class RtpSender {
+    public val id: String
+    public val track: MediaStreamTrack?
+    public var parameters: RtpParameters
+    public val dtmf: DtmfSender?
 
-    suspend fun replaceTrack(track: MediaStreamTrack?)
+    public suspend fun replaceTrack(track: MediaStreamTrack?)
 }

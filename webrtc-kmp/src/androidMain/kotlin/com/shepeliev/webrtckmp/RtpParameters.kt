@@ -3,95 +3,70 @@ package com.shepeliev.webrtckmp
 import android.util.Log
 import org.webrtc.RtpParameters as AndroidRtpParameters
 
-actual class RtpParameters(val native: AndroidRtpParameters) {
-    actual val codecs: List<RtpCodecParameters>
+public actual class RtpParameters(
+    public val native: AndroidRtpParameters,
+) {
+    public actual val codecs: List<RtpCodecParameters>
         get() = native.codecs.map { RtpCodecParameters(it) }
 
-    actual val encodings: List<RtpEncodingParameters>
+    public actual val encodings: List<RtpEncodingParameters>
         get() = native.encodings.map { RtpEncodingParameters(it) }
 
-    actual val headerExtension: List<HeaderExtension>
+    public actual val headerExtension: List<HeaderExtension>
         get() = native.headerExtensions.map { HeaderExtension(it) }
 
-    actual val rtcp: RtcpParameters
-        get() = RtcpParameters(native.rtcp)
-
-    actual val transactionId: String
-        get() = native.transactionId
+    public actual val rtcp: RtcpParameters get() = RtcpParameters(native.rtcp)
+    public actual val transactionId: String get() = native.transactionId
 }
 
-actual class RtpCodecParameters(val native: AndroidRtpParameters.Codec) {
-    actual val payloadType: Int
-        get() = native.payloadType
+public actual class RtpCodecParameters(
+    public val native: AndroidRtpParameters.Codec,
+) {
+    public actual val payloadType: Int get() = native.payloadType
 
-    actual val mimeType: String?
-        get() = try {
-            val kindField = AndroidRtpParameters.Codec::class.java.getField("kind")
-            kindField.isAccessible = true
-            val kind = kindField.get(native) as? String
-            if (kind != null && native.name != null) "$kind/${native.name}" else null
-        } catch (e: Throwable) {
-            Log.e("RtpCodecParameters", "Getting 'kind' field failed", e)
-            null
-        }
+    public actual val mimeType: String?
+        get() =
+            try {
+                val kindField = AndroidRtpParameters.Codec::class.java.getField("kind")
+                kindField.isAccessible = true
+                val kind = kindField.get(native) as? String
+                if (kind != null && native.name != null) "$kind/${native.name}" else null
+            } catch (e: Throwable) {
+                Log.e("RtpCodecParameters", "Getting 'kind' field failed", e)
+                null
+            }
 
-    actual val clockRate: Int?
-        get() = native.clockRate
-
-    actual val numChannels: Int?
-        get() = native.numChannels
-
-    actual val parameters: Map<String, String>
-        get() = native.parameters
+    public actual val clockRate: Int? get() = native.clockRate
+    public actual val numChannels: Int? get() = native.numChannels
+    public actual val parameters: Map<String, String> get() = native.parameters
 }
 
-actual class RtpEncodingParameters(val native: AndroidRtpParameters.Encoding) {
-    actual val rid: String?
-        get() = native.rid
-
-    actual val active: Boolean
-        get() = native.active
-
-    actual val bitratePriority: Double
-        get() = native.bitratePriority
-
-    actual val networkPriority: Int
-        get() = native.networkPriority
-
-    actual val maxBitrateBps: Int?
-        get() = native.maxBitrateBps
-
-    actual val minBitrateBps: Int?
-        get() = native.minBitrateBps
-
-    actual val maxFramerate: Int?
-        get() = native.maxFramerate
-
-    actual val numTemporalLayers: Int?
-        get() = native.numTemporalLayers
-
-    actual val scaleResolutionDownBy: Double?
-        get() = native.scaleResolutionDownBy
-
-    actual val ssrc: Long?
-        get() = native.ssrc
+public actual class RtpEncodingParameters(
+    public val native: AndroidRtpParameters.Encoding,
+) {
+    public actual val rid: String? get() = native.rid
+    public actual val active: Boolean get() = native.active
+    public actual val bitratePriority: Double get() = native.bitratePriority
+    public actual val networkPriority: Int get() = native.networkPriority
+    public actual val maxBitrateBps: Int? get() = native.maxBitrateBps
+    public actual val minBitrateBps: Int? get() = native.minBitrateBps
+    public actual val maxFramerate: Int? get() = native.maxFramerate
+    public actual val numTemporalLayers: Int? get() = native.numTemporalLayers
+    public actual val scaleResolutionDownBy: Double? get() = native.scaleResolutionDownBy
+    public actual val ssrc: Long? get() = native.ssrc
 }
 
-actual class HeaderExtension(val native: AndroidRtpParameters.HeaderExtension) {
-    actual val uri: String
-        get() = native.uri
-
-    actual val id: Int
-        get() = native.id
-
-    actual val encrypted: Boolean
-        get() = native.encrypted
+public actual class HeaderExtension(
+    public val native: AndroidRtpParameters.HeaderExtension,
+) {
+    public actual val uri: String get() = native.uri
+    public actual val id: Int get() = native.id
+    public actual val encrypted: Boolean get() = native.encrypted
 }
 
-actual class RtcpParameters(val native: AndroidRtpParameters.Rtcp) {
-    actual val cname: String
-        get() = native.cname
-
-    actual val reducedSize: Boolean
-        get() = native.reducedSize
+public actual class RtcpParameters(
+    public val native: AndroidRtpParameters.Rtcp,
+) {
+    public actual val cname: String get() = native.cname
+    public actual val reducedSize: Boolean get() = native.reducedSize
 }

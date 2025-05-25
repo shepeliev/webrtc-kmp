@@ -1,17 +1,20 @@
 package com.shepeliev.webrtckmp
 
-expect class MediaStream() {
-    val id: String
-    val tracks: List<MediaStreamTrack>
+public expect class MediaStream() {
+    public val id: String
+    public val tracks: List<MediaStreamTrack>
 
-    fun addTrack(track: MediaStreamTrack)
-    fun getTrackById(id: String): MediaStreamTrack?
-    fun removeTrack(track: MediaStreamTrack)
-    fun release()
+    public fun addTrack(track: MediaStreamTrack)
+
+    public fun getTrackById(id: String): MediaStreamTrack?
+
+    public fun removeTrack(track: MediaStreamTrack)
+
+    public fun release()
 }
 
-val MediaStream.audioTracks: List<AudioStreamTrack>
+public val MediaStream.audioTracks: List<AudioStreamTrack>
     get() = tracks.mapNotNull { it as? AudioStreamTrack }
 
-val MediaStream.videoTracks: List<VideoStreamTrack>
+public val MediaStream.videoTracks: List<VideoStreamTrack>
     get() = tracks.mapNotNull { it as? VideoStreamTrack }

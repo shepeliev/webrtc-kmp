@@ -1,6 +1,6 @@
 package com.shepeliev.webrtckmp
 
-data class MediaTrackSettings(
+public data class MediaTrackSettings(
     val aspectRatio: Double? = null,
     val autoGainControl: Boolean? = null,
     val channelCount: Int? = null,

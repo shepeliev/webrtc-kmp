@@ -1,3 +1,3 @@
 package com.shepeliev.webrtckmp.externals
 
-external class Date
+internal external class Date

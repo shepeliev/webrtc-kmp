@@ -1,6 +1,6 @@
 package com.shepeliev.webrtckmp.externals
 
-external interface RTCRtpCodecParameters {
+internal external interface RTCRtpCodecParameters {
     val payloadType: Int?
     val mimeType: String?
     val clockRate: Int?

@@ -1,8 +1,8 @@
 package com.shepeliev.webrtckmp
 
-expect class RtcStatsReport {
-    val timestampUs: Long
-    val stats: Map<String, RtcStats>
+public expect class RtcStatsReport {
+    public val timestampUs: Long
+    public val stats: Map<String, RtcStats>
 
     override fun toString(): String
 }

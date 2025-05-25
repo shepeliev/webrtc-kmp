@@ -17,6 +17,8 @@ group = "com.shepeliev"
 version = System.getenv("VERSION") ?: "0.0.0"
 
 kotlin {
+    explicitApi()
+
     compilerOptions {
         freeCompilerArgs.add("-Xexpect-actual-classes")
     }

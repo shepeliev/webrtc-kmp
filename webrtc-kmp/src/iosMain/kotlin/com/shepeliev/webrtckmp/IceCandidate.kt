@@ -5,14 +5,16 @@ package com.shepeliev.webrtckmp
 import WebRTC.RTCIceCandidate
 import kotlinx.cinterop.ExperimentalForeignApi
 
-actual class IceCandidate internal constructor(val native: RTCIceCandidate) {
-    actual constructor(sdpMid: String, sdpMLineIndex: Int, candidate: String) : this(
-        RTCIceCandidate(candidate, sdpMLineIndex, sdpMid)
+public actual class IceCandidate internal constructor(
+    public val native: RTCIceCandidate,
+) {
+    public actual constructor(sdpMid: String, sdpMLineIndex: Int, candidate: String) : this(
+        RTCIceCandidate(candidate, sdpMLineIndex, sdpMid),
     )
 
-    actual val sdpMid: String = native.sdpMid!!
-    actual val sdpMLineIndex: Int = native.sdpMLineIndex
-    actual val candidate: String = native.sdp
+    public actual val sdpMid: String = native.sdpMid!!
+    public actual val sdpMLineIndex: Int = native.sdpMLineIndex
+    public actual val candidate: String = native.sdp
 
     actual override fun toString(): String = candidate
 }

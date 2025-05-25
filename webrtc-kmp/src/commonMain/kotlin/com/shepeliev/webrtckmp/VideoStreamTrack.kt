@@ -1,5 +1,5 @@
 package com.shepeliev.webrtckmp
 
-expect interface VideoStreamTrack : MediaStreamTrack {
-    suspend fun switchCamera(deviceId: String? = null)
+public expect interface VideoStreamTrack : MediaStreamTrack {
+    public suspend fun switchCamera(deviceId: String? = null)
 }

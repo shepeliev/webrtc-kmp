@@ -9,93 +9,77 @@ import WebRTC.RTCRtpHeaderExtension
 import WebRTC.RTCRtpParameters
 import kotlinx.cinterop.ExperimentalForeignApi
 
-actual class RtpParameters(val native: RTCRtpParameters) {
-    actual val codecs: List<RtpCodecParameters>
+public actual class RtpParameters(
+    public val native: RTCRtpParameters,
+) {
+    public actual val codecs: List<RtpCodecParameters>
         get() = native.codecs.map { RtpCodecParameters(it as RTCRtpCodecParameters) }
 
-    actual val encodings: List<RtpEncodingParameters>
+    public actual val encodings: List<RtpEncodingParameters>
         get() = native.encodings.map { RtpEncodingParameters(it as RTCRtpEncodingParameters) }
 
-    actual val headerExtension: List<HeaderExtension>
+    public actual val headerExtension: List<HeaderExtension>
         get() = native.headerExtensions.map { HeaderExtension(it as RTCRtpHeaderExtension) }
 
-    actual val rtcp: RtcpParameters
-        get() = RtcpParameters(native.rtcp)
-
-    actual val transactionId: String
-        get() = native.transactionId
+    public actual val rtcp: RtcpParameters get() = RtcpParameters(native.rtcp)
+    public actual val transactionId: String get() = native.transactionId
 }
 
-actual class RtpCodecParameters(val native: RTCRtpCodecParameters) {
-    actual val payloadType: Int
-        get() = native.payloadType
-
-    actual val mimeType: String?
-        get() = "${native.kind}/${native.name}"
-
-    actual val clockRate: Int?
-        get() = native.clockRate?.intValue
-
-    actual val numChannels: Int?
-        get() = native.numChannels?.intValue
-
-    actual val parameters: Map<String, String>
+public actual class RtpCodecParameters(
+    public val native: RTCRtpCodecParameters,
+) {
+    public actual val payloadType: Int get() = native.payloadType
+    public actual val mimeType: String? get() = "${native.kind}/${native.name}"
+    public actual val clockRate: Int? get() = native.clockRate?.intValue
+    public actual val numChannels: Int? get() = native.numChannels?.intValue
+    public actual val parameters: Map<String, String>
         get() = native.parameters.map { (k, v) -> "$k" to "$v" }.toMap()
 }
 
-actual class RtpEncodingParameters(val native: RTCRtpEncodingParameters) {
-    actual val rid: String?
+public actual class RtpEncodingParameters(
+    public val native: RTCRtpEncodingParameters,
+) {
+    public actual val rid: String?
         get() = native.rid
 
-    actual val active: Boolean
+    public actual val active: Boolean
         get() = native.isActive
 
-    actual val bitratePriority: Double
+    public actual val bitratePriority: Double
         get() {
             // not implemented
             return 0.0
         }
 
-    actual val networkPriority: Int
+    public actual val networkPriority: Int
         get() {
             // not implemented
             return 0
         }
 
-    actual val maxBitrateBps: Int?
-        get() = native.maxBitrateBps?.intValue
+    public actual val maxBitrateBps: Int? get() = native.maxBitrateBps?.intValue
+    public actual val minBitrateBps: Int? get() = native.minBitrateBps?.intValue
+    public actual val maxFramerate: Int? get() = native.maxFramerate?.intValue
+    public actual val numTemporalLayers: Int? get() = native.numTemporalLayers?.intValue
 
-    actual val minBitrateBps: Int?
-        get() = native.minBitrateBps?.intValue
+    public actual val scaleResolutionDownBy: Double? get() =
+        native.scaleResolutionDownBy
+            ?.doubleValue
 
-    actual val maxFramerate: Int?
-        get() = native.maxFramerate?.intValue
-
-    actual val numTemporalLayers: Int?
-        get() = native.numTemporalLayers?.intValue
-
-    actual val scaleResolutionDownBy: Double?
-        get() = native.scaleResolutionDownBy?.doubleValue
-
-    actual val ssrc: Long?
-        get() = native.ssrc?.longValue
+    public actual val ssrc: Long? get() = native.ssrc?.longValue
 }
 
-actual class HeaderExtension(val native: RTCRtpHeaderExtension) {
-    actual val uri: String
-        get() = native.uri
-
-    actual val id: Int
-        get() = native.id
-
-    actual val encrypted: Boolean
-        get() = native.encrypted
+public actual class HeaderExtension(
+    public val native: RTCRtpHeaderExtension,
+) {
+    public actual val uri: String get() = native.uri
+    public actual val id: Int get() = native.id
+    public actual val encrypted: Boolean get() = native.encrypted
 }
 
-actual class RtcpParameters(val native: RTCRtcpParameters) {
-    actual val cname: String
-        get() = native.cname
-
-    actual val reducedSize: Boolean
-        get() = native.isReducedSize
+public actual class RtcpParameters(
+    public val native: RTCRtcpParameters,
+) {
+    public actual val cname: String get() = native.cname
+    public actual val reducedSize: Boolean get() = native.isReducedSize
 }

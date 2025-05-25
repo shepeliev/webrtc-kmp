@@ -35,73 +35,78 @@ import org.webrtc.PeerConnection as AndroidPeerConnection
 import org.webrtc.RtpReceiver as AndroidRtpReceiver
 import org.webrtc.SessionDescription as AndroidSessionDescription
 
-actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguration) {
-    val android: AndroidPeerConnection = WebRtc.peerConnectionFactory.createPeerConnection(
-        rtcConfiguration.toPlatform(),
-        AndroidPeerConnectionObserver()
-    ) ?: error("Creating PeerConnection failed")
+public actual class PeerConnection actual constructor(
+    rtcConfiguration: RtcConfiguration,
+) {
+    public val android: AndroidPeerConnection =
+        WebRtc.peerConnectionFactory.createPeerConnection(
+            rtcConfiguration.toPlatform(),
+            AndroidPeerConnectionObserver(),
+        ) ?: error("Creating PeerConnection failed")
 
-    actual val localDescription: SessionDescription?
+    public actual val localDescription: SessionDescription?
         get() = android.localDescription?.asCommon()
 
-    actual val remoteDescription: SessionDescription?
+    public actual val remoteDescription: SessionDescription?
         get() = android.remoteDescription?.asCommon()
 
-    actual val signalingState: SignalingState
+    public actual val signalingState: SignalingState
         get() = if (closed) SignalingState.Closed else android.signalingState().asCommon()
 
-    actual val iceConnectionState: IceConnectionState
+    public actual val iceConnectionState: IceConnectionState
         get() = android.iceConnectionState().asCommon()
 
-    actual val connectionState: PeerConnectionState
+    public actual val connectionState: PeerConnectionState
         get() = android.connectionState().asCommon()
 
-    actual val iceGatheringState: IceGatheringState
+    public actual val iceGatheringState: IceGatheringState
         get() = android.iceGatheringState().asCommon()
 
+    @Suppress("ktlint:standard:backing-property-naming")
     private val _peerConnectionEvent =
         MutableSharedFlow<PeerConnectionEvent>(extraBufferCapacity = FLOW_BUFFER_CAPACITY)
-    internal actual val peerConnectionEvent: Flow<PeerConnectionEvent> = _peerConnectionEvent.asSharedFlow()
+    internal actual val peerConnectionEvent: Flow<PeerConnectionEvent> =
+        _peerConnectionEvent
+            .asSharedFlow()
 
     private val coroutineScope = MainScope()
     private val localTracks = mutableMapOf<String, MediaStreamTrackImpl>()
     private val remoteTracks = mutableMapOf<String, MediaStreamTrackImpl>()
     private var closed = false
 
-    actual fun createDataChannel(
+    public actual fun createDataChannel(
         label: String,
         id: Int,
         ordered: Boolean,
         maxPacketLifeTimeMs: Int,
         maxRetransmits: Int,
         protocol: String,
-        negotiated: Boolean
+        negotiated: Boolean,
     ): DataChannel? {
-        val init = AndroidDataChannel.Init().also {
-            it.id = id
-            it.ordered = ordered
-            it.maxRetransmitTimeMs = maxPacketLifeTimeMs
-            it.maxRetransmits = maxRetransmits
-            it.protocol = protocol
-            it.negotiated = negotiated
-        }
+        val init =
+            AndroidDataChannel.Init().also {
+                it.id = id
+                it.ordered = ordered
+                it.maxRetransmitTimeMs = maxPacketLifeTimeMs
+                it.maxRetransmits = maxRetransmits
+                it.protocol = protocol
+                it.negotiated = negotiated
+            }
         return android.createDataChannel(label, init)?.let { DataChannel(it) }
     }
 
-    actual suspend fun createOffer(options: OfferAnswerOptions): SessionDescription {
-        return suspendCoroutine { cont ->
+    public actual suspend fun createOffer(options: OfferAnswerOptions): SessionDescription =
+        suspendCoroutine { cont ->
             android.createOffer(createSdpObserver(cont), options.toMediaConstraints())
         }
-    }
 
-    actual suspend fun createAnswer(options: OfferAnswerOptions): SessionDescription {
-        return suspendCoroutine { cont ->
+    public actual suspend fun createAnswer(options: OfferAnswerOptions): SessionDescription =
+        suspendCoroutine { cont ->
             android.createAnswer(createSdpObserver(cont), options.toMediaConstraints())
         }
-    }
 
-    private fun OfferAnswerOptions.toMediaConstraints(): MediaConstraints {
-        return MediaConstraints().apply {
+    private fun OfferAnswerOptions.toMediaConstraints(): MediaConstraints =
+        MediaConstraints().apply {
             iceRestart?.let { mandatory += MediaConstraints.KeyValuePair("IceRestart", "$it") }
             offerToReceiveAudio?.let {
                 mandatory += MediaConstraints.KeyValuePair("OfferToReceiveAudio", "$it")
@@ -113,10 +118,9 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
                 mandatory += MediaConstraints.KeyValuePair("VoiceActivityDetection", "$it")
             }
         }
-    }
 
-    private fun createSdpObserver(continuation: Continuation<SessionDescription>): SdpObserver {
-        return object : SdpObserver {
+    private fun createSdpObserver(continuation: Continuation<SessionDescription>): SdpObserver =
+        object : SdpObserver {
             override fun onCreateSuccess(description: AndroidSessionDescription) {
                 continuation.resume(description.asCommon())
             }
@@ -133,22 +137,21 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
                 // not applicable for creating SDP
             }
         }
-    }
 
-    actual suspend fun setLocalDescription(description: SessionDescription) {
-        return suspendCoroutine {
+    public actual suspend fun setLocalDescription(description: SessionDescription) {
+        suspendCoroutine {
             android.setLocalDescription(setSdpObserver(it), description.asAndroid())
         }
     }
 
-    actual suspend fun setRemoteDescription(description: SessionDescription) {
-        return suspendCoroutine {
+    public actual suspend fun setRemoteDescription(description: SessionDescription) {
+        suspendCoroutine {
             android.setRemoteDescription(setSdpObserver(it), description.asAndroid())
         }
     }
 
-    private fun setSdpObserver(continuation: Continuation<Unit>): SdpObserver {
-        return object : SdpObserver {
+    private fun setSdpObserver(continuation: Continuation<Unit>): SdpObserver =
+        object : SdpObserver {
             override fun onCreateSuccess(description: AndroidSessionDescription) {
                 // not applicable for setting SDP
             }
@@ -165,36 +168,42 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
                 continuation.resumeWithException(RuntimeException("Setting SDP failed: $error"))
             }
         }
-    }
 
-    actual fun setConfiguration(configuration: RtcConfiguration): Boolean {
-        return android.setConfiguration(configuration.toPlatform())
-    }
+    public actual fun setConfiguration(configuration: RtcConfiguration): Boolean =
+        android.setConfiguration(configuration.toPlatform())
 
-    actual suspend fun addIceCandidate(candidate: IceCandidate): Boolean {
-        return android.addIceCandidate(candidate.native)
-    }
+    public actual suspend fun addIceCandidate(candidate: IceCandidate): Boolean =
+        android.addIceCandidate(candidate.native)
 
-    actual fun removeIceCandidates(candidates: List<IceCandidate>): Boolean {
-        return android.removeIceCandidates(candidates.map { it.native }.toTypedArray())
-    }
+    public actual fun removeIceCandidates(candidates: List<IceCandidate>): Boolean =
+        android.removeIceCandidates(
+            candidates
+                .map {
+                    it.native
+                }.toTypedArray(),
+        )
 
-    actual fun getSenders(): List<RtpSender> = android.senders.map {
-        RtpSender(it, localTracks[it.track()?.id()])
-    }
+    public actual fun getSenders(): List<RtpSender> =
+        android.senders.map {
+            RtpSender(it, localTracks[it.track()?.id()])
+        }
 
-    actual fun getReceivers(): List<RtpReceiver> = android.receivers.map {
-        RtpReceiver(it, remoteTracks[it.track()?.id()])
-    }
+    public actual fun getReceivers(): List<RtpReceiver> =
+        android.receivers.map {
+            RtpReceiver(it, remoteTracks[it.track()?.id()])
+        }
 
-    actual fun getTransceivers(): List<RtpTransceiver> =
+    public actual fun getTransceivers(): List<RtpTransceiver> =
         android.transceivers.map {
             val senderTrack = localTracks[it.sender.track()?.id()]
             val receiverTrack = remoteTracks[it.receiver.track()?.id()]
             RtpTransceiver(it, senderTrack, receiverTrack)
         }
 
-    actual fun addTrack(track: MediaStreamTrack, vararg streams: MediaStream): RtpSender {
+    public actual fun addTrack(
+        track: MediaStreamTrack,
+        vararg streams: MediaStream,
+    ): RtpSender {
         require(track is MediaStreamTrackImpl)
 
         val streamIds = streams.map { it.id }
@@ -202,18 +211,17 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         return RtpSender(android.addTrack(track.android, streamIds), track)
     }
 
-    actual fun removeTrack(sender: RtpSender): Boolean {
+    public actual fun removeTrack(sender: RtpSender): Boolean {
         localTracks.remove(sender.track?.id)
         return android.removeTrack(sender.android)
     }
 
-    actual suspend fun getStats(): RtcStatsReport? {
-        return suspendCoroutine { cont ->
+    public actual suspend fun getStats(): RtcStatsReport? =
+        suspendCoroutine { cont ->
             android.getStats { cont.resume(RtcStatsReport(it)) }
         }
-    }
 
-    actual fun close() {
+    public actual fun close() {
         if (closed) return
         closed = true
         remoteTracks.values.forEach(MediaStreamTrack::stop)
@@ -227,33 +235,59 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
 
     internal inner class AndroidPeerConnectionObserver : AndroidPeerConnection.Observer {
         override fun onSignalingChange(newState: AndroidPeerConnection.SignalingState) {
-            coroutineScope.launch { _peerConnectionEvent.emit(SignalingStateChange(newState.asCommon())) }
+            coroutineScope.launch {
+                _peerConnectionEvent.emit(
+                    SignalingStateChange(newState.asCommon()),
+                )
+            }
         }
 
         override fun onIceConnectionChange(newState: AndroidPeerConnection.IceConnectionState) {
-            coroutineScope.launch { _peerConnectionEvent.emit(IceConnectionStateChange(newState.asCommon())) }
+            coroutineScope.launch {
+                _peerConnectionEvent.emit(
+                    IceConnectionStateChange(newState.asCommon()),
+                )
+            }
         }
 
-        override fun onStandardizedIceConnectionChange(newState: AndroidPeerConnection.IceConnectionState) {
-            coroutineScope.launch { _peerConnectionEvent.emit(StandardizedIceConnectionChange(newState.asCommon())) }
+        override fun onStandardizedIceConnectionChange(
+            newState: AndroidPeerConnection.IceConnectionState,
+        ) {
+            coroutineScope.launch {
+                _peerConnectionEvent.emit(StandardizedIceConnectionChange(newState.asCommon()))
+            }
         }
 
         override fun onConnectionChange(newState: AndroidPeerConnection.PeerConnectionState) {
-            coroutineScope.launch { _peerConnectionEvent.emit(ConnectionStateChange(newState.asCommon())) }
+            coroutineScope.launch {
+                _peerConnectionEvent.emit(
+                    ConnectionStateChange(newState.asCommon()),
+                )
+            }
         }
 
         override fun onIceConnectionReceivingChange(receiving: Boolean) {}
 
         override fun onIceGatheringChange(newState: AndroidPeerConnection.IceGatheringState) {
-            coroutineScope.launch { _peerConnectionEvent.emit(IceGatheringStateChange(newState.asCommon())) }
+            coroutineScope.launch {
+                _peerConnectionEvent.emit(
+                    IceGatheringStateChange(newState.asCommon()),
+                )
+            }
         }
 
         override fun onIceCandidate(candidate: AndroidIceCandidate) {
-            coroutineScope.launch { _peerConnectionEvent.emit(NewIceCandidate(IceCandidate(candidate))) }
+            coroutineScope.launch {
+                _peerConnectionEvent.emit(
+                    NewIceCandidate(IceCandidate(candidate)),
+                )
+            }
         }
 
         override fun onIceCandidatesRemoved(candidates: Array<out AndroidIceCandidate>) {
-            coroutineScope.launch { _peerConnectionEvent.emit(RemovedIceCandidates(candidates.map { IceCandidate(it) })) }
+            coroutineScope.launch {
+                _peerConnectionEvent.emit(RemovedIceCandidates(candidates.map { IceCandidate(it) }))
+            }
         }
 
         override fun onAddStream(nativeStream: AndroidMediaStream) {
@@ -271,7 +305,11 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
         }
 
         override fun onDataChannel(dataChannel: AndroidDataChannel) {
-            coroutineScope.launch { _peerConnectionEvent.emit(NewDataChannel(DataChannel(dataChannel))) }
+            coroutineScope.launch {
+                _peerConnectionEvent.emit(
+                    NewDataChannel(DataChannel(dataChannel)),
+                )
+            }
         }
 
         override fun onRenegotiationNeeded() {
@@ -280,41 +318,57 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
 
         override fun onAddTrack(
             receiver: AndroidRtpReceiver,
-            androidStreams: Array<out AndroidMediaStream>
+            androidStreams: Array<out AndroidMediaStream>,
         ) {
-            val transceiver = android.transceivers.find { it.receiver.id() == receiver.id() } ?: return
+            val transceiver =
+                android.transceivers.find { it.receiver.id() == receiver.id() } ?: return
             val senderTrack = localTracks[transceiver.sender.track()?.id()]
 
-            val receiverTrack = receiver.track()?.let {
-                remoteTracks.getOrPut(it.id()) {
-                    when (it.kind()) {
-                        AUDIO_TRACK_KIND -> RemoteAudioStreamTrack(it as AudioTrack)
-                        VIDEO_TRACK_KIND -> RemoteVideoStreamTrack(it as VideoTrack)
-                        else -> error("Unsupported track kind: ${it.kind()}")
+            val receiverTrack =
+                receiver.track()?.let {
+                    remoteTracks.getOrPut(it.id()) {
+                        when (it.kind()) {
+                            AUDIO_TRACK_KIND -> RemoteAudioStreamTrack(it as AudioTrack)
+                            VIDEO_TRACK_KIND -> RemoteVideoStreamTrack(it as VideoTrack)
+                            else -> error("Unsupported track kind: ${it.kind()}")
+                        }
                     }
                 }
-            }
 
-            val streams = androidStreams.map { androidStream ->
-                MediaStream(androidStream).also { stream ->
-                    androidStream.audioTracks.forEach { stream.addTrack(RemoteAudioStreamTrack(it)) }
-                    androidStream.videoTracks.forEach { stream.addTrack(RemoteVideoStreamTrack(it)) }
+            val streams =
+                androidStreams.map { androidStream ->
+                    MediaStream(androidStream).also { stream ->
+                        androidStream.audioTracks.forEach {
+                            stream.addTrack(
+                                RemoteAudioStreamTrack(it),
+                            )
+                        }
+                        androidStream.videoTracks.forEach {
+                            stream.addTrack(
+                                RemoteVideoStreamTrack(it),
+                            )
+                        }
+                    }
                 }
-            }
 
-            val trackEvent = TrackEvent(
-                receiver = RtpReceiver(receiver, receiverTrack),
-                streams = streams,
-                track = receiverTrack,
-                transceiver = RtpTransceiver(transceiver, senderTrack, receiverTrack)
-            )
+            val trackEvent =
+                TrackEvent(
+                    receiver = RtpReceiver(receiver, receiverTrack),
+                    streams = streams,
+                    track = receiverTrack,
+                    transceiver = RtpTransceiver(transceiver, senderTrack, receiverTrack),
+                )
 
             coroutineScope.launch { _peerConnectionEvent.emit(Track(trackEvent)) }
         }
 
         override fun onRemoveTrack(receiver: AndroidRtpReceiver) {
             val track = remoteTracks.remove(receiver.track()?.id())
-            coroutineScope.launch { _peerConnectionEvent.emit(RemoveTrack(RtpReceiver(receiver, track))) }
+            coroutineScope.launch {
+                _peerConnectionEvent.emit(
+                    RemoveTrack(RtpReceiver(receiver, track)),
+                )
+            }
             track?.stop()
         }
 
@@ -324,19 +378,22 @@ actual class PeerConnection actual constructor(rtcConfiguration: RtcConfiguratio
     }
 }
 
-private fun AndroidPeerConnection.SignalingState.asCommon(): SignalingState {
-    return when (this) {
+private fun AndroidPeerConnection.SignalingState.asCommon(): SignalingState =
+    when (this) {
         AndroidPeerConnection.SignalingState.STABLE -> SignalingState.Stable
         AndroidPeerConnection.SignalingState.HAVE_LOCAL_OFFER -> SignalingState.HaveLocalOffer
         AndroidPeerConnection.SignalingState.HAVE_LOCAL_PRANSWER -> SignalingState.HaveLocalPranswer
         AndroidPeerConnection.SignalingState.HAVE_REMOTE_OFFER -> SignalingState.HaveRemoteOffer
-        AndroidPeerConnection.SignalingState.HAVE_REMOTE_PRANSWER -> SignalingState.HaveRemotePranswer
+
+        AndroidPeerConnection.SignalingState.HAVE_REMOTE_PRANSWER -> {
+            SignalingState.HaveRemotePranswer
+        }
+
         AndroidPeerConnection.SignalingState.CLOSED -> SignalingState.Closed
     }
-}
 
-private fun AndroidPeerConnection.IceConnectionState.asCommon(): IceConnectionState {
-    return when (this) {
+private fun AndroidPeerConnection.IceConnectionState.asCommon(): IceConnectionState =
+    when (this) {
         AndroidPeerConnection.IceConnectionState.NEW -> IceConnectionState.New
         AndroidPeerConnection.IceConnectionState.CHECKING -> IceConnectionState.Checking
         AndroidPeerConnection.IceConnectionState.CONNECTED -> IceConnectionState.Connected
@@ -345,10 +402,9 @@ private fun AndroidPeerConnection.IceConnectionState.asCommon(): IceConnectionSt
         AndroidPeerConnection.IceConnectionState.DISCONNECTED -> IceConnectionState.Disconnected
         AndroidPeerConnection.IceConnectionState.CLOSED -> IceConnectionState.Closed
     }
-}
 
-private fun AndroidPeerConnection.PeerConnectionState.asCommon(): PeerConnectionState {
-    return when (this) {
+private fun AndroidPeerConnection.PeerConnectionState.asCommon(): PeerConnectionState =
+    when (this) {
         AndroidPeerConnection.PeerConnectionState.NEW -> PeerConnectionState.New
         AndroidPeerConnection.PeerConnectionState.CONNECTING -> PeerConnectionState.Connecting
         AndroidPeerConnection.PeerConnectionState.CONNECTED -> PeerConnectionState.Connected
@@ -356,12 +412,10 @@ private fun AndroidPeerConnection.PeerConnectionState.asCommon(): PeerConnection
         AndroidPeerConnection.PeerConnectionState.FAILED -> PeerConnectionState.Failed
         AndroidPeerConnection.PeerConnectionState.CLOSED -> PeerConnectionState.Closed
     }
-}
 
-private fun AndroidPeerConnection.IceGatheringState.asCommon(): IceGatheringState {
-    return when (this) {
+private fun AndroidPeerConnection.IceGatheringState.asCommon(): IceGatheringState =
+    when (this) {
         AndroidPeerConnection.IceGatheringState.NEW -> IceGatheringState.New
         AndroidPeerConnection.IceGatheringState.GATHERING -> IceGatheringState.Gathering
         AndroidPeerConnection.IceGatheringState.COMPLETE -> IceGatheringState.Complete
     }
-}

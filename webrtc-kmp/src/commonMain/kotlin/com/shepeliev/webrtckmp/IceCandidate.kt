@@ -1,9 +1,13 @@
 package com.shepeliev.webrtckmp
 
-expect class IceCandidate(sdpMid: String, sdpMLineIndex: Int, candidate: String) {
-    val sdpMid: String
-    val sdpMLineIndex: Int
-    val candidate: String
+public expect class IceCandidate(
+    sdpMid: String,
+    sdpMLineIndex: Int,
+    candidate: String,
+) {
+    public val sdpMid: String
+    public val sdpMLineIndex: Int
+    public val candidate: String
 
     override fun toString(): String
 }

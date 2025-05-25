@@ -7,11 +7,14 @@ import WebRTC.RTCStatisticsReport
 import kotlinx.cinterop.ExperimentalForeignApi
 
 @OptIn(ExperimentalForeignApi::class)
-actual class RtcStatsReport(val native: RTCStatisticsReport) {
-    actual val timestampUs: Long = (native.timestamp_us).toLong()
-    actual val stats: Map<String, RtcStats> = native.statistics
-        .map { (k, v) -> "$k" to RtcStats(v as RTCStatistics) }
-        .toMap()
+public actual class RtcStatsReport(
+    public val native: RTCStatisticsReport,
+) {
+    public actual val timestampUs: Long = (native.timestamp_us).toLong()
+    public actual val stats: Map<String, RtcStats> =
+        native.statistics
+            .map { (k, v) -> "$k" to RtcStats(v as RTCStatistics) }
+            .toMap()
 
     actual override fun toString(): String = native.toString()
 }

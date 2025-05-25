@@ -7,7 +7,9 @@ import org.webrtc.SurfaceTextureHelper
 import org.webrtc.VideoCapturer
 import org.webrtc.VideoSource
 
-internal abstract class VideoCapturerController(private val videoSource: VideoSource) {
+internal abstract class VideoCapturerController(
+    private val videoSource: VideoSource,
+) {
     val isScreencast: Boolean
         get() = videoCapturer.isScreencast
 
@@ -29,15 +31,24 @@ internal abstract class VideoCapturerController(private val videoSource: VideoSo
     fun startCapture() {
         check(!disposed) { "Video capturer disposed" }
         check(textureHelper == null) { "Video capturer already started" }
-        textureHelper = SurfaceTextureHelper.create("VideoCapturerTextureHelper", WebRtc.rootEglBase.eglBaseContext)
-        videoCapturer.initialize(textureHelper, WebRtc.applicationContext, videoSource.capturerObserver)
+        textureHelper =
+            SurfaceTextureHelper.create(
+                "VideoCapturerTextureHelper",
+                WebRtc.rootEglBase.eglBaseContext,
+            )
+        videoCapturer.initialize(
+            textureHelper,
+            WebRtc.applicationContext,
+            videoSource.capturerObserver,
+        )
         val size = selectVideoSize()
         val fps = selectFps()
-        settings = settings.copy(
-            width = size.width,
-            height = size.height,
-            frameRate = fps.toDouble()
-        )
+        settings =
+            settings.copy(
+                width = size.width,
+                height = size.height,
+                frameRate = fps.toDouble(),
+            )
         videoCapturer.startCapture(size.width, size.height, fps)
     }
 
@@ -57,6 +68,6 @@ internal abstract class VideoCapturerController(private val videoSource: VideoSo
     }
 }
 
-fun interface VideoCapturerErrorListener {
+internal fun interface VideoCapturerErrorListener {
     fun onError(error: String)
 }

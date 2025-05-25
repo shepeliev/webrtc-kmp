@@ -9,9 +9,17 @@ import kotlin.js.Promise
 // TODO: remove after fixing in kotlinx.coroutines
 // PR: https://github.com/Kotlin/kotlinx.coroutines/pull/4120
 @Suppress("UNCHECKED_CAST")
-suspend fun <T> Promise<JsAny?>.await(): T = suspendCancellableCoroutine { cont: CancellableContinuation<T> ->
-    this@await.then(
-        onFulfilled = { cont.resume(it as T); null },
-        onRejected = { cont.resumeWithException(it.toThrowableOrNull() ?: Exception("Non-Kotlin exception $it")); null }
-    )
-}
+internal suspend fun <T> Promise<JsAny?>.await(): T =
+    suspendCancellableCoroutine { cont: CancellableContinuation<T> ->
+        this@await.then(
+            onFulfilled = {
+                cont.resume(it as T)
+                null
+            },
+            onRejected = {
+                val exception = it.toThrowableOrNull() ?: Exception("Non-Kotlin exception $it")
+                cont.resumeWithException(exception)
+                null
+            },
+        )
+    }

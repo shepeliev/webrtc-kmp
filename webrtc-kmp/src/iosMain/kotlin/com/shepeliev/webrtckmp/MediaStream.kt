@@ -8,14 +8,18 @@ import WebRTC.RTCVideoTrack
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.Foundation.NSUUID
 
-actual class MediaStream internal constructor(val ios: RTCMediaStream) {
-    actual constructor() : this(WebRtc.peerConnectionFactory.mediaStreamWithStreamId(NSUUID.UUID().UUIDString))
+public actual class MediaStream internal constructor(
+    public val ios: RTCMediaStream,
+) {
+    public actual constructor() : this(
+        WebRtc.peerConnectionFactory.mediaStreamWithStreamId(NSUUID.UUID().UUIDString),
+    )
 
-    actual val id: String = ios.streamId
+    public actual val id: String = ios.streamId
     private val _tracks = mutableListOf<MediaStreamTrack>()
-    actual val tracks: List<MediaStreamTrack> = _tracks
+    public actual val tracks: List<MediaStreamTrack> = _tracks
 
-    actual fun addTrack(track: MediaStreamTrack) {
+    public actual fun addTrack(track: MediaStreamTrack) {
         require(track is MediaStreamTrackImpl)
 
         ios.let {
@@ -28,11 +32,10 @@ actual class MediaStream internal constructor(val ios: RTCMediaStream) {
         _tracks += track
     }
 
-    actual fun getTrackById(id: String): MediaStreamTrack? {
-        return tracks.firstOrNull { it.id == id }
-    }
+    public actual fun getTrackById(id: String): MediaStreamTrack? =
+        tracks.firstOrNull { it.id == id }
 
-    actual fun removeTrack(track: MediaStreamTrack) {
+    public actual fun removeTrack(track: MediaStreamTrack) {
         require(track is MediaStreamTrackImpl)
 
         when (track.ios) {
@@ -43,7 +46,7 @@ actual class MediaStream internal constructor(val ios: RTCMediaStream) {
         _tracks -= track
     }
 
-    actual fun release() {
+    public actual fun release() {
         tracks.forEach(MediaStreamTrack::stop)
     }
 }

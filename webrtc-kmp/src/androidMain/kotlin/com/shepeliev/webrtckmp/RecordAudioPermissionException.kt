@@ -1,3 +1,3 @@
 package com.shepeliev.webrtckmp
 
-class RecordAudioPermissionException : Exception()
+public class RecordAudioPermissionException : Exception()

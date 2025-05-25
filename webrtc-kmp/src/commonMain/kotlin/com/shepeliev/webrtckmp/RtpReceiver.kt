@@ -1,7 +1,7 @@
 package com.shepeliev.webrtckmp
 
-expect class RtpReceiver {
-    val id: String
-    val track: MediaStreamTrack?
-    val parameters: RtpParameters
+public expect class RtpReceiver {
+    public val id: String
+    public val track: MediaStreamTrack?
+    public val parameters: RtpParameters
 }

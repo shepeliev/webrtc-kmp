@@ -10,69 +10,77 @@ import kotlinx.coroutines.flow.map
 import java.nio.ByteBuffer
 import org.webrtc.DataChannel as AndroidDataChannel
 
-actual class DataChannel(val android: AndroidDataChannel) {
+public actual class DataChannel(
+    public val android: AndroidDataChannel,
+) {
+    public actual val label: String get() = android.label()
+    public actual val id: Int get() = android.id()
+    public actual val readyState: DataChannelState get() = android.state().toCommon()
+    public actual val bufferedAmount: Long get() = android.bufferedAmount()
 
-    actual val label: String
-        get() = android.label()
-
-    actual val id: Int
-        get() = android.id()
-
-    actual val readyState: DataChannelState
-        get() = android.state().toCommon()
-
-    actual val bufferedAmount: Long
-        get() = android.bufferedAmount()
-
-    private val events = MutableSharedFlow<DataChannelEvent>(
-        extraBufferCapacity = Channel.UNLIMITED
-    )
+    private val events =
+        MutableSharedFlow<DataChannelEvent>(
+            extraBufferCapacity = Channel.UNLIMITED,
+        )
 
     init {
         android.registerObserver(DataChannelObserver())
     }
 
-    actual val onOpen: Flow<Unit> = events
-        .filter { it is DataChannelEvent.StateChanged && it.state == AndroidDataChannel.State.OPEN }
-        .map { }
+    public actual val onOpen: Flow<Unit> =
+        events
+            .filter {
+                it is DataChannelEvent.StateChanged &&
+                    it.state == AndroidDataChannel.State.OPEN
+            }.map { }
 
-    actual val onClosing: Flow<Unit> = events
-        .filter { it is DataChannelEvent.StateChanged && it.state == AndroidDataChannel.State.CLOSING }
-        .map { }
+    public actual val onClosing: Flow<Unit> =
+        events
+            .filter {
+                it is DataChannelEvent.StateChanged &&
+                    it.state == AndroidDataChannel.State.CLOSING
+            }.map { }
 
-    actual val onClose: Flow<Unit> = events
-        .filter { it is DataChannelEvent.StateChanged && it.state == AndroidDataChannel.State.CLOSED }
-        .map { }
+    public actual val onClose: Flow<Unit> =
+        events
+            .filter {
+                it is DataChannelEvent.StateChanged && it.state == AndroidDataChannel.State.CLOSED
+            }.map { }
 
-    actual val onError: Flow<String> = emptyFlow()
+    public actual val onError: Flow<String> = emptyFlow()
 
-    actual val onMessage: Flow<ByteArray> = events
-        .map { it as? DataChannelEvent.MessageReceived }
-        .filterNotNull()
-        .map { it.buffer.data.toByteArray() }
+    public actual val onMessage: Flow<ByteArray> =
+        events
+            .map { it as? DataChannelEvent.MessageReceived }
+            .filterNotNull()
+            .map { it.buffer.data.toByteArray() }
 
-    actual fun send(data: ByteArray): Boolean {
+    public actual fun send(data: ByteArray): Boolean {
         val buffer = AndroidDataChannel.Buffer(ByteBuffer.wrap(data), true)
         return android.send(buffer)
     }
 
-    actual fun close() {
+    public actual fun close() {
         android.close()
         // android DataChannel is disposed asynchronously in the observer
     }
 
-    private fun AndroidDataChannel.State.toCommon(): DataChannelState {
-        return when (this) {
+    private fun AndroidDataChannel.State.toCommon(): DataChannelState =
+        when (this) {
             AndroidDataChannel.State.CONNECTING -> DataChannelState.Connecting
             AndroidDataChannel.State.OPEN -> DataChannelState.Open
             AndroidDataChannel.State.CLOSING -> DataChannelState.Closing
             AndroidDataChannel.State.CLOSED -> DataChannelState.Closed
         }
-    }
 
     private sealed interface DataChannelEvent {
-        data class StateChanged(val state: AndroidDataChannel.State) : DataChannelEvent
-        data class MessageReceived(val buffer: AndroidDataChannel.Buffer) : DataChannelEvent
+        data class StateChanged(
+            val state: AndroidDataChannel.State,
+        ) : DataChannelEvent
+
+        data class MessageReceived(
+            val buffer: AndroidDataChannel.Buffer,
+        ) : DataChannelEvent
     }
 
     private inner class DataChannelObserver : AndroidDataChannel.Observer {

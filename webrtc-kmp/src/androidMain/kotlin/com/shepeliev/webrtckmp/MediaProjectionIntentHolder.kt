@@ -2,6 +2,6 @@ package com.shepeliev.webrtckmp
 
 import android.content.Intent
 
-object MediaProjectionIntentHolder {
-    lateinit var intent: Intent
+public object MediaProjectionIntentHolder {
+    public lateinit var intent: Intent
 }

@@ -5,20 +5,18 @@ package com.shepeliev.webrtckmp
 import WebRTC.RTCDtmfSenderProtocol
 import kotlinx.cinterop.ExperimentalForeignApi
 
-actual class DtmfSender(val native: RTCDtmfSenderProtocol) {
+public actual class DtmfSender(
+    public val native: RTCDtmfSenderProtocol,
+) {
+    public actual val canInsertDtmf: Boolean get() = native.canInsertDtmf()
+    public actual val duration: Int get() = (native.duration() * 1000).toInt()
+    public actual val interToneGap: Int get() = (native.interToneGap() * 1000).toInt()
 
-    actual val canInsertDtmf: Boolean
-        get() = native.canInsertDtmf()
+    public actual fun insertDtmf(
+        tones: String,
+        durationMs: Int,
+        interToneGapMs: Int,
+    ): Boolean = native.insertDtmf(tones, durationMs / 1000.0, interToneGapMs / 1000.0)
 
-    actual val duration: Int
-        get() = (native.duration() * 1000).toInt()
-
-    actual val interToneGap: Int
-        get() = (native.interToneGap() * 1000).toInt()
-
-    actual fun insertDtmf(tones: String, durationMs: Int, interToneGapMs: Int): Boolean {
-        return native.insertDtmf(tones, durationMs / 1000.0, interToneGapMs / 1000.0)
-    }
-
-    actual fun tones(): String = native.remainingTones()
+    public actual fun tones(): String = native.remainingTones()
 }

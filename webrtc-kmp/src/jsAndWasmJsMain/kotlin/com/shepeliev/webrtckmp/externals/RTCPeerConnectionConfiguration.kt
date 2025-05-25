@@ -1,3 +1,3 @@
 package com.shepeliev.webrtckmp.externals
 
-external interface RTCPeerConnectionConfiguration
+internal external interface RTCPeerConnectionConfiguration

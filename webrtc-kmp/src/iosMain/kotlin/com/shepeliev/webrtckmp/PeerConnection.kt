@@ -47,128 +47,143 @@ import platform.darwin.NSObject
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-actual class PeerConnection actual constructor(
-    rtcConfiguration: RtcConfiguration
-) : NSObject(), RTCPeerConnectionDelegateProtocol {
+public actual class PeerConnection actual constructor(
+    rtcConfiguration: RtcConfiguration,
+) : NSObject(),
+    RTCPeerConnectionDelegateProtocol {
+    public val ios: RTCPeerConnection =
+        checkNotNull(
+            WebRtc.peerConnectionFactory.peerConnectionWithConfiguration(
+                configuration = rtcConfiguration.toPlatform(),
+                constraints = RTCMediaConstraints(),
+                delegate = this,
+            ),
+        ) { "Failed to create peer connection" }
 
-    val ios: RTCPeerConnection = checkNotNull(
-        WebRtc.peerConnectionFactory.peerConnectionWithConfiguration(
-            configuration = rtcConfiguration.toPlatform(),
-            constraints = RTCMediaConstraints(),
-            delegate = this
-        )
-    ) { "Failed to create peer connection" }
+    public actual val localDescription: SessionDescription? get() = ios.localDescription?.asCommon()
 
-    actual val localDescription: SessionDescription? get() = ios.localDescription?.asCommon()
+    public actual val remoteDescription: SessionDescription? get() =
+        ios.remoteDescription
+            ?.asCommon()
 
-    actual val remoteDescription: SessionDescription? get() = ios.remoteDescription?.asCommon()
-
-    actual val signalingState: SignalingState
+    public actual val signalingState: SignalingState
         get() = rtcSignalingStateAsCommon(ios.signalingState())
 
-    actual val iceConnectionState: IceConnectionState
+    public actual val iceConnectionState: IceConnectionState
         get() = rtcIceConnectionStateAsCommon(ios.iceConnectionState())
 
-    actual val connectionState: PeerConnectionState
+    public actual val connectionState: PeerConnectionState
         get() = rtcPeerConnectionStateAsCommon(ios.connectionState())
 
-    actual val iceGatheringState: IceGatheringState
+    public actual val iceGatheringState: IceGatheringState
         get() = rtcIceGatheringStateAsCommon(ios.iceGatheringState())
 
+    @Suppress("ktlint:standard:backing-property-naming")
     private val _peerConnectionEvent =
         MutableSharedFlow<PeerConnectionEvent>(extraBufferCapacity = FLOW_BUFFER_CAPACITY)
-    internal actual val peerConnectionEvent: Flow<PeerConnectionEvent> = _peerConnectionEvent.asSharedFlow()
+    internal actual val peerConnectionEvent: Flow<PeerConnectionEvent> =
+        _peerConnectionEvent
+            .asSharedFlow()
 
     private val coroutineScope = MainScope()
     private val localTracks = mutableMapOf<String, MediaStreamTrackImpl>()
     private val remoteTracks = mutableMapOf<String, MediaStreamTrackImpl>()
 
-    actual fun createDataChannel(
+    public actual fun createDataChannel(
         label: String,
         id: Int,
         ordered: Boolean,
         maxPacketLifeTimeMs: Int,
         maxRetransmits: Int,
         protocol: String,
-        negotiated: Boolean
+        negotiated: Boolean,
     ): DataChannel? {
-        val config = RTCDataChannelConfiguration().also {
-            it.channelId = id
-            it.isOrdered = ordered
-            it.maxRetransmitTimeMs = maxPacketLifeTimeMs.toLong()
-            it.maxRetransmits = maxRetransmits
-            it.protocol = protocol
-            it.isNegotiated = negotiated
-        }
+        val config =
+            RTCDataChannelConfiguration().also {
+                it.channelId = id
+                it.isOrdered = ordered
+                it.maxRetransmitTimeMs = maxPacketLifeTimeMs.toLong()
+                it.maxRetransmits = maxRetransmits
+                it.protocol = protocol
+                it.isNegotiated = negotiated
+            }
         return ios.dataChannelForLabel(label, config)?.let { DataChannel(it) }
     }
 
-    actual suspend fun createOffer(options: OfferAnswerOptions): SessionDescription {
+    public actual suspend fun createOffer(options: OfferAnswerOptions): SessionDescription {
         val constraints = options.toRTCMediaConstraints()
-        val sessionDescription: RTCSessionDescription = ios.awaitResult {
-            offerForConstraints(constraints, it)
-        }
+        val sessionDescription: RTCSessionDescription =
+            ios.awaitResult {
+                offerForConstraints(constraints, it)
+            }
         return sessionDescription.asCommon()
     }
 
-    actual suspend fun createAnswer(options: OfferAnswerOptions): SessionDescription {
+    public actual suspend fun createAnswer(options: OfferAnswerOptions): SessionDescription {
         val constraints = options.toRTCMediaConstraints()
-        val sessionDescription: RTCSessionDescription = ios.awaitResult {
-            answerForConstraints(constraints, it)
-        }
+        val sessionDescription: RTCSessionDescription =
+            ios.awaitResult {
+                answerForConstraints(constraints, it)
+            }
         return sessionDescription.asCommon()
     }
 
     private fun OfferAnswerOptions.toRTCMediaConstraints(): RTCMediaConstraints {
-        val mandatory = mutableMapOf<Any?, String?>().apply {
-            iceRestart?.let { this += "IceRestart" to "$it" }
-            offerToReceiveAudio?.let { this += "OfferToReceiveAudio" to "$it" }
-            offerToReceiveVideo?.let { this += "OfferToReceiveVideo" to "$it" }
-            voiceActivityDetection?.let { this += "VoiceActivityDetection" to "$it" }
-        }
+        val mandatory =
+            mutableMapOf<Any?, String?>().apply {
+                iceRestart?.let { this += "IceRestart" to "$it" }
+                offerToReceiveAudio?.let { this += "OfferToReceiveAudio" to "$it" }
+                offerToReceiveVideo?.let { this += "OfferToReceiveVideo" to "$it" }
+                voiceActivityDetection?.let { this += "VoiceActivityDetection" to "$it" }
+            }
         return RTCMediaConstraints(mandatory, null)
     }
 
-    actual suspend fun setLocalDescription(description: SessionDescription) {
+    public actual suspend fun setLocalDescription(description: SessionDescription) {
         ios.await { setLocalDescription(description.asIos(), it) }
     }
 
-    actual suspend fun setRemoteDescription(description: SessionDescription) {
+    public actual suspend fun setRemoteDescription(description: SessionDescription) {
         ios.await { setRemoteDescription(description.asIos(), it) }
     }
 
-    actual fun setConfiguration(configuration: RtcConfiguration): Boolean {
-        return ios.setConfiguration(configuration.toPlatform())
-    }
+    public actual fun setConfiguration(configuration: RtcConfiguration): Boolean =
+        ios.setConfiguration(configuration.toPlatform())
 
-    actual suspend fun addIceCandidate(candidate: IceCandidate): Boolean {
+    public actual suspend fun addIceCandidate(candidate: IceCandidate): Boolean {
         ios.addIceCandidate(candidate.native)
         return true
     }
 
-    actual fun removeIceCandidates(candidates: List<IceCandidate>): Boolean {
+    public actual fun removeIceCandidates(candidates: List<IceCandidate>): Boolean {
         ios.removeIceCandidates(candidates.map { it.native })
         return true
     }
 
-    actual fun getSenders(): List<RtpSender> = ios.senders.map {
-        val iosSender = it as RTCRtpSender
-        RtpSender(iosSender, localTracks[iosSender.track?.trackId])
-    }
+    public actual fun getSenders(): List<RtpSender> =
+        ios.senders.map {
+            val iosSender = it as RTCRtpSender
+            RtpSender(iosSender, localTracks[iosSender.track?.trackId])
+        }
 
-    actual fun getReceivers(): List<RtpReceiver> = ios.receivers.map {
-        val iosReceiver = it as RTCRtpReceiver
-        RtpReceiver(iosReceiver, remoteTracks[iosReceiver.track?.trackId])
-    }
+    public actual fun getReceivers(): List<RtpReceiver> =
+        ios.receivers.map {
+            val iosReceiver = it as RTCRtpReceiver
+            RtpReceiver(iosReceiver, remoteTracks[iosReceiver.track?.trackId])
+        }
 
-    actual fun getTransceivers(): List<RtpTransceiver> = ios.transceivers.map {
-        val iosTransceiver = it as RTCRtpTransceiver
-        val senderTrack = localTracks[iosTransceiver.sender.track?.trackId]
-        val receiverTrack = remoteTracks[iosTransceiver.receiver.track?.trackId]
-        RtpTransceiver(iosTransceiver, senderTrack, receiverTrack)
-    }
+    public actual fun getTransceivers(): List<RtpTransceiver> =
+        ios.transceivers.map {
+            val iosTransceiver = it as RTCRtpTransceiver
+            val senderTrack = localTracks[iosTransceiver.sender.track?.trackId]
+            val receiverTrack = remoteTracks[iosTransceiver.receiver.track?.trackId]
+            RtpTransceiver(iosTransceiver, senderTrack, receiverTrack)
+        }
 
-    actual fun addTrack(track: MediaStreamTrack, vararg streams: MediaStream): RtpSender {
+    public actual fun addTrack(
+        track: MediaStreamTrack,
+        vararg streams: MediaStream,
+    ): RtpSender {
         require(track is MediaStreamTrackImpl)
 
         val streamIds = streams.map { it.id }
@@ -177,44 +192,52 @@ actual class PeerConnection actual constructor(
         return RtpSender(iosSender, track)
     }
 
-    actual fun removeTrack(sender: RtpSender): Boolean {
+    public actual fun removeTrack(sender: RtpSender): Boolean {
         localTracks.remove(sender.track?.id)
         return ios.removeTrack(sender.ios)
     }
 
-    actual suspend fun getStats(): RtcStatsReport? {
-        return suspendCoroutine { cont ->
+    public actual suspend fun getStats(): RtcStatsReport? =
+        suspendCoroutine { cont ->
             ios.statisticsWithCompletionHandler { report ->
                 report?.let { cont.resume(RtcStatsReport(it)) }
             }
         }
-    }
 
-    actual fun close() {
+    public actual fun close() {
         remoteTracks.values.forEach(MediaStreamTrack::stop)
         remoteTracks.clear()
         ios.close()
         coroutineScope.launch {
-            _peerConnectionEvent.emit(PeerConnectionEvent.SignalingStateChange(SignalingState.Closed))
+            _peerConnectionEvent.emit(SignalingStateChange(SignalingState.Closed))
             coroutineScope.cancel()
         }
     }
 
-    override fun peerConnection(peerConnection: RTCPeerConnection, didChangeSignalingState: RTCSignalingState) {
+    override fun peerConnection(
+        peerConnection: RTCPeerConnection,
+        didChangeSignalingState: RTCSignalingState,
+    ) {
         val event = SignalingStateChange(rtcSignalingStateAsCommon(didChangeSignalingState))
         coroutineScope.launch { _peerConnectionEvent.emit(event) }
     }
 
     @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
     @ObjCSignatureOverride
-    override fun peerConnection(peerConnection: RTCPeerConnection, didAddStream: RTCMediaStream) {
+    override fun peerConnection(
+        peerConnection: RTCPeerConnection,
+        didAddStream: RTCMediaStream,
+    ) {
         // this deprecated API should not longer be used
         // https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/onaddstream
     }
 
     @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
     @ObjCSignatureOverride
-    override fun peerConnection(peerConnection: RTCPeerConnection, didRemoveStream: RTCMediaStream) {
+    override fun peerConnection(
+        peerConnection: RTCPeerConnection,
+        didRemoveStream: RTCMediaStream,
+    ) {
         // The removestream event has been removed from the WebRTC specification in favor of
         // the existing removetrack event on the remote MediaStream and the corresponding
         // MediaStream.onremovetrack event handler property of the remote MediaStream.
@@ -229,28 +252,45 @@ actual class PeerConnection actual constructor(
 
     @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
     @ObjCSignatureOverride
-    override fun peerConnection(peerConnection: RTCPeerConnection, didChangeIceConnectionState: RTCIceConnectionState) {
-        val event = IceConnectionStateChange(rtcIceConnectionStateAsCommon(didChangeIceConnectionState))
+    override fun peerConnection(
+        peerConnection: RTCPeerConnection,
+        didChangeIceConnectionState: RTCIceConnectionState,
+    ) {
+        val event =
+            IceConnectionStateChange(rtcIceConnectionStateAsCommon(didChangeIceConnectionState))
         coroutineScope.launch { _peerConnectionEvent.emit(event) }
     }
 
-    override fun peerConnection(peerConnection: RTCPeerConnection, didChangeIceGatheringState: RTCIceGatheringState) {
-        val event = IceGatheringStateChange(rtcIceGatheringStateAsCommon(didChangeIceGatheringState))
+    override fun peerConnection(
+        peerConnection: RTCPeerConnection,
+        didChangeIceGatheringState: RTCIceGatheringState,
+    ) {
+        val event =
+            IceGatheringStateChange(rtcIceGatheringStateAsCommon(didChangeIceGatheringState))
         coroutineScope.launch { _peerConnectionEvent.emit(event) }
     }
 
-    override fun peerConnection(peerConnection: RTCPeerConnection, didGenerateIceCandidate: RTCIceCandidate) {
+    override fun peerConnection(
+        peerConnection: RTCPeerConnection,
+        didGenerateIceCandidate: RTCIceCandidate,
+    ) {
         val event = NewIceCandidate(IceCandidate(didGenerateIceCandidate))
         coroutineScope.launch { _peerConnectionEvent.emit(event) }
     }
 
-    override fun peerConnection(peerConnection: RTCPeerConnection, didRemoveIceCandidates: List<*>) {
+    override fun peerConnection(
+        peerConnection: RTCPeerConnection,
+        didRemoveIceCandidates: List<*>,
+    ) {
         val candidates = didRemoveIceCandidates.map { IceCandidate(it as RTCIceCandidate) }
         val event = RemovedIceCandidates(candidates)
         coroutineScope.launch { _peerConnectionEvent.emit(event) }
     }
 
-    override fun peerConnection(peerConnection: RTCPeerConnection, didOpenDataChannel: RTCDataChannel) {
+    override fun peerConnection(
+        peerConnection: RTCPeerConnection,
+        didOpenDataChannel: RTCDataChannel,
+    ) {
         val event = NewDataChannel(DataChannel(didOpenDataChannel))
         coroutineScope.launch { _peerConnectionEvent.emit(event) }
     }
@@ -259,58 +299,81 @@ actual class PeerConnection actual constructor(
     @ObjCSignatureOverride
     override fun peerConnection(
         peerConnection: RTCPeerConnection,
-        didChangeStandardizedIceConnectionState: RTCIceConnectionState
+        didChangeStandardizedIceConnectionState: RTCIceConnectionState,
     ) {
-        val event = StandardizedIceConnectionChange(
-            rtcIceConnectionStateAsCommon(didChangeStandardizedIceConnectionState)
-        )
+        val event =
+            StandardizedIceConnectionChange(
+                rtcIceConnectionStateAsCommon(didChangeStandardizedIceConnectionState),
+            )
         coroutineScope.launch { _peerConnectionEvent.emit(event) }
     }
 
-    override fun peerConnection(peerConnection: RTCPeerConnection, didChangeConnectionState: RTCPeerConnectionState) {
+    override fun peerConnection(
+        peerConnection: RTCPeerConnection,
+        didChangeConnectionState: RTCPeerConnectionState,
+    ) {
         val event = ConnectionStateChange(rtcPeerConnectionStateAsCommon(didChangeConnectionState))
         coroutineScope.launch { _peerConnectionEvent.emit(event) }
     }
 
-    override fun peerConnection(peerConnection: RTCPeerConnection, didAddReceiver: RTCRtpReceiver, streams: List<*>) {
-        val transceiver = ios.transceivers
-            .map { it as RTCRtpTransceiver }
-            .find { it.receiver.receiverId == didAddReceiver.receiverId }
-            ?: return
+    override fun peerConnection(
+        peerConnection: RTCPeerConnection,
+        didAddReceiver: RTCRtpReceiver,
+        streams: List<*>,
+    ) {
+        val transceiver =
+            ios.transceivers
+                .map { it as RTCRtpTransceiver }
+                .find { it.receiver.receiverId == didAddReceiver.receiverId }
+                ?: return
 
         val senderTrack = localTracks[transceiver.sender.track?.trackId]
 
-        val receiverTrack = didAddReceiver.track()?.let {
-            remoteTracks.getOrPut(it.trackId) {
-                when (val kind = it.kind()) {
-                    kRTCMediaStreamTrackKindAudio -> RemoteAudioStreamTrack(it as RTCAudioTrack)
-                    kRTCMediaStreamTrackKindVideo -> RemoteVideoStreamTrack(it as RTCVideoTrack)
-                    else -> error("Unsupported track kind: $kind")
+        val receiverTrack =
+            didAddReceiver.track()?.let {
+                remoteTracks.getOrPut(it.trackId) {
+                    when (val kind = it.kind()) {
+                        kRTCMediaStreamTrackKindAudio -> RemoteAudioStreamTrack(it as RTCAudioTrack)
+                        kRTCMediaStreamTrackKindVideo -> RemoteVideoStreamTrack(it as RTCVideoTrack)
+                        else -> error("Unsupported track kind: $kind")
+                    }
                 }
             }
-        }
 
         val iosStreams = streams.map { it as RTCMediaStream }
 
-        val commonStreams = iosStreams.map { iosStream ->
-            MediaStream(iosStream).also { stream ->
-                iosStream.audioTracks.forEach { stream.addTrack(RemoteAudioStreamTrack(it as RTCAudioTrack)) }
-                iosStream.videoTracks.forEach { stream.addTrack(RemoteVideoStreamTrack(it as RTCVideoTrack)) }
+        val commonStreams =
+            iosStreams.map { iosStream ->
+                MediaStream(iosStream).also { stream ->
+                    iosStream.audioTracks.forEach {
+                        stream.addTrack(
+                            RemoteAudioStreamTrack(it as RTCAudioTrack),
+                        )
+                    }
+                    iosStream.videoTracks.forEach {
+                        stream.addTrack(
+                            RemoteVideoStreamTrack(it as RTCVideoTrack),
+                        )
+                    }
+                }
             }
-        }
 
-        val trackEvent = TrackEvent(
-            receiver = RtpReceiver(didAddReceiver, receiverTrack),
-            streams = commonStreams,
-            track = receiverTrack,
-            transceiver = RtpTransceiver(transceiver, senderTrack, receiverTrack)
-        )
+        val trackEvent =
+            TrackEvent(
+                receiver = RtpReceiver(didAddReceiver, receiverTrack),
+                streams = commonStreams,
+                track = receiverTrack,
+                transceiver = RtpTransceiver(transceiver, senderTrack, receiverTrack),
+            )
 
         val event = Track(trackEvent)
         coroutineScope.launch { _peerConnectionEvent.emit(event) }
     }
 
-    override fun peerConnection(peerConnection: RTCPeerConnection, didRemoveReceiver: RTCRtpReceiver) {
+    override fun peerConnection(
+        peerConnection: RTCPeerConnection,
+        didRemoveReceiver: RTCRtpReceiver,
+    ) {
         val track = remoteTracks.remove(didRemoveReceiver.track?.trackId)
         val event = RemoveTrack(RtpReceiver(didRemoveReceiver, track))
         coroutineScope.launch { _peerConnectionEvent.emit(event) }

@@ -1,71 +1,75 @@
 package com.shepeliev.webrtckmp.externals
 
-import kotlin.js.JsName
 import com.shepeliev.webrtckmp.FacingMode
 import com.shepeliev.webrtckmp.MediaStreamTrackState
 import com.shepeliev.webrtckmp.MediaTrackConstraints
 import com.shepeliev.webrtckmp.MediaTrackSettings
+import kotlin.js.JsName
 
 @JsName("MediaStreamTrack")
-external interface PlatformMediaStreamTrack {
-    val id: String
-    var contentHint: String
-    var enabled: Boolean
-    val kind: String
-    val label: String
-    val muted: Boolean
-    var onended: (() -> Unit)?
-    var onmute: (() -> Unit)?
-    var onunmute: (() -> Unit)?
-    val readyState: String
+public external interface PlatformMediaStreamTrack {
+    public val id: String
+    public var contentHint: String
+    public var enabled: Boolean
+    public val kind: String
+    public val label: String
+    public val muted: Boolean
+    public var onended: (() -> Unit)?
+    public var onmute: (() -> Unit)?
+    public var onunmute: (() -> Unit)?
+    public val readyState: String
 
-    fun getSettings(): PlatformMediaTrackSettings
-    fun stop()
+    public fun getSettings(): PlatformMediaTrackSettings
+
+    public fun stop()
 }
 
 internal expect fun PlatformMediaStreamTrack.getConstraints(): MediaTrackConstraints
 
 @JsName("MediaTrackSettings")
-external interface PlatformMediaTrackSettings {
-    var aspectRatio: Double?
-    var autoGainControl: Boolean?
-    var channelCount: Int?
-    var deviceId: String?
-    var displaySurface: String?
-    var echoCancellation: Boolean?
-    var facingMode: String?
-    var frameRate: Double?
-    var groupId: String?
-    var height: Int?
-    var noiseSuppression: Boolean?
-    var sampleRate: Int?
-    var sampleSize: Int?
-    var width: Int?
+public external interface PlatformMediaTrackSettings {
+    public var aspectRatio: Double?
+    public var autoGainControl: Boolean?
+    public var channelCount: Int?
+    public var deviceId: String?
+    public var displaySurface: String?
+    public var echoCancellation: Boolean?
+    public var facingMode: String?
+    public var frameRate: Double?
+    public var groupId: String?
+    public var height: Int?
+    public var noiseSuppression: Boolean?
+    public var sampleRate: Int?
+    public var sampleSize: Int?
+    public var width: Int?
 }
 
-internal fun PlatformMediaTrackSettings.asCommon() = MediaTrackSettings(
-    aspectRatio = aspectRatio,
-    autoGainControl = autoGainControl,
-    channelCount = channelCount,
-    deviceId = deviceId,
-    echoCancellation = echoCancellation,
-    facingMode = facingMode?.toFacingMode(),
-    frameRate = frameRate,
-    groupId = groupId,
-    height = height,
-    noiseSuppression = noiseSuppression,
-    sampleRate = sampleRate,
-    sampleSize = sampleSize,
-    width = width
-)
+internal fun PlatformMediaTrackSettings.asCommon() =
+    MediaTrackSettings(
+        aspectRatio = aspectRatio,
+        autoGainControl = autoGainControl,
+        channelCount = channelCount,
+        deviceId = deviceId,
+        echoCancellation = echoCancellation,
+        facingMode = facingMode?.toFacingMode(),
+        frameRate = frameRate,
+        groupId = groupId,
+        height = height,
+        noiseSuppression = noiseSuppression,
+        sampleRate = sampleRate,
+        sampleSize = sampleSize,
+        width = width,
+    )
 
-internal fun String.toFacingMode() = when (this) {
-    "user" -> FacingMode.User
-    else -> FacingMode.Environment
-}
+internal fun String.toFacingMode() =
+    when (this) {
+        "user" -> FacingMode.User
+        else -> FacingMode.Environment
+    }
 
-internal fun String.toMediaStreamTrackState(muted: Boolean) = when (this) {
-    "live" -> MediaStreamTrackState.Live(muted)
-    "ended" -> MediaStreamTrackState.Ended(muted)
-    else -> error("Unknown media stream track state: $this")
-}
+internal fun String.toMediaStreamTrackState(muted: Boolean) =
+    when (this) {
+        "live" -> MediaStreamTrackState.Live(muted)
+        "ended" -> MediaStreamTrackState.Ended(muted)
+        else -> error("Unknown media stream track state: $this")
+    }

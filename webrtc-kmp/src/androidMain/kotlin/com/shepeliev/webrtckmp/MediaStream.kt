@@ -5,14 +5,19 @@ import org.webrtc.MediaStream
 import org.webrtc.VideoTrack
 import java.util.UUID
 
-actual class MediaStream internal constructor(val android: MediaStream) {
-    actual constructor() : this(WebRtc.peerConnectionFactory.createLocalMediaStream(UUID.randomUUID().toString()))
+public actual class MediaStream internal constructor(
+    public val android: MediaStream,
+) {
+    public actual constructor() : this(
+        WebRtc.peerConnectionFactory.createLocalMediaStream(UUID.randomUUID().toString()),
+    )
 
-    actual val id: String = android.id
+    public actual val id: String = android.id
+
     private val _tracks = mutableListOf<MediaStreamTrack>()
-    actual val tracks: List<MediaStreamTrack> = _tracks
+    public actual val tracks: List<MediaStreamTrack> = _tracks
 
-    actual fun addTrack(track: MediaStreamTrack) {
+    public actual fun addTrack(track: MediaStreamTrack) {
         require(track is MediaStreamTrackImpl)
 
         android.let {
@@ -25,11 +30,10 @@ actual class MediaStream internal constructor(val android: MediaStream) {
         _tracks += track
     }
 
-    actual fun getTrackById(id: String): MediaStreamTrack? {
-        return tracks.firstOrNull { it.id == id }
-    }
+    public actual fun getTrackById(id: String): MediaStreamTrack? =
+        tracks.firstOrNull { it.id == id }
 
-    actual fun removeTrack(track: MediaStreamTrack) {
+    public actual fun removeTrack(track: MediaStreamTrack) {
         require(track is MediaStreamTrackImpl)
 
         android.let {
@@ -42,7 +46,7 @@ actual class MediaStream internal constructor(val android: MediaStream) {
         _tracks -= track
     }
 
-    actual fun release() {
+    public actual fun release() {
         tracks.forEach(MediaStreamTrack::stop)
         android.dispose()
     }

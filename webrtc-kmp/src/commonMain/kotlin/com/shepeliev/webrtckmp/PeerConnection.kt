@@ -8,17 +8,19 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlin.jvm.JvmName
 
-expect class PeerConnection(rtcConfiguration: RtcConfiguration = RtcConfiguration()) {
-    val localDescription: SessionDescription?
-    val remoteDescription: SessionDescription?
-    val signalingState: SignalingState
-    val iceConnectionState: IceConnectionState
-    val connectionState: PeerConnectionState
-    val iceGatheringState: IceGatheringState
+public expect class PeerConnection(
+    rtcConfiguration: RtcConfiguration = RtcConfiguration(),
+) {
+    public val localDescription: SessionDescription?
+    public val remoteDescription: SessionDescription?
+    public val signalingState: SignalingState
+    public val iceConnectionState: IceConnectionState
+    public val connectionState: PeerConnectionState
+    public val iceGatheringState: IceGatheringState
 
     internal val peerConnectionEvent: Flow<PeerConnectionEvent>
 
-    fun createDataChannel(
+    public fun createDataChannel(
         label: String,
         id: Int = -1,
         ordered: Boolean = true,
@@ -28,28 +30,33 @@ expect class PeerConnection(rtcConfiguration: RtcConfiguration = RtcConfiguratio
         negotiated: Boolean = false,
     ): DataChannel?
 
-    suspend fun createOffer(options: OfferAnswerOptions): SessionDescription
-    suspend fun createAnswer(options: OfferAnswerOptions): SessionDescription
-    suspend fun setLocalDescription(description: SessionDescription)
-    suspend fun setRemoteDescription(description: SessionDescription)
+    public suspend fun createOffer(options: OfferAnswerOptions): SessionDescription
 
-    fun setConfiguration(configuration: RtcConfiguration): Boolean
-    suspend fun addIceCandidate(candidate: IceCandidate): Boolean
-    fun removeIceCandidates(candidates: List<IceCandidate>): Boolean
+    public suspend fun createAnswer(options: OfferAnswerOptions): SessionDescription
+
+    public suspend fun setLocalDescription(description: SessionDescription)
+
+    public suspend fun setRemoteDescription(description: SessionDescription)
+
+    public fun setConfiguration(configuration: RtcConfiguration): Boolean
+
+    public suspend fun addIceCandidate(candidate: IceCandidate): Boolean
+
+    public fun removeIceCandidates(candidates: List<IceCandidate>): Boolean
 
     /**
      * Gets all RtpSenders associated with this peer connection.
      * Note that calling getSenders will dispose of the senders previously
      * returned.
      */
-    fun getSenders(): List<RtpSender>
+    public fun getSenders(): List<RtpSender>
 
     /**
      * Gets all RtpReceivers associated with this peer connection.
      * Note that calling getReceivers will dispose of the receivers previously
      * returned.
      */
-    fun getReceivers(): List<RtpReceiver>
+    public fun getReceivers(): List<RtpReceiver>
 
     /**
      * Gets all RtpTransceivers associated with this peer connection.
@@ -57,7 +64,7 @@ expect class PeerConnection(rtcConfiguration: RtcConfiguration = RtcConfiguratio
      * returned.
      * Note: This is only available with SdpSemantics.UNIFIED_PLAN specified.
      */
-    fun getTransceivers(): List<RtpTransceiver>
+    public fun getTransceivers(): List<RtpTransceiver>
 
     /**
      * Adds a new media stream track to be sent on this peer connection, and returns
@@ -69,19 +76,22 @@ expect class PeerConnection(rtcConfiguration: RtcConfiguration = RtcConfiguratio
      * - A sender already exists for the track.
      * - The peer connection is closed.
      */
-    fun addTrack(track: MediaStreamTrack, vararg streams: MediaStream): RtpSender
+    public fun addTrack(
+        track: MediaStreamTrack,
+        vararg streams: MediaStream,
+    ): RtpSender
 
     /**
      * Stops sending media from sender. The sender will still appear in getSenders. Future
      * calls to createOffer will mark the m section for the corresponding transceiver as
      * receive only or inactive, as defined in JSEP. Returns true on success.
      */
-    fun removeTrack(sender: RtpSender): Boolean
+    public fun removeTrack(sender: RtpSender): Boolean
 
     /**
      * Gets stats using the new stats collection API, see webrtc/api/stats/.
      */
-    suspend fun getStats(): RtcStatsReport?
+    public suspend fun getStats(): RtcStatsReport?
 
     /**
      * Free native resources associated with this PeerConnection instance.
@@ -99,121 +109,136 @@ expect class PeerConnection(rtcConfiguration: RtcConfiguration = RtcConfiguratio
      * must do this asynchronously (in other words, unwind the stack first). See
      * [bug 3721](https://bugs.chromium.org/p/webrtc/issues/detail?id=3721) for more details.
      */
-    fun close()
+    public fun close()
 }
 
 /**
  * Emits [PeerConnectionState] events. This happens whenever the aggregate state of the connection
  * changes.
  */
-val PeerConnection.onConnectionStateChange: Flow<PeerConnectionState>
-    get() = peerConnectionEvent
-        .map { it as? PeerConnectionEvent.ConnectionStateChange }
-        .filterNotNull()
-        .map { it.state }
+public val PeerConnection.onConnectionStateChange: Flow<PeerConnectionState>
+    get() =
+        peerConnectionEvent
+            .map { it as? PeerConnectionEvent.ConnectionStateChange }
+            .filterNotNull()
+            .map { it.state }
 
 /**
  * Emits [DataChannel] events. This event is sent when an [DataChannel] is added to the connection
  * by the remote peer calling [PeerConnection.createDataChannel]
  */
-val PeerConnection.onDataChannel: Flow<DataChannel>
-    get() = peerConnectionEvent
-        .map { it as? PeerConnectionEvent.NewDataChannel }
-        .filterNotNull()
-        .map { it.dataChannel }
+public val PeerConnection.onDataChannel: Flow<DataChannel>
+    get() =
+        peerConnectionEvent
+            .map { it as? PeerConnectionEvent.NewDataChannel }
+            .filterNotNull()
+            .map { it.dataChannel }
 
 /**
  * Emits [IceCandidate] events. This happens whenever the local ICE agent needs to deliver a message
  * to the other peer through the signaling server.
  */
-val PeerConnection.onIceCandidate: Flow<IceCandidate>
-    get() = peerConnectionEvent
-        .map { it as? PeerConnectionEvent.NewIceCandidate }
-        .filterNotNull()
-        .map { it.candidate }
+public val PeerConnection.onIceCandidate: Flow<IceCandidate>
+    get() =
+        peerConnectionEvent
+            .map { it as? PeerConnectionEvent.NewIceCandidate }
+            .filterNotNull()
+            .map { it.candidate }
 
 /**
  * Emits [IceConnectionState] events. This happens when the state of the connection's ICE agent,
  * as represented by the [PeerConnection.iceConnectionState] property, changes.
  */
-val PeerConnection.onIceConnectionStateChange: Flow<IceConnectionState>
-    get() = peerConnectionEvent
-        .map { it as? PeerConnectionEvent.IceConnectionStateChange }
-        .filterNotNull()
-        .map { it.state }
+public val PeerConnection.onIceConnectionStateChange: Flow<IceConnectionState>
+    get() =
+        peerConnectionEvent
+            .map { it as? PeerConnectionEvent.IceConnectionStateChange }
+            .filterNotNull()
+            .map { it.state }
 
 /**
  * Emits [IceGatheringState] events. This happens when the ICE gathering state—that is, whether or
  * not the ICE agent is actively gathering candidates—changes.
  */
-val PeerConnection.onIceGatheringState: Flow<IceGatheringState>
-    get() = peerConnectionEvent
-        .map { it as? PeerConnectionEvent.IceGatheringStateChange }
-        .filterNotNull()
-        .map { it.state }
+public val PeerConnection.onIceGatheringState: Flow<IceGatheringState>
+    get() =
+        peerConnectionEvent
+            .map { it as? PeerConnectionEvent.IceGatheringStateChange }
+            .filterNotNull()
+            .map { it.state }
 
 /**
  * Emits negotiationneeded events. This event is fired when a change has occurred which requires
  * session negotiation. This negotiation should be carried out as the offerer, because some session
  * changes cannot be negotiated as the answerer.
  */
-val PeerConnection.onNegotiationNeeded: Flow<Unit>
-    get() = peerConnectionEvent
-        .filter { it is PeerConnectionEvent.NegotiationNeeded }
-        .map { }
+public val PeerConnection.onNegotiationNeeded: Flow<Unit>
+    get() =
+        peerConnectionEvent
+            .filter { it is PeerConnectionEvent.NegotiationNeeded }
+            .map { }
 
 /**
  * Emits [SignalingState] events..
  */
-val PeerConnection.onSignalingStateChange: Flow<SignalingState>
-    get() = peerConnectionEvent
-        .map { it as? PeerConnectionEvent.SignalingStateChange }
-        .filterNotNull()
-        .map { it.state }
+public val PeerConnection.onSignalingStateChange: Flow<SignalingState>
+    get() =
+        peerConnectionEvent
+            .map { it as? PeerConnectionEvent.SignalingStateChange }
+            .filterNotNull()
+            .map { it.state }
 
 /**
  * Emits track events, indicating that a track has been added to the [PeerConnection].
  */
-val PeerConnection.onTrack: Flow<TrackEvent>
-    get() = peerConnectionEvent
-        .map { it as? PeerConnectionEvent.Track }
-        .filterNotNull()
-        .map { it.trackEvent }
+public val PeerConnection.onTrack: Flow<TrackEvent>
+    get() =
+        peerConnectionEvent
+            .map { it as? PeerConnectionEvent.Track }
+            .filterNotNull()
+            .map { it.trackEvent }
 
-val PeerConnection.onStandardizedIceConnection: Flow<IceConnectionState>
-    get() = peerConnectionEvent
-        .map { it as? PeerConnectionEvent.StandardizedIceConnectionChange }
-        .filterNotNull()
-        .map { it.state }
+public val PeerConnection.onStandardizedIceConnection: Flow<IceConnectionState>
+    get() =
+        peerConnectionEvent
+            .map { it as? PeerConnectionEvent.StandardizedIceConnectionChange }
+            .filterNotNull()
+            .map { it.state }
 
-val PeerConnection.onRemovedIceCandidates: Flow<List<IceCandidate>>
-    get() = peerConnectionEvent
-        .map { it as? PeerConnectionEvent.RemovedIceCandidates }
-        .filterNotNull()
-        .map { it.candidates }
+public val PeerConnection.onRemovedIceCandidates: Flow<List<IceCandidate>>
+    get() =
+        peerConnectionEvent
+            .map { it as? PeerConnectionEvent.RemovedIceCandidates }
+            .filterNotNull()
+            .map { it.candidates }
 
-val PeerConnection.onRemoveTrack: Flow<RtpReceiver>
-    get() = peerConnectionEvent
-        .map { it as? PeerConnectionEvent.RemoveTrack }
-        .filterNotNull()
-        .map { it.rtpReceiver }
+public val PeerConnection.onRemoveTrack: Flow<RtpReceiver>
+    get() =
+        peerConnectionEvent
+            .map { it as? PeerConnectionEvent.RemoveTrack }
+            .filterNotNull()
+            .map { it.rtpReceiver }
 
-enum class TlsCertPolicy { TlsCertPolicySecure, TlsCertPolicyInsecureNoCheck }
-enum class KeyType { RSA, ECDSA }
-enum class RtcpMuxPolicy { Negotiate, Require }
-enum class BundlePolicy { Balanced, MaxBundle, MaxCompat }
-enum class IceTransportPolicy { None, Relay, NoHost, All }
+public enum class TlsCertPolicy { TlsCertPolicySecure, TlsCertPolicyInsecureNoCheck }
 
-enum class SignalingState {
+public enum class KeyType { RSA, ECDSA }
+
+public enum class RtcpMuxPolicy { Negotiate, Require }
+
+public enum class BundlePolicy { Balanced, MaxBundle, MaxCompat }
+
+public enum class IceTransportPolicy { None, Relay, NoHost, All }
+
+public enum class SignalingState {
     Stable,
     HaveLocalOffer,
     HaveLocalPranswer,
     HaveRemoteOffer,
     HaveRemotePranswer,
-    Closed;
+    Closed,
 }
 
-enum class IceConnectionState {
+public enum class IceConnectionState {
     New,
     Checking,
     Connected,
@@ -221,11 +246,11 @@ enum class IceConnectionState {
     Failed,
     Disconnected,
     Closed,
-    Count;
+    Count,
 }
 
-enum class PeerConnectionState { New, Connecting, Connected, Disconnected, Failed, Closed; }
+public enum class PeerConnectionState { New, Connecting, Connected, Disconnected, Failed, Closed; }
 
-enum class IceGatheringState { New, Gathering, Complete }
+public enum class IceGatheringState { New, Gathering, Complete }
 
-enum class ContinualGatheringPolicy { GatherOnce, GatherContinually }
+public enum class ContinualGatheringPolicy { GatherOnce, GatherContinually }

@@ -9,39 +9,42 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 
-actual class DataChannel internal constructor(internal val js: RTCDataChannel) {
-    actual val id: Int
+public actual class DataChannel internal constructor(
+    internal val js: RTCDataChannel,
+) {
+    public actual val id: Int
         get() = js.id
 
-    actual val label: String
+    public actual val label: String
         get() = js.label
 
-    actual val readyState: DataChannelState
-        get() = when (val readyState = js.readyState) {
-            "connecting" -> DataChannelState.Connecting
-            "open" -> DataChannelState.Open
-            "closing" -> DataChannelState.Closing
-            "closed" -> DataChannelState.Closed
-            else -> throw IllegalArgumentException("Illegal ready state: $readyState")
-        }
+    public actual val readyState: DataChannelState
+        get() =
+            when (val readyState = js.readyState) {
+                "connecting" -> DataChannelState.Connecting
+                "open" -> DataChannelState.Open
+                "closing" -> DataChannelState.Closing
+                "closed" -> DataChannelState.Closed
+                else -> throw IllegalArgumentException("Illegal ready state: $readyState")
+            }
 
-    actual val bufferedAmount: Long
+    public actual val bufferedAmount: Long
         get() = js.bufferedAmount
 
     private val _onOpen = MutableSharedFlow<Unit>(extraBufferCapacity = Channel.UNLIMITED)
-    actual val onOpen: Flow<Unit> = _onOpen.asSharedFlow()
+    public actual val onOpen: Flow<Unit> = _onOpen.asSharedFlow()
 
     private val _onClosing = MutableSharedFlow<Unit>(extraBufferCapacity = Channel.UNLIMITED)
-    actual val onClosing: Flow<Unit> = _onClosing.asSharedFlow()
+    public actual val onClosing: Flow<Unit> = _onClosing.asSharedFlow()
 
     private val _onClose = MutableSharedFlow<Unit>(extraBufferCapacity = Channel.UNLIMITED)
-    actual val onClose: Flow<Unit> = _onClose.asSharedFlow()
+    public actual val onClose: Flow<Unit> = _onClose.asSharedFlow()
 
     private val _onError = MutableSharedFlow<String>(extraBufferCapacity = Channel.UNLIMITED)
-    actual val onError: Flow<String> = _onError.asSharedFlow()
+    public actual val onError: Flow<String> = _onError.asSharedFlow()
 
     private val _onMessage = MutableSharedFlow<ByteArray>(extraBufferCapacity = Channel.UNLIMITED)
-    actual val onMessage: Flow<ByteArray> = _onMessage.asSharedFlow()
+    public actual val onMessage: Flow<ByteArray> = _onMessage.asSharedFlow()
 
     init {
         js.onopen = { tryEmit(_onOpen, Unit) }
@@ -51,21 +54,23 @@ actual class DataChannel internal constructor(internal val js: RTCDataChannel) {
         js.onclose = { tryEmit(_onClose, Unit) }
     }
 
-    private fun <T> tryEmit(flow: MutableSharedFlow<T>, event: T) {
+    private fun <T> tryEmit(
+        flow: MutableSharedFlow<T>,
+        event: T,
+    ) {
         check(flow.tryEmit(event)) {
             // as we use SharedFlow with unlimited buffer, this should never happen
             "Failed to emit event: $event"
         }
     }
 
-    actual fun send(data: ByteArray): Boolean {
-        return runCatching { js.send(data) }
+    public actual fun send(data: ByteArray): Boolean =
+        runCatching { js.send(data) }
             .onFailure { Console.error("Failed to send data: $it") }
             .map { true }
             .getOrDefault(false)
-    }
 
-    actual fun close() {
+    public actual fun close() {
         js.close()
     }
 }

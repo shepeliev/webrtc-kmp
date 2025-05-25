@@ -2,38 +2,32 @@ package com.shepeliev.webrtckmp
 
 import org.webrtc.RtpTransceiver as AndroidRtpTransceiver
 
-actual class RtpTransceiver(
-    val native: AndroidRtpTransceiver,
+public actual class RtpTransceiver(
+    public val native: AndroidRtpTransceiver,
     private val senderTrack: MediaStreamTrack?,
     private val receiverTrack: MediaStreamTrack?,
 ) {
-
-    actual var direction: RtpTransceiverDirection
+    public actual var direction: RtpTransceiverDirection
         get() = native.direction.asCommon()
         set(value) {
             native.direction = value.toPlatform()
         }
 
-    actual val currentDirection: RtpTransceiverDirection?
+    public actual val currentDirection: RtpTransceiverDirection?
         get() = native.currentDirection?.asCommon()
 
-    actual val mid: String
-        get() = native.mid
+    public actual val mid: String get() = native.mid
+    public actual val sender: RtpSender get() = RtpSender(native.sender, senderTrack)
+    public actual val receiver: RtpReceiver get() = RtpReceiver(native.receiver, receiverTrack)
+    public actual val stopped: Boolean get() = native.isStopped
 
-    actual val sender: RtpSender
-        get() = RtpSender(native.sender, senderTrack)
-
-    actual val receiver: RtpReceiver
-        get() = RtpReceiver(native.receiver, receiverTrack)
-
-    actual val stopped: Boolean
-        get() = native.isStopped
-
-    actual fun stop() = native.stop()
+    public actual fun stop() {
+        native.stop()
+    }
 }
 
-private fun AndroidRtpTransceiver.RtpTransceiverDirection.asCommon(): RtpTransceiverDirection {
-    return when (this) {
+private fun AndroidRtpTransceiver.RtpTransceiverDirection.asCommon(): RtpTransceiverDirection =
+    when (this) {
         AndroidRtpTransceiver.RtpTransceiverDirection.SEND_RECV -> {
             RtpTransceiverDirection.SendRecv
         }
@@ -54,14 +48,12 @@ private fun AndroidRtpTransceiver.RtpTransceiverDirection.asCommon(): RtpTransce
             RtpTransceiverDirection.Stopped
         }
     }
-}
 
-internal fun RtpTransceiverDirection.toPlatform(): AndroidRtpTransceiver.RtpTransceiverDirection {
-    return when (this) {
+internal fun RtpTransceiverDirection.toPlatform(): AndroidRtpTransceiver.RtpTransceiverDirection =
+    when (this) {
         RtpTransceiverDirection.SendRecv -> AndroidRtpTransceiver.RtpTransceiverDirection.SEND_RECV
         RtpTransceiverDirection.SendOnly -> AndroidRtpTransceiver.RtpTransceiverDirection.SEND_ONLY
         RtpTransceiverDirection.RecvOnly -> AndroidRtpTransceiver.RtpTransceiverDirection.RECV_ONLY
         RtpTransceiverDirection.Inactive -> AndroidRtpTransceiver.RtpTransceiverDirection.INACTIVE
         RtpTransceiverDirection.Stopped -> AndroidRtpTransceiver.RtpTransceiverDirection.STOPPED
     }
-}

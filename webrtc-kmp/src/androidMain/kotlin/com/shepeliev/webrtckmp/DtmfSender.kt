@@ -2,20 +2,23 @@ package com.shepeliev.webrtckmp
 
 import org.webrtc.DtmfSender as NativeDtmfSender
 
-actual class DtmfSender(val native: NativeDtmfSender) {
-
-    actual val canInsertDtmf: Boolean
+public actual class DtmfSender(
+    public val native: NativeDtmfSender,
+) {
+    public actual val canInsertDtmf: Boolean
         get() = native.canInsertDtmf()
 
-    actual val duration: Int
+    public actual val duration: Int
         get() = native.duration()
 
-    actual val interToneGap: Int
+    public actual val interToneGap: Int
         get() = native.interToneGap()
 
-    actual fun insertDtmf(tones: String, durationMs: Int, interToneGapMs: Int): Boolean {
-        return native.insertDtmf(tones, durationMs, interToneGapMs)
-    }
+    public actual fun insertDtmf(
+        tones: String,
+        durationMs: Int,
+        interToneGapMs: Int,
+    ): Boolean = native.insertDtmf(tones, durationMs, interToneGapMs)
 
-    actual fun tones(): String = native.tones()
+    public actual fun tones(): String = native.tones()
 }

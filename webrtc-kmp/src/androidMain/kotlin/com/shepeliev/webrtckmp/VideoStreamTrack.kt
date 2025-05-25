@@ -2,8 +2,10 @@ package com.shepeliev.webrtckmp
 
 import org.webrtc.VideoSink
 
-actual interface VideoStreamTrack : MediaStreamTrack {
-    actual suspend fun switchCamera(deviceId: String?)
-    fun addSink(sink: VideoSink)
-    fun removeSink(sink: VideoSink)
+public actual interface VideoStreamTrack : MediaStreamTrack {
+    public actual suspend fun switchCamera(deviceId: String?)
+
+    public fun addSink(sink: VideoSink)
+
+    public fun removeSink(sink: VideoSink)
 }

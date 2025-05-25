@@ -14,13 +14,13 @@ import org.webrtc.PeerConnectionFactory.InitializationOptions
 import org.webrtc.VideoProcessor
 
 @Suppress("MemberVisibilityCanBePrivate")
-object WebRtc {
+public object WebRtc {
     private var _rootEglBase: EglBase? = null
 
     /**
      * The root [EglBase] instance.
      */
-    val rootEglBase: EglBase by lazy {
+    public val rootEglBase: EglBase by lazy {
         _rootEglBase ?: EglBase.create().also { _rootEglBase = it }
     }
 
@@ -30,6 +30,7 @@ object WebRtc {
     internal var videoProcessorFactory: VideoProcessorFactory? = null
         private set
 
+    @Suppress("ktlint:standard:backing-property-naming")
     private var _cameraEnumerator: CameraEnumerator? = null
     internal val cameraEnumerator: CameraEnumerator by lazy {
         _cameraEnumerator ?: if (Camera2Enumerator.isSupported(applicationContext)) {
@@ -39,36 +40,40 @@ object WebRtc {
         }
     }
 
+    @Suppress("ktlint:standard:backing-property-naming")
     private var _peerConnectionFactory: PeerConnectionFactory? = null
     internal val peerConnectionFactory: PeerConnectionFactory by lazy {
-        _peerConnectionFactory ?: createPeerConnectionFactoryBuilder().createPeerConnectionFactory()
+        _peerConnectionFactory ?: createPeerConnectionFactoryBuilder()
+            .createPeerConnectionFactory()
             .also { _peerConnectionFactory = it }
     }
 
     /**
      * Creates a new default [InitializationOptions.Builder].
      */
-    fun createInitializationOptionsBuilder(): InitializationOptions.Builder {
-        return InitializationOptions.builder(applicationContext)
-    }
+    public fun createInitializationOptionsBuilder(): InitializationOptions.Builder =
+        InitializationOptions.builder(applicationContext)
 
     /**
      * Creates a new default [PeerConnectionFactory.Builder].
      */
-    fun createPeerConnectionFactoryBuilder(
-        initializationOptionsBuilder: InitializationOptions.Builder = createInitializationOptionsBuilder(),
+    public fun createPeerConnectionFactoryBuilder(
+        initializationOptionsBuilder: InitializationOptions.Builder =
+            createInitializationOptionsBuilder(),
         enableIntelVp8Encoder: Boolean = true,
-        enableH264HighProfile: Boolean = true
+        enableH264HighProfile: Boolean = true,
     ): PeerConnectionFactory.Builder {
         PeerConnectionFactory.initialize(initializationOptionsBuilder.createInitializationOptions())
 
         val videoDecoderFactory = DefaultVideoDecoderFactory(rootEglBase.eglBaseContext)
-        val defaultVideoEncoderFactory = DefaultVideoEncoderFactory(
-            rootEglBase.eglBaseContext,
-            enableIntelVp8Encoder,
-            enableH264HighProfile
-        )
-        return PeerConnectionFactory.builder()
+        val defaultVideoEncoderFactory =
+            DefaultVideoEncoderFactory(
+                rootEglBase.eglBaseContext,
+                enableIntelVp8Encoder,
+                enableH264HighProfile,
+            )
+        return PeerConnectionFactory
+            .builder()
             .setVideoDecoderFactory(videoDecoderFactory)
             .setVideoEncoderFactory(defaultVideoEncoderFactory)
     }
@@ -86,11 +91,12 @@ object WebRtc {
      * [PeerConnectionFactory].
      */
     @Suppress("unused")
-    fun configure(
+    public fun configure(
         rootEglBase: EglBase? = null,
         videoProcessorFactory: VideoProcessorFactory? = null,
         cameraEnumerator: CameraEnumerator? = null,
-        peerConnectionFactoryBuilder: PeerConnectionFactory.Builder = createPeerConnectionFactoryBuilder(),
+        peerConnectionFactoryBuilder: PeerConnectionFactory.Builder =
+            createPeerConnectionFactoryBuilder(),
     ) {
         check(_peerConnectionFactory == null) {
             "WebRtc.configurePeerConnectionFactory() must be called once only and before any access to MediaDevices."
