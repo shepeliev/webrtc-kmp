@@ -3,18 +3,20 @@ package com.shepeliev.webrtckmp
 import org.webrtc.Logging
 import org.webrtc.VideoFrame
 import org.webrtc.VideoSink
-import org.webrtc.VideoTrack
 import java.util.Timer
 import java.util.TimerTask
 import java.util.concurrent.atomic.AtomicInteger
+import org.webrtc.VideoTrack as AndroidVideoTrack
 
-internal class RemoteVideoStreamTrack(
-    android: VideoTrack,
-) : RenderedVideoStreamTrack(android), VideoStreamTrack {
-    private val trackMuteDetector = TrackMuteDetector().apply {
-        addSink(this)
-        start()
-    }
+internal class RemoteVideoTrack(
+    android: AndroidVideoTrack,
+) : RenderedVideoTrack(android),
+    VideoTrack {
+    private val trackMuteDetector =
+        TrackMuteDetector().apply {
+            addSink(this)
+            start()
+        }
 
     override suspend fun switchCamera(deviceId: String?) {
         Logging.e("RemoteVideoStreamTrack", "switchCamera is not supported for remote tracks")
@@ -57,21 +59,22 @@ internal class RemoteVideoStreamTrack(
 
             synchronized(this) {
                 setMuteTask?.cancel()
-                setMuteTask = object : TimerTask() {
-                    private var lastFrameNumber: Int = frameCounter.get()
+                setMuteTask =
+                    object : TimerTask() {
+                        private var lastFrameNumber: Int = frameCounter.get()
 
-                    override fun run() {
-                        if (disposed) return
+                        override fun run() {
+                            if (disposed) return
 
-                        val frameCount = frameCounter.get()
-                        val isMuted = lastFrameNumber == frameCount
-                        if (isMuted != mutedState) {
-                            mutedState = isMuted
-                            setMuted(isMuted)
+                            val frameCount = frameCounter.get()
+                            val isMuted = lastFrameNumber == frameCount
+                            if (isMuted != mutedState) {
+                                mutedState = isMuted
+                                setMuted(isMuted)
+                            }
+                            lastFrameNumber = frameCounter.get()
                         }
-                        lastFrameNumber = frameCounter.get()
                     }
-                }
                 timer.schedule(setMuteTask, INITIAL_MUTE_DELAY, MUTE_DELAY)
             }
         }

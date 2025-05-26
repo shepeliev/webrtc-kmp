@@ -3,12 +3,13 @@ package com.shepeliev.webrtckmp
 import com.shepeliev.webrtckmp.capturer.CameraVideoCapturerController
 import com.shepeliev.webrtckmp.capturer.VideoCapturerController
 import com.shepeliev.webrtckmp.capturer.VideoCapturerErrorListener
-import org.webrtc.VideoTrack
+import org.webrtc.VideoTrack as AndroidVideoTrack
 
-internal class LocalVideoStreamTrack(
-    android: VideoTrack,
+internal class LocalVideoTrack(
+    android: AndroidVideoTrack,
     private val videoCapturerController: VideoCapturerController,
-) : RenderedVideoStreamTrack(android), VideoStreamTrack {
+) : RenderedVideoTrack(android),
+    VideoTrack {
     override val settings: MediaTrackSettings get() = videoCapturerController.settings
 
     init {

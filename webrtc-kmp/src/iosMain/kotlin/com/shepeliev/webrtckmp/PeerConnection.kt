@@ -333,8 +333,8 @@ public actual class PeerConnection actual constructor(
             didAddReceiver.track()?.let {
                 remoteTracks.getOrPut(it.trackId) {
                     when (val kind = it.kind()) {
-                        kRTCMediaStreamTrackKindAudio -> RemoteAudioStreamTrack(it as RTCAudioTrack)
-                        kRTCMediaStreamTrackKindVideo -> RemoteVideoStreamTrack(it as RTCVideoTrack)
+                        kRTCMediaStreamTrackKindAudio -> RemoteAudioTrack(it as RTCAudioTrack)
+                        kRTCMediaStreamTrackKindVideo -> RemoteVideoTrack(it as RTCVideoTrack)
                         else -> error("Unsupported track kind: $kind")
                     }
                 }
@@ -346,14 +346,10 @@ public actual class PeerConnection actual constructor(
             iosStreams.map { iosStream ->
                 MediaStream(iosStream).also { stream ->
                     iosStream.audioTracks.forEach {
-                        stream.addTrack(
-                            RemoteAudioStreamTrack(it as RTCAudioTrack),
-                        )
+                        stream.addTrack(RemoteAudioTrack(it as RTCAudioTrack))
                     }
                     iosStream.videoTracks.forEach {
-                        stream.addTrack(
-                            RemoteVideoStreamTrack(it as RTCVideoTrack),
-                        )
+                        stream.addTrack(RemoteVideoTrack(it as RTCVideoTrack))
                     }
                 }
             }

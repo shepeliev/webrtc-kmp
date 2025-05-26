@@ -20,11 +20,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.platformLogWriter
-import com.shepeliev.webrtckmp.AudioStreamTrack
+import com.shepeliev.webrtckmp.AudioTrack
 import com.shepeliev.webrtckmp.MediaDevices
 import com.shepeliev.webrtckmp.MediaStream
 import com.shepeliev.webrtckmp.PeerConnection
-import com.shepeliev.webrtckmp.VideoStreamTrack
+import com.shepeliev.webrtckmp.VideoTrack
 import com.shepeliev.webrtckmp.videoTracks
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -42,19 +42,22 @@ fun App() {
         ) { innerPadding ->
             val scope = rememberCoroutineScope()
             val (localStream, setLocalStream) = remember { mutableStateOf<MediaStream?>(null) }
-            val (remoteVideoTrack, setRemoteVideoTrack) = remember {
-                mutableStateOf<VideoStreamTrack?>(
-                    null
-                )
-            }
-            val (remoteAudioTrack, setRemoteAudioTrack) = remember {
-                mutableStateOf<AudioStreamTrack?>(
-                    null
-                )
-            }
-            val (peerConnections, setPeerConnections) = remember {
-                mutableStateOf<Pair<PeerConnection, PeerConnection>?>(null)
-            }
+            val (remoteVideoTrack, setRemoteVideoTrack) =
+                remember {
+                    mutableStateOf<VideoTrack?>(
+                        null,
+                    )
+                }
+            val (remoteAudioTrack, setRemoteAudioTrack) =
+                remember {
+                    mutableStateOf<AudioTrack?>(
+                        null,
+                    )
+                }
+            val (peerConnections, setPeerConnections) =
+                remember {
+                    mutableStateOf<Pair<PeerConnection, PeerConnection>?>(null)
+                }
 
             LaunchedEffect(localStream, peerConnections) {
                 if (peerConnections == null || localStream == null) return@LaunchedEffect
@@ -70,7 +73,7 @@ fun App() {
                 localVideoTrack?.let {
                     Video(
                         videoTrack = it,
-                        modifier = Modifier.weight(1f).fillMaxWidth()
+                        modifier = Modifier.weight(1f).fillMaxWidth(),
                     )
                 } ?: Box(
                     modifier = Modifier.weight(1f).fillMaxWidth(),
@@ -109,7 +112,7 @@ fun App() {
                                 setPeerConnections(null)
                                 setRemoteVideoTrack(null)
                                 setRemoteAudioTrack(null)
-                            }
+                            },
                         )
 
                         SwitchCameraButton(
@@ -117,7 +120,7 @@ fun App() {
                                 scope.launch {
                                     localStream.videoTracks.firstOrNull()?.switchCamera()
                                 }
-                            }
+                            },
                         )
                     }
                     if (peerConnections == null) {
@@ -126,8 +129,8 @@ fun App() {
                                 setPeerConnections(
                                     Pair(
                                         PeerConnection(),
-                                        PeerConnection()
-                                    )
+                                        PeerConnection(),
+                                    ),
                                 )
                             },
                         )
@@ -146,28 +149,40 @@ fun App() {
 }
 
 @Composable
-private fun CallButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun CallButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Button(onClick, modifier = modifier) {
         Text("Call")
     }
 }
 
 @Composable
-private fun HangupButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun HangupButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Button(onClick, modifier = modifier) {
         Text("Hangup")
     }
 }
 
 @Composable
-private fun SwitchCameraButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun SwitchCameraButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Button(onClick = onClick, modifier = modifier) {
         Text("Switch Camera")
     }
 }
 
 @Composable
-private fun StopButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun StopButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Button(onClick = onClick, modifier = modifier) {
         Text("Stop")
     }

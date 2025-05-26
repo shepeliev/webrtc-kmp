@@ -10,7 +10,8 @@ import kotlinx.cinterop.ExperimentalForeignApi
 internal class LocalVideoStreamTrack(
     ios: RTCVideoTrack,
     private val videoCapturerController: VideoCapturerController,
-) : RenderedVideoStreamTrack(ios), VideoStreamTrack {
+) : RenderedVideoStreamTrack(ios),
+    VideoTrack {
     override val settings: MediaTrackSettings get() = videoCapturerController.settings
 
     init {

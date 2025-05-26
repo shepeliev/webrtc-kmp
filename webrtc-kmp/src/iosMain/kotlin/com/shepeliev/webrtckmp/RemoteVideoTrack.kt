@@ -25,19 +25,20 @@ import platform.darwin.dispatch_source_t
 import platform.darwin.dispatch_time
 import kotlin.concurrent.AtomicInt
 
-internal class RemoteVideoStreamTrack internal constructor(
+internal class RemoteVideoTrack internal constructor(
     ios: RTCVideoTrack,
-) : RenderedVideoStreamTrack(ios), VideoStreamTrack {
-
-    private val trackMuteDetector = TrackMuteDetector().apply {
-        addRenderer(this)
-        start()
-    }
+) : RenderedVideoStreamTrack(ios),
+    VideoTrack {
+    private val trackMuteDetector =
+        TrackMuteDetector().apply {
+            addRenderer(this)
+            start()
+        }
 
     override suspend fun switchCamera(deviceId: String?) {
         RTCLogEx(
             RTCLoggingSeverity.RTCLoggingSeverityWarning,
-            "switchCamera is not supported for remote tracks"
+            "switchCamera is not supported for remote tracks",
         )
     }
 
@@ -60,7 +61,9 @@ internal class RemoteVideoStreamTrack internal constructor(
      * The original idea is from React Native WebRTC
      * https://github.com/react-native-webrtc/react-native-webrtc/blob/95cf638dfa/ios/RCTWebRTC/WebRTCModule%2BVideoTrackAdapter.m
      */
-    private inner class TrackMuteDetector : NSObject(), RTCVideoRendererProtocol {
+    private inner class TrackMuteDetector :
+        NSObject(),
+        RTCVideoRendererProtocol {
         private var timer: dispatch_source_t = null
         private var frameCount: AtomicInt = AtomicInt(0)
         private var disposed = false
@@ -81,15 +84,21 @@ internal class RemoteVideoStreamTrack internal constructor(
                 dispatch_source_cancel(timer)
             }
 
-            timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0u, 0u, dispatch_get_main_queue())
+            timer =
+                dispatch_source_create(
+                    DISPATCH_SOURCE_TYPE_TIMER,
+                    0u,
+                    0u,
+                    dispatch_get_main_queue(),
+                )
             dispatch_source_set_timer(
                 timer,
                 dispatch_time(
                     DISPATCH_TIME_NOW,
-                    (INITIAL_MUTE_DELAY * NSEC_PER_SEC.toDouble()).toLong()
+                    (INITIAL_MUTE_DELAY * NSEC_PER_SEC.toDouble()).toLong(),
                 ),
                 (MUTE_DELAY * NSEC_PER_SEC.toDouble()).toULong(),
-                NSEC_PER_SEC / 10.toULong()
+                NSEC_PER_SEC / 10.toULong(),
             )
 
             var lastFrameCount = frameCount.value

@@ -9,38 +9,43 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import com.shepeliev.webrtckmp.AudioStreamTrack
-import com.shepeliev.webrtckmp.VideoStreamTrack
+import com.shepeliev.webrtckmp.AudioTrack
+import com.shepeliev.webrtckmp.VideoTrack
 import com.shepeliev.webrtckmp.WebRtc
 import org.webrtc.RendererCommon
 import org.webrtc.SurfaceViewRenderer
 import org.webrtc.VideoSink
 
 @Composable
-actual fun Video(videoTrack: VideoStreamTrack, modifier: Modifier, audioTrack: AudioStreamTrack?) {
+actual fun Video(
+    videoTrack: VideoTrack,
+    modifier: Modifier,
+    audioTrack: AudioTrack?,
+) {
     var renderer by remember { mutableStateOf<SurfaceViewRenderer?>(null) }
 
-    val lifecycleEventObserver = remember(renderer, videoTrack) {
-        LifecycleEventObserver { _, event ->
-            when (event) {
-                Lifecycle.Event.ON_RESUME -> {
-                    renderer?.also {
-                        it.init(WebRtc.rootEglBase.eglBaseContext, null)
-                        videoTrack.addSinkCatching(it)
+    val lifecycleEventObserver =
+        remember(renderer, videoTrack) {
+            LifecycleEventObserver { _, event ->
+                when (event) {
+                    Lifecycle.Event.ON_RESUME -> {
+                        renderer?.also {
+                            it.init(WebRtc.rootEglBase.eglBaseContext, null)
+                            videoTrack.addSinkCatching(it)
+                        }
                     }
-                }
 
-                Lifecycle.Event.ON_PAUSE -> {
-                    renderer?.also { videoTrack.removeSinkCatching(it) }
-                    renderer?.release()
-                }
+                    Lifecycle.Event.ON_PAUSE -> {
+                        renderer?.also { videoTrack.removeSinkCatching(it) }
+                        renderer?.release()
+                    }
 
-                else -> {
-                    // ignore other events
+                    else -> {
+                        // ignore other events
+                    }
                 }
             }
         }
-    }
 
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     DisposableEffect(lifecycle, lifecycleEventObserver) {
@@ -59,7 +64,7 @@ actual fun Video(videoTrack: VideoStreamTrack, modifier: Modifier, audioTrack: A
             SurfaceViewRenderer(context).apply {
                 setScalingType(
                     RendererCommon.ScalingType.SCALE_ASPECT_BALANCED,
-                    RendererCommon.ScalingType.SCALE_ASPECT_FIT
+                    RendererCommon.ScalingType.SCALE_ASPECT_FIT,
                 )
                 renderer = this
             }
@@ -67,12 +72,12 @@ actual fun Video(videoTrack: VideoStreamTrack, modifier: Modifier, audioTrack: A
     )
 }
 
-private fun VideoStreamTrack.addSinkCatching(sink: VideoSink) {
+private fun VideoTrack.addSinkCatching(sink: VideoSink) {
     // runCatching as track may be disposed while activity was in pause
     runCatching { addSink(sink) }
 }
 
-private fun VideoStreamTrack.removeSinkCatching(sink: VideoSink) {
+private fun VideoTrack.removeSinkCatching(sink: VideoSink) {
     // runCatching as track may be disposed while activity was in pause
     runCatching { removeSink(sink) }
 }

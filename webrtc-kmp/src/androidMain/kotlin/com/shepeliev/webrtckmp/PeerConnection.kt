@@ -328,8 +328,8 @@ public actual class PeerConnection actual constructor(
                 receiver.track()?.let {
                     remoteTracks.getOrPut(it.id()) {
                         when (it.kind()) {
-                            AUDIO_TRACK_KIND -> RemoteAudioStreamTrack(it as AudioTrack)
-                            VIDEO_TRACK_KIND -> RemoteVideoStreamTrack(it as VideoTrack)
+                            AUDIO_TRACK_KIND -> RemoteAudioTrack(it as AudioTrack)
+                            VIDEO_TRACK_KIND -> RemoteVideoTrack(it as VideoTrack)
                             else -> error("Unsupported track kind: ${it.kind()}")
                         }
                     }
@@ -339,14 +339,10 @@ public actual class PeerConnection actual constructor(
                 androidStreams.map { androidStream ->
                     MediaStream(androidStream).also { stream ->
                         androidStream.audioTracks.forEach {
-                            stream.addTrack(
-                                RemoteAudioStreamTrack(it),
-                            )
+                            stream.addTrack(RemoteAudioTrack(it))
                         }
                         androidStream.videoTracks.forEach {
-                            stream.addTrack(
-                                RemoteVideoStreamTrack(it),
-                            )
+                            stream.addTrack(RemoteVideoTrack(it))
                         }
                     }
                 }

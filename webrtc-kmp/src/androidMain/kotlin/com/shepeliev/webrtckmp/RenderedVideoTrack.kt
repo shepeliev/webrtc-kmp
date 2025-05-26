@@ -1,11 +1,12 @@
 package com.shepeliev.webrtckmp
 
 import org.webrtc.VideoSink
-import org.webrtc.VideoTrack
+import org.webrtc.VideoTrack as AndroidVideoTrack
 
-internal abstract class RenderedVideoStreamTrack(
-    android: VideoTrack
-) : MediaStreamTrackImpl(android), VideoStreamTrack {
+internal abstract class RenderedVideoTrack(
+    android: AndroidVideoTrack,
+) : MediaStreamTrackImpl(android),
+    VideoTrack {
     override fun addSink(sink: VideoSink) {
         android as VideoTrack
         android.addSink(sink)
