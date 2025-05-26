@@ -6,7 +6,7 @@ import com.shepeliev.webrtckmp.internal.AudioTrackImpl
 import com.shepeliev.webrtckmp.internal.VideoTrackImpl
 
 public actual class MediaStream internal constructor(
-    internal val js: PlatformMediaStream,
+    public val js: PlatformMediaStream,
 ) {
     public actual constructor() : this(PlatformMediaStream())
 

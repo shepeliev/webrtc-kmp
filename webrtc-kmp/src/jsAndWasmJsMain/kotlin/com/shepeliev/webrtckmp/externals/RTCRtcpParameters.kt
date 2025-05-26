@@ -1,6 +1,6 @@
 package com.shepeliev.webrtckmp.externals
 
-external interface RTCRtcpParameters {
+internal external interface RTCRtcpParameters {
     val cname: String
     val reducedSize: Boolean
 }

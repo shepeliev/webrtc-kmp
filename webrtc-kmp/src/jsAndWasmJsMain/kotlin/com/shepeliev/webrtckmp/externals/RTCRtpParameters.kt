@@ -1,6 +1,6 @@
 package com.shepeliev.webrtckmp.externals
 
-external interface RTCRtpParameters {
+internal external interface RTCRtpParameters {
     val rtcp: RTCRtcpParameters
 }
 

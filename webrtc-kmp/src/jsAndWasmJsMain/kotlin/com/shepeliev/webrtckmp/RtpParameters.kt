@@ -5,7 +5,7 @@ import com.shepeliev.webrtckmp.externals.RTCRtpCodecParameters
 import com.shepeliev.webrtckmp.externals.RTCRtpParameters
 import com.shepeliev.webrtckmp.externals.codes
 
-public actual class RtpParameters(
+public actual class RtpParameters internal constructor(
     internal val platform: RTCRtpParameters,
 ) {
     public actual val codecs: List<RtpCodecParameters> get() =
@@ -48,7 +48,7 @@ public actual class HeaderExtension {
     public actual val encrypted: Boolean = false
 }
 
-public actual class RtcpParameters(
+public actual class RtcpParameters internal constructor(
     internal val platform: RTCRtcpParameters,
 ) {
     public actual val cname: String get() = platform.cname

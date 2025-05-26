@@ -3,14 +3,14 @@ package com.shepeliev.webrtckmp.externals
 import kotlin.js.JsName
 
 @JsName("MediaStream")
-internal external interface PlatformMediaStream {
-    val id: String
+public external interface PlatformMediaStream {
+    public val id: String
 
-    fun addTrack(track: PlatformMediaStreamTrack)
+    public fun addTrack(track: PlatformMediaStreamTrack)
 
-    fun getTrackById(id: String): PlatformMediaStreamTrack?
+    public fun getTrackById(id: String): PlatformMediaStreamTrack?
 
-    fun removeTrack(track: PlatformMediaStreamTrack)
+    public fun removeTrack(track: PlatformMediaStreamTrack)
 }
 
 internal expect fun PlatformMediaStream(): PlatformMediaStream
