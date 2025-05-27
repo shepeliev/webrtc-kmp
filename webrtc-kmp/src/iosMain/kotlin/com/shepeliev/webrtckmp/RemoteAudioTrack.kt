@@ -6,10 +6,10 @@ import WebRTC.RTCAudioTrack
 import kotlinx.cinterop.ExperimentalForeignApi
 
 internal class RemoteAudioTrack(
-    ios: RTCAudioTrack,
-) : MediaStreamTrackImpl(ios),
+    private val iosTrack: RTCAudioTrack,
+) : MediaStreamTrackImpl(iosTrack),
     AudioTrack {
     override fun setVolume(volume: Double) {
-        (ios as RTCAudioTrack).source().setVolume(volume)
+        iosTrack.source.setVolume(volume)
     }
 }

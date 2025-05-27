@@ -3,10 +3,10 @@ package com.shepeliev.webrtckmp
 import org.webrtc.AudioTrack as AndroidAudioTrack
 
 internal class RemoteAudioTrack(
-    android: AndroidAudioTrack,
-) : MediaStreamTrackImpl(android),
+    private val androidTrack: AndroidAudioTrack,
+) : MediaStreamTrackImpl(androidTrack),
     AudioTrack {
     override fun setVolume(volume: Double) {
-        (android as AudioTrack).setVolume(volume)
+        androidTrack.setVolume(volume)
     }
 }
