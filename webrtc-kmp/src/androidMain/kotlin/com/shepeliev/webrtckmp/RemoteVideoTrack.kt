@@ -19,7 +19,7 @@ internal class RemoteVideoTrack(
         }
 
     override suspend fun switchCamera(deviceId: String?) {
-        Logging.e("RemoteVideoStreamTrack", "switchCamera is not supported for remote tracks")
+        Logging.e("RemoteVideoTrack", "switchCamera is not supported for remote tracks")
     }
 
     override fun onSetEnabled(enabled: Boolean) {

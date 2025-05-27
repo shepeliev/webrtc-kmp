@@ -27,7 +27,7 @@ import kotlin.concurrent.AtomicInt
 
 internal class RemoteVideoTrack internal constructor(
     ios: RTCVideoTrack,
-) : RenderedVideoStreamTrack(ios),
+) : RenderedVideoTrack(ios),
     VideoTrack {
     private val trackMuteDetector =
         TrackMuteDetector().apply {

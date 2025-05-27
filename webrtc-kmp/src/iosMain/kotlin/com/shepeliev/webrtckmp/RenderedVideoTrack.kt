@@ -6,7 +6,7 @@ import WebRTC.RTCVideoRendererProtocol
 import WebRTC.RTCVideoTrack
 import kotlinx.cinterop.ExperimentalForeignApi
 
-internal abstract class RenderedVideoStreamTrack(
+internal abstract class RenderedVideoTrack(
     ios: RTCVideoTrack,
 ) : MediaStreamTrackImpl(ios),
     VideoTrack {

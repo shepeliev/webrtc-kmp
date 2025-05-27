@@ -54,7 +54,7 @@ private object MediaDevicesImpl : MediaDevices {
                         constraints = videoConstraints,
                         videoCapturerDelegate = videoProcessor ?: videoSource,
                     )
-                LocalVideoStreamTrack(iosVideoTrack, videoCaptureController)
+                LocalVideoTrack(iosVideoTrack, videoCaptureController)
             }
 
         return MediaStream().apply {

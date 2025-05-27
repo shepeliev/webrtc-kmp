@@ -7,10 +7,10 @@ import com.shepeliev.webrtckmp.capturer.CameraVideoCapturerController
 import com.shepeliev.webrtckmp.capturer.VideoCapturerController
 import kotlinx.cinterop.ExperimentalForeignApi
 
-internal class LocalVideoStreamTrack(
+internal class LocalVideoTrack(
     ios: RTCVideoTrack,
     private val videoCapturerController: VideoCapturerController,
-) : RenderedVideoStreamTrack(ios),
+) : RenderedVideoTrack(ios),
     VideoTrack {
     override val settings: MediaTrackSettings get() = videoCapturerController.settings
 
