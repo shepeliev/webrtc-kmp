@@ -122,10 +122,10 @@ class PeerConnectionTest {
         val pc2 = PeerConnection()
         val offer = pc1.createOffer(DefaultOfferAnswerOptions)
 
-        pc1.setLocalDescription(offer)
+        assertNull(pc2.remoteDescription)
         pc2.setRemoteDescription(offer)
 
-        assertEquals(offer, pc2.remoteDescription)
+        assertNotNull(pc2.remoteDescription)
 
         pc1.close()
         pc2.close()

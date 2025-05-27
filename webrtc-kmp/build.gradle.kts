@@ -109,6 +109,10 @@ kotlin {
             implementation(libs.kotlin.coroutines.test)
         }
 
+        androidInstrumentedTest.dependencies {
+            implementation(libs.androidx.test.rules)
+        }
+
         val iosX64AndSimulatorArm64Main by creating {
             dependsOn(iosMain.get())
         }
