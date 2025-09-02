@@ -58,17 +58,23 @@ public object WebRtc {
      * Creates a new default [PeerConnectionFactory.Builder].
      */
     public fun createPeerConnectionFactoryBuilder(
+        rootEglBase: EglBase? = null,
         initializationOptionsBuilder: InitializationOptions.Builder =
             createInitializationOptionsBuilder(),
         enableIntelVp8Encoder: Boolean = true,
         enableH264HighProfile: Boolean = true,
     ): PeerConnectionFactory.Builder {
+        if (rootEglBase != null) {
+            check(_rootEglBase == null) { "Root EglBase is already initialized." }
+            _rootEglBase = rootEglBase
+        }
+
         PeerConnectionFactory.initialize(initializationOptionsBuilder.createInitializationOptions())
 
-        val videoDecoderFactory = DefaultVideoDecoderFactory(rootEglBase.eglBaseContext)
+        val videoDecoderFactory = DefaultVideoDecoderFactory(this.rootEglBase.eglBaseContext)
         val defaultVideoEncoderFactory =
             DefaultVideoEncoderFactory(
-                rootEglBase.eglBaseContext,
+                this.rootEglBase.eglBaseContext,
                 enableIntelVp8Encoder,
                 enableH264HighProfile,
             )
@@ -82,8 +88,6 @@ public object WebRtc {
      * Configures the WebRTC library. This method must be called once only and before any access to
      * MediaDevices.
      *
-     * @param rootEglBase The root [EglBase] instance. If not provided, a new instance will be
-     * created.
      * @param videoProcessorFactory The factory to create [VideoProcessor] instances.
      * @param cameraEnumerator The camera enumerator to use. If not provided, the default enumerator
      * will be used.
@@ -92,7 +96,6 @@ public object WebRtc {
      */
     @Suppress("unused")
     public fun configure(
-        rootEglBase: EglBase? = null,
         videoProcessorFactory: VideoProcessorFactory? = null,
         cameraEnumerator: CameraEnumerator? = null,
         peerConnectionFactoryBuilder: PeerConnectionFactory.Builder =
@@ -100,11 +103,6 @@ public object WebRtc {
     ) {
         check(_peerConnectionFactory == null) {
             "WebRtc.configurePeerConnectionFactory() must be called once only and before any access to MediaDevices."
-        }
-
-        if (rootEglBase != null) {
-            check(_rootEglBase == null) { "Root EglBase is already initialized." }
-            _rootEglBase = rootEglBase
         }
 
         this.videoProcessorFactory = videoProcessorFactory

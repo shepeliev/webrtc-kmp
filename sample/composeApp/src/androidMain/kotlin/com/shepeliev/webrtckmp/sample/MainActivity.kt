@@ -17,7 +17,7 @@ class MainActivity : ComponentActivity() {
 
         val initializationOptionsBuilder = WebRtc.createInitializationOptionsBuilder()
             .setInjectableLogger(WebRtcLogger, Logging.Severity.LS_ERROR)
-        val peerConnectionFactoryBuilder = WebRtc.createPeerConnectionFactoryBuilder(initializationOptionsBuilder)
+        val peerConnectionFactoryBuilder = WebRtc.createPeerConnectionFactoryBuilder(initializationOptionsBuilder = initializationOptionsBuilder)
         WebRtc.configure(peerConnectionFactoryBuilder = peerConnectionFactoryBuilder)
 
         setContent {
