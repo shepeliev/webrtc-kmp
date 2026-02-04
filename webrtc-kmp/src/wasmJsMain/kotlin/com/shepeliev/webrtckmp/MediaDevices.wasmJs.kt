@@ -82,7 +82,7 @@ private object MediaDevicesImpl : MediaDevices {
 private fun jsGetDisplayMedia(): Promise<org.w3c.dom.mediacapture.MediaStream> =
     js("navigator.mediaDevices.getDisplayMedia()")
 
-private fun jsSupportsDisplayMedia(): Boolean = js("navigator.mediaDevices.supportsDisplayMedia()")
+private fun jsSupportsDisplayMedia(): Boolean = js("!!navigator.mediaDevices.getDisplayMedia")
 
 @Suppress("UNUSED_PARAMETER")
 private fun jsMediaStreamConstraints(audio: JsAny?, video: JsAny?): org.w3c.dom.mediacapture.MediaStreamConstraints =
