@@ -5,10 +5,13 @@ import org.khronos.webgl.Int8Array
 import org.khronos.webgl.get
 import org.khronos.webgl.set
 
+/** Returns MessageEvent.data as Int8Array. Handles both string (TextEncoder) and ArrayBuffer. */
+private fun messageEventDataToInt8Array(ev: WasmMessageEvent): Int8Array = js("(function(e){var d=e.data;if(typeof d==='string')return new Int8Array(new TextEncoder().encode(d).buffer);return new Int8Array(d);})(ev)")
+
 @Suppress("UNCHECKED_CAST_TO_EXTERNAL_INTERFACE")
 internal actual val MessageEvent.data: ByteArray
     get() {
-        val jsArray = Int8Array((this as WasmMessageEvent).data)
+        val jsArray = messageEventDataToInt8Array(this as WasmMessageEvent)
         return ByteArray(jsArray.length) { jsArray[it] }
     }
 
