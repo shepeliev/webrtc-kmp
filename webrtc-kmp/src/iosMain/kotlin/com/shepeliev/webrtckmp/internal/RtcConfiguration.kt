@@ -2,12 +2,6 @@
 
 package com.shepeliev.webrtckmp.internal
 
-import WebRTC.RTCBundlePolicy
-import WebRTC.RTCConfiguration
-import WebRTC.RTCContinualGatheringPolicy
-import WebRTC.RTCIceTransportPolicy
-import WebRTC.RTCRtcpMuxPolicy
-import WebRTC.RTCSdpSemantics
 import com.shepeliev.webrtckmp.BundlePolicy
 import com.shepeliev.webrtckmp.ContinualGatheringPolicy
 import com.shepeliev.webrtckmp.IceServer
@@ -15,6 +9,12 @@ import com.shepeliev.webrtckmp.IceTransportPolicy
 import com.shepeliev.webrtckmp.RtcConfiguration
 import com.shepeliev.webrtckmp.RtcpMuxPolicy
 import kotlinx.cinterop.ExperimentalForeignApi
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCBundlePolicy
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCConfiguration
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCContinualGatheringPolicy
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCIceTransportPolicy
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCRtcpMuxPolicy
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCSdpSemantics
 
 internal fun RtcConfiguration.toPlatform(): RTCConfiguration {
     return RTCConfiguration().also {

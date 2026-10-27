@@ -2,8 +2,8 @@
 
 package com.shepeliev.webrtckmp
 
-import WebRTC.RTCRtpSender
 import kotlinx.cinterop.ExperimentalForeignApi
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCRtpSender
 
 public actual class RtpSender(
     public val ios: RTCRtpSender,

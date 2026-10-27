@@ -2,8 +2,8 @@
 
 package com.shepeliev.webrtckmp
 
-import WebRTC.RTCAudioTrack
 import kotlinx.cinterop.ExperimentalForeignApi
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCAudioTrack
 
 internal class RemoteAudioTrack(
     private val iosTrack: RTCAudioTrack,

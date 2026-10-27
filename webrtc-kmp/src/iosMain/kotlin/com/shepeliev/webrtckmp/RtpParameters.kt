@@ -2,12 +2,12 @@
 
 package com.shepeliev.webrtckmp
 
-import WebRTC.RTCRtcpParameters
-import WebRTC.RTCRtpCodecParameters
-import WebRTC.RTCRtpEncodingParameters
-import WebRTC.RTCRtpHeaderExtension
-import WebRTC.RTCRtpParameters
 import kotlinx.cinterop.ExperimentalForeignApi
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCRtcpParameters
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCRtpCodecParameters
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCRtpEncodingParameters
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCRtpHeaderExtension
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCRtpParameters
 
 public actual class RtpParameters(
     public val native: RTCRtpParameters,

@@ -2,11 +2,11 @@
 
 package com.shepeliev.webrtckmp.internal
 
-import WebRTC.RTCIceServer
-import WebRTC.RTCTlsCertPolicy
 import com.shepeliev.webrtckmp.IceServer
 import com.shepeliev.webrtckmp.TlsCertPolicy
 import kotlinx.cinterop.ExperimentalForeignApi
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCIceServer
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCTlsCertPolicy
 
 internal fun IceServer.toPlatform(): RTCIceServer {
     return RTCIceServer(

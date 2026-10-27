@@ -2,10 +2,6 @@
 
 package com.shepeliev.webrtckmp
 
-import WebRTC.RTCDataBuffer
-import WebRTC.RTCDataChannel
-import WebRTC.RTCDataChannelDelegateProtocol
-import WebRTC.RTCDataChannelState
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.channels.Channel
@@ -17,6 +13,10 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import platform.darwin.NSObject
 import platform.posix.uint64_t
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCDataBuffer
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCDataChannel
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCDataChannelDelegateProtocol
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCDataChannelState
 
 public actual class DataChannel(
     public val ios: RTCDataChannel,

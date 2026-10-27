@@ -1,8 +1,8 @@
 package com.shepeliev.webrtckmp
 
-import WebRTC.RTCVideoCapturerDelegateProtocol
-import WebRTC.RTCVideoSource
 import kotlinx.cinterop.ExperimentalForeignApi
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCVideoCapturerDelegateProtocol
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCVideoSource
 
 @OptIn(ExperimentalForeignApi::class)
 public fun interface VideoProcessorFactory {

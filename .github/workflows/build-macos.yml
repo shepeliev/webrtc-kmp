@@ -9,42 +9,45 @@ jobs:
     name: Build and test iOS
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v7
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v6
         with:
+          distribution: temurin
           java-version: 17
-          cache: gradle
 
-      - name: Gradle cache
-        uses: gradle/gradle-build-action@v2
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          build-scan-publish: true
+          build-scan-terms-of-use-url: "https://gradle.com/help/legal-terms-of-use"
+          build-scan-terms-of-use-agree: "yes"
 
-      - name: Cache konan directory
-        uses: actions/cache@v3
+      - name: Cache Kotlin/Native toolchain
+        uses: actions/cache@v6
         with:
           path: ~/.konan
-          key: ${{ runner.os }}-konan-${{ hashFiles('*.gradle.kts', 'buildSrc/*') }}
+          key: ${{ runner.os }}-konan-${{ hashFiles('gradle/libs.versions.toml') }}
           restore-keys: |
-            ${{ runner.os }}-konan- 
+            ${{ runner.os }}-konan-
 
-      - name: Cocoapods cache
-        uses: actions/cache@v3
-        id: cocoapods-cache
+      - name: SwiftPM cache
+        uses: actions/cache@v6
         with:
           path: |
-            ~/.cocoapods
-            ~/Library/Caches/CocoaPods
-            */build/cocoapods
-            */build/classes
-          key: cocoapods-cache
+            ~/Library/Caches/org.swift.swiftpm
+            .swiftpm-locks/*/swiftPMCheckout
+          key: ${{ runner.os }}-swiftpm-${{ hashFiles('.swiftpm-locks/*/swiftImport/Package.resolved') }}
+          restore-keys: |
+            ${{ runner.os }}-swiftpm-
 
       - name: Run iOS tests
         run: ./gradlew cleanTest webrtc-kmp:iosSimulatorArm64Test
 
       - name: Upload iOS test artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: "iOS Tests Report HTML"
-          path: "webrtc-kmp/build/reports/tests/iosX64Test"
+          path: "webrtc-kmp/build/reports/tests/iosSimulatorArm64Test"

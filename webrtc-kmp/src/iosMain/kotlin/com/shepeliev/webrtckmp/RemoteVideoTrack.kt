@@ -2,11 +2,6 @@
 
 package com.shepeliev.webrtckmp
 
-import WebRTC.RTCLogEx
-import WebRTC.RTCLoggingSeverity
-import WebRTC.RTCVideoFrame
-import WebRTC.RTCVideoRendererProtocol
-import WebRTC.RTCVideoTrack
 import kotlinx.cinterop.CValue
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.CoreGraphics.CGSize
@@ -23,6 +18,11 @@ import platform.darwin.dispatch_source_set_event_handler
 import platform.darwin.dispatch_source_set_timer
 import platform.darwin.dispatch_source_t
 import platform.darwin.dispatch_time
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCLogEx
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCLoggingSeverity
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCVideoFrame
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCVideoRendererProtocol
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCVideoTrack
 import kotlin.concurrent.AtomicInt
 
 internal class RemoteVideoTrack internal constructor(

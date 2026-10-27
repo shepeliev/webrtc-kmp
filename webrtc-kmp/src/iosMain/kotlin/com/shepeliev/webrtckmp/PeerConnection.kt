@@ -2,27 +2,6 @@
 
 package com.shepeliev.webrtckmp
 
-import WebRTC.RTCAudioTrack
-import WebRTC.RTCDataChannel
-import WebRTC.RTCDataChannelConfiguration
-import WebRTC.RTCIceCandidate
-import WebRTC.RTCIceConnectionState
-import WebRTC.RTCIceGatheringState
-import WebRTC.RTCMediaConstraints
-import WebRTC.RTCMediaStream
-import WebRTC.RTCPeerConnection
-import WebRTC.RTCPeerConnectionDelegateProtocol
-import WebRTC.RTCPeerConnectionState
-import WebRTC.RTCRtpReceiver
-import WebRTC.RTCRtpSender
-import WebRTC.RTCRtpTransceiver
-import WebRTC.RTCSessionDescription
-import WebRTC.RTCSignalingState
-import WebRTC.RTCVideoTrack
-import WebRTC.dataChannelForLabel
-import WebRTC.kRTCMediaStreamTrackKindAudio
-import WebRTC.kRTCMediaStreamTrackKindVideo
-import WebRTC.statisticsWithCompletionHandler
 import com.shepeliev.webrtckmp.PeerConnectionEvent.ConnectionStateChange
 import com.shepeliev.webrtckmp.PeerConnectionEvent.IceConnectionStateChange
 import com.shepeliev.webrtckmp.PeerConnectionEvent.IceGatheringStateChange
@@ -44,6 +23,27 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import platform.darwin.NSObject
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCAudioTrack
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCDataChannel
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCDataChannelConfiguration
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCIceCandidate
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCIceConnectionState
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCIceGatheringState
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCMediaConstraints
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCMediaStream
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCPeerConnection
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCPeerConnectionDelegateProtocol
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCPeerConnectionState
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCRtpReceiver
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCRtpSender
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCRtpTransceiver
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCSessionDescription
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCSignalingState
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCVideoTrack
+import swiftPMImport.com.shepeliev.webrtc.kmp.dataChannelForLabel
+import swiftPMImport.com.shepeliev.webrtc.kmp.kRTCMediaStreamTrackKindAudio
+import swiftPMImport.com.shepeliev.webrtc.kmp.kRTCMediaStreamTrackKindVideo
+import swiftPMImport.com.shepeliev.webrtc.kmp.statisticsWithCompletionHandler
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 

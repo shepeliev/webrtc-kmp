@@ -40,13 +40,13 @@ public sealed interface ValueOrConstrain<T> {
     }
 }
 
-public fun Boolean.asValueConstrain() = ValueOrConstrain.Value(this)
+public fun Boolean.asValueConstrain(): ValueOrConstrain.Value<Boolean> = ValueOrConstrain.Value(this)
 
-public fun Int.asValueConstrain() = ValueOrConstrain.Value(this)
+public fun Int.asValueConstrain(): ValueOrConstrain.Value<Int> = ValueOrConstrain.Value(this)
 
-public fun Double.asValueConstrain() = ValueOrConstrain.Value(this)
+public fun Double.asValueConstrain(): ValueOrConstrain.Value<Double> = ValueOrConstrain.Value(this)
 
-public fun FacingMode.asValueConstrain() = ValueOrConstrain.Value(this)
+public fun FacingMode.asValueConstrain(): ValueOrConstrain.Value<FacingMode> = ValueOrConstrain.Value(this)
 
 public val <T> ValueOrConstrain<T>.value: T?
     get() =

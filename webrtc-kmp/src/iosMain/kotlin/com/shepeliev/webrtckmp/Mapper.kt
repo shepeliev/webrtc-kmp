@@ -2,11 +2,11 @@
 
 package com.shepeliev.webrtckmp
 
-import WebRTC.RTCIceConnectionState
-import WebRTC.RTCIceGatheringState
-import WebRTC.RTCPeerConnectionState
-import WebRTC.RTCSignalingState
 import kotlinx.cinterop.ExperimentalForeignApi
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCIceConnectionState
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCIceGatheringState
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCPeerConnectionState
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCSignalingState
 
 internal fun rtcSignalingStateAsCommon(state: RTCSignalingState): SignalingState {
     return when (state) {

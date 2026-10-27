@@ -2,9 +2,9 @@
 
 package com.shepeliev.webrtckmp
 
-import WebRTC.RTCSdpType
-import WebRTC.RTCSessionDescription
 import kotlinx.cinterop.ExperimentalForeignApi
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCSdpType
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCSessionDescription
 
 internal fun SessionDescription.asIos(): RTCSessionDescription {
     return RTCSessionDescription(type.asIos(), sdp)

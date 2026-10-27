@@ -27,7 +27,7 @@ import com.shepeliev.webrtckmp.PeerConnection
 import com.shepeliev.webrtckmp.VideoTrack
 import com.shepeliev.webrtckmp.videoTracks
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 @Preview

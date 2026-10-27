@@ -1,13 +1,13 @@
 package com.shepeliev.webrtckmp
 
-import WebRTC.RTCCameraVideoCapturer
-import WebRTC.RTCMediaConstraints
 import com.shepeliev.webrtckmp.capturer.CameraVideoCapturerController
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.AVFoundation.AVCaptureDevice
 import platform.Foundation.NSBundle
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSUUID
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCCameraVideoCapturer
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCMediaConstraints
 
 internal actual val mediaDevices: MediaDevices = MediaDevicesImpl
 

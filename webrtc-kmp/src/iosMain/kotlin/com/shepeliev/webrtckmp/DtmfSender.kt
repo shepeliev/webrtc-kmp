@@ -2,8 +2,8 @@
 
 package com.shepeliev.webrtckmp
 
-import WebRTC.RTCDtmfSenderProtocol
 import kotlinx.cinterop.ExperimentalForeignApi
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCDtmfSenderProtocol
 
 public actual class DtmfSender(
     public val native: RTCDtmfSenderProtocol,

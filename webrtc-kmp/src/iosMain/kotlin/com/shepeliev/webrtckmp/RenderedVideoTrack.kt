@@ -2,9 +2,9 @@
 
 package com.shepeliev.webrtckmp
 
-import WebRTC.RTCVideoRendererProtocol
-import WebRTC.RTCVideoTrack
 import kotlinx.cinterop.ExperimentalForeignApi
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCVideoRendererProtocol
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCVideoTrack
 
 internal abstract class RenderedVideoTrack(
     private val iosTrack: RTCVideoTrack,

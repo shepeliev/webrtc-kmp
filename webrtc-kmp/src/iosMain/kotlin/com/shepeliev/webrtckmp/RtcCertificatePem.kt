@@ -2,8 +2,8 @@
 
 package com.shepeliev.webrtckmp
 
-import WebRTC.RTCCertificate
 import kotlinx.cinterop.ExperimentalForeignApi
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCCertificate
 
 public actual class RtcCertificatePem(
     public val native: RTCCertificate,

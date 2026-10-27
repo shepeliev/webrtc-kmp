@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalKotlinGradlePluginApi::class)
+
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -6,51 +8,52 @@ import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.vanniktech.maven.publish)
-    kotlin("native.cocoapods")
 }
 
 group = "com.shepeliev"
 
-version = System.getenv("VERSION") ?: "0.0.0"
+version = providers.environmentVariable("VERSION").getOrElse("0.0.0")
 
 kotlin {
     explicitApi()
+    jvmToolchain(libs.versions.jvmToolchain.get().toInt())
 
     compilerOptions {
         freeCompilerArgs.add("-Xexpect-actual-classes")
     }
 
-    cocoapods {
-        version = project.version.toString()
-        summary = "WebRTC Kotlin Multiplatform SDK"
-        homepage = "https://github.com/shepeliev/webrtc-kmp"
-        ios.deploymentTarget = "13.0"
-
-        noPodspec()
-
-        pod("WebRTC-SDK") {
-            version =
-                libs.versions.webrtc.ios.sdk
-                    .get()
-            moduleName = "WebRTC"
-            packageName = "WebRTC"
-        }
+    swiftPMDependencies {
+        swiftPackage(
+            url = url("https://github.com/webrtc-sdk/Specs.git"),
+            version = exact(libs.versions.webrtc.ios.sdk.get()),
+            products = listOf(product("WebRTC")),
+        )
     }
 
-    @OptIn(ExperimentalKotlinGradlePluginApi::class)
-    androidTarget {
-        publishAllLibraryVariants()
-        instrumentedTestVariant {
-            sourceSetTree.set(KotlinSourceSetTree.test)
+    android {
+        namespace = "com.shepeliev.webrtckmp"
+        compileSdk =
+            libs.versions.compileSdk
+                .get()
+                .toInt()
+        minSdk =
+            libs.versions.minSdk
+                .get()
+                .toInt()
+
+        withDeviceTestBuilder {
+            sourceSetTreeName = KotlinSourceSetTree.test.name
+        }.configure {
+            instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         }
+
         compilerOptions {
             jvmTarget = JvmTarget.JVM_1_8
         }
     }
 
-    iosX64()
     iosArm64()
     iosSimulatorArm64()
 
@@ -66,17 +69,13 @@ kotlin {
             commonWebpackConfig {
                 devServer =
                     (devServer ?: KotlinWebpackConfig.DevServer()).apply {
-                        static =
-                            (static ?: mutableListOf()).apply {
-                                // Serve sources to debug inside browser
-                                add(project.rootDir.path)
-                            }
+                        // Serve sources to debug inside browser
+                        static(project.rootDir.path)
                     }
             }
         }
     }
 
-    @OptIn(ExperimentalKotlinGradlePluginApi::class)
     applyDefaultHierarchyTemplate {
         common {
             group("jsAndWasmJs") {
@@ -99,7 +98,7 @@ kotlin {
         }
 
         jsMain.dependencies {
-            implementation(npm("webrtc-adapter", "8.1.1"))
+            implementation(npm("webrtc-adapter", libs.versions.webrtc.adapter.get()))
         }
 
         wasmJsMain.dependencies {
@@ -108,58 +107,18 @@ kotlin {
 
         commonTest.dependencies {
             implementation(kotlin("test"))
-            implementation(kotlin("test-annotations-common"))
             implementation(libs.kotlin.coroutines.test)
         }
 
-        androidInstrumentedTest.dependencies {
+        getByName("androidDeviceTest").dependencies {
+            implementation(libs.androidx.test.core)
+            implementation(libs.androidx.test.runner)
             implementation(libs.androidx.test.rules)
         }
 
-        val iosX64AndSimulatorArm64Main by creating {
-            dependsOn(iosMain.get())
+        named { it.startsWith("ios") }.configureEach {
+            languageSettings.optIn("kotlinx.cinterop.ExperimentalForeignApi")
         }
-
-        val iosX64Main by getting
-        iosX64Main.dependsOn(iosX64AndSimulatorArm64Main)
-        val iosSimulatorArm64Main by getting
-        iosSimulatorArm64Main.dependsOn(iosX64AndSimulatorArm64Main)
-    }
-}
-
-android {
-    namespace = "com.shepeliev.webrtckmp"
-
-    compileSdk =
-        libs.versions.compileSdk
-            .get()
-            .toInt()
-    sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
-    sourceSets["main"].res.srcDir("src/androidMain/res")
-
-    defaultConfig {
-        minSdk =
-            libs.versions.minSdk
-                .get()
-                .toInt()
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-
-    testOptions {
-        targetSdk =
-            libs.versions.targetSdk
-                .get()
-                .toInt()
-    }
-
-    dependencies {
-        androidTestImplementation(libs.androidx.test.core)
-        androidTestImplementation(libs.androidx.test.runner)
     }
 }
 

@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -45,24 +46,11 @@ class DataChannelTest {
         val pc1DataChannel = pc1.createDataChannel("dataChannel", maxRetransmits = 10)!!
         val pc2DataChannelDeferred = async(start = CoroutineStart.UNDISPATCHED) { pc2.onDataChannel.first() }
 
-        val offer = pc1.createOffer(OfferAnswerOptions())
-        pc1.setLocalDescription(offer)
-        pc1.onIceGatheringState.first { it == IceGatheringState.Complete }
-        pc2.setRemoteDescription(pc1.localDescription!!)
-
-        val answer = pc2.createAnswer(OfferAnswerOptions())
-        pc2.setLocalDescription(answer)
-        pc2.onIceGatheringState.first { it == IceGatheringState.Complete }
-        pc1.setRemoteDescription(pc2.localDescription!!)
+        connect(pc1, pc2)
 
         val pc2DataChannel = pc2DataChannelDeferred.await()
-        if (pc2DataChannel.readyState != DataChannelState.Open) {
-            pc2DataChannel.onOpen.first()
-        }
-
-        if (pc1DataChannel.readyState != DataChannelState.Open) {
-            pc1DataChannel.onOpen.first()
-        }
+        pc1DataChannel.awaitOpen()
+        pc2DataChannel.awaitOpen()
 
         val pc1MessageDeferred = async(start = CoroutineStart.UNDISPATCHED) {
             pc1DataChannel.onMessage
@@ -99,24 +87,11 @@ class DataChannelTest {
         val pc2DataChannelDeferred =
             async(start = CoroutineStart.UNDISPATCHED) { pc2.onDataChannel.first() }
 
-        val offer = pc1.createOffer(OfferAnswerOptions())
-        pc1.setLocalDescription(offer)
-        pc1.onIceGatheringState.first { it == IceGatheringState.Complete }
-        pc2.setRemoteDescription(pc1.localDescription!!)
-
-        val answer = pc2.createAnswer(OfferAnswerOptions())
-        pc2.setLocalDescription(answer)
-        pc2.onIceGatheringState.first { it == IceGatheringState.Complete }
-        pc1.setRemoteDescription(pc2.localDescription!!)
+        connect(pc1, pc2)
 
         val pc2DataChannel = pc2DataChannelDeferred.await()
-        if (pc2DataChannel.readyState != DataChannelState.Open) {
-            pc2DataChannel.onOpen.first()
-        }
-
-        if (pc1DataChannel.readyState != DataChannelState.Open) {
-            pc1DataChannel.onOpen.first()
-        }
+        pc1DataChannel.awaitOpen()
+        pc2DataChannel.awaitOpen()
 
         val messageFrom1stObserver = async(start = CoroutineStart.UNDISPATCHED) {
             pc2DataChannel.onMessage
@@ -146,24 +121,11 @@ class DataChannelTest {
         val pc2DataChannelDeferred =
             async(start = CoroutineStart.UNDISPATCHED) { pc2.onDataChannel.first() }
 
-        val offer = pc1.createOffer(OfferAnswerOptions())
-        pc1.setLocalDescription(offer)
-        pc1.onIceGatheringState.first { it == IceGatheringState.Complete }
-        pc2.setRemoteDescription(pc1.localDescription!!)
-
-        val answer = pc2.createAnswer(OfferAnswerOptions())
-        pc2.setLocalDescription(answer)
-        pc2.onIceGatheringState.first { it == IceGatheringState.Complete }
-        pc1.setRemoteDescription(pc2.localDescription!!)
+        connect(pc1, pc2)
 
         val pc2DataChannel = pc2DataChannelDeferred.await()
-        if (pc2DataChannel.readyState != DataChannelState.Open) {
-            pc2DataChannel.onOpen.first()
-        }
-
-        if (pc1DataChannel.readyState != DataChannelState.Open) {
-            pc1DataChannel.onOpen.first()
-        }
+        pc1DataChannel.awaitOpen()
+        pc2DataChannel.awaitOpen()
 
         val waitPc1ClosedJob = launch(start = CoroutineStart.UNDISPATCHED) {
             pc1DataChannel.onClose.first()
@@ -177,4 +139,37 @@ class DataChannelTest {
 
         listOf(waitPc1ClosedJob, waitPc2ClosedJob).joinAll()
     }
+}
+
+// Candidates are trickled for as long as the test runs instead of being read from the local
+// description after gathering completes. Since WebRTC M137 the Android network monitor serves
+// its network list from a cache that is only filled by ConnectivityManager callbacks, so a peer
+// connection created right after the monitor starts can see no networks, report ICE gathering
+// as complete with no candidates, and only gather them a few milliseconds later.
+private suspend fun TestScope.connect(
+    pc1: PeerConnection,
+    pc2: PeerConnection,
+) {
+    backgroundScope.launch(start = CoroutineStart.UNDISPATCHED) {
+        pc1.onIceCandidate.collect { pc2.addIceCandidate(it) }
+    }
+    backgroundScope.launch(start = CoroutineStart.UNDISPATCHED) {
+        pc2.onIceCandidate.collect { pc1.addIceCandidate(it) }
+    }
+
+    // Each remote description is set before the other side starts gathering, so no candidate
+    // arrives at a peer that can't accept it yet.
+    val offer = pc1.createOffer(OfferAnswerOptions())
+    pc2.setRemoteDescription(offer)
+    pc1.setLocalDescription(offer)
+
+    val answer = pc2.createAnswer(OfferAnswerOptions())
+    pc1.setRemoteDescription(answer)
+    pc2.setLocalDescription(answer)
+}
+
+// The event flows don't replay, so subscribe before checking the state or a fast event is missed.
+private suspend fun DataChannel.awaitOpen() = coroutineScope {
+    val opened = async(start = CoroutineStart.UNDISPATCHED) { onOpen.first() }
+    if (readyState == DataChannelState.Open) opened.cancel() else opened.await()
 }

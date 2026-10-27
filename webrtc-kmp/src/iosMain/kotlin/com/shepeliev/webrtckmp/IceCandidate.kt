@@ -2,8 +2,8 @@
 
 package com.shepeliev.webrtckmp
 
-import WebRTC.RTCIceCandidate
 import kotlinx.cinterop.ExperimentalForeignApi
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCIceCandidate
 
 public actual class IceCandidate internal constructor(
     public val native: RTCIceCandidate,

@@ -2,10 +2,10 @@
 
 package com.shepeliev.webrtckmp
 
-import WebRTC.RTCVideoTrack
 import com.shepeliev.webrtckmp.capturer.CameraVideoCapturerController
 import com.shepeliev.webrtckmp.capturer.VideoCapturerController
 import kotlinx.cinterop.ExperimentalForeignApi
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCVideoTrack
 
 internal class LocalVideoTrack(
     ios: RTCVideoTrack,

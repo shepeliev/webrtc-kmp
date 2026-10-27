@@ -2,9 +2,9 @@
 
 package com.shepeliev.webrtckmp
 
-import WebRTC.RTCStatistics
-import WebRTC.RTCStatisticsReport
 import kotlinx.cinterop.ExperimentalForeignApi
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCStatistics
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCStatisticsReport
 
 @OptIn(ExperimentalForeignApi::class)
 public actual class RtcStatsReport(

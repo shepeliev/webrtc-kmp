@@ -1,6 +1,3 @@
-import WebRTC.RTCAudioSession
-import WebRTC.RTCAudioSessionConfiguration
-import WebRTC.setConfiguration
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.window.ComposeUIViewController
 import co.touchlab.kermit.Logger
@@ -12,6 +9,9 @@ import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.ptr
 import kotlinx.cinterop.value
 import platform.Foundation.NSError
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCAudioSession
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCAudioSessionConfiguration
+import swiftPMImport.com.shepeliev.webrtc.kmp.setConfiguration
 
 @Suppress("unused", "FunctionName")
 @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)

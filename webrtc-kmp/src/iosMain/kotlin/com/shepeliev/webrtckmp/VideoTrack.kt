@@ -2,8 +2,8 @@
 
 package com.shepeliev.webrtckmp
 
-import WebRTC.RTCVideoRendererProtocol
 import kotlinx.cinterop.ExperimentalForeignApi
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCVideoRendererProtocol
 
 public actual interface VideoTrack : MediaStreamTrack {
     public actual suspend fun switchCamera(deviceId: String?)

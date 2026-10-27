@@ -1,10 +1,10 @@
 package com.shepeliev.webrtckmp
 
-import WebRTC.RTCInitializeSSL
-import WebRTC.RTCLoggingSeverity
-import WebRTC.RTCPeerConnectionFactory
-import WebRTC.RTCSetMinDebugLogLevel
 import kotlinx.cinterop.ExperimentalForeignApi
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCInitializeSSL
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCLoggingSeverity
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCPeerConnectionFactory
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCSetMinDebugLogLevel
 
 @OptIn(ExperimentalForeignApi::class)
 public object WebRtc {

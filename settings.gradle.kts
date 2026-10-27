@@ -1,16 +1,31 @@
-@Suppress("UnstableApiUsage")
-dependencyResolutionManagement {
+pluginManagement {
     repositories {
-        mavenLocal()
+        google {
+            mavenContent {
+                includeGroupAndSubgroups("androidx")
+                includeGroupAndSubgroups("com.android")
+                includeGroupAndSubgroups("com.google")
+            }
+        }
         mavenCentral()
-        google()
+        gradlePluginPortal()
     }
 }
 
-pluginManagement {
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+}
+
+dependencyResolutionManagement {
+    // Not FAIL_ON_PROJECT_REPOS: Kotlin/JS adds a project repository to download Node.js and Yarn
     repositories {
-        gradlePluginPortal()
-        google()
+        google {
+            mavenContent {
+                includeGroupAndSubgroups("androidx")
+                includeGroupAndSubgroups("com.android")
+                includeGroupAndSubgroups("com.google")
+            }
+        }
         mavenCentral()
     }
 }
@@ -18,3 +33,4 @@ pluginManagement {
 rootProject.name = "webrtc-kmp"
 include(":webrtc-kmp")
 include(":sample:composeApp")
+include(":sample:androidApp")

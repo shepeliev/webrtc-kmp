@@ -1,9 +1,5 @@
 package com.shepeliev.webrtckmp.capturer
 
-import WebRTC.RTCCameraVideoCapturer
-import WebRTC.RTCLogEx
-import WebRTC.RTCLoggingSeverity
-import WebRTC.RTCVideoCapturerDelegateProtocol
 import com.shepeliev.webrtckmp.CameraVideoCapturerException
 import com.shepeliev.webrtckmp.DEFAULT_FRAME_RATE
 import com.shepeliev.webrtckmp.DEFAULT_VIDEO_HEIGHT
@@ -24,6 +20,10 @@ import platform.AVFoundation.multiCamSupported
 import platform.AVFoundation.position
 import platform.CoreMedia.CMFormatDescriptionGetMediaSubType
 import platform.CoreMedia.CMVideoFormatDescriptionGetDimensions
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCCameraVideoCapturer
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCLogEx
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCLoggingSeverity
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCVideoCapturerDelegateProtocol
 import kotlin.math.abs
 
 @OptIn(ExperimentalForeignApi::class)

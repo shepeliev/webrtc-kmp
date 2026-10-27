@@ -1,12 +1,12 @@
 package com.shepeliev.webrtckmp.capturer
 
-import WebRTC.RTCFileVideoCapturer
-import WebRTC.RTCLogEx
-import WebRTC.RTCLoggingSeverity
-import WebRTC.RTCVideoCapturerDelegateProtocol
 import com.shepeliev.webrtckmp.MediaTrackConstraints
 import com.shepeliev.webrtckmp.WebRtc
 import kotlinx.cinterop.ExperimentalForeignApi
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCFileVideoCapturer
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCLogEx
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCLoggingSeverity
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCVideoCapturerDelegateProtocol
 
 @OptIn(ExperimentalForeignApi::class)
 internal actual class CameraVideoCapturerController actual constructor(

@@ -2,8 +2,8 @@
 
 package com.shepeliev.webrtckmp
 
-import WebRTC.RTCRtpReceiver
 import kotlinx.cinterop.ExperimentalForeignApi
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCRtpReceiver
 
 public actual class RtpReceiver(
     public val native: RTCRtpReceiver,

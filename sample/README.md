@@ -14,19 +14,14 @@ cd webrtc-kmp
 Run Android emulator or connect real device.
 
 ```bash
-./gradlew installDebug
+./gradlew :sample:androidApp:installDebug
 ```
 
 ### iOS
 In `sample/iosApp/Configuration/Config.xcconfig` set `TEAM_ID` and `BUNDLE_ID` to your values.
 
-```bash
-./gradlew generateDummyFramework
-cd sample/iosApp
-pod install
-```
-
-Open `sample/iosApp/iosApp.xcworkspace` in XCode build and run
+Open `sample/iosApp/iosApp.xcodeproj` in Xcode, build and run. The Kotlin framework and the WebRTC Swift package
+are built and linked by the "Compile Kotlin Framework" build phase and `KotlinMultiplatformLinkedPackage`.
 
 ### Web JS
 

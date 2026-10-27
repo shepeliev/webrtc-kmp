@@ -1,53 +1,35 @@
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
-import org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.jetbrains.compose)
     alias(libs.plugins.compose.compiler)
-    kotlin("native.cocoapods")
 }
 
 kotlin {
-    cocoapods {
-        version = "1.0"
-        summary = "Compose app"
-        homepage = "not published"
-        ios.deploymentTarget = "13.0"
+    jvmToolchain(libs.versions.jvmToolchain.get().toInt())
 
-        pod("WebRTC-SDK") {
-            version = libs.versions.webrtc.ios.sdk.get()
-            moduleName = "WebRTC"
-            packageName = "WebRTC"
-            linkOnly = true
+    android {
+        namespace = "com.shepeliev.webrtckmp.sample.shared"
+        compileSdk = libs.versions.compileSdk.get().toInt()
+        minSdk = libs.versions.sampleMinSdk.get().toInt()
+        androidResources { enable = true }
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_11
         }
+    }
 
-        podfile = project.file("../iosApp/Podfile")
-
-        framework {
+    listOf(iosArm64(), iosSimulatorArm64()).forEach { iosTarget ->
+        iosTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
-            export(project(":webrtc-kmp"))
-        }
-
-        xcodeConfigurationToNativeBuildType["CUSTOM_DEBUG"] = NativeBuildType.DEBUG
-        xcodeConfigurationToNativeBuildType["CUSTOM_RELEASE"] = NativeBuildType.RELEASE
-    }
-
-    @OptIn(ExperimentalKotlinGradlePluginApi::class)
-    androidTarget {
-        compilerOptions {
-            jvmTarget = JvmTarget.JVM_1_8
+            binaryOption("bundleId", "com.shepeliev.webrtckmp.sample.ComposeApp")
+            export(dependencies.project(":webrtc-kmp"))
         }
     }
-
-    iosX64()
-    iosArm64()
-    iosSimulatorArm64()
 
     js {
         browser {
@@ -57,15 +39,13 @@ kotlin {
 
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
-        moduleName = "composeApp"
+        outputModuleName = "composeApp"
         browser {
             commonWebpackConfig {
                 outputFileName = "composeApp.js"
                 devServer = (devServer ?: KotlinWebpackConfig.DevServer()).apply {
-                    static = (static ?: mutableListOf()).apply {
-                        // Serve sources to debug inside browser
-                        add(project.projectDir.path)
-                    }
+                    // Serve sources to debug inside browser
+                    static(project.projectDir.path)
                 }
             }
         }
@@ -74,12 +54,12 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.material)
-            implementation(compose.ui)
-            implementation(compose.components.resources)
-            implementation(compose.components.uiToolingPreview)
+            implementation(libs.compose.runtime)
+            implementation(libs.compose.foundation)
+            implementation(libs.compose.material)
+            implementation(libs.compose.ui)
+            implementation(libs.compose.components.resources)
+            implementation(libs.compose.ui.tooling.preview)
             implementation(libs.kotlin.coroutines)
             implementation(libs.kermit)
             api(project(":webrtc-kmp"))
@@ -87,8 +67,7 @@ kotlin {
 
         androidMain.dependencies {
             implementation(libs.kotlin.coroutines.android)
-            implementation(compose.preview)
-            implementation(libs.androidx.activity.compose)
+            implementation(libs.androidx.coreKtx)
             implementation(libs.accompanist.permissions)
         }
 
@@ -98,40 +77,7 @@ kotlin {
             implementation(libs.kotlin.wrappers.react)
             implementation(libs.kotlin.wrappers.reactDom)
             implementation(libs.kotlin.wrappers.emotion)
+            implementation(libs.kotlin.wrappers.emotion.styled)
         }
-    }
-}
-
-android {
-    namespace = "com.shepeliev.webrtckmp.sample"
-    compileSdk = libs.versions.compileSdk.get().toInt()
-
-    sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
-    sourceSets["main"].res.srcDirs("src/androidMain/res")
-    sourceSets["main"].resources.srcDirs("src/commonMain/resources")
-
-    defaultConfig {
-        applicationId = "com.shepeliev.webrtckmp.sample"
-        minSdk = libs.versions.minSdk.get().toInt()
-        targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0"
-    }
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
-    }
-    buildTypes {
-        getByName("release") {
-            isMinifyEnabled = false
-        }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    dependencies {
-        debugImplementation(compose.uiTooling)
     }
 }

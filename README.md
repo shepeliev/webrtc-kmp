@@ -12,7 +12,7 @@ It supports Android, iOS, JS. Other platforms - PRs are welcome.
  Screen Capture | :white_check_mark: | | :white_check_mark:
 
 ## WebRTC revision
-Current revision: M125
+Current revision: M137
 
 ## Installation
 The library is published to [Maven Central](https://search.maven.org/artifact/com.shepeliev/webrtc-kmp).
@@ -28,45 +28,28 @@ commonMain.dependencies {
 ```
 
 ### Running on iOS
-On iOS, the WebRTC SDK is not linked as a transitive dependency, so you need to add it to your iOS project manually.
-This can be done using CocoaPods or SPM, depending on your project setup. Here is an example of how to link 
-the WebRTC SDK using CocoaPods in `build.gradle.kts`:
+On iOS, the WebRTC SDK ([WebRTC-SDK](https://github.com/webrtc-sdk/Specs) Swift package) comes as a transitive
+dependency through Kotlin's [SwiftPM import](https://kotl.in/cocoapods-to-swiftpm-migration), so you don't add it
+to your iOS project yourself. This requires:
 
-```kotlin
-kotlin {
-  cocoapods {
-    version = "1.0.0"
-    summary = "Shared module"
-    homepage = "not published"
-    ios.deploymentTarget = "13.0"
-   
-    pod("WebRTC-SDK") { 
-      version = "125.6422.05"
-      moduleName = "WebRTC"
-    }
-  
-    podfile = project.file("../iosApp/Podfile")
-  
-    framework {
-      baseName = "shared"
-      isStatic = true  
-    }
-  
-    xcodeConfigurationToNativeBuildType["CUSTOM_DEBUG"] = NativeBuildType.DEBUG
-    xcodeConfigurationToNativeBuildType["CUSTOM_RELEASE"] = NativeBuildType.RELEASE
-  }
+- Kotlin 2.4.0 or later
+- iOS deployment target 15.0 or later
+- No `kotlin("native.cocoapods")` plugin in the module that builds your iOS framework. The Kotlin Gradle plugin
+  can't combine CocoaPods with SwiftPM dependencies, including transitive ones. If you still use it, migrate first;
+  see the [migration guide](https://kotl.in/cocoapods-to-swiftpm-migration).
 
-    iosX64()
-    iosArm64()
-    iosSimulatorArm64()
-}
+Integrate the Xcode project once by running the integration tasks for the module that builds your iOS framework
+(e.g. `:shared`):
+
+```bash
+XCODEPROJ_PATH="$PWD/iosApp/iosApp.xcodeproj" GRADLE_PROJECT_PATH=":shared" \
+  ./gradlew :shared:integrateEmbedAndSign :shared:integrateLinkagePackage
 ```
 
-Also add the following to your `Podfile` in the target section:
-```Ruby
-use_frameworks!
-pod 'shared', :path => '../shared'
-```
+This adds a build phase that runs `embedAndSignAppleFrameworkForXcode` and a local `KotlinMultiplatformLinkedPackage`
+that links the Swift packages into your app. If you skip it, building in Xcode fails with an error that prints this
+command for your project. Also set _User Script Sandboxing_ (`ENABLE_USER_SCRIPT_SANDBOXING`) to `NO` for your app
+target.
 
 ## Usage
 

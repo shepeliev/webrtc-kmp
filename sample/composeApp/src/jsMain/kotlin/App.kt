@@ -18,6 +18,7 @@ import web.cssom.Display
 import web.cssom.JustifyContent
 import web.cssom.px
 import web.html.HTMLVideoElement
+import web.html.MediaProvider
 
 val ReactApp = FC<Props> { _ ->
     h1 { +"WebRTC KMP Sample" }
@@ -31,28 +32,25 @@ val ReactApp = FC<Props> { _ ->
 
     useEffect(localStream) {
         val localVideoStream = MediaStream().apply { localStream?.videoTracks?.firstOrNull()?.let { addTrack(it) } }
-        localVideoRef.current?.srcObject = localVideoStream.js
+        localVideoRef.current?.srcObject = localVideoStream.js.unsafeCast<MediaProvider>()
     }
 
+    // The effect coroutine is cancelled on cleanup, which ends the call
     useEffect(localStream, peerConnections) {
         if (peerConnections == null || localStream == null) return@useEffect
         remoteStream.current = MediaStream()
-        val job = scope.launch {
-            makeCall(
-                peerConnections = peerConnections,
-                localStream = localStream,
-                onRemoteVideoTrack = { track ->
-                    remoteStream.current?.addTrack(track)
-                    remoteVideoRef.current?.srcObject = remoteStream.current?.js
-                },
-                onRemoteAudioTrack = { track ->
-                    remoteStream.current?.addTrack(track)
-                    remoteVideoRef.current?.srcObject = remoteStream.current?.js
-                },
-            )
-        }
-
-        cleanup { job.cancel() }
+        makeCall(
+            peerConnections = peerConnections,
+            localStream = localStream,
+            onRemoteVideoTrack = { track ->
+                remoteStream.current?.addTrack(track)
+                remoteVideoRef.current?.srcObject = remoteStream.current?.js?.unsafeCast<MediaProvider>()
+            },
+            onRemoteAudioTrack = { track ->
+                remoteStream.current?.addTrack(track)
+                remoteVideoRef.current?.srcObject = remoteStream.current?.js?.unsafeCast<MediaProvider>()
+            },
+        )
     }
 
     div {

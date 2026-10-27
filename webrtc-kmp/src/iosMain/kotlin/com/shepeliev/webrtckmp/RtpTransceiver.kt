@@ -2,12 +2,12 @@
 
 package com.shepeliev.webrtckmp
 
-import WebRTC.RTCRtpTransceiver
-import WebRTC.RTCRtpTransceiverDirection
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.alloc
 import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.ptr
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCRtpTransceiver
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCRtpTransceiverDirection
 
 public actual class RtpTransceiver(
     public val native: RTCRtpTransceiver,

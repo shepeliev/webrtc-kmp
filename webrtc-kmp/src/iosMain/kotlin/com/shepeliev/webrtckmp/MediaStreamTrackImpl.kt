@@ -2,15 +2,15 @@
 
 package com.shepeliev.webrtckmp
 
-import WebRTC.RTCMediaStreamTrack
-import WebRTC.RTCMediaStreamTrackState
-import WebRTC.kRTCMediaStreamTrackKindAudio
-import WebRTC.kRTCMediaStreamTrackKindVideo
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCMediaStreamTrack
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCMediaStreamTrackState
+import swiftPMImport.com.shepeliev.webrtc.kmp.kRTCMediaStreamTrackKindAudio
+import swiftPMImport.com.shepeliev.webrtc.kmp.kRTCMediaStreamTrackKindVideo
 
 internal abstract class MediaStreamTrackImpl(val ios: RTCMediaStreamTrack) : MediaStreamTrack {
 

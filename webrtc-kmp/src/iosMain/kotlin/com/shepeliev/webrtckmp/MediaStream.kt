@@ -2,11 +2,11 @@
 
 package com.shepeliev.webrtckmp
 
-import WebRTC.RTCAudioTrack
-import WebRTC.RTCMediaStream
-import WebRTC.RTCVideoTrack
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.Foundation.NSUUID
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCAudioTrack
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCMediaStream
+import swiftPMImport.com.shepeliev.webrtc.kmp.RTCVideoTrack
 
 public actual class MediaStream internal constructor(
     public val ios: RTCMediaStream,
